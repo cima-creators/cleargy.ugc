@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="es">
 <head>
@@ -20,7 +21,7 @@
 body{background:var(--bg);color:var(--text);font-family:'Nunito',sans-serif;min-height:100vh;max-width:430px;margin:0 auto;}
 
 /* LOGIN */
-#login-screen{position:fixed;inset:0;background:linear-gradient(160deg,#cde8f5 0%,#a8d4ef 100%);z-index:999;display:flex;flex-direction:column;align-items:stretch;justify-content:center;padding:32px 20px;max-width:430px;margin:0 auto;left:50%;transform:translateX(-50%);gap:20px;}
+#login-screen{position:fixed;inset:0;background:linear-gradient(160deg,#cde8f5 0%,#a8d4ef 100%);z-index:999;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:24px 20px;left:0;right:0;gap:20px;}
 .login-logo-wrap{text-align:center;}
 .cleargy-logo{font-family:'Nunito';font-size:52px;font-weight:900;color:#1a3a8f;letter-spacing:-1px;text-shadow:2px 2px 0 rgba(26,58,143,.15);margin-bottom:6px;display:block;}
 .cleargy-logo-sub{font-family:'DM Mono';font-size:10px;letter-spacing:3px;text-transform:uppercase;color:var(--muted);margin-bottom:0;}
@@ -326,10 +327,7 @@ select.finput option{background:white;}
     <div style="font-family:'DM Mono';font-size:9px;letter-spacing:2px;color:var(--muted);text-transform:uppercase;margin-bottom:12px;">VENTAS</div>
     <div id="lb-ventas"></div>
 
-    <div style="font-family:'DM Mono';font-size:9px;letter-spacing:2px;color:var(--muted);text-transform:uppercase;margin:20px 0 12px;">SCORE PROMEDIO IA</div>
-    <div id="lb-score"></div>
-
-    <div style="font-family:'DM Mono';font-size:9px;letter-spacing:2px;color:var(--muted);text-transform:uppercase;margin:20px 0 12px;">🔥 VIDEO MÁS VIRAL</div>
+  <div style="font-family:'DM Mono';font-size:9px;letter-spacing:2px;color:var(--muted);text-transform:uppercase;margin:20px 0 12px;">🔥 VIDEO MÁS VIRAL</div>
     <div id="lb-viral"></div>
   </div>
 
@@ -501,7 +499,7 @@ function getCampaignDay(){
 function fmtV(v){if(!v)return"0";if(v>=1000000)return(v/1000000).toFixed(1)+"M";if(v>=1000)return(v/1000).toFixed(0)+"K";return v.toString();}
 function fmtPesos(n){return"$"+n.toLocaleString("es-AR");}
 function getWeek(day){return Math.ceil(day/7);}
-function myVideos(){return sharedData.videos.filter(v=>v.creator===currentUser);}
+function myVideos(){return (sharedData.videos||[]).filter(v=>v.creator===currentUser);}
 function myVideosWeek(w){return myVideos().filter(v=>getWeek(v.day)===w);}
 function myVideoDay(d){return myVideos().filter(v=>v.day===d);}
 function avgScore(videos){const sc=videos.filter(v=>v.score!=null);return sc.length?Math.round(sc.reduce((a,v)=>a+v.score,0)/sc.length*10)/10:null;}
@@ -531,10 +529,11 @@ function renderHome(){
   const myVids = myVideos();
   const perVideo = Math.round(650000 * myVids.length / 150);
   const perVenta = ventas * 2500;
+  const bonos = sharedData.bonos[currentUser]||0;
   document.getElementById("home-ventas").textContent = ventas;
   document.getElementById("home-total-videos").textContent = myVids.length;
   document.getElementById("home-per-video").textContent = fmtPesos(perVideo);
-  document.getElementById("home-per-venta").textContent = fmtPesos(perVenta);
+  document.getElementById("home-per-venta").textContent = fmtPesos(perVenta + bonos);
 
   const recent = [...myVideos()].sort((a,b)=>b.day-a.day).slice(0,3);
   document.getElementById("home-recent-videos").innerHTML = recent.length ?
@@ -634,21 +633,7 @@ function renderLeaderboard(){
       <div class="lb-score"><div class="lb-score-val">${sharedData.ventas[c]||0}</div><div class="lb-score-label">ventas</div></div>
     </div>`).join("");
 
-  // Score ranking
-  const scoreData = creators.map(c=>{
-    const vids = sharedData.videos.filter(v=>v.creator===c&&getWeek(v.day)===sw&&v.score!=null);
-    return {c, avg:avgScore(vids)||0, count:vids.length};
-  }).sort((a,b)=>b.avg-a.avg);
-  document.getElementById("lb-score").innerHTML = scoreData.map((d,i)=>`
-    <div class="lb-card ${d.c===currentUser?"me":""}">
-      <div class="lb-rank ${i===0?"r1":i===1?"r2":i===2?"r3":""}">${i+1}</div>
-      <div class="lb-avatar" style="border-color:${COLORS[d.c]};color:${COLORS[d.c]}">${AVATARS[d.c]}</div>
-      <div class="lb-info">
-        <div class="lb-name">${DISPLAY_NAMES[d.c]}${d.c===currentUser?" (vos)":""}</div>
-        <div class="lb-meta">${d.count} videos con score</div>
-      </div>
-      <div class="lb-score"><div class="lb-score-val" style="color:${d.avg>=7?"var(--accent)":d.avg>=5?"var(--accent3)":"var(--accent2)"}">${d.avg||"—"}</div><div class="lb-score-label">avg score</div></div>
-    </div>`).join("");
+
 
   // Viral video
   const allVids = sharedData.videos.filter(v=>getWeek(v.day)===sw&&v.views>0);
@@ -736,10 +721,11 @@ function renderBonos(){
       check:()=>{
         const startDay=(week-1)*7+1;
         const endDay=Math.min(week*7,day);
+        if(endDay<startDay)return"disponible";
         for(let d=startDay;d<=endDay;d++){
           if(myVideoDay(d).length<DAILY_VIDEOS)return"disponible";
         }
-        return endDay>=week*7?"ganaste":"disponible";
+        return endDay>=week*7?"ganaste":"en juego";
       }
     },
     {
