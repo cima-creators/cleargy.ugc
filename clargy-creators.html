@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="es">
 <head>
@@ -210,6 +211,7 @@ select.finput option{background:white;}
     <div class="topbar-user">
       <div class="user-name" id="topbar-name">—</div>
       <div class="user-avatar" id="topbar-avatar">?</div>
+      <button onclick="logout()" title="Cerrar sesión" style="background:none;border:none;cursor:pointer;font-size:16px;opacity:.5;padding:4px;line-height:1;" onmouseover="this.style.opacity=1" onmouseout="this.style.opacity=.5">⏏</button>
     </div>
   </div>
 
@@ -471,16 +473,12 @@ let selectedPlat = "ig";
 // ═══════════════════════════════════
 // LOGIN
 // ═══════════════════════════════════
-function doLogin(){
-  const creator = document.getElementById("l-creator").value;
-  const pass = document.getElementById("l-pass").value;
-  if(!creator){document.getElementById("lerr").classList.add("show");document.getElementById("lerr").textContent="Seleccioná tu nombre.";return;}
-  if(PASSWORDS[creator] !== pass){document.getElementById("lerr").classList.add("show");return;}
+function enterApp(creator){
   currentUser = creator;
+  localStorage.setItem("clargy_session", creator);
   document.getElementById("login-screen").style.display="none";
   document.getElementById("app").classList.add("show");
   document.getElementById("bottom-nav").style.display="flex";
-  // Start real-time sync — handles race condition with async Firebase module
   function startListen(){
     window._fbUnlisten = window._fbListen((newData)=>{
       sharedData = newData;
@@ -491,7 +489,6 @@ function doLogin(){
   if(window._fbListen) startListen();
   else window.addEventListener('firebase-ready', startListen, {once:true});
   document.getElementById("topbar-name").textContent=DISPLAY_NAMES[creator];
-  document.getElementById("topbar-avatar").textContent=DISPLAY_NAMES[creator].split(" ")[0].substring(0,2).toUpperCase();
   document.getElementById("topbar-avatar").textContent=AVATARS[creator];
   document.getElementById("topbar-avatar").style.borderColor=COLORS[creator];
   loadData().then(()=>renderAll());
@@ -500,6 +497,20 @@ function doLogin(){
     const unread=sharedData.notifs.filter(n=>(n.to==='ALL'||n.to===currentUser)&&(!n.read||!n.read.includes(currentUser))).length;
     if(unread>0){const b=document.getElementById('bnav-notifs');if(b)b.querySelector('.bnav-icon').textContent='🔴';}
   },500);
+}
+
+function doLogin(){
+  const creator = document.getElementById("l-creator").value;
+  const pass = document.getElementById("l-pass").value;
+  if(!creator){document.getElementById("lerr").classList.add("show");document.getElementById("lerr").textContent="Seleccioná tu nombre.";return;}
+  if(PASSWORDS[creator] !== pass){document.getElementById("lerr").classList.add("show");return;}
+  enterApp(creator);
+}
+
+function logout(){
+  localStorage.removeItem("clargy_session");
+  if(window._fbUnlisten) window._fbUnlisten();
+  location.reload();
 }
 
 // ═══════════════════════════════════
@@ -524,7 +535,9 @@ function goScreen(name, el){
 // ═══════════════════════════════════
 function getCampaignDay(){
   const now = new Date();
-  const diff = Math.floor((now - CAMPAIGN_START)/(1000*60*60*24))+1;
+  const startStr = (sharedData.startDates||{})[currentUser];
+  const start = startStr ? new Date(startStr) : CAMPAIGN_START;
+  const diff = Math.floor((now - start)/(1000*60*60*24))+1;
   return Math.min(Math.max(diff,1),30);
 }
 function fmtV(v){if(!v)return"0";if(v>=1000000)return(v/1000000).toFixed(1)+"M";if(v>=1000)return(v/1000).toFixed(0)+"K";return v.toString();}
@@ -650,21 +663,26 @@ function submitVideo(){
 // LEADERBOARD
 // ═══════════════════════════════════
 function renderLeaderboard(){
-  const weeks = [1,2,3,4];
-  const sw = sharedData.semanaActual;
-  document.getElementById("lb-week-tabs").innerHTML = weeks.map(w=>`
-    <button class="wtab ${w===sw?"active":""}" onclick="sharedData.semanaActual=${w};saveData();renderLeaderboard()">Semana ${w}</button>`).join("");
+  const sw = sharedData.semanaActual||1;
+  const tabs = [{val:0,label:"Total"},{val:1,label:"Sem 1"},{val:2,label:"Sem 2"},{val:3,label:"Sem 3"},{val:4,label:"Sem 4"}];
+  document.getElementById("lb-week-tabs").innerHTML = tabs.map(t=>`
+    <button class="wtab ${t.val===sw?"active":""}" onclick="sharedData.semanaActual=${t.val};saveData();renderLeaderboard()">${t.label}</button>`).join("");
 
   const creators = ["creadora1","creadora2","creadora3","creadora4","creadora5"];
 
-  // Ventas ranking — filter ventasLog by selected semana
-  const vlog = (sharedData.ventasLog||[]).filter(e=>e.semana==sw);
-  const ventasPorCreadora = {};
+  // Ventas ranking — total histórico (sw=0) o filtrado por semana
+  let ventasPorCreadora = {};
   creators.forEach(c=>{ ventasPorCreadora[c]=0; });
-  vlog.forEach(e=>{
-    if(e.tipo==="suma") ventasPorCreadora[e.creator]=(ventasPorCreadora[e.creator]||0)+e.cantidad;
-    else if(e.tipo==="resta") ventasPorCreadora[e.creator]=Math.max(0,(ventasPorCreadora[e.creator]||0)-e.cantidad);
-  });
+  if(sw===0){
+    // Total acumulado
+    creators.forEach(c=>{ ventasPorCreadora[c]=sharedData.ventas[c]||0; });
+  } else {
+    const vlog = (sharedData.ventasLog||[]).filter(e=>e.semana==sw);
+    vlog.forEach(e=>{
+      if(e.tipo==="suma") ventasPorCreadora[e.creator]=(ventasPorCreadora[e.creator]||0)+e.cantidad;
+      else if(e.tipo==="resta") ventasPorCreadora[e.creator]=Math.max(0,(ventasPorCreadora[e.creator]||0)-e.cantidad);
+    });
+  }
   const ventasSorted = [...creators].sort((a,b)=>(ventasPorCreadora[b]||0)-(ventasPorCreadora[a]||0));
   document.getElementById("lb-ventas").innerHTML = ventasSorted.map((c,i)=>`
     <div class="lb-card ${c===currentUser?"me":""}">
@@ -914,6 +932,16 @@ function renderIdeasOnly(){
 }
 
 loadData();
+
+// Auto-login si hay sesión guardada
+(function(){
+  const saved = localStorage.getItem("clargy_session");
+  if(saved && PASSWORDS[saved] !== undefined){
+    document.addEventListener("DOMContentLoaded", function(){
+      enterApp(saved);
+    });
+  }
+})();
 </script>
 
   <!-- Firebase -->
