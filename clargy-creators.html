@@ -248,6 +248,10 @@ select.finput option{background:white;}
         <div class="stat-sub">comisión acumulada</div>
       </div>
     </div>
+
+    <div style="margin-top:20px;">
+      <div style="font-family:'DM Mono';font-size:9px;letter-spacing:2px;color:var(--muted);text-transform:uppercase;margin-bottom:10px;">ÚLTIMOS VIDEOS</div>
+      <div id="home-recent-list"></div>
     </div>
 
   </div>
@@ -390,6 +394,23 @@ select.finput option{background:white;}
 <div class="toast" id="toast"></div>
 
 <script>
+// Strip black background from logo PNGs that lost their alpha channel
+(function(){
+  function stripBlack(img){
+    var c=document.createElement('canvas');
+    c.width=img.naturalWidth;c.height=img.naturalHeight;
+    var ctx=c.getContext('2d');ctx.drawImage(img,0,0);
+    var d=ctx.getImageData(0,0,c.width,c.height),px=d.data;
+    for(var i=0;i<px.length;i+=4){if(px[i]<40&&px[i+1]<40&&px[i+2]<40)px[i+3]=0;}
+    ctx.putImageData(d,0,0);img.src=c.toDataURL('image/png');
+  }
+  document.addEventListener('DOMContentLoaded',function(){
+    document.querySelectorAll('img[alt="Cleargy"]').forEach(function(img){
+      if(img.complete&&img.naturalWidth>0)stripBlack(img);else img.onload=function(){stripBlack(img);};
+    });
+  });
+})();
+
 // ═══════════════════════════════════
 // DATA
 // ═══════════════════════════════════
@@ -539,7 +560,6 @@ function renderHome(){
   const todayVids = myVideoDay(day).length;
   document.getElementById("home-today-videos").textContent = todayVids;
   const ventas = sharedData.ventas[currentUser]||0;
-  const myVids = myVideos();
   const perVideo = Math.round(650000 * myVids.length / 150);
   const perVenta = ventas * 2500;
   const bonos = sharedData.bonos[currentUser]||0;
@@ -549,7 +569,9 @@ function renderHome(){
   document.getElementById("home-per-venta").textContent = fmtPesos(perVenta + bonos);
 
   const recent = [...myVideos()].sort((a,b)=>b.day-a.day).slice(0,3);
-  
+  document.getElementById("home-recent-list").innerHTML = recent.length ?
+    recent.map(v => videoCardHTML(v)).join("") :
+    `<div class="empty"><div class="empty-icon">📹</div><div class="empty-text">Sin videos todavía</div></div>`;
 }
 
 function videoCardHTML(v){
@@ -701,7 +723,7 @@ function renderBonos(){
       amount:"$50.000",
       check:()=>{
         const topSeller=creators.reduce((a,c)=>(sharedData.ventas[c]||0)>(sharedData.ventas[a]||0)?c:a);
-        return topSeller===currentUser?"ganaste":"disponible";
+        return topSeller===currentUser&&(sharedData.ventas[topSeller]||0)>0?"ganaste":"disponible";
       }
     },
     {
@@ -763,7 +785,7 @@ function renderBonos(){
       check:()=>{
         if(day<30)return"disponible";
         const top=creators.reduce((a,c)=>(sharedData.ventas[c]||0)>(sharedData.ventas[a]||0)?c:a);
-        return top===currentUser?"ganaste":"perdiste";
+        return top===currentUser&&(sharedData.ventas[top]||0)>0?"ganaste":"perdiste";
       }
     },
     {
