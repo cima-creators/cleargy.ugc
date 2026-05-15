@@ -599,6 +599,7 @@ function videoCardHTML(v){
       <span class="vc-status ${stClass}">${stLabel}</span>
     </div>
     <a class="vc-link" href="${v.link}" target="_blank">${v.link.length>40?v.link.substring(0,40)+"...":v.link}</a>
+    ${v.adminNote?`<div style="background:rgba(42,82,201,.06);border-left:3px solid var(--accent3);border-radius:0 8px 8px 0;padding:8px 12px;margin-bottom:12px;font-size:12px;line-height:1.5;color:var(--text);">📝 <strong style="color:var(--accent3);">Nota del admin:</strong> ${v.adminNote}</div>`:""}
     <div style="display:flex;align-items:center;justify-content:space-between;">
       <div class="vc-metrics">
         <div class="vcm"><div class="vcm-val">${fmtV(v.views)}</div><div class="vcm-label">Views</div></div>
@@ -822,7 +823,26 @@ function renderBonos(){
 // ═══════════════════════════════════
 // RENDER ALL
 // ═══════════════════════════════════
+function mergeExtraCreators(){
+  if(!(sharedData.extraCreators||[]).length) return;
+  sharedData.extraCreators.forEach(c=>{
+    PASSWORDS[c.key] = c.pass;
+    DISPLAY_NAMES[c.key] = c.name;
+    AVATARS[c.key] = c.avatar || c.name.substring(0,2).toUpperCase();
+    COLORS[c.key] = c.color || '#6366f1';
+    // Add to login dropdown if not already there
+    const sel = document.getElementById('l-creator');
+    if(sel && !sel.querySelector(`option[value="${c.key}"]`)){
+      const opt = document.createElement('option');
+      opt.value = c.key;
+      opt.textContent = c.name;
+      sel.appendChild(opt);
+    }
+  });
+}
+
 function renderAll(){
+  mergeExtraCreators();
   renderHome();
   const active = document.querySelector('.screen.active');
   if(active){
@@ -841,32 +861,38 @@ function renderAll(){
 // ═══════════════════════════════════
 function renderNotifs(){
   if(!sharedData.notifs) sharedData.notifs=[];
-  const tipoIcon={info:"📋",alerta:"⚠️",felicitacion:"🔥",bono:"💰"};
-  const tipoColor={info:"var(--accent3)",alerta:"var(--accent2)",felicitacion:"var(--accent)",bono:"var(--gold)"};
+  const tipoIcon={info:"📋",alerta:"⚠️",felicitacion:"🔥",bono:"💰",idea:"💡"};
+  const tipoColor={info:"var(--accent3)",alerta:"var(--accent2)",felicitacion:"var(--accent)",bono:"var(--gold)",idea:"#7c3aed"};
+  const tipoBg={info:"rgba(42,82,201,.06)",alerta:"rgba(232,93,38,.06)",felicitacion:"rgba(26,58,143,.06)",bono:"rgba(245,158,11,.06)",idea:"rgba(124,58,237,.06)"};
   const myNotifs=sharedData.notifs.filter(n=>n.to==="ALL"||n.to===currentUser).reverse();
-  
+
+  const unread=myNotifs.filter(n=>!n.read||!n.read.includes(currentUser));
+
   // Mark as read
   myNotifs.forEach(n=>{
     if(!n.read) n.read=[];
     if(!n.read.includes(currentUser)) n.read.push(currentUser);
   });
-  saveData();
+  if(unread.length) saveData();
 
   document.getElementById("notifs-list").innerHTML = myNotifs.length ?
-    myNotifs.map(n=>`<div style="background:var(--surface);border:1px solid var(--border);border-radius:16px;padding:16px;margin-bottom:10px;">
-      <div style="display:flex;align-items:center;gap:8px;margin-bottom:8px;">
-        <span style="font-size:20px;">${tipoIcon[n.tipo]||"📋"}</span>
-        <span style="font-size:10px;font-family:'DM Mono';color:${tipoColor[n.tipo]||"var(--muted)"};">${n.tipo.toUpperCase()}</span>
-        <span style="font-size:10px;font-family:'DM Mono';color:var(--muted);margin-left:auto;">${new Date(n.date).toLocaleString("es-AR",{day:"2-digit",month:"2-digit",hour:"2-digit",minute:"2-digit"})}</span>
-      </div>
-      <div style="font-size:14px;line-height:1.6;">${n.msg}</div>
-    </div>`).join("") :
+    myNotifs.map(n=>{
+      const isNew = unread.find(u=>u.id===n.id);
+      return `<div style="background:${tipoBg[n.tipo]||"var(--surface)"};border:1px solid ${isNew?tipoColor[n.tipo]||"var(--border)":"var(--border)"};border-radius:16px;padding:16px;margin-bottom:10px;${isNew?"box-shadow:0 2px 12px "+( tipoColor[n.tipo]||"rgba(0,0,0,.1)")+"22;":""}">
+        <div style="display:flex;align-items:center;gap:8px;margin-bottom:8px;">
+          <span style="font-size:20px;">${tipoIcon[n.tipo]||"📋"}</span>
+          <span style="font-size:10px;font-family:'DM Mono';color:${tipoColor[n.tipo]||"var(--muted)"};">${n.tipo==="idea"?"NUEVA IDEA":n.tipo.toUpperCase()}</span>
+          ${isNew?`<span style="font-size:8px;font-family:'DM Mono';background:${tipoColor[n.tipo]||"var(--accent)"};color:white;padding:2px 6px;border-radius:10px;">NUEVO</span>`:""}
+          <span style="font-size:10px;font-family:'DM Mono';color:var(--muted);margin-left:auto;">${new Date(n.date).toLocaleString("es-AR",{day:"2-digit",month:"2-digit",hour:"2-digit",minute:"2-digit"})}</span>
+        </div>
+        <div style="font-size:14px;line-height:1.6;">${n.msg}</div>
+      </div>`;
+    }).join("") :
     `<div class="empty"><div class="empty-icon">🔔</div><div class="empty-text">Sin mensajes todavía</div></div>`;
 
   // Update badge
-  const unread=myNotifs.filter(n=>!n.read||!n.read.includes(currentUser)).length;
   const bnav=document.getElementById("bnav-notifs");
-  if(bnav&&unread>0) bnav.querySelector(".bnav-icon").textContent="🔴";
+  if(bnav) bnav.querySelector(".bnav-icon").textContent=unread.length>0?"🔴":"🔔";
 }
 
 // ═══════════════════════════════════
@@ -896,7 +922,11 @@ function renderFeatured(){
         <span style="font-size:12px;font-weight:700;color:var(--text);">${DISPLAY_NAMES[v.creator]}</span>
         <span style="font-size:10px;font-family:'DM Mono';color:var(--gold);margin-left:auto;">⭐ DESTACADO</span>
       </div>
-      <a href="${v.link||v.linkIg||v.linkTt||'#'}" target="_blank" style="color:var(--text);font-size:13px;font-weight:500;text-decoration:none;display:block;margin-bottom:10px;word-break:break-all;">${(v.linkIg||v.linkTt||v.link||'').substring(0,50)}${(v.linkIg||v.linkTt||v.link||'').length>50?'...':''}</a>
+      <div style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:10px;">
+        ${v.linkIg?`<button onclick="navigator.clipboard.writeText('${v.linkIg}');showToast('Link IG copiado 📋')" style="padding:5px 12px;border-radius:20px;font-size:10px;font-family:'Nunito';font-weight:700;cursor:pointer;background:rgba(26,58,143,.08);border:1px solid rgba(26,58,143,.2);color:var(--blue);">📸 Copiar IG</button>`:""}
+        ${v.linkTt?`<button onclick="navigator.clipboard.writeText('${v.linkTt}');showToast('Link TikTok copiado 📋')" style="padding:5px 12px;border-radius:20px;font-size:10px;font-family:'Nunito';font-weight:700;cursor:pointer;background:rgba(26,58,143,.08);border:1px solid rgba(26,58,143,.2);color:var(--blue);">🎵 Copiar TT</button>`:""}
+        ${!v.linkIg&&!v.linkTt&&v.link?`<button onclick="navigator.clipboard.writeText('${v.link}');showToast('Link copiado 📋')" style="padding:5px 12px;border-radius:20px;font-size:10px;font-family:'Nunito';font-weight:700;cursor:pointer;background:rgba(26,58,143,.08);border:1px solid rgba(26,58,143,.2);color:var(--blue);">📋 Copiar link</button>`:""}
+      </div>
       <div style="display:flex;gap:16px;align-items:center;">
         <div><div style="font-family:'Nunito';font-size:20px;font-weight:800;color:var(--accent);">${fmtV(v.views)}</div><div style="font-size:9px;font-family:'DM Mono';color:var(--muted);">views</div></div>
         ${v.score!=null?`<div><div style="font-family:'Nunito';font-size:20px;font-weight:800;color:${v.score>=7?"var(--accent)":v.score>=5?"var(--accent3)":"var(--accent2)"};">${v.score}/10</div><div style="font-size:9px;font-family:'DM Mono';color:var(--muted);">score</div></div>`:""}
@@ -936,7 +966,10 @@ loadData();
 // Auto-login si hay sesión guardada
 (function(){
   const saved = localStorage.getItem("clargy_session");
-  if(saved && PASSWORDS[saved] !== undefined){
+  if(!saved) return;
+  // Para creadoras dinámicas, la contraseña se carga de Firebase — igual entramos
+  const isKnown = PASSWORDS[saved] !== undefined || saved.startsWith("creadora");
+  if(isKnown){
     document.addEventListener("DOMContentLoaded", function(){
       enterApp(saved);
     });
