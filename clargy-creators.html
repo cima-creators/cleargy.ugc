@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html lang="es">
 <head>
@@ -246,6 +245,26 @@ select.finput option{background:white;}
         <div class="stat-label">A cobrar x videos</div>
         <div class="stat-val" id="home-per-video" style="color:var(--gold);font-size:20px;">$0</div>
         <div class="stat-sub">comisión acumulada</div>
+      </div>
+    </div>
+
+    <!-- Resumen de cobros -->
+    <div id="home-cobros" style="margin-top:16px;background:var(--surface);border-radius:18px;padding:18px;box-shadow:var(--shadow);border:1px solid var(--border);">
+      <div style="font-family:'DM Mono';font-size:9px;letter-spacing:2px;color:var(--muted);text-transform:uppercase;margin-bottom:14px;">RESUMEN DE COBROS</div>
+      <div style="display:flex;flex-direction:column;gap:10px;">
+        <div style="display:flex;justify-content:space-between;align-items:center;">
+          <span style="font-size:12px;color:var(--muted);font-family:'DM Mono';">Total ganado</span>
+          <span id="home-total-ganado" style="font-family:'Nunito';font-size:16px;font-weight:800;color:var(--text);">$0</span>
+        </div>
+        <div style="display:flex;justify-content:space-between;align-items:center;padding:10px 12px;background:rgba(13,148,136,.08);border-radius:10px;border:1px solid rgba(13,148,136,.2);">
+          <span style="font-size:12px;color:#0d9488;font-family:'DM Mono';font-weight:600;">✓ Ya cobrado</span>
+          <span id="home-ya-cobrado" style="font-family:'Nunito';font-size:16px;font-weight:800;color:#0d9488;">$0</span>
+        </div>
+        <div style="height:1px;background:var(--border);"></div>
+        <div style="display:flex;justify-content:space-between;align-items:center;padding:10px 12px;background:rgba(245,158,11,.08);border-radius:10px;border:1px solid rgba(245,158,11,.25);">
+          <span style="font-size:12px;color:var(--gold);font-family:'DM Mono';font-weight:700;">💰 Restante a cobrar</span>
+          <span id="home-restante" style="font-family:'Nunito';font-size:20px;font-weight:900;color:var(--gold);">$0</span>
+        </div>
       </div>
     </div>
 
@@ -582,6 +601,15 @@ function renderHome(){
   document.getElementById("home-per-video").textContent = fmtPesos(perVideo);
   document.getElementById("home-per-venta").textContent = fmtPesos(perVenta + bonos);
 
+  // Resumen de cobros
+  const totalGanado = myVids.length > 0 ? (perVideo + perVenta + bonos) : 0;
+  const pagado = ((sharedData.pagos||[]).filter(p=>p.creator===currentUser)).reduce((a,p)=>a+(p.monto||0),0);
+  const restante = Math.max(0, totalGanado - pagado);
+  document.getElementById("home-total-ganado").textContent = fmtPesos(totalGanado);
+  document.getElementById("home-ya-cobrado").textContent = fmtPesos(pagado);
+  document.getElementById("home-restante").textContent = fmtPesos(restante);
+  document.getElementById("home-cobros").style.display = totalGanado > 0 || pagado > 0 ? "block" : "none";
+
   const recent = [...myVideos()].sort((a,b)=>b.day-a.day).slice(0,3);
   document.getElementById("home-recent-list").innerHTML = recent.length ?
     recent.map(v => videoCardHTML(v)).join("") :
@@ -598,8 +626,12 @@ function videoCardHTML(v){
       <div><div class="vc-day">Día ${v.day}</div><div class="vc-platform"><span class="plat-tag">${v.platform==="ig"?"Instagram":v.platform==="tt"?"TikTok":"IG + TikTok"}</span><span class="plat-tag">${v.cat}</span></div></div>
       <span class="vc-status ${stClass}">${stLabel}</span>
     </div>
-    <a class="vc-link" href="${v.link}" target="_blank">${v.link.length>40?v.link.substring(0,40)+"...":v.link}</a>
-    ${v.adminNote?`<div style="background:rgba(42,82,201,.06);border-left:3px solid var(--accent3);border-radius:0 8px 8px 0;padding:8px 12px;margin-bottom:12px;font-size:12px;line-height:1.5;color:var(--text);">📝 <strong style="color:var(--accent3);">Nota del admin:</strong> ${v.adminNote}</div>`:""}
+    <div style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:10px;">
+      ${v.linkIg?`<button onclick="navigator.clipboard.writeText('${v.linkIg}');showToast('Link IG copiado 📋')" style="padding:5px 12px;border-radius:20px;font-size:10px;font-family:'Nunito';font-weight:700;cursor:pointer;background:rgba(26,58,143,.08);border:1px solid rgba(26,58,143,.2);color:var(--blue);">📸 Copiar IG</button>`:""}
+      ${v.linkTt?`<button onclick="navigator.clipboard.writeText('${v.linkTt}');showToast('Link TikTok copiado 📋')" style="padding:5px 12px;border-radius:20px;font-size:10px;font-family:'Nunito';font-weight:700;cursor:pointer;background:rgba(26,58,143,.08);border:1px solid rgba(26,58,143,.2);color:var(--blue);">🎵 Copiar TT</button>`:""}
+      ${!v.linkIg&&!v.linkTt&&v.link?`<button onclick="navigator.clipboard.writeText('${v.link}');showToast('Link copiado 📋')" style="padding:5px 12px;border-radius:20px;font-size:10px;font-family:'Nunito';font-weight:700;cursor:pointer;background:rgba(26,58,143,.08);border:1px solid rgba(26,58,143,.2);color:var(--blue);">📋 Copiar link</button>`:""}
+    </div>
+    ${v.adminNote?`<div style="background:rgba(42,82,201,.06);border-left:3px solid var(--accent3);border-radius:0 8px 8px 0;padding:8px 12px;margin-bottom:12px;font-size:12px;line-height:1.5;color:var(--text);">💬 <strong style="color:var(--accent3);">Feedback Cleargy:</strong> ${v.adminNote}</div>`:""}
     <div style="display:flex;align-items:center;justify-content:space-between;">
       <div class="vc-metrics">
         <div class="vcm"><div class="vcm-val">${fmtV(v.views)}</div><div class="vcm-label">Views</div></div>
@@ -664,7 +696,7 @@ function submitVideo(){
 // LEADERBOARD
 // ═══════════════════════════════════
 function renderLeaderboard(){
-  const sw = sharedData.semanaActual||1;
+  const sw = sharedData.semanaActual != null ? sharedData.semanaActual : 1;
   const tabs = [{val:0,label:"Total"},{val:1,label:"Sem 1"},{val:2,label:"Sem 2"},{val:3,label:"Sem 3"},{val:4,label:"Sem 4"}];
   document.getElementById("lb-week-tabs").innerHTML = tabs.map(t=>`
     <button class="wtab ${t.val===sw?"active":""}" onclick="sharedData.semanaActual=${t.val};saveData();renderLeaderboard()">${t.label}</button>`).join("");
@@ -816,7 +848,10 @@ function renderBonos(){
       <span class="idea-tag">${i.tag}</span>
       <div class="idea-title">${i.title}</div>
       <div class="idea-desc">${i.desc}</div>
-      ${i.link?`<a class="idea-link" href="${i.link}" target="_blank">Ver referencia ↗</a>`:""}
+      ${i.link?`<div style="display:flex;gap:8px;margin-top:10px;align-items:center;">
+        <button onclick="navigator.clipboard.writeText('${i.link}');showToast('Link copiado 📋')" style="padding:5px 14px;border-radius:20px;font-size:10px;font-family:'Nunito';font-weight:700;cursor:pointer;background:rgba(124,58,237,.08);border:1px solid rgba(124,58,237,.25);color:#7c3aed;">📋 Copiar link</button>
+        <a href="${i.link}" target="_blank" style="font-size:10px;font-family:'DM Mono';color:var(--muted);text-decoration:none;">Ver ↗</a>
+      </div>`:""}
     </div>`).join("");
 }
 
@@ -957,7 +992,10 @@ function renderIdeasOnly(){
       <span class="idea-tag">${i.tag}</span>
       <div class="idea-title">${i.title}</div>
       <div class="idea-desc">${i.desc}</div>
-      ${i.link?`<a class="idea-link" href="${i.link}" target="_blank">Ver referencia ↗</a>`:""}
+      ${i.link?`<div style="display:flex;gap:8px;margin-top:10px;align-items:center;">
+        <button onclick="navigator.clipboard.writeText('${i.link}');showToast('Link copiado 📋')" style="padding:5px 14px;border-radius:20px;font-size:10px;font-family:'Nunito';font-weight:700;cursor:pointer;background:rgba(124,58,237,.08);border:1px solid rgba(124,58,237,.25);color:#7c3aed;">📋 Copiar link</button>
+        <a href="${i.link}" target="_blank" style="font-size:10px;font-family:'DM Mono';color:var(--muted);text-decoration:none;">Ver ↗</a>
+      </div>`:""}
     </div>`).join("") || `<div class="empty"><div class="empty-icon">💡</div><div class="empty-text">Sin ideas todavía</div></div>`;
 }
 
