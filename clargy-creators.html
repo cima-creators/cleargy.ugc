@@ -220,7 +220,7 @@ select.finput option{background:white;}
     <div class="day-progress">
       <div class="day-header">
         <div><div class="day-eyebrow">DÍA</div><div class="day-num"><span id="home-day">1</span><span> / 30</span></div></div>
-        <div style="text-align:right;"><div class="day-eyebrow">VIDEOS HOY</div><div class="day-num"><span id="home-today-videos">0</span><span>/5</span></div></div>
+        <div style="text-align:right;"><div class="day-eyebrow">VIDEOS HOY</div><div class="day-num"><span id="home-today-videos">0</span><span style="font-size:20px;opacity:.6;font-weight:600;">/5</span></div></div>
       </div>
       <div class="day-track"><div class="day-fill" id="home-day-fill" style="width:3%"></div></div>
       <div class="day-sub"><span>Día 1</span><span>Día 30</span></div>
@@ -362,10 +362,16 @@ select.finput option{background:white;}
     <div style="font-family:'DM Mono';font-size:9px;letter-spacing:2px;color:var(--muted);text-transform:uppercase;margin-bottom:12px;">BONOS DISPONIBLES</div>
     <div id="bonos-list"></div>
 
-    <div style="font-family:'DM Mono';font-size:9px;letter-spacing:2px;color:var(--muted);text-transform:uppercase;margin:20px 0 12px;">💡 IDEAS DE CONTENIDO</div>
-    <div id="ideas-list"></div>
+    
   </div>
 
+
+  <!-- IDEAS SEPARADO -->
+  <div class="screen" id="screen-ideas">
+    <div class="stitle">Ideas</div>
+    <div class="ssub">Contenido sugerido por el admin</div>
+    <div id="ideas-only-list"></div>
+  </div>
 
   <!-- NOTIFICACIONES -->
   <div class="screen" id="screen-notifs">
@@ -394,6 +400,7 @@ select.finput option{background:white;}
 const CAMPAIGN_START = new Date("2025-06-01");
 const CAMPAIGN_DAYS = 30;
 const SALARY = 650000;
+const COMISION_POR_VENTA = 2500;
 const MIN_VIDEOS = 150;
 const DAILY_VIDEOS = 5;
 const MIN_SCORE = 6.5;
@@ -443,6 +450,7 @@ function doLogin(){
   document.getElementById("app").classList.add("show");
   document.getElementById("bottom-nav").style.display="flex";
   document.getElementById("topbar-name").textContent=DISPLAY_NAMES[creator];
+  document.getElementById("topbar-avatar").textContent=DISPLAY_NAMES[creator].split(" ")[0].substring(0,2).toUpperCase();
   document.getElementById("topbar-avatar").textContent=AVATARS[creator];
   document.getElementById("topbar-avatar").style.borderColor=COLORS[creator];
   loadData();
@@ -467,6 +475,7 @@ function goScreen(name, el){
   if(name==="videos") renderMyVideos();
   if(name==="bonos") renderBonos();
   if(name==="notifs") renderNotifs();
+  if(name==="ideas") renderIdeasOnly();
   if(name==="videos") renderFeatured();
 }
 
@@ -487,8 +496,9 @@ function myVideoDay(d){return myVideos().filter(v=>v.day===d);}
 function avgScore(videos){const sc=videos.filter(v=>v.score!=null);return sc.length?Math.round(sc.reduce((a,v)=>a+v.score,0)/sc.length*10)/10:null;}
 function totalComision(){
   const base = Math.round(SALARY * (myVideos().length / MIN_VIDEOS));
+  const comVentas = (sharedData.ventas[currentUser]||0) * COMISION_POR_VENTA;
   const bonos = sharedData.bonos[currentUser]||0;
-  return base + bonos;
+  return base + comVentas + bonos;
 }
 function showToast(msg){
   const t=document.getElementById("toast");
@@ -505,7 +515,7 @@ function renderHome(){
   document.getElementById("home-day").textContent = day;
   document.getElementById("home-day-fill").style.width = pct+"%";
   const todayVids = myVideoDay(day).length;
-  document.getElementById("home-today-videos").textContent = todayVids+"/"+DAILY_VIDEOS;
+  document.getElementById("home-today-videos").textContent = todayVids;
   document.getElementById("home-ventas").textContent = sharedData.ventas[currentUser]||0;
   document.getElementById("home-cobrar").textContent = fmtPesos(totalComision());
   document.getElementById("home-total-videos").textContent = myVideos().length;
@@ -523,7 +533,7 @@ function videoCardHTML(v){
   const scClass = sc==null?"":sc>=7?"high":sc>=5?"mid":"low";
   const stClass = v.status==="approved"?"approved":v.status==="rejected"?"rejected":"pending";
   const stLabel = v.status==="approved"?"✓ Aprobado":v.status==="rejected"?"✗ Rechazado":"⏳ Pendiente";
-  return `<div class="video-card">
+  return `<div class="video-card" id="vc-\${v.id}">
     <div class="vc-top">
       <div><div class="vc-day">Día ${v.day}</div><div class="vc-platform"><span class="plat-tag">${v.platform==="ig"?"Instagram":v.platform==="tt"?"TikTok":"IG + TikTok"}</span><span class="plat-tag">${v.cat}</span></div></div>
       <span class="vc-status ${stClass}">${stLabel}</span>
@@ -850,6 +860,32 @@ function renderFeatured(){
         ${v.score!=null?`<div><div style="font-family:'Nunito';font-size:18px;font-weight:700;color:${v.score>=7?"var(--accent)":v.score>=5?"var(--accent3)":"var(--accent2)"};">${v.score}/10</div><div style="font-size:9px;font-family:'DM Mono';color:var(--muted);">score</div></div>`:""}
       </div>
     </div>`).join("");
+}
+
+
+function deleteMyVideo(id){
+  if(!confirm("¿Eliminar este video?")) return;
+  sharedData.videos = sharedData.videos.filter(v=>v.id!==id);
+  saveData();
+  renderHome();
+  renderMyVideos();
+  showToast("Video eliminado");
+}
+
+
+function renderIdeasOnly(){
+  const ideas = sharedData.ideas && sharedData.ideas.length ? sharedData.ideas : [
+    {tag:"Tendencia",title:"Green flag morning routine",desc:"Mostrá tu rutina de mañana incluyendo el shake de Cleargy. Formato GRWM, música lo-fi.",link:""},
+    {tag:"Tutorial",title:"3 formas de tomar la proteína",desc:"Un video mostrando 3 recetas: batido simple, con avena y en pancakes.",link:""},
+    {tag:"Trend",title:"POV: ya llegué a mi meta",desc:"Usá el audio viral del momento mostrando tu progreso real.",link:""},
+  ];
+  document.getElementById("ideas-only-list").innerHTML = ideas.map(i=>`
+    <div class="idea-card">
+      <span class="idea-tag">${i.tag}</span>
+      <div class="idea-title">${i.title}</div>
+      <div class="idea-desc">${i.desc}</div>
+      ${i.link?`<a class="idea-link" href="${i.link}" target="_blank">Ver referencia ↗</a>`:""}
+    </div>`).join("") || `<div class="empty"><div class="empty-icon">💡</div><div class="empty-text">Sin ideas todavía</div></div>`;
 }
 
 loadData();
