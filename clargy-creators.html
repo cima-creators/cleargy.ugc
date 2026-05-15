@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html lang="es">
 <head>
@@ -424,12 +423,19 @@ let sharedData = {
 };
 
 // Load from localStorage
-function loadData(){
+async function loadData(){
+  // Try Firebase first
+  if(window._fbLoad){
+    const fbData = await window._fbLoad();
+    if(fbData){ sharedData = fbData; return; }
+  }
+  // Fallback to localStorage
   const saved = localStorage.getItem("clargy_data");
   if(saved) sharedData = JSON.parse(saved);
 }
 function saveData(){
   localStorage.setItem("clargy_data", JSON.stringify(sharedData));
+  if(window._fbSave) window._fbSave(sharedData);
 }
 
 let currentUser = null;
@@ -447,12 +453,19 @@ function doLogin(){
   document.getElementById("login-screen").style.display="none";
   document.getElementById("app").classList.add("show");
   document.getElementById("bottom-nav").style.display="flex";
+  // Start real-time sync
+  if(window._fbListen){
+    window._fbListen((newData)=>{
+      sharedData = newData;
+      renderAll();
+      localStorage.setItem("clargy_data", JSON.stringify(sharedData));
+    });
+  }
   document.getElementById("topbar-name").textContent=DISPLAY_NAMES[creator];
   document.getElementById("topbar-avatar").textContent=DISPLAY_NAMES[creator].split(" ")[0].substring(0,2).toUpperCase();
   document.getElementById("topbar-avatar").textContent=AVATARS[creator];
   document.getElementById("topbar-avatar").style.borderColor=COLORS[creator];
-  loadData();
-  renderAll();
+  loadData().then(()=>renderAll());
   setTimeout(()=>{
     if(!sharedData.notifs)return;
     const unread=sharedData.notifs.filter(n=>(n.to==='ALL'||n.to===currentUser)&&(!n.read||!n.read.includes(currentUser))).length;
@@ -895,5 +908,55 @@ function renderIdeasOnly(){
 
 loadData();
 </script>
+
+  <!-- Firebase -->
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
+    import { getFirestore, doc, setDoc, onSnapshot, getDoc } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+
+    const firebaseConfig = {
+      apiKey: "AIzaSyCTv4DiRCpbCpGYP6E86TPHlkPvaAZTN3g",
+      authDomain: "cleargy-creators.firebaseapp.com",
+      projectId: "cleargy-creators",
+      storageBucket: "cleargy-creators.firebasestorage.app",
+      messagingSenderId: "313543582398",
+      appId: "1:313543582398:web:99fe78991adeea2e7cb4ef"
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const db = getFirestore(app);
+    const DATA_DOC = doc(db, "cleargy", "main");
+
+    window._fbSave = async (data) => {
+      try { await setDoc(DATA_DOC, {data: JSON.stringify(data)}); }
+      catch(e){ console.error("FB save:", e); localStorage.setItem("clargy_data", JSON.stringify(data)); }
+    };
+
+    window._fbLoad = async () => {
+      try {
+        const snap = await getDoc(DATA_DOC);
+        if(snap.exists()) return JSON.parse(snap.data().data);
+        return null;
+      } catch(e){ console.error("FB load:", e); return null; }
+    };
+
+    window._fbListen = (callback) => {
+      return onSnapshot(DATA_DOC, (snap) => {
+        if(snap.exists()){
+          try{ callback(JSON.parse(snap.data().data)); }catch(e){}
+        }
+      });
+    };
+
+    window.dispatchEvent(new CustomEvent("firebase-ready"));
+    // If already logged in, start listening
+    if(window.currentUser && window._fbListen){
+      window._fbListen((newData)=>{
+        sharedData = newData;
+        if(typeof renderAll === 'function') renderAll();
+      });
+    }
+  </script>
+
 </body>
 </html>
