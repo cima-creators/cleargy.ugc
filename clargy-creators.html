@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="es">
 <head>
@@ -223,6 +224,7 @@ select.finput option{background:white;}
       </div>
       <div class="day-track"><div class="day-fill" id="home-day-fill" style="width:3%"></div></div>
       <div class="day-sub"><span>Día 1</span><span>Día 30</span></div>
+      <div id="home-streak-banner" style="display:none;"></div>
     </div>
 
     <div class="stats-grid">
@@ -328,6 +330,11 @@ select.finput option{background:white;}
           <option>Día de entrenamiento</option>
           <option>Otro</option>
         </select>
+      </div>
+      <div class="fgroup">
+        <div class="flabel">🎬 Link del video original (Drive)</div>
+        <input class="finput" type="url" id="up-drive" placeholder="https://drive.google.com/...">
+        <div style="font-size:10px;font-family:'DM Mono';color:var(--muted);margin-top:4px;">Subí el video a tu Drive → compartir → "cualquiera con el link" → pegá acá</div>
       </div>
       <div class="fgroup">
         <div class="flabel">Notas (opcional)</div>
@@ -596,6 +603,31 @@ function renderHome(){
   const perVideo = Math.round(650000 * myVids.length / 150);
   const perVenta = ventas * 2500;
   const bonos = sharedData.bonos[currentUser]||0;
+  // Racha — contar días consecutivos con 5 videos hasta hoy
+  let streak = 0;
+  for(let d = day; d >= 1; d--){
+    if(myVideoDay(d).length >= DAILY_VIDEOS) streak++;
+    else break;
+  }
+  const banner = document.getElementById("home-streak-banner");
+  if(todayVids >= DAILY_VIDEOS && streak >= 3){
+    banner.style.display = "block";
+    banner.innerHTML = `<div style="margin-top:12px;background:linear-gradient(135deg,rgba(245,100,0,.12),rgba(245,166,35,.12));border:2px solid rgba(245,120,0,.4);border-radius:14px;padding:14px 16px;text-align:center;">
+      <div style="font-size:28px;margin-bottom:4px;">🔥🔥🔥</div>
+      <div style="font-family:'Nunito';font-size:15px;font-weight:900;color:#c45000;">¡Racha de ${streak} días!</div>
+      <div style="font-size:11px;font-family:'DM Mono';color:var(--muted);margin-top:4px;">${streak} días seguidos con los 5 videos. ¡Imparable!</div>
+    </div>`;
+  } else if(todayVids >= DAILY_VIDEOS){
+    banner.style.display = "block";
+    banner.innerHTML = `<div style="margin-top:12px;background:rgba(245,166,35,.1);border:1px solid rgba(245,166,35,.35);border-radius:14px;padding:12px 16px;text-align:center;">
+      <div style="font-size:24px;margin-bottom:2px;">🔥</div>
+      <div style="font-family:'Nunito';font-size:14px;font-weight:800;color:#c47f00;">¡5 videos del día completos!</div>
+      <div style="font-size:11px;font-family:'DM Mono';color:var(--muted);margin-top:2px;">Meta diaria cumplida 💪</div>
+    </div>`;
+  } else {
+    banner.style.display = "none";
+  }
+
   document.getElementById("home-ventas").textContent = ventas;
   document.getElementById("home-total-videos").textContent = myVids.length;
   document.getElementById("home-per-video").textContent = fmtPesos(perVideo);
@@ -624,7 +656,10 @@ function videoCardHTML(v){
   return `<div class="video-card" id="vc-\${v.id}">
     <div class="vc-top">
       <div><div class="vc-day">Día ${v.day}</div><div class="vc-platform"><span class="plat-tag">${v.platform==="ig"?"Instagram":v.platform==="tt"?"TikTok":"IG + TikTok"}</span><span class="plat-tag">${v.cat}</span></div></div>
-      <span class="vc-status ${stClass}">${stLabel}</span>
+      <div style="text-align:right;">
+        <span class="vc-status ${stClass}">${stLabel}</span>
+        ${v.date?`<div style="font-size:9px;font-family:'DM Mono';color:var(--muted);margin-top:3px;">${new Date(v.date).toLocaleDateString("es-AR",{day:"2-digit",month:"2-digit",year:"2-digit"})}</div>`:""}
+      </div>
     </div>
     <div style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:10px;">
       ${v.linkIg?`<button onclick="navigator.clipboard.writeText('${v.linkIg}');showToast('Link IG copiado 📋')" style="padding:5px 12px;border-radius:20px;font-size:10px;font-family:'Nunito';font-weight:700;cursor:pointer;background:rgba(26,58,143,.08);border:1px solid rgba(26,58,143,.2);color:var(--blue);">📸 Copiar IG</button>`:""}
@@ -677,6 +712,7 @@ function submitVideo(){
     saves: parseInt(document.getElementById("up-saves").value)||0,
     cat,
     notes: document.getElementById("up-notes").value,
+    driveLink: document.getElementById("up-drive").value.trim(),
     day,
     score: null,
     status: "pending",
@@ -685,7 +721,7 @@ function submitVideo(){
   sharedData.videos.push(video);
   saveData();
   // Reset
-  ["up-link-ig","up-link-tt","up-views","up-likes","up-shares","up-saves","up-notes"].forEach(id=>document.getElementById(id).value="");
+  ["up-link-ig","up-link-tt","up-views","up-likes","up-shares","up-saves","up-notes","up-drive"].forEach(id=>document.getElementById(id).value="");
   document.getElementById("up-cat").value="";
   showToast("✓ Video subido correctamente");
   goScreen("home", document.querySelector(".bnav-item"));
@@ -951,11 +987,11 @@ function renderFeatured(){
   if(!featured.length){ section.style.display="none"; return; }
   section.style.display="block";
   document.getElementById("featured-list").innerHTML = featured.map(v=>`
-    <div style="background:rgba(255,215,0,.04);border:1px solid rgba(255,215,0,.2);border-radius:14px;padding:14px;margin-bottom:8px;">
+    <div style="background:rgba(245,166,35,.12);border:2px solid rgba(245,166,35,.55);border-radius:14px;padding:14px;margin-bottom:8px;box-shadow:0 2px 12px rgba(245,166,35,.15);">
       <div style="display:flex;align-items:center;gap:8px;margin-bottom:8px;">
         <div style="width:28px;height:28px;border-radius:50%;background:${COLORS[v.creator]}22;border:2px solid ${COLORS[v.creator]};display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:700;color:${COLORS[v.creator]}">${AVATARS[v.creator]}</div>
         <span style="font-size:12px;font-weight:700;color:var(--text);">${DISPLAY_NAMES[v.creator]}</span>
-        <span style="font-size:10px;font-family:'DM Mono';color:var(--gold);margin-left:auto;">⭐ DESTACADO</span>
+        <span style="font-size:10px;font-family:'DM Mono';font-weight:700;background:rgba(245,166,35,.2);color:#c47f00;padding:3px 10px;border-radius:20px;border:1px solid rgba(245,166,35,.5);margin-left:auto;">⭐ DESTACADO</span>
       </div>
       <div style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:10px;">
         ${v.linkIg?`<button onclick="navigator.clipboard.writeText('${v.linkIg}');showToast('Link IG copiado 📋')" style="padding:5px 12px;border-radius:20px;font-size:10px;font-family:'Nunito';font-weight:700;cursor:pointer;background:rgba(26,58,143,.08);border:1px solid rgba(26,58,143,.2);color:var(--blue);">📸 Copiar IG</button>`:""}
