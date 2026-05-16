@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html lang="es">
 <head>
@@ -296,25 +295,8 @@ select.finput option{background:white;}
         </div>
         <div style="font-size:11px;color:var(--muted);margin-top:8px;font-weight:600;">💡 1 video = 1 producción, aunque lo subas en las dos plataformas</div>
       </div>
-      <div class="row2">
-        <div class="fgroup">
-          <div class="flabel">Views</div>
-          <input class="finput" type="number" id="up-views" placeholder="ej: 15000" inputmode="numeric">
-        </div>
-        <div class="fgroup">
-          <div class="flabel">Likes</div>
-          <input class="finput" type="number" id="up-likes" placeholder="ej: 800" inputmode="numeric">
-        </div>
-      </div>
-      <div class="row2">
-        <div class="fgroup">
-          <div class="flabel">Shares</div>
-          <input class="finput" type="number" id="up-shares" placeholder="ej: 120" inputmode="numeric">
-        </div>
-        <div class="fgroup">
-          <div class="flabel">Saves</div>
-          <input class="finput" type="number" id="up-saves" placeholder="ej: 90" inputmode="numeric">
-        </div>
+      <div style="background:rgba(26,58,143,.04);border-radius:var(--radius-xs);padding:10px 12px;margin-bottom:10px;font-size:11px;color:var(--muted);font-weight:600;">
+        📊 Las views, likes y shares se sincronizan automáticamente desde Instagram.
       </div>
       <div class="fgroup">
         <div class="flabel">Categoría</div>
@@ -706,10 +688,10 @@ function submitVideo(){
     linkIg,
     linkTt,
     platform,
-    views: parseInt(document.getElementById("up-views").value)||0,
-    likes: parseInt(document.getElementById("up-likes").value)||0,
-    shares: parseInt(document.getElementById("up-shares").value)||0,
-    saves: parseInt(document.getElementById("up-saves").value)||0,
+    views: 0,
+    likes: 0,
+    shares: 0,
+    saves: 0,
     cat,
     notes: document.getElementById("up-notes").value,
     driveLink: document.getElementById("up-drive").value.trim(),
@@ -721,7 +703,7 @@ function submitVideo(){
   sharedData.videos.push(video);
   saveData();
   // Reset
-  ["up-link-ig","up-link-tt","up-views","up-likes","up-shares","up-saves","up-notes","up-drive"].forEach(id=>document.getElementById(id).value="");
+  ["up-link-ig","up-link-tt","up-notes","up-drive"].forEach(id=>document.getElementById(id).value="");
   document.getElementById("up-cat").value="";
   showToast("✓ Video subido correctamente");
   goScreen("home", document.querySelector(".bnav-item"));
