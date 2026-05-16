@@ -359,9 +359,9 @@ select.finput option{background:white;}
   <div class="screen" id="screen-videos">
     <div class="stitle">Videos</div>
 
-    <!-- Mejores Videos: todos los featured de cualquier creadora -->
+    <!-- Virales: todos los featured de cualquier creadora -->
     <div id="featured-section" style="display:none;margin-bottom:24px;">
-      <div style="font-family:'DM Mono';font-size:9px;letter-spacing:2px;color:var(--gold);text-transform:uppercase;margin-bottom:10px;">⭐ Mejores Videos</div>
+      <div style="font-family:'DM Mono';font-size:9px;letter-spacing:2px;color:#16a34a;text-transform:uppercase;margin-bottom:10px;">🔥 VIRALES</div>
       <div id="featured-list"></div>
     </div>
 
@@ -983,11 +983,11 @@ function renderFeatured(){
   if(!featured.length){ section.style.display="none"; return; }
   section.style.display="block";
   document.getElementById("featured-list").innerHTML = featured.map(v=>`
-    <div style="background:rgba(245,166,35,.12);border:2px solid rgba(245,166,35,.55);border-radius:14px;padding:14px;margin-bottom:8px;box-shadow:0 2px 12px rgba(245,166,35,.15);">
+    <div style="background:rgba(22,163,74,.04);border-left:4px solid #16a34a;border-radius:14px;padding:14px;margin-bottom:8px;box-shadow:0 2px 12px rgba(22,163,74,.08);">
       <div style="display:flex;align-items:center;gap:8px;margin-bottom:8px;">
         <div style="width:28px;height:28px;border-radius:50%;background:${COLORS[v.creator]}22;border:2px solid ${COLORS[v.creator]};display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:700;color:${COLORS[v.creator]}">${AVATARS[v.creator]}</div>
         <span style="font-size:12px;font-weight:700;color:var(--text);">${DISPLAY_NAMES[v.creator]}</span>
-        <span style="font-size:10px;font-family:'DM Mono';font-weight:700;background:rgba(245,166,35,.2);color:#c47f00;padding:3px 10px;border-radius:20px;border:1px solid rgba(245,166,35,.5);margin-left:auto;">⭐ DESTACADO</span>
+        <span style="font-size:10px;font-family:'DM Mono';font-weight:700;background:rgba(22,163,74,.12);color:#16a34a;padding:3px 10px;border-radius:20px;margin-left:auto;">🔥 VIRAL</span>
       </div>
       <div style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:10px;">
         ${v.linkIg?`<button onclick="navigator.clipboard.writeText('${v.linkIg}');showToast('Link IG copiado 📋')" style="padding:5px 12px;border-radius:20px;font-size:10px;font-family:'Nunito';font-weight:700;cursor:pointer;background:rgba(26,58,143,.08);border:1px solid rgba(26,58,143,.2);color:var(--blue);">📸 Copiar IG</button>`:""}
@@ -995,7 +995,7 @@ function renderFeatured(){
         ${!v.linkIg&&!v.linkTt&&v.link?`<button onclick="navigator.clipboard.writeText('${v.link}');showToast('Link copiado 📋')" style="padding:5px 12px;border-radius:20px;font-size:10px;font-family:'Nunito';font-weight:700;cursor:pointer;background:rgba(26,58,143,.08);border:1px solid rgba(26,58,143,.2);color:var(--blue);">📋 Copiar link</button>`:""}
       </div>
       <div style="display:flex;gap:16px;align-items:center;">
-        <div><div style="font-family:'Nunito';font-size:20px;font-weight:800;color:var(--accent);">${fmtV(v.views)}</div><div style="font-size:9px;font-family:'DM Mono';color:var(--muted);">views</div></div>
+        <div><div style="font-family:'Nunito';font-size:20px;font-weight:800;color:#16a34a;">${fmtV(v.views)}</div><div style="font-size:9px;font-family:'DM Mono';color:var(--muted);">views</div></div>
         <span style="font-size:10px;font-family:'DM Mono';color:var(--muted);margin-left:auto;">Día ${v.day} · ${v.cat||''}</span>
       </div>
     </div>`).join("");
