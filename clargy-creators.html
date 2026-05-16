@@ -85,22 +85,33 @@ select.linput option{background:white;}
 .stat-card.gold .stat-val{color:var(--gold);font-size:24px;}
 
 /* VIDEO CARD */
-.video-card{background:var(--surface);border-radius:var(--radius);padding:18px;margin-bottom:10px;box-shadow:var(--shadow);}
-.vc-top{display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:10px;}
-.vc-day{font-family:'DM Mono';font-size:9px;letter-spacing:2px;color:var(--muted);text-transform:uppercase;margin-bottom:2px;}
-.vc-cat{font-size:11px;color:var(--muted);font-weight:600;}
-.vc-status{font-size:9px;font-family:'DM Mono';letter-spacing:.5px;padding:4px 10px;border-radius:20px;font-weight:600;}
+.video-card{background:var(--surface);border-radius:var(--radius);padding:16px 18px;margin-bottom:10px;box-shadow:var(--shadow);display:flex;gap:16px;align-items:flex-start;border-left:4px solid var(--muted2);transition:all .15s;}
+.video-card.approved{border-left-color:var(--accent);}
+.video-card.rejected{border-left-color:var(--accent2);}
+.vc-day-num{font-family:'Nunito';font-size:34px;font-weight:900;line-height:1;letter-spacing:-2px;color:var(--muted2);min-width:38px;text-align:center;flex-shrink:0;padding-top:2px;}
+.video-card.approved .vc-day-num{color:var(--accent);}
+.video-card.rejected .vc-day-num{color:var(--accent2);}
+.vc-day-label{font-family:'DM Mono';font-size:7px;letter-spacing:1px;color:var(--muted);text-transform:uppercase;text-align:center;}
+.vc-body{flex:1;min-width:0;}
+.vc-top{display:flex;align-items:center;justify-content:space-between;margin-bottom:6px;}
+.vc-meta{font-family:'DM Mono';font-size:9px;color:var(--muted);letter-spacing:.5px;}
+.vc-status{font-size:9px;font-family:'DM Mono';letter-spacing:.5px;padding:3px 9px;border-radius:20px;font-weight:600;white-space:nowrap;}
 .vc-status.approved{background:rgba(26,58,143,.1);color:var(--accent);}
 .vc-status.pending{background:rgba(96,128,160,.1);color:var(--muted);}
 .vc-status.rejected{background:rgba(232,93,38,.1);color:var(--accent2);}
-.vc-link{font-size:12px;color:var(--accent-light);font-weight:600;word-break:break-all;margin-bottom:14px;text-decoration:none;display:block;border-bottom:2px solid var(--surface2);padding-bottom:12px;}
-.vc-metrics{display:flex;gap:16px;align-items:flex-end;}
-.vcm-val{font-family:'Nunito';font-size:22px;font-weight:900;line-height:1;color:var(--text);}
+.vc-metrics{display:flex;gap:20px;align-items:flex-end;margin:10px 0 10px;}
+.vcm{display:flex;flex-direction:column;}
+.vcm-val{font-family:'Nunito';font-size:24px;font-weight:900;line-height:1;color:var(--text);}
 .vcm-label{font-family:'DM Mono';font-size:8px;letter-spacing:1.5px;text-transform:uppercase;color:var(--muted);margin-top:2px;}
-.score-pill{display:inline-flex;align-items:center;padding:5px 12px;border-radius:20px;font-family:'DM Mono';font-size:12px;font-weight:500;margin-left:auto;}
+.vc-bottom{display:flex;align-items:center;gap:6px;}
+.vc-copy-btn{padding:8px 16px;border-radius:20px;font-size:12px;font-family:'Nunito';font-weight:700;cursor:pointer;background:rgba(26,58,143,.07);border:1.5px solid rgba(26,58,143,.15);color:var(--blue);transition:all .1s;min-height:36px;}
+.vc-copy-btn:active{background:rgba(26,58,143,.15);}
+.vc-del-btn{padding:8px 12px;border-radius:20px;font-size:14px;cursor:pointer;background:none;border:1.5px solid rgba(232,93,38,.2);color:#e85d26;margin-left:auto;transition:all .1s;min-height:36px;}
+.score-pill{display:inline-flex;align-items:center;padding:3px 10px;border-radius:20px;font-family:'DM Mono';font-size:10px;font-weight:600;}
 .score-pill.high{background:rgba(26,58,143,.1);color:var(--accent);}
 .score-pill.mid{background:rgba(42,82,201,.1);color:var(--accent3);}
 .score-pill.low{background:rgba(232,93,38,.1);color:var(--accent2);}
+.score-pill.none{background:var(--surface3);color:var(--muted);}
 
 /* UPLOAD */
 .upload-card{background:var(--surface);border-radius:var(--radius);padding:22px;margin-bottom:14px;box-shadow:var(--shadow);}
@@ -632,32 +643,35 @@ function renderHome(){
 
 function videoCardHTML(v){
   const sc = v.score!=null ? v.score : null;
-  const scClass = sc==null?"":sc>=7?"high":sc>=5?"mid":"low";
+  const scClass = sc==null?"none":sc>=7?"high":sc>=5?"mid":"low";
+  const scLabel = sc!=null?`★ ${sc}/10`:"sin score";
   const stClass = v.status==="approved"?"approved":v.status==="rejected"?"rejected":"pending";
-  const stLabel = v.status==="approved"?"✓ Aprobado":v.status==="rejected"?"✗ Rechazado":"⏳ Pendiente";
-  return `<div class="video-card" id="vc-\${v.id}">
-    <div class="vc-top">
-      <div><div class="vc-day">Día ${v.day}</div><div class="vc-platform"><span class="plat-tag">${v.platform==="ig"?"Instagram":v.platform==="tt"?"TikTok":"IG + TikTok"}</span><span class="plat-tag">${v.cat}</span></div></div>
-      <div style="text-align:right;">
+  const stLabel = v.status==="approved"?"✓ aprobado":v.status==="rejected"?"✗ rechazado":"pendiente";
+  const dateStr = v.date?new Date(v.date).toLocaleDateString("es-AR",{day:"2-digit",month:"2-digit"}):"";
+  const platIcon = v.platform==="ig"?"📸":v.platform==="tt"?"🎵":"📸🎵";
+  return `<div class="video-card ${stClass}" id="vc-${v.id}">
+    <div style="display:flex;flex-direction:column;align-items:center;">
+      <div class="vc-day-num">${v.day}</div>
+      <div class="vc-day-label">día</div>
+    </div>
+    <div class="vc-body">
+      <div class="vc-top">
+        <div style="font-size:13px;font-weight:800;color:var(--text);">${platIcon} ${v.cat}</div>
         <span class="vc-status ${stClass}">${stLabel}</span>
-        ${v.date?`<div style="font-size:9px;font-family:'DM Mono';color:var(--muted);margin-top:3px;">${new Date(v.date).toLocaleDateString("es-AR",{day:"2-digit",month:"2-digit",year:"2-digit"})}</div>`:""}
       </div>
-    </div>
-    <div style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:10px;">
-      ${v.linkIg?`<button onclick="navigator.clipboard.writeText('${v.linkIg}');showToast('Link IG copiado 📋')" style="padding:5px 12px;border-radius:20px;font-size:10px;font-family:'Nunito';font-weight:700;cursor:pointer;background:rgba(26,58,143,.08);border:1px solid rgba(26,58,143,.2);color:var(--blue);">📸 Copiar IG</button>`:""}
-      ${v.linkTt?`<button onclick="navigator.clipboard.writeText('${v.linkTt}');showToast('Link TikTok copiado 📋')" style="padding:5px 12px;border-radius:20px;font-size:10px;font-family:'Nunito';font-weight:700;cursor:pointer;background:rgba(26,58,143,.08);border:1px solid rgba(26,58,143,.2);color:var(--blue);">🎵 Copiar TT</button>`:""}
-      ${!v.linkIg&&!v.linkTt&&v.link?`<button onclick="navigator.clipboard.writeText('${v.link}');showToast('Link copiado 📋')" style="padding:5px 12px;border-radius:20px;font-size:10px;font-family:'Nunito';font-weight:700;cursor:pointer;background:rgba(26,58,143,.08);border:1px solid rgba(26,58,143,.2);color:var(--blue);">📋 Copiar link</button>`:""}
-    </div>
-    ${v.adminNote?`<div style="background:rgba(42,82,201,.06);border-left:3px solid var(--accent3);border-radius:0 8px 8px 0;padding:8px 12px;margin-bottom:12px;font-size:12px;line-height:1.5;color:var(--text);">💬 <strong style="color:var(--accent3);">Feedback Cleargy:</strong> ${v.adminNote}</div>`:""}
-    <div style="display:flex;align-items:center;justify-content:space-between;">
+      ${dateStr?`<div class="vc-meta" style="margin-bottom:8px;">${dateStr}</div>`:""}
+      ${v.adminNote?`<div style="background:rgba(42,82,201,.06);border-left:3px solid var(--accent3);border-radius:0 8px 8px 0;padding:7px 11px;margin-bottom:8px;font-size:11px;line-height:1.5;color:var(--text);">💬 <strong style="color:var(--accent3);">Feedback:</strong> ${v.adminNote}</div>`:""}
       <div class="vc-metrics">
         <div class="vcm"><div class="vcm-val">${fmtV(v.views)}</div><div class="vcm-label">Views</div></div>
         ${v.likes?`<div class="vcm"><div class="vcm-val">${fmtV(v.likes)}</div><div class="vcm-label">Likes</div></div>`:""}
-        ${v.shares?`<div class="vcm"><div class="vcm-val">${fmtV(v.shares)}</div><div class="vcm-label">Shares</div></div>`:""}
+        ${v.comments?`<div class="vcm"><div class="vcm-val">${fmtV(v.comments)}</div><div class="vcm-label">Coment.</div></div>`:""}
+        ${sc!=null?`<span class="score-pill ${scClass}" style="margin-left:auto;align-self:center;">★ ${sc}/10</span>`:""}
       </div>
-      <div style="display:flex;align-items:center;gap:8px;">
-        ${sc!=null?`<span class="score-pill ${scClass}">${sc}/10</span>`:`<span class="score-pill" style="background:var(--surface3);color:var(--muted);">Sin score</span>`}
-        <button onclick="deleteMyVideo(${v.id})" style="padding:4px 10px;border-radius:20px;font-size:10px;font-family:'DM Mono';cursor:pointer;background:rgba(232,93,38,.06);border:1px solid rgba(232,93,38,.25);color:#e85d26;">🗑 Eliminar</button>
+      <div class="vc-bottom">
+        ${v.linkIg?`<button class="vc-copy-btn" onclick="navigator.clipboard.writeText('${v.linkIg}');showToast('Link IG copiado 📋')">📸 Copiar link</button>`:""}
+        ${v.linkTt?`<button class="vc-copy-btn" onclick="navigator.clipboard.writeText('${v.linkTt}');showToast('Link TikTok copiado 📋')">🎵 Copiar link</button>`:""}
+        ${!v.linkIg&&!v.linkTt&&v.link?`<button class="vc-copy-btn" onclick="navigator.clipboard.writeText('${v.link}');showToast('Link copiado 📋')">📋 Copiar link</button>`:""}
+        <button class="vc-del-btn" onclick="deleteMyVideo(${v.id})">🗑</button>
       </div>
     </div>
   </div>`;
