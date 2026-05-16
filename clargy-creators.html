@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="es">
 <head>
@@ -85,33 +86,31 @@ select.linput option{background:white;}
 .stat-card.gold .stat-val{color:var(--gold);font-size:24px;}
 
 /* VIDEO CARD */
-.video-card{background:var(--surface);border-radius:var(--radius);padding:16px 18px;margin-bottom:10px;box-shadow:var(--shadow);display:flex;gap:16px;align-items:flex-start;border-left:4px solid var(--muted2);transition:all .15s;}
+.video-card{background:var(--surface);border-radius:var(--radius);padding:18px 18px 14px;margin-bottom:10px;box-shadow:var(--shadow);border-left:4px solid var(--muted2);transition:all .15s;position:relative;}
 .video-card.approved{border-left-color:var(--accent);}
 .video-card.rejected{border-left-color:var(--accent2);}
-.vc-day-num{font-family:'Nunito';font-size:34px;font-weight:900;line-height:1;letter-spacing:-2px;color:var(--muted2);min-width:38px;text-align:center;flex-shrink:0;padding-top:2px;}
-.video-card.approved .vc-day-num{color:var(--accent);}
-.video-card.rejected .vc-day-num{color:var(--accent2);}
-.vc-day-label{font-family:'DM Mono';font-size:7px;letter-spacing:1px;color:var(--muted);text-transform:uppercase;text-align:center;}
-.vc-body{flex:1;min-width:0;}
-.vc-top{display:flex;align-items:center;justify-content:space-between;margin-bottom:6px;}
+.vc-day-badge{position:absolute;top:14px;left:16px;font-family:'DM Mono';font-size:9px;letter-spacing:1px;color:var(--muted);background:var(--surface2);border:1px solid var(--border);border-radius:20px;padding:2px 8px;font-weight:600;}
+.video-card.approved .vc-day-badge{color:var(--accent);border-color:rgba(26,58,143,.2);background:rgba(26,58,143,.06);}
+.video-card.rejected .vc-day-badge{color:var(--accent2);border-color:rgba(232,93,38,.2);background:rgba(232,93,38,.06);}
+.vc-body{min-width:0;}
+.vc-top{display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;padding-top:22px;}
 .vc-meta{font-family:'DM Mono';font-size:9px;color:var(--muted);letter-spacing:.5px;}
 .vc-status{font-size:9px;font-family:'DM Mono';letter-spacing:.5px;padding:3px 9px;border-radius:20px;font-weight:600;white-space:nowrap;}
 .vc-status.approved{background:rgba(26,58,143,.1);color:var(--accent);}
 .vc-status.pending{background:rgba(96,128,160,.1);color:var(--muted);}
 .vc-status.rejected{background:rgba(232,93,38,.1);color:var(--accent2);}
-.vc-metrics{display:flex;gap:20px;align-items:flex-end;margin:10px 0 10px;}
+.vc-metrics{display:flex;gap:22px;align-items:flex-end;margin:0 0 14px;}
 .vcm{display:flex;flex-direction:column;}
-.vcm-val{font-family:'Nunito';font-size:24px;font-weight:900;line-height:1;color:var(--text);}
-.vcm-label{font-family:'DM Mono';font-size:8px;letter-spacing:1.5px;text-transform:uppercase;color:var(--muted);margin-top:2px;}
-.vc-bottom{display:flex;align-items:center;gap:6px;}
-.vc-copy-btn{padding:8px 16px;border-radius:20px;font-size:12px;font-family:'Nunito';font-weight:700;cursor:pointer;background:rgba(26,58,143,.07);border:1.5px solid rgba(26,58,143,.15);color:var(--blue);transition:all .1s;min-height:36px;}
-.vc-copy-btn:active{background:rgba(26,58,143,.15);}
-.vc-del-btn{padding:8px 12px;border-radius:20px;font-size:14px;cursor:pointer;background:none;border:1.5px solid rgba(232,93,38,.2);color:#e85d26;margin-left:auto;transition:all .1s;min-height:36px;}
-.score-pill{display:inline-flex;align-items:center;padding:3px 10px;border-radius:20px;font-family:'DM Mono';font-size:10px;font-weight:600;}
-.score-pill.high{background:rgba(26,58,143,.1);color:var(--accent);}
-.score-pill.mid{background:rgba(42,82,201,.1);color:var(--accent3);}
-.score-pill.low{background:rgba(232,93,38,.1);color:var(--accent2);}
-.score-pill.none{background:var(--surface3);color:var(--muted);}
+.vcm-val{font-family:'Nunito';font-size:26px;font-weight:900;line-height:1;}
+.vcm-val.viral{color:#16a34a;}
+.vcm-val.good{color:var(--accent);}
+.vcm-val.low{color:var(--muted);}
+.vcm-label{font-family:'DM Mono';font-size:8px;letter-spacing:1.5px;text-transform:uppercase;color:var(--muted);margin-top:3px;}
+.viral-badge{display:inline-flex;align-items:center;gap:3px;font-size:9px;font-family:'DM Mono';font-weight:700;color:#16a34a;background:rgba(22,163,74,.1);border-radius:20px;padding:2px 8px;letter-spacing:.5px;margin-left:6px;}
+.vc-bottom{display:flex;align-items:center;gap:6px;padding-top:12px;border-top:1px solid var(--surface2);}
+.vc-copy-btn{padding:7px 14px;border-radius:20px;font-size:11px;font-family:'Nunito';font-weight:700;cursor:pointer;background:rgba(26,58,143,.07);border:1.5px solid rgba(26,58,143,.15);color:var(--blue);transition:all .1s;min-height:34px;}
+.vc-copy-btn:active{background:rgba(26,58,143,.14);}
+.vc-del-btn{padding:7px 11px;border-radius:20px;font-size:13px;cursor:pointer;background:none;border:1.5px solid rgba(232,93,38,.18);color:#e85d26;margin-left:auto;transition:all .1s;min-height:34px;}
 
 /* UPLOAD */
 .upload-card{background:var(--surface);border-radius:var(--radius);padding:22px;margin-bottom:14px;box-shadow:var(--shadow);}
@@ -281,7 +280,11 @@ select.finput option{background:white;}
     </div>
 
     <div style="margin-top:20px;">
-      <div style="font-family:'DM Mono';font-size:9px;letter-spacing:2px;color:var(--muted);text-transform:uppercase;margin-bottom:10px;">ÚLTIMOS VIDEOS</div>
+      <div style="display:flex;align-items:center;gap:12px;margin:20px 0 14px;">
+        <div style="flex:1;height:1px;background:var(--border);"></div>
+        <span style="font-family:'DM Mono';font-size:8px;letter-spacing:2.5px;text-transform:uppercase;color:var(--muted2);">últimos videos</span>
+        <div style="flex:1;height:1px;background:var(--border);"></div>
+      </div>
       <div id="home-recent-list"></div>
     </div>
 
@@ -332,9 +335,6 @@ select.finput option{background:white;}
       <div class="fgroup">
         <div class="flabel">Notas (opcional)</div>
         <input class="finput" type="text" id="up-notes" placeholder="algo que quieras aclarar...">
-      </div>
-      <div style="font-size:11px;color:var(--muted);margin-bottom:14px;line-height:1.6;padding:10px 12px;background:var(--surface2);border-radius:var(--radius-xs);">
-        ⚡ Score mínimo <strong style="color:var(--text);">6.5/10</strong> para que el video cuente en bonos. El score se asigna en las próximas horas.
       </div>
       <div style="color:var(--accent2);font-size:12px;display:none;margin-bottom:10px;" id="up-err">Completá el link y la categoría.</div>
       <button class="submit-btn" onclick="submitVideo()">Subir video ✓</button>
@@ -440,7 +440,6 @@ const SALARY = 650000;
 const COMISION_POR_VENTA = 2500;
 const MIN_VIDEOS = 150;
 const DAILY_VIDEOS = 5;
-const MIN_SCORE = 6.5;
 
 const PASSWORDS = {
   creadora1:"clargy1",creadora2:"clargy2",creadora3:"clargy3",
@@ -565,7 +564,6 @@ function getWeek(day){return Math.ceil(day/7);}
 function myVideos(){return (sharedData.videos||[]).filter(v=>v.creator===currentUser);}
 function myVideosWeek(w){return myVideos().filter(v=>getWeek(v.day)===w);}
 function myVideoDay(d){return myVideos().filter(v=>v.day===d);}
-function avgScore(videos){const sc=videos.filter(v=>v.score!=null);return sc.length?Math.round(sc.reduce((a,v)=>a+v.score,0)/sc.length*10)/10:null;}
 function totalComision(){
   const base = Math.round(SALARY * (myVideos().length / MIN_VIDEOS));
   const comVentas = (sharedData.ventas[currentUser]||0) * COMISION_POR_VENTA;
@@ -642,30 +640,32 @@ function renderHome(){
 }
 
 function videoCardHTML(v){
-  const sc = v.score!=null ? v.score : null;
-  const scClass = sc==null?"none":sc>=7?"high":sc>=5?"mid":"low";
-  const scLabel = sc!=null?`★ ${sc}/10`:"sin score";
   const stClass = v.status==="approved"?"approved":v.status==="rejected"?"rejected":"pending";
   const stLabel = v.status==="approved"?"✓ aprobado":v.status==="rejected"?"✗ rechazado":"pendiente";
   const dateStr = v.date?new Date(v.date).toLocaleDateString("es-AR",{day:"2-digit",month:"2-digit"}):"";
   const platIcon = v.platform==="ig"?"📸":v.platform==="tt"?"🎵":"📸🎵";
+  const views = v.views||0;
+  const viewsClass = views>=10000?"viral":views>=1000?"good":"low";
+  const isViral = views>=10000;
   return `<div class="video-card ${stClass}" id="vc-${v.id}">
-    <div style="display:flex;flex-direction:column;align-items:center;">
-      <div class="vc-day-num">${v.day}</div>
-      <div class="vc-day-label">día</div>
-    </div>
+    <div class="vc-day-badge">Día ${v.day}</div>
     <div class="vc-body">
       <div class="vc-top">
-        <div style="font-size:13px;font-weight:800;color:var(--text);">${platIcon} ${v.cat}</div>
+        <div style="font-size:13px;font-weight:800;color:var(--text);">${platIcon} ${v.cat}${dateStr?`<span style="font-family:'DM Mono';font-size:9px;font-weight:400;color:var(--muted);margin-left:8px;">${dateStr}</span>`:""}</div>
         <span class="vc-status ${stClass}">${stLabel}</span>
       </div>
-      ${dateStr?`<div class="vc-meta" style="margin-bottom:8px;">${dateStr}</div>`:""}
-      ${v.adminNote?`<div style="background:rgba(42,82,201,.06);border-left:3px solid var(--accent3);border-radius:0 8px 8px 0;padding:7px 11px;margin-bottom:8px;font-size:11px;line-height:1.5;color:var(--text);">💬 <strong style="color:var(--accent3);">Feedback:</strong> ${v.adminNote}</div>`:""}
+      ${v.adminNote?`<div style="background:rgba(42,82,201,.06);border-left:3px solid var(--accent3);border-radius:0 8px 8px 0;padding:7px 11px;margin-bottom:10px;font-size:11px;line-height:1.5;color:var(--text);">💬 <strong style="color:var(--accent3);">Feedback:</strong> ${v.adminNote}</div>`:""}
       <div class="vc-metrics">
-        <div class="vcm"><div class="vcm-val">${fmtV(v.views)}</div><div class="vcm-label">Views</div></div>
-        ${v.likes?`<div class="vcm"><div class="vcm-val">${fmtV(v.likes)}</div><div class="vcm-label">Likes</div></div>`:""}
-        ${v.comments?`<div class="vcm"><div class="vcm-val">${fmtV(v.comments)}</div><div class="vcm-label">Coment.</div></div>`:""}
-        ${sc!=null?`<span class="score-pill ${scClass}" style="margin-left:auto;align-self:center;">★ ${sc}/10</span>`:""}
+        <div class="vcm">
+          <div style="display:flex;align-items:center;">
+            <div class="vcm-val ${viewsClass}">${fmtV(views)}</div>
+            ${isViral?`<span class="viral-badge">🔥 Viral</span>`:""}
+          </div>
+          <div class="vcm-label">Views</div>
+        </div>
+        ${v.likes?`<div class="vcm"><div class="vcm-val" style="color:var(--muted);">${fmtV(v.likes)}</div><div class="vcm-label">Likes</div></div>`:""}
+        ${v.comments?`<div class="vcm"><div class="vcm-val" style="color:var(--muted);">${fmtV(v.comments)}</div><div class="vcm-label">Coment.</div></div>`:""}
+
       </div>
       <div class="vc-bottom">
         ${v.linkIg?`<button class="vc-copy-btn" onclick="navigator.clipboard.writeText('${v.linkIg}');showToast('Link IG copiado 📋')">📸 Copiar link</button>`:""}
@@ -996,7 +996,6 @@ function renderFeatured(){
       </div>
       <div style="display:flex;gap:16px;align-items:center;">
         <div><div style="font-family:'Nunito';font-size:20px;font-weight:800;color:var(--accent);">${fmtV(v.views)}</div><div style="font-size:9px;font-family:'DM Mono';color:var(--muted);">views</div></div>
-        ${v.score!=null?`<div><div style="font-family:'Nunito';font-size:20px;font-weight:800;color:${v.score>=7?"var(--accent)":v.score>=5?"var(--accent3)":"var(--accent2)"};">${v.score}/10</div><div style="font-size:9px;font-family:'DM Mono';color:var(--muted);">score</div></div>`:""}
         <span style="font-size:10px;font-family:'DM Mono';color:var(--muted);margin-left:auto;">Día ${v.day} · ${v.cat||''}</span>
       </div>
     </div>`).join("");
