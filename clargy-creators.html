@@ -246,15 +246,22 @@ select.finput option{background:white;}
         <div class="stat-val" id="home-total-videos" style="color:var(--accent)">0</div>
         <div class="stat-sub">de 150 totales</div>
       </div>
-      <div class="stat-card gold">
-        <div class="stat-label">Ganado x ventas</div>
-        <div class="stat-val" id="home-per-venta" style="color:var(--gold);font-size:20px;">$0</div>
-        <div class="stat-sub">$2.500 por venta</div>
-      </div>
-      <div class="stat-card gold">
-        <div class="stat-label">A cobrar x videos</div>
-        <div class="stat-val" id="home-per-video" style="color:var(--gold);font-size:20px;">$0</div>
-        <div class="stat-sub">comisión acumulada</div>
+      <div style="grid-column:1/-1;display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;">
+        <div class="stat-card gold">
+          <div class="stat-label">Ganado x ventas</div>
+          <div class="stat-val" id="home-per-venta" style="color:var(--gold);font-size:20px;">$0</div>
+          <div class="stat-sub">$2.500 por venta</div>
+        </div>
+        <div class="stat-card gold">
+          <div class="stat-label">Ganado x videos</div>
+          <div class="stat-val" id="home-per-video" style="color:var(--gold);font-size:20px;">$0</div>
+          <div class="stat-sub">comisión acumulada</div>
+        </div>
+        <div class="stat-card gold">
+          <div class="stat-label">Ganado x bonos</div>
+          <div class="stat-val" id="home-bonos" style="color:var(--gold);font-size:20px;">$0</div>
+          <div class="stat-sub">bonos acumulados</div>
+        </div>
       </div>
     </div>
 
@@ -621,7 +628,8 @@ function renderHome(){
   document.getElementById("home-ventas").textContent = ventas;
   document.getElementById("home-total-videos").textContent = myVids.length;
   document.getElementById("home-per-video").textContent = fmtPesos(perVideo);
-  document.getElementById("home-per-venta").textContent = fmtPesos(perVenta + bonos);
+  document.getElementById("home-per-venta").textContent = fmtPesos(perVenta);
+  if(document.getElementById("home-bonos")) document.getElementById("home-bonos").textContent = fmtPesos(bonos);
 
   // Resumen de cobros
   const totalGanado = myVids.length > 0 ? (perVideo + perVenta + bonos) : 0;
