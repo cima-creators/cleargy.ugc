@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="es">
 <head>
@@ -675,9 +676,9 @@ function videoCardHTML(v){
 
       </div>
       <div class="vc-bottom">
-        ${v.linkIg?`<button class="vc-copy-btn" onclick="navigator.clipboard.writeText('${v.linkIg}');showToast('Link IG copiado 📋')">📸 Copiar link</button>`:""}
-        ${v.linkTt?`<button class="vc-copy-btn" onclick="navigator.clipboard.writeText('${v.linkTt}');showToast('Link TikTok copiado 📋')">🎵 Copiar link</button>`:""}
-        ${!v.linkIg&&!v.linkTt&&v.link?`<button class="vc-copy-btn" onclick="navigator.clipboard.writeText('${v.link}');showToast('Link copiado 📋')">📋 Copiar link</button>`:""}
+        ${v.linkIg?`<a class="vc-copy-btn" href="${v.linkIg.startsWith('http')?v.linkIg:'https://'+v.linkIg}" target="_blank" style="text-decoration:none;">📸 Ver en IG</a>`:""}
+        ${v.linkTt?`<a class="vc-copy-btn" href="${v.linkTt.startsWith('http')?v.linkTt:'https://'+v.linkTt}" target="_blank" style="text-decoration:none;">🎵 Ver en TT</a>`:""}
+        ${!v.linkIg&&!v.linkTt&&v.link?`<a class="vc-copy-btn" href="${v.link.startsWith('http')?v.link:'https://'+v.link}" target="_blank" style="text-decoration:none;">📋 Ver video</a>`:""}
         <button class="vc-del-btn" onclick="deleteMyVideo(${v.id})">🗑</button>
       </div>
     </div>
@@ -694,8 +695,10 @@ function selectPlat(p, el){
 }
 
 function submitVideo(){
-  const linkIg = document.getElementById("up-link-ig").value.trim();
-  const linkTt = document.getElementById("up-link-tt").value.trim();
+  let linkIg = document.getElementById("up-link-ig").value.trim();
+  let linkTt = document.getElementById("up-link-tt").value.trim();
+  if(linkIg && !linkIg.startsWith('http')) linkIg = 'https://' + linkIg;
+  if(linkTt && !linkTt.startsWith('http')) linkTt = 'https://' + linkTt;
   const cat = document.getElementById("up-cat").value;
   if(!linkIg||!cat){document.getElementById("up-err").style.display="block";document.getElementById("up-err").textContent="Completá el link de Instagram y la categoría.";return;}
   document.getElementById("up-err").style.display="none";
@@ -734,25 +737,46 @@ function submitVideo(){
 // ═══════════════════════════════════
 // LEADERBOARD
 // ═══════════════════════════════════
+function getMonday(d){
+  const dt = new Date(d);
+  const day = dt.getDay();
+  const diff = dt.getDate() - day + (day===0?-6:1);
+  return new Date(dt.getFullYear(), dt.getMonth(), diff);
+}
 function renderLeaderboard(){
-  const sw = sharedData.semanaActual != null ? sharedData.semanaActual : 1;
-  const tabs = [{val:0,label:"Total"},{val:1,label:"Sem 1"},{val:2,label:"Sem 2"},{val:3,label:"Sem 3"},{val:4,label:"Sem 4"}];
+  const sw = sharedData.semanaActual != null ? sharedData.semanaActual : 0;
+  const sales = window.salesData || [];
+
+  // Calcular semanas disponibles (lunes a lunes) de las ventas
+  const today = new Date();
+  const thisMon = getMonday(today);
+  const lastMon = new Date(thisMon); lastMon.setDate(lastMon.getDate()-7);
+  const twoMon  = new Date(lastMon); twoMon.setDate(twoMon.getDate()-7);
+  const fmt = d => d.toLocaleDateString("es-AR",{day:"numeric",month:"short"});
+  const tabs = [
+    {val:0, label:"Total"},
+    {val:1, label:`${fmt(thisMon)}`},
+    {val:2, label:`${fmt(lastMon)}`},
+    {val:3, label:`${fmt(twoMon)}`},
+  ];
   document.getElementById("lb-week-tabs").innerHTML = tabs.map(t=>`
     <button class="wtab ${t.val===sw?"active":""}" onclick="sharedData.semanaActual=${t.val};saveData();renderLeaderboard()">${t.label}</button>`).join("");
 
   const creators = ["creadora1","creadora2","creadora3","creadora4","creadora5","creadora6","creadora7"];
-
-  // Ventas ranking — total histórico (sw=0) o filtrado por semana
   let ventasPorCreadora = {};
   creators.forEach(c=>{ ventasPorCreadora[c]=0; });
+
   if(sw===0){
-    // Total acumulado
     creators.forEach(c=>{ ventasPorCreadora[c]=sharedData.ventas[c]||0; });
   } else {
-    const vlog = (sharedData.ventasLog||[]).filter(e=>e.semana==sw);
-    vlog.forEach(e=>{
-      if(e.tipo==="suma") ventasPorCreadora[e.creator]=(ventasPorCreadora[e.creator]||0)+e.cantidad;
-      else if(e.tipo==="resta") ventasPorCreadora[e.creator]=Math.max(0,(ventasPorCreadora[e.creator]||0)-e.cantidad);
+    const mondays = [thisMon, lastMon, twoMon];
+    const fromDate = mondays[sw-1];
+    const toDate = new Date(fromDate); toDate.setDate(toDate.getDate()+7);
+    sales.forEach(s=>{
+      const d = new Date(s.date);
+      if(d>=fromDate && d<toDate && ventasPorCreadora[s.creator]!==undefined){
+        ventasPorCreadora[s.creator]++;
+      }
     });
   }
   const ventasSorted = [...creators].sort((a,b)=>(ventasPorCreadora[b]||0)-(ventasPorCreadora[a]||0));
@@ -1056,7 +1080,7 @@ loadData();
   <!-- Firebase -->
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
-    import { getFirestore, doc, setDoc, onSnapshot, getDoc } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+    import { getFirestore, doc, setDoc, onSnapshot, getDoc, collection } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
 
     const firebaseConfig = {
       apiKey: "AIzaSyCTv4DiRCpbCpGYP6E86TPHlkPvaAZTN3g",
@@ -1091,6 +1115,14 @@ loadData();
         }
       });
     };
+
+    // Sales collection listener para ranking semanal
+    window.salesData = [];
+    onSnapshot(collection(db, "sales"), (snap) => {
+      window.salesData = snap.docs.map(d => d.data());
+      const active = document.querySelector('.screen.active');
+      if(active && active.id === 'screen-leaderboard' && typeof renderLeaderboard === 'function') renderLeaderboard();
+    });
 
     window.dispatchEvent(new CustomEvent("firebase-ready"));
     // If already logged in, start listening
