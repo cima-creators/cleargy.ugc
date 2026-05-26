@@ -595,7 +595,7 @@ function renderHome(){
   if(document.getElementById("home-day-total")) document.getElementById("home-day-total").textContent = campaignStarted ? " / 30" : "";
   if(document.querySelector(".day-eyebrow")) document.querySelector(".day-eyebrow").textContent = campaignStarted ? "DÍA DE CAMPAÑA" : "AÚN NO SUBISTE VIDEOS";
   document.getElementById("home-day-fill").style.width = pct+"%";
-  const todayVids = myVideoDay(day).length;
+  const _tn=new Date();const _tk=`${_tn.getFullYear()}-${String(_tn.getMonth()+1).padStart(2,"0")}-${String(_tn.getDate()).padStart(2,"0")}`;const todayVids=myVideos().filter(v=>v.date&&new Date(v.date).toLocaleDateString("sv")===_tk).length;
   document.getElementById("home-today-videos").textContent = todayVids;
   const ventas = sharedData.ventas[currentUser]||0;
   const perVideo = Math.round(650000 * myVids.length / 150);
@@ -604,7 +604,7 @@ function renderHome(){
   // Racha — contar días consecutivos con 5 videos hasta hoy
   let streak = 0;
   for(let d = day; d >= 1; d--){
-    if(myVideoDay(d).length >= DAILY_VIDEOS) streak++;
+    const _sd=new Date();_sd.setDate(_sd.getDate()-i);const _sk=`${_sd.getFullYear()}-${String(_sd.getMonth()+1).padStart(2,"0")}-${String(_sd.getDate()).padStart(2,"0")}`;if(myVideos().filter(v=>v.date&&new Date(v.date).toLocaleDateString("sv")===_sk).length>=DAILY_VIDEOS) streak++;
     else break;
   }
   const banner = document.getElementById("home-streak-banner");
@@ -656,7 +656,7 @@ function videoCardHTML(v){
   const viewsClass = views>=10000?"viral":views>=1000?"good":"low";
   const isViral = views>=10000;
   return `<div class="video-card ${stClass}" id="vc-${v.id}">
-    <div class="vc-day-badge">Día ${v.day}</div>
+    <div class="vc-day-badge">Día ${v.date?(()=>{const s=(sharedData.startDates||{})[currentUser]||"2026-05-25";const[sy,sm,sd]=s.split("-").map(Number);return Math.max(1,Math.floor((new Date(v.date)-new Date(sy,sm-1,sd))/86400000)+1);})():(v.day||1)}</div>
     <div class="vc-body">
       <div class="vc-top">
         <div style="font-size:13px;font-weight:800;color:var(--text);">${platIcon} ${v.cat}${dateStr?`<span style="font-family:'DM Mono';font-size:9px;font-weight:400;color:var(--muted);margin-left:8px;">${dateStr}</span>`:""}</div>
