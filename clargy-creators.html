@@ -603,7 +603,7 @@ function renderHome(){
   const bonos = sharedData.bonos[currentUser]||0;
   // Racha — contar días consecutivos con 5 videos hasta hoy
   let streak = 0;
-  for(let d = day; d >= 1; d--){
+  for(let i = 0; i < day; i++){
     const _sd=new Date();_sd.setDate(_sd.getDate()-i);const _sk=`${_sd.getFullYear()}-${String(_sd.getMonth()+1).padStart(2,"0")}-${String(_sd.getDate()).padStart(2,"0")}`;if(myVideos().filter(v=>v.date&&new Date(v.date).toLocaleDateString("sv")===_sk).length>=DAILY_VIDEOS) streak++;
     else break;
   }
