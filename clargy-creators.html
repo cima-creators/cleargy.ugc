@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html lang="es">
 <head>
@@ -441,7 +440,7 @@ select.finput option{background:white;}
 // ═══════════════════════════════════
 // DATA
 // ═══════════════════════════════════
-const CAMPAIGN_START = new Date("2025-06-01");
+const CAMPAIGN_START = new Date(2026,4,25);
 const CAMPAIGN_DAYS = 30;
 const SALARY = 650000;
 const COMISION_POR_VENTA = 2500;
@@ -560,8 +559,9 @@ function goScreen(name, el){
 // ═══════════════════════════════════
 function getCampaignDay(){
   const now = new Date();
-  const startStr = (sharedData.startDates||{})[currentUser];
-  const start = startStr ? new Date(startStr) : CAMPAIGN_START;
+  const startStr = (sharedData.startDates||{})[currentUser]||"2026-05-25";
+  const[sy,sm,sd]=startStr.split("-").map(Number);
+  const start = new Date(sy,sm-1,sd);
   const diff = Math.floor((now - start)/(1000*60*60*24))+1;
   return Math.min(Math.max(diff,1),30);
 }
@@ -1009,7 +1009,7 @@ function setVideoSort(sort, el){
 // ═══════════════════════════════════
 function renderFeatured(){
   // Muestra los destacados de TODAS las creadoras, ordenados por views
-  const featured = [...sharedData.videos.filter(v=>v.featured)].sort((a,b)=>(b.views||0)-(a.views||0));
+  const featured = [...sharedData.videos.filter(v=>v.views>=10000)].sort((a,b)=>(b.views||0)-(a.views||0));
   const section = document.getElementById("featured-section");
   if(!featured.length){ section.style.display="none"; return; }
   section.style.display="block";
@@ -1021,9 +1021,9 @@ function renderFeatured(){
         <span style="font-size:10px;font-family:'DM Mono';font-weight:700;background:rgba(22,163,74,.12);color:#16a34a;padding:3px 10px;border-radius:20px;margin-left:auto;">🔥 VIRAL</span>
       </div>
       <div style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:10px;">
-        ${v.linkIg?`<button onclick="navigator.clipboard.writeText('${v.linkIg}');showToast('Link IG copiado 📋')" style="padding:5px 12px;border-radius:20px;font-size:10px;font-family:'Nunito';font-weight:700;cursor:pointer;background:rgba(26,58,143,.08);border:1px solid rgba(26,58,143,.2);color:var(--blue);">📸 Copiar IG</button>`:""}
-        ${v.linkTt?`<button onclick="navigator.clipboard.writeText('${v.linkTt}');showToast('Link TikTok copiado 📋')" style="padding:5px 12px;border-radius:20px;font-size:10px;font-family:'Nunito';font-weight:700;cursor:pointer;background:rgba(26,58,143,.08);border:1px solid rgba(26,58,143,.2);color:var(--blue);">🎵 Copiar TT</button>`:""}
-        ${!v.linkIg&&!v.linkTt&&v.link?`<button onclick="navigator.clipboard.writeText('${v.link}');showToast('Link copiado 📋')" style="padding:5px 12px;border-radius:20px;font-size:10px;font-family:'Nunito';font-weight:700;cursor:pointer;background:rgba(26,58,143,.08);border:1px solid rgba(26,58,143,.2);color:var(--blue);">📋 Copiar link</button>`:""}
+        ${v.linkIg?`<a href="${v.linkIg.startsWith('http')?v.linkIg:'https://'+v.linkIg}" target="_blank" style="padding:5px 12px;border-radius:20px;font-size:10px;font-family:'Nunito';font-weight:700;cursor:pointer;background:rgba(26,58,143,.08);border:1px solid rgba(26,58,143,.2);color:var(--blue);text-decoration:none;">📸 Ver en IG</a>`:""}
+        ${v.linkTt?`<a href="${v.linkTt.startsWith('http')?v.linkTt:'https://'+v.linkTt}" target="_blank" style="padding:5px 12px;border-radius:20px;font-size:10px;font-family:'Nunito';font-weight:700;cursor:pointer;background:rgba(26,58,143,.08);border:1px solid rgba(26,58,143,.2);color:var(--blue);text-decoration:none;">🎵 Ver en TT</a>`:""}
+        ${!v.linkIg&&!v.linkTt&&v.link?`<a href="${v.link.startsWith('http')?v.link:'https://'+v.link}" target="_blank" style="padding:5px 12px;border-radius:20px;font-size:10px;font-family:'Nunito';font-weight:700;cursor:pointer;background:rgba(26,58,143,.08);border:1px solid rgba(26,58,143,.2);color:var(--blue);text-decoration:none;">📋 Ver video</a>`:""}
       </div>
       <div style="display:flex;gap:16px;align-items:center;">
         <div><div style="font-family:'Nunito';font-size:20px;font-weight:800;color:#16a34a;">${fmtV(v.views)}</div><div style="font-size:9px;font-family:'DM Mono';color:var(--muted);">views</div></div>
