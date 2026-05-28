@@ -865,7 +865,7 @@ function renderLeaderboard(){
   document.getElementById("lb-week-tabs").innerHTML = tabs.map(t=>`
     <button class="wtab ${t.val===sw?"active":""}" onclick="sharedData.semanaActual=${t.val};saveData();renderLeaderboard()">${t.label}</button>`).join("");
 
-  const creators = ["creadora1","creadora2","creadora3","creadora4","creadora5","creadora6","creadora7"];
+  const creators = Object.keys(DISPLAY_NAMES);
   let ventasPorCreadora = {};
   creators.forEach(c=>{ ventasPorCreadora[c]=0; });
 
