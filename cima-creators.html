@@ -1136,13 +1136,22 @@ function renderFeatured(){
 }
 
 
+let _delPending = null;
+let _delTimer = null;
 function deleteMyVideo(id){
-  if(!confirm("⚠️ Vas a perder este archivo permanentemente. ¿Eliminarlo?")) return;
-  sharedData.videos = sharedData.videos.filter(v=>v.id!=id);
-  saveData();
-  renderHome();
-  renderMyVideos();
-  showToast("Video eliminado");
+  if(_delPending === id){
+    clearTimeout(_delTimer);
+    _delPending = null;
+    sharedData.videos = sharedData.videos.filter(v=>v.id!=id);
+    saveData();
+    renderHome();
+    renderMyVideos();
+    showToast("Video eliminado ✓");
+  } else {
+    _delPending = id;
+    showToast("Tocá 🗑 de nuevo para confirmar");
+    _delTimer = setTimeout(()=>{ _delPending = null; }, 3000);
+  }
 }
 
 
@@ -1228,13 +1237,6 @@ loadData();
     });
 
     window.dispatchEvent(new CustomEvent("firebase-ready"));
-    // If already logged in, start listening
-    if(window.currentUser && window._fbListen){
-      window._fbListen((newData)=>{
-        sharedData = newData;
-        if(typeof renderAll === 'function') renderAll();
-      });
-    }
   </script>
 
 </body>
