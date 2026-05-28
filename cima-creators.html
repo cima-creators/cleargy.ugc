@@ -936,7 +936,7 @@ function renderBonos(){
   const week=getWeek(day);
   const my=myVideos();
   const myVentas=sharedData.ventas[currentUser]||0;
-  const creators=["creadora1","creadora2","creadora3","creadora4","creadora5","creadora6","creadora7"];
+  const creators=Object.keys(DISPLAY_NAMES);
 
   const gained = (sharedData.bonosGanados||{})[currentUser]||{};
 
