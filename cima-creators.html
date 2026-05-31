@@ -761,7 +761,7 @@ function renderHome(){
   document.getElementById("home-restante").textContent = fmtPesos(restante);
   document.getElementById("home-cobros").style.display = totalGanado > 0 || pagado > 0 ? "block" : "none";
 
-  const recent = [...myVideos()].sort((a,b)=>b.day-a.day).slice(0,3);
+  const recent = [...myVideos()].sort((a,b)=>(b.date||'').localeCompare(a.date||'')).slice(0,3);
   document.getElementById("home-recent-list").innerHTML = recent.length ?
     recent.map(v => videoCardHTML(v)).join("") :
     `<div class="empty"><div class="empty-icon">📹</div><div class="empty-text">Sin videos todavía</div></div>`;
@@ -947,7 +947,7 @@ function renderLeaderboard(){
 // MIS VIDEOS
 // ═══════════════════════════════════
 function renderMyVideos(){
-  const vids=[...myVideos()].sort((a,b)=>videoSort==='views'?(b.views||0)-(a.views||0):b.day-a.day);
+  const vids=[...myVideos()].sort((a,b)=>videoSort==='views'?(b.views||0)-(a.views||0):(b.date||'').localeCompare(a.date||''));
   document.getElementById("my-videos-list").innerHTML=vids.length?
     vids.map(v=>videoCardHTML(v)).join(""):
     `<div class="empty"><div class="empty-icon">📭</div><div class="empty-text">Todavía no subiste videos</div></div>`;
