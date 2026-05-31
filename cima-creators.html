@@ -109,7 +109,8 @@ select.linput option{background:white;}
 .vc-bottom{display:flex;align-items:center;gap:6px;padding-top:12px;border-top:1px solid var(--surface2);}
 .vc-copy-btn{padding:7px 14px;border-radius:20px;font-size:11px;font-family:'Nunito';font-weight:700;cursor:pointer;background:rgba(26,58,143,.07);border:1.5px solid rgba(26,58,143,.15);color:var(--blue);transition:all .1s;min-height:34px;}
 .vc-copy-btn:active{background:rgba(26,58,143,.14);}
-.vc-del-btn{padding:7px 11px;border-radius:20px;font-size:13px;cursor:pointer;background:none;border:1.5px solid rgba(232,93,38,.18);color:#e85d26;margin-left:auto;transition:all .1s;min-height:34px;}
+.vc-del-btn{padding:7px 11px;border-radius:20px;font-size:13px;cursor:pointer;background:none;border:1.5px solid rgba(232,93,38,.18);color:#e85d26;margin-left:auto;transition:all .15s;min-height:34px;}
+.vc-del-btn.confirming{background:rgba(232,93,38,.15);border-color:#e85d26;font-size:11px;font-weight:700;}
 
 /* UPLOAD */
 .upload-card{background:var(--surface);border-radius:var(--radius);padding:22px;margin-bottom:14px;box-shadow:var(--shadow);}
@@ -799,7 +800,7 @@ function videoCardHTML(v){
         ${v.linkIg?`<a class="vc-copy-btn" href="${v.linkIg.startsWith('http')?v.linkIg:'https://'+v.linkIg}" target="_blank" style="text-decoration:none;">📸 Ver en IG</a>`:""}
         ${v.linkTt?`<a class="vc-copy-btn" href="${v.linkTt.startsWith('http')?v.linkTt:'https://'+v.linkTt}" target="_blank" style="text-decoration:none;">🎵 Ver en TT</a>`:""}
         ${!v.linkIg&&!v.linkTt&&v.link?`<a class="vc-copy-btn" href="${v.link.startsWith('http')?v.link:'https://'+v.link}" target="_blank" style="text-decoration:none;">📋 Ver video</a>`:""}
-        <button class="vc-del-btn" onclick="deleteMyVideo(${v.id}, this)">🗑</button>
+        <button class="vc-del-btn${_deleteConfirmId===v.id?' confirming':''}" onclick="deleteMyVideo(${v.id})">${_deleteConfirmId===v.id?'¿Segura?':'🗑'}</button>
       </div>
     </div>
   </div>`;
@@ -1161,26 +1162,24 @@ function renderFeatured(){
 }
 
 
-function deleteMyVideo(id, btn){
-  if(btn.dataset.confirming){
+let _deleteConfirmId = null;
+let _deleteConfirmTimer = null;
+
+function deleteMyVideo(id){
+  if(_deleteConfirmId === id){
+    clearTimeout(_deleteConfirmTimer);
+    _deleteConfirmId = null;
     sharedData.videos = sharedData.videos.filter(v=>v.id!=id);
-    saveData();
+    saveData().catch(()=>showToast("❌ Error al borrar — reintentá",4000));
     renderHome();
     renderMyVideos();
     showToast("Video eliminado ✓");
   } else {
-    btn.dataset.confirming = "1";
-    const orig = btn.textContent;
-    btn.textContent = "¿Segura?";
-    btn.style.background = "rgba(232,93,38,.2)";
-    btn.style.color = "#e85d26";
-    setTimeout(()=>{
-      if(btn.dataset.confirming){
-        delete btn.dataset.confirming;
-        btn.textContent = orig;
-        btn.style.background = "none";
-        btn.style.color = "#e85d26";
-      }
+    _deleteConfirmId = id;
+    renderMyVideos();
+    _deleteConfirmTimer = setTimeout(()=>{
+      _deleteConfirmId = null;
+      renderMyVideos();
     }, 3000);
   }
 }
