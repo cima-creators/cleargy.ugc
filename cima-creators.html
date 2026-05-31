@@ -592,11 +592,11 @@ async function loadData(){
     if(fbData){ sharedData = fbData; return; }
   }
   // Fallback to localStorage
-  const saved = localStorage.getItem("clargy_data");
+  const saved = localStorage.getItem((BRAND_ID+"_data"));
   if(saved) sharedData = JSON.parse(saved);
 }
 function saveData(){
-  localStorage.setItem("clargy_data", JSON.stringify(sharedData));
+  localStorage.setItem((BRAND_ID+"_data"), JSON.stringify(sharedData));
   const doSave = () => {
     if(window._fbSave){
       window._fbSave(sharedData).catch(e=>console.error("Save error:",e));
@@ -616,7 +616,7 @@ let selectedPlat = "ig";
 // ═══════════════════════════════════
 function enterApp(creator){
   currentUser = creator;
-  localStorage.setItem("clargy_session", creator);
+  localStorage.setItem((BRAND_ID+"_session"), creator);
   document.getElementById("login-screen").style.display="none";
   document.getElementById("app").classList.add("show");
   document.getElementById("bottom-nav").style.display="flex";
@@ -624,7 +624,7 @@ function enterApp(creator){
     window._fbUnlisten = window._fbListen((newData)=>{
       sharedData = newData;
       renderAll();
-      localStorage.setItem("clargy_data", JSON.stringify(sharedData));
+      localStorage.setItem((BRAND_ID+"_data"), JSON.stringify(sharedData));
     });
   }
   if(window._fbListen) startListen();
@@ -650,7 +650,7 @@ function doLogin(){
 }
 
 function logout(){
-  localStorage.removeItem("clargy_session");
+  localStorage.removeItem((BRAND_ID+"_session"));
   if(window._fbUnlisten) window._fbUnlisten();
   location.reload();
 }
@@ -1198,7 +1198,7 @@ loadData();
 
 // Auto-login si hay sesión guardada
 (function(){
-  const saved = localStorage.getItem("clargy_session");
+  const saved = localStorage.getItem((BRAND_ID+"_session"));
   if(!saved) return;
   // Para creadoras dinámicas, la contraseña se carga de Firebase — igual entramos
   const isKnown = PASSWORDS[saved] !== undefined || saved.startsWith("creadora");
@@ -1230,7 +1230,7 @@ loadData();
 
     window._fbSave = async (data) => {
       try { await setDoc(DATA_DOC, {data: JSON.stringify(data)}); }
-      catch(e){ console.error("FB save:", e); localStorage.setItem("clargy_data", JSON.stringify(data)); }
+      catch(e){ console.error("FB save:", e); localStorage.setItem((BRAND_ID+"_data"), JSON.stringify(data)); }
     };
 
     window._fbLoad = async () => {
