@@ -597,15 +597,17 @@ async function loadData(){
 }
 function saveData(){
   localStorage.setItem((BRAND_ID+"_data"), JSON.stringify(sharedData));
-  const doSave = () => {
-    if(window._fbSave){
-      window._fbSave(sharedData).catch(e=>console.error("Save error:",e));
-    } else {
-      // Retry after 1 second if Firebase not ready
-      setTimeout(doSave, 1000);
-    }
-  };
-  doSave();
+  return new Promise((resolve, reject) => {
+    const snap = JSON.parse(JSON.stringify(sharedData)); // captura snapshot antes de onSnapshot
+    const doSave = () => {
+      if(window._fbSave){
+        window._fbSave(snap).then(resolve).catch(e=>{ console.error("Save error:",e); reject(e); });
+      } else {
+        setTimeout(doSave, 500);
+      }
+    };
+    doSave();
+  });
 }
 
 let currentUser = null;
@@ -695,10 +697,10 @@ function totalComision(){
   const bonos = sharedData.bonos[currentUser]||0;
   return base + comVentas + bonos;
 }
-function showToast(msg){
+function showToast(msg, dur=2500){
   const t=document.getElementById("toast");
   t.textContent=msg;t.classList.add("show");
-  setTimeout(()=>t.classList.remove("show"),2500);
+  setTimeout(()=>t.classList.remove("show"),dur);
 }
 
 // ═══════════════════════════════════
@@ -843,13 +845,21 @@ function submitVideo(){
     date: new Date().toISOString(),
   };
   sharedData.videos.push(video);
-  saveData();
-  // Reset
-  ["up-link-ig","up-link-tt","up-notes","up-drive"].forEach(id=>document.getElementById(id).value="");
-  document.getElementById("up-cat").value="";
-  showToast("✓ Video subido correctamente");
-  goScreen("home", document.querySelector(".bnav-item"));
-  renderHome();
+  const btn = document.querySelector("#screen-upload .primary-btn");
+  if(btn){ btn.disabled=true; btn.textContent="Guardando..."; }
+  saveData().then(()=>{
+    ["up-link-ig","up-link-tt","up-notes","up-drive"].forEach(id=>document.getElementById(id).value="");
+    document.getElementById("up-cat").value="";
+    showToast("✓ Video guardado en Firebase");
+    goScreen("home", document.querySelector(".bnav-item"));
+    renderHome();
+  }).catch(()=>{
+    // Rollback local state
+    sharedData.videos = sharedData.videos.filter(v=>v.id!==video.id);
+    showToast("❌ Error al guardar — reintentá en un momento", 5000);
+  }).finally(()=>{
+    if(btn){ btn.disabled=false; btn.textContent="Subir video"; }
+  });
 }
 
 // ═══════════════════════════════════
@@ -1229,8 +1239,7 @@ loadData();
     const DATA_DOC = doc(db, window.BRAND_COLLECTION || "cleargy", "main");
 
     window._fbSave = async (data) => {
-      try { await setDoc(DATA_DOC, {data: JSON.stringify(data)}); }
-      catch(e){ console.error("FB save:", e); localStorage.setItem((BRAND_ID+"_data"), JSON.stringify(data)); }
+      await setDoc(DATA_DOC, {data: JSON.stringify(data)});
     };
 
     window._fbLoad = async () => {
