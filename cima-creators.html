@@ -411,7 +411,7 @@ select.finput option{background:white;}
 <div class="toast" id="toast"></div>
 
 <div id="del-modal" style="display:none;position:fixed;inset:0;z-index:200;background:rgba(0,0,0,.45);align-items:flex-end;justify-content:center;">
-  <div style="background:var(--surface);border-radius:24px 24px 0 0;padding:28px 24px 36px;width:100%;max-width:480px;box-shadow:0 -8px 40px rgba(0,0,0,.18);">
+  <div style="background:var(--surface);border-radius:24px 24px 0 0;padding:28px 24px calc(36px + env(safe-area-inset-bottom, 0px));width:100%;max-width:480px;box-shadow:0 -8px 40px rgba(0,0,0,.18);">
     <div style="font-family:'Syne';font-weight:700;font-size:16px;margin-bottom:6px;">¿Borrar este video?</div>
     <div style="font-size:13px;color:var(--muted);margin-bottom:24px;">Esta acción no se puede deshacer.</div>
     <div style="display:flex;gap:10px;">
@@ -1183,15 +1183,28 @@ function closeDelModal(){
   _pendingDeleteId = null;
   document.getElementById("del-modal").style.display = "none";
 }
-function confirmDelVideo(){
+async function confirmDelVideo(){
   if(!_pendingDeleteId) return;
   const id = _pendingDeleteId;
-  closeDelModal();
+  const btn = document.getElementById("del-modal-confirm");
+  btn.disabled = true;
+  btn.textContent = "Borrando...";
+
+  const backup = sharedData.videos.find(v=>v.id==id);
   sharedData.videos = sharedData.videos.filter(v=>v.id!=id);
-  saveData().catch(()=>showToast("❌ Error al borrar — reintentá",4000));
-  renderHome();
-  renderMyVideos();
-  showToast("Video eliminado ✓");
+
+  try {
+    await saveData();
+    closeDelModal();
+    renderHome();
+    renderMyVideos();
+    showToast("Video eliminado ✓");
+  } catch(e) {
+    if(backup) sharedData.videos = [...sharedData.videos, backup];
+    btn.disabled = false;
+    btn.textContent = "Sí, borrar";
+    showToast("❌ Sin conexión — reintentá", 4000);
+  }
 }
 
 
