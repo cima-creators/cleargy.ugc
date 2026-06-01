@@ -794,6 +794,7 @@ function videoCardHTML(v){
         <span class="vc-status ${stClass}">${stLabel}</span>
       </div>
       ${v.notes?`<div style="background:var(--surface2);border-left:3px solid var(--border2);border-radius:0 8px 8px 0;padding:6px 11px;margin-bottom:6px;font-size:11px;line-height:1.5;color:var(--muted);">🏷 <strong>Tu nota:</strong> ${v.notes}</div>`:""}
+      ${v.brandNote?`<div style="background:rgba(217,119,6,.07);border-left:3px solid #d97706;border-radius:0 8px 8px 0;padding:7px 11px;margin-bottom:6px;font-size:11px;line-height:1.5;color:var(--text);">🏢 <strong style="color:#d97706;">Marca:</strong> ${v.brandNote}</div>`:""}
       ${v.adminNote?`<div style="background:rgba(42,82,201,.06);border-left:3px solid var(--accent3);border-radius:0 8px 8px 0;padding:7px 11px;margin-bottom:10px;font-size:11px;line-height:1.5;color:var(--text);">💬 <strong style="color:var(--accent3);">Feedback:</strong> ${v.adminNote}</div>`:""}
       <div class="vc-metrics">
         <div class="vcm">
