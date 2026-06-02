@@ -1265,6 +1265,22 @@ loadData();
     const DATA_DOC = doc(db, window.BRAND_COLLECTION || "cleargy", "main");
 
     window._fbSave = async (data) => {
+      // Leer estado actual de Firebase antes de guardar
+      const current = await getDoc(DATA_DOC);
+      if(current.exists()){
+        try {
+          const currentData = JSON.parse(current.data().data);
+          const currentVideos = currentData.videos || [];
+          const newVideos = data.videos || [];
+          // Merge: mantener todos los videos que existen en Firebase aunque no estén en local
+          const merged = [...newVideos];
+          const newIds = new Set(newVideos.map(v => v.id));
+          for(const v of currentVideos){
+            if(!newIds.has(v.id)) merged.push(v);
+          }
+          data = {...data, videos: merged};
+        } catch(e) { /* si falla el merge, guardar igual */ }
+      }
       await setDoc(DATA_DOC, {data: JSON.stringify(data)});
     };
 
