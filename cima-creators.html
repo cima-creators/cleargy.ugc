@@ -1301,8 +1301,9 @@ loadData();
     };
 
     // Sales collection listener para ranking semanal
+    const _salesColName = (window.BRAND_COLLECTION==="cleargy") ? "sales" : (window.BRAND_COLLECTION||"cleargy")+"_sales";
     window.salesData = [];
-    onSnapshot(collection(db, "sales"), (snap) => {
+    onSnapshot(collection(db, _salesColName), (snap) => {
       window.salesData = snap.docs.map(d => d.data());
       const active = document.querySelector('.screen.active');
       if(active && active.id === 'screen-leaderboard' && typeof renderLeaderboard === 'function') renderLeaderboard();
