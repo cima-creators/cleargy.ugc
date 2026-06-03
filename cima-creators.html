@@ -1194,17 +1194,14 @@ async function confirmDelVideo(){
   btn.disabled = true;
   btn.textContent = "Borrando...";
 
-  const backup = sharedData.videos.find(v=>v.id==id);
-  sharedData.videos = sharedData.videos.filter(v=>v.id!=id);
-
   try {
-    await saveData();
+    await window._fbDeleteVideo(id);
+    sharedData.videos = sharedData.videos.filter(v=>v.id!=id);
     closeDelModal();
     renderHome();
     renderMyVideos();
     showToast("Video eliminado ✓");
   } catch(e) {
-    if(backup) sharedData.videos = [...sharedData.videos, backup];
     btn.disabled = false;
     btn.textContent = "Sí, borrar";
     showToast("❌ Sin conexión — reintentá", 4000);
@@ -1265,22 +1262,29 @@ loadData();
     const DATA_DOC = doc(db, window.BRAND_COLLECTION || "cleargy", "main");
 
     window._fbSave = async (data) => {
-      // Leer estado actual de Firebase antes de guardar
       const current = await getDoc(DATA_DOC);
       if(current.exists()){
         try {
           const currentData = JSON.parse(current.data().data);
           const currentVideos = currentData.videos || [];
           const newVideos = data.videos || [];
-          // Merge: mantener todos los videos que existen en Firebase aunque no estén en local
           const merged = [...newVideos];
           const newIds = new Set(newVideos.map(v => v.id));
           for(const v of currentVideos){
             if(!newIds.has(v.id)) merged.push(v);
           }
           data = {...data, videos: merged};
-        } catch(e) { /* si falla el merge, guardar igual */ }
+        } catch(e) {}
       }
+      await setDoc(DATA_DOC, {data: JSON.stringify(data)});
+    };
+
+    // Para borrar: lee Firebase, filtra el id, guarda sin merge
+    window._fbDeleteVideo = async (id) => {
+      const current = await getDoc(DATA_DOC);
+      if(!current.exists()) return;
+      const data = JSON.parse(current.data().data);
+      data.videos = (data.videos || []).filter(v => v.id != id);
       await setDoc(DATA_DOC, {data: JSON.stringify(data)});
     };
 
