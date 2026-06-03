@@ -1261,6 +1261,8 @@ loadData();
     const db = getFirestore(app);
     const DATA_DOC = doc(db, window.BRAND_COLLECTION || "cleargy", "main");
 
+    const _deletedIds = new Set();
+
     window._fbSave = async (data) => {
       const current = await getDoc(DATA_DOC);
       if(current.exists()){
@@ -1271,7 +1273,8 @@ loadData();
           const merged = [...newVideos];
           const newIds = new Set(newVideos.map(v => v.id));
           for(const v of currentVideos){
-            if(!newIds.has(v.id)) merged.push(v);
+            // nunca restaurar un video que fue borrado intencionalmente
+            if(!newIds.has(v.id) && !_deletedIds.has(String(v.id))) merged.push(v);
           }
           data = {...data, videos: merged};
         } catch(e) {}
@@ -1279,12 +1282,12 @@ loadData();
       await setDoc(DATA_DOC, {data: JSON.stringify(data)});
     };
 
-    // Para borrar: lee Firebase, filtra el id, guarda sin merge
     window._fbDeleteVideo = async (id) => {
+      _deletedIds.add(String(id));
       const current = await getDoc(DATA_DOC);
       if(!current.exists()) return;
       const data = JSON.parse(current.data().data);
-      data.videos = (data.videos || []).filter(v => v.id != id);
+      data.videos = (data.videos || []).filter(v => String(v.id) !== String(id));
       await setDoc(DATA_DOC, {data: JSON.stringify(data)});
     };
 
