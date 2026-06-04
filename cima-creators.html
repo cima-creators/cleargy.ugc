@@ -1207,6 +1207,7 @@ function renderDestacados(){
         ${v.linkTt?`<a href="${v.linkTt.startsWith('http')?v.linkTt:'https://'+v.linkTt}" target="_blank" style="padding:5px 12px;border-radius:20px;font-size:10px;font-family:'Nunito';font-weight:700;cursor:pointer;background:rgba(26,58,143,.08);border:1px solid rgba(26,58,143,.2);color:var(--blue);text-decoration:none;">🎵 Ver en TT</a>`:""}
         ${!v.linkIg&&!v.linkTt&&v.link?`<a href="${v.link.startsWith('http')?v.link:'https://'+v.link}" target="_blank" style="padding:5px 12px;border-radius:20px;font-size:10px;font-family:'Nunito';font-weight:700;cursor:pointer;background:rgba(26,58,143,.08);border:1px solid rgba(26,58,143,.2);color:var(--blue);text-decoration:none;">📋 Ver video</a>`:""}
       </div>
+      ${v.nota?`<div style="font-size:12px;line-height:1.5;color:var(--text);background:rgba(245,158,11,.08);border-radius:8px;padding:8px 10px;margin-bottom:10px;">💬 ${v.nota}</div>`:""}
       <div style="display:flex;gap:16px;align-items:center;">
         <div><div style="font-family:'Nunito';font-size:20px;font-weight:800;color:#d97706;">${fmtV(v.views||0)}</div><div style="font-size:9px;font-family:'DM Mono';color:var(--muted);">views</div></div>
         <span style="font-size:10px;font-family:'DM Mono';color:var(--muted);margin-left:auto;">Día ${v.day||''} · ${v.cat||''}</span>
