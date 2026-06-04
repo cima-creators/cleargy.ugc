@@ -363,12 +363,14 @@ select.finput option{background:white;}
     </div>
 
     <!-- Mis Videos -->
-    <div style="font-family:'DM Mono';font-size:9px;letter-spacing:2px;color:var(--muted);text-transform:uppercase;margin-bottom:10px;">MIS VIDEOS</div>
+    <div id="mis-videos-label" style="font-family:'DM Mono';font-size:9px;letter-spacing:2px;color:var(--muted);text-transform:uppercase;margin-bottom:10px;">MIS VIDEOS</div>
     <div style="display:flex;gap:6px;margin-bottom:14px;">
       <button class="wtab active" id="vsort-views" onclick="setVideoSort('views',this)">↓ Mejores</button>
       <button class="wtab" id="vsort-day" onclick="setVideoSort('day',this)">↓ Recientes</button>
+      <button class="wtab" id="vsort-featured" onclick="setVideoSort('featured',this)">⭐ Destacados</button>
     </div>
     <div id="my-videos-list"></div>
+    <div id="destacados-list" style="display:none;"></div>
   </div>
 
   <!-- BONOS & IDEAS -->
@@ -1144,7 +1146,12 @@ function setVideoSort(sort, el){
   videoSort = sort;
   document.querySelectorAll("#screen-videos .wtab[id^='vsort']").forEach(b=>b.classList.remove("active"));
   el.classList.add("active");
-  renderMyVideos();
+  const isFeat = sort === "featured";
+  document.getElementById("my-videos-list").style.display = isFeat ? "none" : "";
+  document.getElementById("destacados-list").style.display = isFeat ? "" : "none";
+  document.getElementById("mis-videos-label").textContent = isFeat ? "DESTACADOS DE LA SEMANA" : "MIS VIDEOS";
+  if(isFeat) renderDestacados();
+  else renderMyVideos();
 }
 
 // ═══════════════════════════════════
@@ -1175,6 +1182,38 @@ function renderFeatured(){
     </div>`).join("");
 }
 
+
+function renderDestacados(){
+  const WEEK = 7*24*60*60*1000;
+  const cutoff = Date.now() - WEEK;
+  const list = document.getElementById("destacados-list");
+  const vids = (sharedData.videos||[])
+    .filter(v => v.featuredAt && new Date(v.featuredAt).getTime() >= cutoff)
+    .sort((a,b) => new Date(b.featuredAt) - new Date(a.featuredAt));
+  if(!vids.length){
+    list.innerHTML = `<div class="empty"><div class="empty-icon">⭐</div><div class="empty-text">Sin destacados esta semana</div></div>`;
+    return;
+  }
+  list.innerHTML = vids.map(v=>{
+    const daysLeft = Math.ceil((new Date(v.featuredAt).getTime() + WEEK - Date.now()) / (1000*60*60*24));
+    return `<div style="background:rgba(245,158,11,.06);border-left:4px solid #f59e0b;border-radius:14px;padding:14px;margin-bottom:8px;box-shadow:0 2px 12px rgba(245,158,11,.08);">
+      <div style="display:flex;align-items:center;gap:8px;margin-bottom:8px;">
+        <div style="width:28px;height:28px;border-radius:50%;background:${COLORS[v.creator]}22;border:2px solid ${COLORS[v.creator]};display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:700;color:${COLORS[v.creator]}">${AVATARS[v.creator]}</div>
+        <span style="font-size:12px;font-weight:700;color:var(--text);">${DISPLAY_NAMES[v.creator]||v.creator}</span>
+        <span style="font-size:9px;font-family:'DM Mono';background:rgba(245,158,11,.15);color:#d97706;padding:3px 8px;border-radius:20px;margin-left:auto;">⭐ DESTACADO · ${daysLeft}d</span>
+      </div>
+      <div style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:10px;">
+        ${v.linkIg?`<a href="${v.linkIg.startsWith('http')?v.linkIg:'https://'+v.linkIg}" target="_blank" style="padding:5px 12px;border-radius:20px;font-size:10px;font-family:'Nunito';font-weight:700;cursor:pointer;background:rgba(26,58,143,.08);border:1px solid rgba(26,58,143,.2);color:var(--blue);text-decoration:none;">📸 Ver en IG</a>`:""}
+        ${v.linkTt?`<a href="${v.linkTt.startsWith('http')?v.linkTt:'https://'+v.linkTt}" target="_blank" style="padding:5px 12px;border-radius:20px;font-size:10px;font-family:'Nunito';font-weight:700;cursor:pointer;background:rgba(26,58,143,.08);border:1px solid rgba(26,58,143,.2);color:var(--blue);text-decoration:none;">🎵 Ver en TT</a>`:""}
+        ${!v.linkIg&&!v.linkTt&&v.link?`<a href="${v.link.startsWith('http')?v.link:'https://'+v.link}" target="_blank" style="padding:5px 12px;border-radius:20px;font-size:10px;font-family:'Nunito';font-weight:700;cursor:pointer;background:rgba(26,58,143,.08);border:1px solid rgba(26,58,143,.2);color:var(--blue);text-decoration:none;">📋 Ver video</a>`:""}
+      </div>
+      <div style="display:flex;gap:16px;align-items:center;">
+        <div><div style="font-family:'Nunito';font-size:20px;font-weight:800;color:#d97706;">${fmtV(v.views||0)}</div><div style="font-size:9px;font-family:'DM Mono';color:var(--muted);">views</div></div>
+        <span style="font-size:10px;font-family:'DM Mono';color:var(--muted);margin-left:auto;">Día ${v.day||''} · ${v.cat||''}</span>
+      </div>
+    </div>`;
+  }).join("");
+}
 
 let _pendingDeleteId = null;
 
