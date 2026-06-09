@@ -1307,17 +1307,42 @@ loadData();
     let _lastFbData = null;
     const _deletedIds = new Set();
 
+    function _mergeVideosCr(base, incoming){
+      const merged = [...incoming];
+      const inIds = new Set(incoming.map(v => String(v.id)));
+      const inTt  = new Set(incoming.map(v => (v.linkTt||'').trim()).filter(Boolean));
+      const inIg  = new Set(incoming.map(v => (v.linkIg||'').trim()).filter(Boolean));
+      for(const v of base){
+        const id = String(v.id);
+        const tt = (v.linkTt||'').trim();
+        const ig = (v.linkIg||'').trim();
+        const alreadyIn = inIds.has(id) || (tt && inTt.has(tt)) || (ig && inIg.has(ig));
+        if(!alreadyIn && !_deletedIds.has(id)) merged.push(v);
+      }
+      return merged;
+    }
+
     window._fbSave = async (data) => {
-      // Usar _lastFbData en lugar de getDoc para evitar leer caché vieja
+      // Merge con _lastFbData para no pisar videos de otras creadoras
       const currentVideos = (_lastFbData && _lastFbData.videos) || [];
       const newVideos = data.videos || [];
-      const merged = [...newVideos];
-      const newIds = new Set(newVideos.map(v => String(v.id)));
-      for(const v of currentVideos){
-        if(!newIds.has(String(v.id)) && !_deletedIds.has(String(v.id))) merged.push(v);
-      }
-      data = {...data, videos: merged};
-      _lastFbData = data; // actualizar inmediatamente para que la próxima llamada lo vea
+      data = {...data, videos: _mergeVideosCr(currentVideos, newVideos)};
+
+      // Version check: si Firebase cambió mientras tanto, re-mergear
+      try {
+        const fbSnap = await getDoc(DATA_DOC);
+        if(fbSnap.exists()){
+          const fbLive = JSON.parse(fbSnap.data().data);
+          const liveVer = fbLive._version || 0;
+          const ourVer  = (_lastFbData && _lastFbData._version) || 0;
+          if(liveVer > ourVer){
+            data = {...data, videos: _mergeVideosCr(fbLive.videos||[], data.videos||[])};
+          }
+        }
+      } catch(e){ console.warn('FB version check:', e); }
+
+      data._version = ((_lastFbData && _lastFbData._version) || 0) + 1;
+      _lastFbData = data;
       await setDoc(DATA_DOC, {data: JSON.stringify(data)});
     };
 
