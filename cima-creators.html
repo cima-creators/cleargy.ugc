@@ -406,6 +406,7 @@ select.finput option{background:white;}
   <div class="bnav-item" onclick="goScreen('notifs',this)" id="bnav-notifs"><div class="bnav-icon">🔔</div><div class="bnav-label">Mensajes</div></div>
 </div>
 
+<div id="offline-banner" style="display:none;position:fixed;top:0;left:0;right:0;z-index:999;background:#dc2626;color:white;font-family:'Nunito';font-size:12px;font-weight:700;padding:8px 16px;align-items:center;gap:8px;justify-content:center;">📶 Sin conexión — los videos se guardarán cuando vuelva la red</div>
 <div class="toast" id="toast"></div>
 
 <div id="del-modal" style="display:none;position:fixed;inset:0;z-index:200;background:rgba(0,0,0,.45);align-items:flex-end;justify-content:center;">
@@ -595,6 +596,68 @@ let sharedData = {
   semanaActual: 0,
 };
 
+// ═══════════════════════════════════════════════════════
+// RESILIENCE — protección contra pérdida de datos
+// ═══════════════════════════════════════════════════════
+
+// [1] COLA OFFLINE: videos que no pudieron subirse por falta de red
+const _PENDING_KEY = BRAND_ID + '_pending_videos';
+function _pendingGet(){ try{ return JSON.parse(localStorage.getItem(_PENDING_KEY)||'[]'); }catch(e){return [];} }
+function _pendingAdd(v){ const q=_pendingGet(); if(!q.some(x=>x.id===v.id)) q.push(v); localStorage.setItem(_PENDING_KEY,JSON.stringify(q)); }
+function _pendingRemove(id){ localStorage.setItem(_PENDING_KEY,JSON.stringify(_pendingGet().filter(v=>v.id!==id))); }
+async function _pendingFlush(){
+  const q=_pendingGet();
+  if(!q.length) return;
+  let flushed=0;
+  for(const v of q){
+    try{ await window._fbAddVideo(v); _pendingRemove(v.id); flushed++; }catch(e){ break; }
+  }
+  if(flushed) showToast(`✓ ${flushed} video${flushed>1?'s':''} pendiente${flushed>1?'s':''} sincronizado${flushed>1?'s':''}`);
+}
+
+// [2] INDICADOR OFFLINE
+function _setOfflineBanner(offline){
+  let b=document.getElementById('offline-banner');
+  if(!b) return;
+  b.style.display = offline ? 'flex' : 'none';
+}
+window.addEventListener('online', ()=>{ _setOfflineBanner(false); _pendingFlush(); });
+window.addEventListener('offline', ()=>{ _setOfflineBanner(true); });
+
+// [3] VISIBILITYCHANGE: cuando la app vuelve del background, refrescar desde Firebase
+let _lastVisibleRefresh = 0;
+document.addEventListener('visibilitychange', ()=>{
+  if(document.visibilityState !== 'visible') return;
+  const now = Date.now();
+  if(now - _lastVisibleRefresh < 60000) return; // máximo 1 vez por minuto
+  _lastVisibleRefresh = now;
+  if(!currentUser || !window._fbLoad) return;
+  window._fbLoad().then(d=>{ if(d){ sharedData=d; renderAll(); } }).catch(()=>{});
+});
+
+// [4] HEARTBEAT: detectar si onSnapshot se cayó y re-attachear
+let _lastSnapshotAt = 0;
+let _heartbeatTimer = null;
+function _resetHeartbeat(){ _lastSnapshotAt = Date.now(); }
+function _startHeartbeat(){
+  if(_heartbeatTimer) clearInterval(_heartbeatTimer);
+  _heartbeatTimer = setInterval(()=>{
+    if(!currentUser || !window._fbListen) return;
+    const stale = Date.now() - _lastSnapshotAt;
+    if(stale > 5*60*1000 && navigator.onLine){ // sin updates por 5 min estando online
+      console.warn('[FB] onSnapshot parece caído, re-attachando...');
+      if(window._fbUnlisten) try{ window._fbUnlisten(); }catch(e){}
+      window._fbUnlisten = window._fbListen((d)=>{ sharedData=d; _resetHeartbeat(); renderAll(); localStorage.setItem(BRAND_ID+'_data',JSON.stringify(d)); });
+    }
+  }, 60000); // chequear cada minuto
+}
+
+// [5] BEFOREUNLOAD: advertir si hay una subida en curso
+let _uploadInProgress = false;
+window.addEventListener('beforeunload', (e)=>{
+  if(_uploadInProgress){ e.preventDefault(); e.returnValue=''; }
+});
+
 // Load from localStorage
 async function loadData(){
   // Try Firebase first
@@ -636,9 +699,15 @@ function enterApp(creator){
   document.getElementById("login-screen").style.display="none";
   document.getElementById("app").classList.add("show");
   document.getElementById("bottom-nav").style.display="flex";
+  _setOfflineBanner(!navigator.onLine);
+  _startHeartbeat();
+  // Flush videos que quedaron pendientes de sesiones anteriores
+  if(navigator.onLine) setTimeout(_pendingFlush, 2000);
+
   function startListen(){
     window._fbUnlisten = window._fbListen((newData)=>{
       sharedData = newData;
+      _resetHeartbeat();
       renderAll();
       localStorage.setItem((BRAND_ID+"_data"), JSON.stringify(sharedData));
     });
@@ -867,24 +936,56 @@ function submitVideo(){
   sharedData.videos.push(video);
   const btn = document.querySelector("#screen-upload .primary-btn");
   if(btn){ btn.disabled=true; btn.textContent="Guardando..."; }
+  _uploadInProgress = true;
+
+  const clearForm = () => {
+    ["up-link-ig","up-link-tt","up-notes","up-drive"].forEach(id=>document.getElementById(id).value="");
+    document.getElementById("up-cat").value="";
+  };
 
   const doAdd = () => {
-    if(window._fbAddVideo){
-      window._fbAddVideo(video).then(()=>{
-        ["up-link-ig","up-link-tt","up-notes","up-drive"].forEach(id=>document.getElementById(id).value="");
-        document.getElementById("up-cat").value="";
-        showToast("✓ Video guardado");
+    if(!window._fbAddVideo){ setTimeout(doAdd, 300); return; }
+
+    // [6] Sin internet: guardar en cola local y confirmar igual
+    if(!navigator.onLine){
+      _pendingAdd(video);
+      clearForm();
+      _uploadInProgress = false;
+      if(btn){ btn.disabled=false; btn.textContent="Subir video"; }
+      showToast("📶 Sin conexión — video guardado localmente, se sube automáticamente cuando vuelva la red", 5000);
+      goScreen("home", document.querySelector(".bnav-item"));
+      renderHome();
+      return;
+    }
+
+    window._fbAddVideo(video).then(()=>{
+      clearForm();
+      _uploadInProgress = false;
+      showToast("✓ Video guardado");
+      goScreen("home", document.querySelector(".bnav-item"));
+      renderHome();
+    }).catch((err)=>{
+      _uploadInProgress = false;
+      // [7] Errores específicos de Firebase
+      const code = err && err.code;
+      if(code === 'resource-exhausted'){
+        showToast("⚠️ Límite de Firebase alcanzado — intentá más tarde", 6000);
+      } else if(code === 'permission-denied'){
+        showToast("⚠️ Sin permisos — contactá al admin", 6000);
+      } else if(!navigator.onLine || code === 'unavailable'){
+        _pendingAdd(video);
+        clearForm();
+        showToast("📶 Sin conexión — video guardado localmente", 5000);
         goScreen("home", document.querySelector(".bnav-item"));
         renderHome();
-      }).catch(()=>{
+        return;
+      } else {
         sharedData.videos = sharedData.videos.filter(v=>v.id!==video.id);
         showToast("❌ Error al guardar — reintentá en un momento", 5000);
-      }).finally(()=>{
-        if(btn){ btn.disabled=false; btn.textContent="Subir video"; }
-      });
-    } else {
-      setTimeout(doAdd, 300);
-    }
+      }
+    }).finally(()=>{
+      if(btn){ btn.disabled=false; btn.textContent="Subir video"; }
+    });
   };
   doAdd();
 }
@@ -1391,35 +1492,53 @@ loadData();
       });
     };
 
+    // [8] Delete con transaction — no puede quedar en estado inconsistente
     window._fbDeleteVideo = async (id) => {
       _deletedIds.add(String(id));
-      // Actualizar _lastFbData antes de escribir para que _fbSave no restaure el video
-      if(_lastFbData) _lastFbData.videos = (_lastFbData.videos||[]).filter(v=>String(v.id)!==String(id));
-      const current = await getDoc(DATA_DOC);
-      if(!current.exists()) return;
-      const data = JSON.parse(current.data().data);
-      data.videos = data.videos.filter(v => String(v.id) !== String(id));
-      await setDoc(DATA_DOC, {data: JSON.stringify(data)});
+      await runTransaction(db, async (t) => {
+        const snap = await t.get(DATA_DOC);
+        if(!snap.exists()) return;
+        const data = JSON.parse(snap.data().data);
+        data.videos = (data.videos||[]).filter(v => String(v.id) !== String(id));
+        data._version = (data._version || 0) + 1;
+        _lastFbData = data;
+        t.set(DATA_DOC, {data: JSON.stringify(data)});
+      });
     };
 
     window._fbLoad = async () => {
       try {
         const snap = await getDoc(DATA_DOC);
-        if(snap.exists()) return JSON.parse(snap.data().data);
-        return null;
+        if(!snap.exists()) return null;
+        // [9] JSON seguro: si está corrupto retornar null en lugar de explotar
+        try{ return JSON.parse(snap.data().data); }
+        catch(e){ console.error('FB data corrupta:', e); return null; }
       } catch(e){ console.error("FB load:", e); return null; }
     };
 
     window._fbListen = (callback) => {
-      return onSnapshot(DATA_DOC, (snap) => {
-        if(snap.exists()){
+      return onSnapshot(DATA_DOC,
+        { includeMetadataChanges: false },
+        (snap) => {
+          if(!snap.exists()) return;
+          // [9] JSON seguro en onSnapshot
           try{
             const parsed = JSON.parse(snap.data().data);
             _lastFbData = parsed;
             callback(parsed);
-          }catch(e){}
+          } catch(e){ console.error('onSnapshot parse error:', e); }
+        },
+        // [10] Error handler: si onSnapshot se cae, re-intentar
+        (err) => {
+          console.error('onSnapshot error:', err);
+          setTimeout(()=>{
+            if(window._fbListen && window._fbUnlisten){
+              try{ window._fbUnlisten(); } catch(e){}
+              window._fbUnlisten = window._fbListen(callback);
+            }
+          }, 5000);
         }
-      });
+      );
     };
 
     // Sales collection listener para ranking semanal
