@@ -356,21 +356,17 @@ select.finput option{background:white;}
   <div class="screen" id="screen-videos">
     <div class="stitle">Videos</div>
 
-    <!-- Virales: todos los featured de cualquier creadora -->
-    <div id="featured-section" style="display:none;margin-bottom:24px;">
-      <div style="font-family:'DM Mono';font-size:9px;letter-spacing:2px;color:#16a34a;text-transform:uppercase;margin-bottom:10px;">🔥 VIRALES</div>
-      <div id="featured-list"></div>
-    </div>
-
-    <!-- Mis Videos -->
+    <!-- Tabs -->
     <div id="mis-videos-label" style="font-family:'DM Mono';font-size:9px;letter-spacing:2px;color:var(--muted);text-transform:uppercase;margin-bottom:10px;">MIS VIDEOS</div>
-    <div style="display:flex;gap:6px;margin-bottom:14px;">
+    <div style="display:flex;gap:6px;margin-bottom:14px;flex-wrap:wrap;">
       <button class="wtab active" id="vsort-views" onclick="setVideoSort('views',this)">↓ Mejores</button>
       <button class="wtab" id="vsort-day" onclick="setVideoSort('day',this)">↓ Recientes</button>
       <button class="wtab" id="vsort-featured" onclick="setVideoSort('featured',this)">⭐ Destacados</button>
+      <button class="wtab" id="vsort-viral" onclick="setVideoSort('viral',this)">🔥 Virales</button>
     </div>
     <div id="my-videos-list"></div>
     <div id="destacados-list" style="display:none;"></div>
+    <div id="featured-list" style="display:none;"></div>
   </div>
 
   <!-- BONOS & IDEAS -->
@@ -682,11 +678,14 @@ function goScreen(name, el){
   if(el) el.classList.add("active");
   if(name==="home") renderHome();
   if(name==="leaderboard") renderLeaderboard();
-  if(name==="videos") renderMyVideos();
+  if(name==="videos"){
+    const activeTab = document.getElementById("vsort-views");
+    if(activeTab) setVideoSort("views", activeTab);
+    else renderMyVideos();
+  }
   if(name==="bonos") renderBonos();
   if(name==="notifs") renderNotifs();
   if(name==="ideas") renderIdeasOnly();
-  if(name==="videos") renderFeatured();
 }
 
 // ═══════════════════════════════════
@@ -1092,7 +1091,7 @@ function renderAll(){
   const active = document.querySelector('.screen.active');
   if(active){
     const id = active.id;
-    if(id==='screen-videos'){ renderMyVideos(); renderFeatured(); }
+    if(id==='screen-videos'){ renderMyVideos(); }
     if(id==='screen-leaderboard') renderLeaderboard();
     if(id==='screen-bonos') renderBonos();
     if(id==='screen-notifs') renderNotifs();
@@ -1149,10 +1148,13 @@ function setVideoSort(sort, el){
   document.querySelectorAll("#screen-videos .wtab[id^='vsort']").forEach(b=>b.classList.remove("active"));
   el.classList.add("active");
   const isFeat = sort === "featured";
-  document.getElementById("my-videos-list").style.display = isFeat ? "none" : "";
+  const isViral = sort === "viral";
+  document.getElementById("my-videos-list").style.display = (isFeat||isViral) ? "none" : "";
   document.getElementById("destacados-list").style.display = isFeat ? "" : "none";
-  document.getElementById("mis-videos-label").textContent = isFeat ? "DESTACADOS DE LA SEMANA" : "MIS VIDEOS";
+  document.getElementById("featured-list").style.display = isViral ? "" : "none";
+  document.getElementById("mis-videos-label").textContent = isFeat ? "DESTACADOS DE LA SEMANA" : isViral ? "VIDEOS VIRALES" : "MIS VIDEOS";
   if(isFeat) renderDestacados();
+  else if(isViral) renderFeatured();
   else renderMyVideos();
 }
 
@@ -1160,12 +1162,10 @@ function setVideoSort(sort, el){
 // FEATURED VIDEOS
 // ═══════════════════════════════════
 function renderFeatured(){
-  // Muestra los destacados de TODAS las creadoras, ordenados por views
   const featured = [...sharedData.videos.filter(v=>v.views>=10000)].sort((a,b)=>(b.views||0)-(a.views||0));
-  const section = document.getElementById("featured-section");
-  if(!featured.length){ section.style.display="none"; return; }
-  section.style.display="block";
-  document.getElementById("featured-list").innerHTML = featured.map(v=>`
+  const list = document.getElementById("featured-list");
+  if(!featured.length){ list.innerHTML=`<div class="empty"><div class="empty-icon">🔥</div><div class="empty-text">Sin videos virales aún</div></div>`; return; }
+  list.innerHTML = featured.map(v=>`
     <div style="background:rgba(22,163,74,.04);border-left:4px solid #16a34a;border-radius:14px;padding:14px;margin-bottom:8px;box-shadow:0 2px 12px rgba(22,163,74,.08);">
       <div style="display:flex;align-items:center;gap:8px;margin-bottom:8px;">
         <div style="width:28px;height:28px;border-radius:50%;background:${COLORS[v.creator]}22;border:2px solid ${COLORS[v.creator]};display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:700;color:${COLORS[v.creator]}">${AVATARS[v.creator]}</div>
