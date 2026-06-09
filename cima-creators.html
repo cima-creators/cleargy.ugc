@@ -939,14 +939,16 @@ function renderLeaderboard(){
 
 
   // Viral video
-  const allVids = sharedData.videos.filter(v=>getWeek(v.day)===sw&&v.views>0);
+  const allVids = sw===0
+    ? sharedData.videos.filter(v=>v.views>0)
+    : sharedData.videos.filter(v=>v.views>0&&v.day&&getWeek(v.day)===sw);
   if(allVids.length){
     const topVid = [...allVids].sort((a,b)=>b.views-a.views)[0];
     document.getElementById("lb-viral").innerHTML = `
       <div class="viral-card">
         <div class="viral-top">
           <div class="viral-avatar" style="border:2px solid ${COLORS[topVid.creator]};color:${COLORS[topVid.creator]}">${AVATARS[topVid.creator]}</div>
-          <div><div class="viral-creator">${DISPLAY_NAMES[topVid.creator]}</div><div style="font-size:10px;color:var(--muted);font-family:'DM Mono'">Día ${topVid.day} · ${topVid.cat}</div></div>
+          <div><div class="viral-creator">${DISPLAY_NAMES[topVid.creator]}</div><div style="font-size:10px;color:var(--muted);font-family:'DM Mono'">${topVid.day?'Día '+topVid.day+' · ':''} ${topVid.cat||''}</div></div>
         </div>
         <div class="fire-badge">🔥 ${fmtV(topVid.views)} views</div>
         <div style="display:flex;gap:6px;margin-top:6px;">
@@ -1177,7 +1179,7 @@ function renderFeatured(){
       </div>
       <div style="display:flex;gap:16px;align-items:center;">
         <div><div style="font-family:'Nunito';font-size:20px;font-weight:800;color:#16a34a;">${fmtV(v.views)}</div><div style="font-size:9px;font-family:'DM Mono';color:var(--muted);">views</div></div>
-        <span style="font-size:10px;font-family:'DM Mono';color:var(--muted);margin-left:auto;">Día ${v.day} · ${v.cat||''}</span>
+        <span style="font-size:10px;font-family:'DM Mono';color:var(--muted);margin-left:auto;">${v.day?'Día '+v.day+' · ':''}${v.cat||''}</span>
       </div>
     </div>`).join("");
 }
