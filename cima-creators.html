@@ -609,10 +609,13 @@ async function loadData(){
 function saveData(){
   localStorage.setItem((BRAND_ID+"_data"), JSON.stringify(sharedData));
   return new Promise((resolve, reject) => {
-    const snap = JSON.parse(JSON.stringify(sharedData)); // captura snapshot antes de onSnapshot
+    // Guardar solo estado no-video para no pisar videos de otras creadoras
+    const { videos: _ignored, ...stateOnly } = sharedData;
     const doSave = () => {
-      if(window._fbSave){
-        window._fbSave(snap).then(resolve).catch(e=>{ console.error("Save error:",e); reject(e); });
+      if(window._fbSaveState){
+        window._fbSaveState(stateOnly).then(resolve).catch(e=>{ console.error("Save error:",e); reject(e); });
+      } else if(window._fbSave){
+        window._fbSave(JSON.parse(JSON.stringify(sharedData))).then(resolve).catch(e=>{ console.error("Save error:",e); reject(e); });
       } else {
         setTimeout(doSave, 500);
       }
@@ -860,22 +863,30 @@ function submitVideo(){
     status: "pending",
     date: new Date().toISOString(),
   };
+  // Optimistic update local
   sharedData.videos.push(video);
   const btn = document.querySelector("#screen-upload .primary-btn");
   if(btn){ btn.disabled=true; btn.textContent="Guardando..."; }
-  saveData().then(()=>{
-    ["up-link-ig","up-link-tt","up-notes","up-drive"].forEach(id=>document.getElementById(id).value="");
-    document.getElementById("up-cat").value="";
-    showToast("✓ Video guardado en Firebase");
-    goScreen("home", document.querySelector(".bnav-item"));
-    renderHome();
-  }).catch(()=>{
-    // Rollback local state
-    sharedData.videos = sharedData.videos.filter(v=>v.id!==video.id);
-    showToast("❌ Error al guardar — reintentá en un momento", 5000);
-  }).finally(()=>{
-    if(btn){ btn.disabled=false; btn.textContent="Subir video"; }
-  });
+
+  const doAdd = () => {
+    if(window._fbAddVideo){
+      window._fbAddVideo(video).then(()=>{
+        ["up-link-ig","up-link-tt","up-notes","up-drive"].forEach(id=>document.getElementById(id).value="");
+        document.getElementById("up-cat").value="";
+        showToast("✓ Video guardado");
+        goScreen("home", document.querySelector(".bnav-item"));
+        renderHome();
+      }).catch(()=>{
+        sharedData.videos = sharedData.videos.filter(v=>v.id!==video.id);
+        showToast("❌ Error al guardar — reintentá en un momento", 5000);
+      }).finally(()=>{
+        if(btn){ btn.disabled=false; btn.textContent="Subir video"; }
+      });
+    } else {
+      setTimeout(doAdd, 300);
+    }
+  };
+  doAdd();
 }
 
 // ═══════════════════════════════════
@@ -1288,7 +1299,7 @@ loadData();
   <!-- Firebase -->
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
-    import { getFirestore, doc, setDoc, onSnapshot, getDoc, collection } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+    import { getFirestore, doc, setDoc, onSnapshot, getDoc, collection, runTransaction } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
 
     const firebaseConfig = {
       apiKey: "AIzaSyCTv4DiRCpbCpGYP6E86TPHlkPvaAZTN3g",
@@ -1344,6 +1355,40 @@ loadData();
       data._version = ((_lastFbData && _lastFbData._version) || 0) + 1;
       _lastFbData = data;
       await setDoc(DATA_DOC, {data: JSON.stringify(data)});
+    };
+
+    // Agregar un video de forma atómica — safe para sesiones largas y usuarios simultáneos
+    window._fbAddVideo = async (video) => {
+      await runTransaction(db, async (t) => {
+        const snap = await t.get(DATA_DOC);
+        const current = snap.exists() ? JSON.parse(snap.data().data) : {videos:[]};
+        const videos = current.videos || [];
+        const vid = String(video.id);
+        const tt  = (video.linkTt||'').trim();
+        const ig  = (video.linkIg||'').trim();
+        const exists = videos.some(v =>
+          String(v.id) === vid ||
+          (tt && (v.linkTt||'').trim() === tt) ||
+          (ig && (v.linkIg||'').trim() === ig)
+        );
+        if(exists) return; // idempotente: si ya existe no duplicar
+        current.videos = [...videos, video];
+        current._version = (current._version || 0) + 1;
+        _lastFbData = current;
+        t.set(DATA_DOC, {data: JSON.stringify(current)});
+      });
+    };
+
+    // Guardar solo campos de estado (no videos) para evitar pisarlos
+    window._fbSaveState = async (stateFields) => {
+      await runTransaction(db, async (t) => {
+        const snap = await t.get(DATA_DOC);
+        const current = snap.exists() ? JSON.parse(snap.data().data) : {};
+        const merged = {...current, ...stateFields, videos: current.videos || []};
+        merged._version = (current._version || 0) + 1;
+        _lastFbData = merged;
+        t.set(DATA_DOC, {data: JSON.stringify(merged)});
+      });
     };
 
     window._fbDeleteVideo = async (id) => {
