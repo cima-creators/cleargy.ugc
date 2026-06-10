@@ -1598,16 +1598,30 @@ loadData();
         }
       );
 
-      const unsubVideos = onSnapshot(VIDEOS_COL, {includeMetadataChanges: false},
-        (snap) => {
-          _videosData = snap.docs.map(d => d.data());
-          _videosReady = true;
-          fire();
-        },
-        (err) => { console.error('videos onSnapshot error:', err); }
-      );
+      // Listener de videos con auto-reintento: si muere (ej. permiso denegado
+      // porque el login anónimo aún no estaba listo), se re-attachea solo
+      let unsubVideos = null;
+      let _videosRetryTimer = null;
+      const attachVideos = () => {
+        unsubVideos = onSnapshot(VIDEOS_COL, {includeMetadataChanges: false},
+          (snap) => {
+            _videosData = snap.docs.map(d => d.data());
+            _videosReady = true;
+            fire();
+          },
+          (err) => {
+            console.error('videos onSnapshot error:', err);
+            _videosRetryTimer = setTimeout(attachVideos, 5000);
+          }
+        );
+      };
+      attachVideos();
 
-      return () => { try{unsubState();}catch(e){} try{unsubVideos();}catch(e){} };
+      return () => {
+        try{unsubState();}catch(e){}
+        try{ if(unsubVideos) unsubVideos(); }catch(e){}
+        if(_videosRetryTimer) clearTimeout(_videosRetryTimer);
+      };
     };
 
     // Sales listener para ranking
