@@ -369,10 +369,10 @@ select.finput option{background:white;}
     <div id="featured-list" style="display:none;"></div>
   </div>
 
-  <!-- BONOS & IDEAS -->
+  <!-- BONOS -->
   <div class="screen" id="screen-bonos">
-    <div class="stitle">Bonos e Ideas</div>
-    <div class="ssub">Recompensas y contenido</div>
+    <div class="stitle">Bonos</div>
+    <div class="ssub">Tus recompensas de la campaña</div>
 
     <div style="font-family:'DM Mono';font-size:9px;letter-spacing:2px;color:var(--muted);text-transform:uppercase;margin-bottom:12px;">BONOS DISPONIBLES</div>
     <div id="bonos-list"></div>
@@ -1233,22 +1233,6 @@ function renderBonos(){
     </div>`;
   }).join("");
 
-  // Ideas
-  const ideas=sharedData.ideas.length?sharedData.ideas:[
-    {tag:"Tendencia",title:"Green flag morning routine",desc:"Mostrá tu rutina de mañana incluyendo el producto de la marca. Formato GRWM, música lo-fi, estética chill.",link:""},
-    {tag:"Tutorial",title:"3 formas de tomar la proteína",desc:"Un video rápido mostrando 3 recetas distintas: batido simple, con avena y en pancakes.",link:""},
-    {tag:"Trend",title:"POV: ya llegué a mi meta",desc:"Usá el audio viral del momento mostrando antes/después o progreso real.",link:""},
-  ];
-  document.getElementById("ideas-list").innerHTML=ideas.map(i=>`
-    <div class="idea-card">
-      <span class="idea-tag">${i.tag}</span>
-      <div class="idea-title">${i.title}</div>
-      <div class="idea-desc">${i.desc}</div>
-      ${i.link?`<div style="display:flex;gap:8px;margin-top:10px;align-items:center;">
-        <button onclick="navigator.clipboard.writeText('${i.link}');showToast('Link copiado 📋')" style="padding:5px 14px;border-radius:20px;font-size:10px;font-family:'Nunito';font-weight:700;cursor:pointer;background:rgba(124,58,237,.08);border:1px solid rgba(124,58,237,.25);color:#7c3aed;">📋 Copiar link</button>
-        <a href="${i.link}" target="_blank" style="font-size:10px;font-family:'DM Mono';color:var(--muted);text-decoration:none;">Ver ↗</a>
-      </div>`:""}
-    </div>`).join("");
 }
 
 // ═══════════════════════════════════
