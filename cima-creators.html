@@ -940,6 +940,9 @@ function submitVideo(){
   if(linkTt && !linkTt.startsWith('http')) linkTt = 'https://' + linkTt;
   const cat = document.getElementById("up-cat").value;
   if(!linkIg||!cat){document.getElementById("up-err").style.display="block";document.getElementById("up-err").textContent="Completá el link de Instagram y la categoría.";return;}
+  // Validar que cada link sea de su plataforma (evita pegar el de IG en el campo de TikTok)
+  if(!/instagram\.com\//i.test(linkIg)){document.getElementById("up-err").style.display="block";document.getElementById("up-err").textContent="El link de Instagram no parece válido — copialo desde la app de Instagram (debe contener instagram.com).";return;}
+  if(linkTt && !/tiktok\.com\//i.test(linkTt)){document.getElementById("up-err").style.display="block";document.getElementById("up-err").textContent="El link de TikTok no parece válido — copialo desde la app de TikTok (debe contener tiktok.com).";return;}
   // Dedup: verificar que no existe ya el mismo link (ignorando ?utm=, barras finales y mayúsculas)
   const _normLink = l => (l||'').trim().toLowerCase().split('?')[0].replace(/\/+$/,'').replace(/^https?:\/\/(www\.)?/,'');
   const alreadyExists = (sharedData.videos||[]).some(v =>
