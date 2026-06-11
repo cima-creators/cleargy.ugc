@@ -798,10 +798,18 @@ function goScreen(name, el){
 // ═══════════════════════════════════
 // HELPERS
 // ═══════════════════════════════════
+// Tu campaña arranca el día que subís tu PRIMER video (si no hay, fecha configurada o inicio de marca)
+function myCampaignStart(){
+  const mios = myVideos().filter(v=>v.date);
+  if(mios.length){
+    const min = mios.reduce((a,v)=>v.date<a?v.date:a, mios[0].date);
+    return new Date(min).toLocaleDateString("sv");
+  }
+  return (sharedData.startDates||{})[currentUser]||BRAND.defaultCampaignStart||"2026-05-25";
+}
 function getCampaignDay(){
   const now = new Date();
-  const startStr = (sharedData.startDates||{})[currentUser]||BRAND.defaultCampaignStart||"2026-05-25";
-  const[sy,sm,sd]=startStr.split("-").map(Number);
+  const[sy,sm,sd]=myCampaignStart().split("-").map(Number);
   const start = new Date(sy,sm-1,sd);
   const diff = Math.floor((now - start)/(1000*60*60*24))+1;
   return Math.min(Math.max(diff,1),30);
@@ -834,7 +842,10 @@ function renderHome(){
   const campaignStarted = myVids.length > 0;
   document.getElementById("home-day").textContent = campaignStarted ? day : "—";
   if(document.getElementById("home-day-total")) document.getElementById("home-day-total").textContent = campaignStarted ? " / 30" : "";
-  if(document.querySelector(".day-eyebrow")) document.querySelector(".day-eyebrow").textContent = campaignStarted ? "DÍA DE CAMPAÑA" : "AÚN NO SUBISTE VIDEOS";
+  if(document.querySelector(".day-eyebrow")){
+    const _f = campaignStarted ? new Date(myCampaignStart()+"T12:00:00").toLocaleDateString("es-AR",{day:"numeric",month:"short"}) : null;
+    document.querySelector(".day-eyebrow").textContent = campaignStarted ? "DÍA DE CAMPAÑA · ARRANCASTE EL "+_f.toUpperCase() : "TU CAMPAÑA ARRANCA CON TU PRIMER VIDEO";
+  }
   document.getElementById("home-day-fill").style.width = pct+"%";
   const _tn=new Date();const _tk=`${_tn.getFullYear()}-${String(_tn.getMonth()+1).padStart(2,"0")}-${String(_tn.getDate()).padStart(2,"0")}`;const todayVids=myVideos().filter(v=>v.date&&new Date(v.date).toLocaleDateString("sv")===_tk).length;
   document.getElementById("home-today-videos").textContent = todayVids;
@@ -922,7 +933,7 @@ function videoCardHTML(v){
   const viewsClass = views>=10000?"viral":views>=1000?"good":"low";
   const isViral = views>=10000;
   return `<div class="video-card ${stClass}" id="vc-${v.id}">
-    <div class="vc-day-badge">Día ${v.date?(()=>{const s=(sharedData.startDates||{})[currentUser]||BRAND.defaultCampaignStart||"2026-05-25";const[sy,sm,sd]=s.split("-").map(Number);return Math.max(1,Math.floor((new Date(v.date)-new Date(sy,sm-1,sd))/86400000)+1);})():(v.day||1)}</div>
+    <div class="vc-day-badge">Día ${v.date?(()=>{const s=myCampaignStart();const[sy,sm,sd]=s.split("-").map(Number);return Math.max(1,Math.floor((new Date(v.date)-new Date(sy,sm-1,sd))/86400000)+1);})():(v.day||1)}</div>
     <div class="vc-body">
       <div class="vc-top">
         <div style="font-size:13px;font-weight:800;color:var(--text);">${platIcon} ${esc(v.cat)}${dateStr?`<span style="font-family:'DM Mono';font-size:9px;font-weight:400;color:var(--muted);margin-left:8px;">${dateStr}</span>`:""}</div>
