@@ -848,30 +848,44 @@ function renderHome(){
     else break;
   }
   const banner = document.getElementById("home-streak-banner");
-  if(todayVids >= DAILY_VIDEOS && streak >= 7){
-    banner.style.display = "block";
-    banner.innerHTML = `<div style="margin-top:12px;background:linear-gradient(135deg,rgba(217,119,6,.18),rgba(245,166,35,.18));border:2.5px solid #d97706;border-radius:14px;padding:16px;text-align:center;box-shadow:0 4px 20px rgba(217,119,6,.25);">
+  // Celebración según nivel de racha
+  let celebracion = "";
+  if(todayVids >= DAILY_VIDEOS && streak >= 7 && streak % 7 === 0){
+    celebracion = `<div style="margin-top:12px;background:linear-gradient(135deg,rgba(217,119,6,.18),rgba(245,166,35,.18));border:2.5px solid #d97706;border-radius:14px;padding:16px;text-align:center;box-shadow:0 4px 20px rgba(217,119,6,.25);">
       <div style="font-size:32px;margin-bottom:4px;">🏆🔥🏆</div>
       <div style="font-family:'Nunito';font-size:16px;font-weight:900;color:#c45000;">¡RACHA DE ${streak} DÍAS COMPLETA!</div>
       <div style="font-size:11px;font-family:'DM Mono';color:var(--muted);margin-top:4px;">Desbloqueaste el bono de $30.000 — se acredita solo 💰</div>
     </div>`;
   } else if(todayVids >= DAILY_VIDEOS && streak >= 3){
-    banner.style.display = "block";
-    banner.innerHTML = `<div style="margin-top:12px;background:linear-gradient(135deg,rgba(245,100,0,.12),rgba(245,166,35,.12));border:2px solid rgba(245,120,0,.4);border-radius:14px;padding:14px 16px;text-align:center;">
+    celebracion = `<div style="margin-top:12px;background:linear-gradient(135deg,rgba(245,100,0,.12),rgba(245,166,35,.12));border:2px solid rgba(245,120,0,.4);border-radius:14px;padding:14px 16px;text-align:center;">
       <div style="font-size:28px;margin-bottom:4px;">🔥🔥🔥</div>
       <div style="font-family:'Nunito';font-size:15px;font-weight:900;color:#c45000;">¡Racha de ${streak} días!</div>
-      <div style="font-size:11px;font-family:'DM Mono';color:var(--muted);margin-top:4px;">${streak} días seguidos con los 5 videos. A los 7 días: bono de $30.000 🎯</div>
     </div>`;
   } else if(todayVids >= DAILY_VIDEOS){
-    banner.style.display = "block";
-    banner.innerHTML = `<div style="margin-top:12px;background:rgba(245,166,35,.1);border:1px solid rgba(245,166,35,.35);border-radius:14px;padding:12px 16px;text-align:center;">
+    celebracion = `<div style="margin-top:12px;background:rgba(245,166,35,.1);border:1px solid rgba(245,166,35,.35);border-radius:14px;padding:12px 16px;text-align:center;">
       <div style="font-size:24px;margin-bottom:2px;">🔥</div>
       <div style="font-family:'Nunito';font-size:14px;font-weight:800;color:#c47f00;">¡5 videos del día completos!</div>
-      <div style="font-size:11px;font-family:'DM Mono';color:var(--muted);margin-top:2px;">Meta diaria cumplida 💪</div>
     </div>`;
-  } else {
-    banner.style.display = "none";
   }
+  // Tracker SIEMPRE visible: progreso hacia el bono de racha ($30.000 cada 7 días seguidos)
+  const bloqueProg = streak === 0 ? 0 : ((streak - 1) % 7) + 1;
+  const falta = 7 - bloqueProg;
+  const puntos = Array.from({length:7},(_,i)=>`<div style="flex:1;height:9px;border-radius:5px;background:${i<bloqueProg?'linear-gradient(90deg,#f59e0b,#d97706)':'var(--surface3)'};"></div>`).join('');
+  const faltanHoy = Math.max(0, DAILY_VIDEOS - todayVids);
+  const tracker = `<div style="margin-top:12px;background:var(--surface2);border:1.5px solid var(--border);border-radius:14px;padding:13px 15px;">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:9px;">
+      <span style="font-size:12px;font-weight:800;color:var(--text);">🎯 Racha para el bono</span>
+      <span style="font-size:10px;font-family:'DM Mono';color:var(--muted);">${bloqueProg}/7 días · $30.000</span>
+    </div>
+    <div style="display:flex;gap:4px;">${puntos}</div>
+    <div style="font-size:10.5px;font-family:'DM Mono';color:var(--muted);margin-top:9px;">${
+      todayVids >= DAILY_VIDEOS
+        ? (bloqueProg === 7 ? '¡Bloque completo! Mañana arranca tu próxima racha 💰' : `Hoy ✓ — te falta${falta>1?'n':''} ${falta} día${falta>1?'s':''} para los $30.000`)
+        : `Subí ${faltanHoy} video${faltanHoy>1?'s':''} más hoy para ${streak>0?'no perder la racha 🔥':'arrancar tu racha'}`
+    }</div>
+  </div>`;
+  banner.style.display = "block";
+  banner.innerHTML = celebracion + tracker;
 
   document.getElementById("home-ventas").textContent = ventas;
   document.getElementById("home-total-videos").textContent = myVids.length;
