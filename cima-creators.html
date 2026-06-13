@@ -1524,14 +1524,29 @@ loadData();
     const DATA_DOC = doc(db, BRAND_COL_NAME, 'main');
     const VIDEOS_COL = collection(db, BRAND_COL_NAME + '_videos');
 
-    // Login anónimo: requerido por las reglas de seguridad. Con timeout para no
-    // bloquear el arranque si no hay red (la sesión anónima persiste entre visitas).
-    try {
-      await Promise.race([
-        signInAnonymously(getAuth(app)),
-        new Promise((_,rej)=>setTimeout(()=>rej(new Error('auth timeout')), 4000))
-      ]);
-    } catch(e) { console.warn('Anon auth:', e.code || e.message); }
+    // Login anónimo: requerido por las reglas para leer/escribir. En conexiones
+    // lentas (móvil) puede tardar — reintentamos hasta lograrlo en vez de abandonar.
+    const _auth = getAuth(app);
+    async function _ensureAuth(){
+      if(_auth.currentUser) return true;
+      for(let i=0;i<4;i++){
+        try {
+          await Promise.race([
+            signInAnonymously(_auth),
+            new Promise((_,rej)=>setTimeout(()=>rej(new Error('timeout')), 12000))
+          ]);
+          return true;
+        } catch(e){ console.warn('Anon auth intento '+(i+1)+':', e.code||e.message); await new Promise(r=>setTimeout(r,1000)); }
+      }
+      return false;
+    }
+    await _ensureAuth();
+    // Red de seguridad: si la sesión llega tarde y la app cargó vacía, recargar
+    _auth.onAuthStateChanged(u=>{
+      if(u && window._fbLoad && typeof sharedData!=='undefined' && (sharedData.videos||[]).length===0 && typeof currentUser!=='undefined' && currentUser){
+        window._fbLoad().then(d=>{ if(d){ sharedData=_mergePending(d); if(typeof renderAll==='function')renderAll(); } }).catch(()=>{});
+      }
+    });
 
     // Estado local separado: estado y videos vienen de fuentes distintas
     let _stateData = {};
