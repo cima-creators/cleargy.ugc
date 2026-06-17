@@ -591,6 +591,13 @@ const CAMPAIGN_DAYS = 30;
 const SALARY = 650000;
 const COMISION_POR_VENTA = 2500;
 const MIN_VIDEOS = 150;
+// Ventana de gracia: hasta el viernes 19/6 los pendientes cuentan; desde ahí, solo aprobados. Rechazados nunca.
+const GRACE_END = new Date('2026-06-19T00:00:00-03:00');
+function cuentaPago(v){
+  if(!v || v.status==='rejected') return false;
+  if(v.status==='approved') return true;
+  return v.date && new Date(v.date) < GRACE_END;
+}
 const DAILY_VIDEOS = 5;
 
 // Brand-derived constants
@@ -853,7 +860,7 @@ function renderHome(){
   const _tn=new Date();const _tk=`${_tn.getFullYear()}-${String(_tn.getMonth()+1).padStart(2,"0")}-${String(_tn.getDate()).padStart(2,"0")}`;const todayVids=myVideos().filter(v=>v.date&&new Date(v.date).toLocaleDateString("sv")===_tk).length;
   document.getElementById("home-today-videos").textContent = todayVids;
   const ventas = sharedData.ventas[currentUser]||0;
-  const myAprob = myVids.filter(v=>v.status==='approved'); // solo aprobados se pagan
+  const myAprob = myVids.filter(cuentaPago); // aprobados (+ pendientes durante la gracia)
   const perVideo = Math.round(650000 * myAprob.length / 150);
   const perVenta = ventas * 2500;
   const bonos = sharedData.bonos[currentUser]||0;
