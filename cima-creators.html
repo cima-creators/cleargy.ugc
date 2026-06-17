@@ -853,7 +853,8 @@ function renderHome(){
   const _tn=new Date();const _tk=`${_tn.getFullYear()}-${String(_tn.getMonth()+1).padStart(2,"0")}-${String(_tn.getDate()).padStart(2,"0")}`;const todayVids=myVideos().filter(v=>v.date&&new Date(v.date).toLocaleDateString("sv")===_tk).length;
   document.getElementById("home-today-videos").textContent = todayVids;
   const ventas = sharedData.ventas[currentUser]||0;
-  const perVideo = Math.round(650000 * myVids.length / 150);
+  const myAprob = myVids.filter(v=>v.status==='approved'); // solo aprobados se pagan
+  const perVideo = Math.round(650000 * myAprob.length / 150);
   const perVenta = ventas * 2500;
   const bonos = sharedData.bonos[currentUser]||0;
   // Racha — contar días consecutivos con 5 videos hasta hoy
