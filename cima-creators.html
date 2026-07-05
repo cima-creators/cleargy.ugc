@@ -623,6 +623,9 @@ document.addEventListener('DOMContentLoaded',function(){
     prodSel.innerHTML = '<option value="">Seleccioná...</option>' + BRAND.products.map(p=>'<option>'+p+'</option>').join('');
     const pg = document.getElementById('up-product-group');
     if(pg) pg.style.display = 'block';
+    // En marcas con productos, la categoría no se pide: solo importa el producto
+    const cg = catSel && catSel.closest ? catSel.closest('.fgroup') : null;
+    if(cg) cg.style.display = 'none';
   }
   document.querySelectorAll('.cleargy-logo').forEach(el=>{
     el.textContent=BRAND.logoText;
@@ -1048,9 +1051,9 @@ function submitVideo(){
   let linkTt = document.getElementById("up-link-tt").value.trim();
   if(linkIg && !linkIg.startsWith('http')) linkIg = 'https://' + linkIg;
   if(linkTt && !linkTt.startsWith('http')) linkTt = 'https://' + linkTt;
-  const cat = document.getElementById("up-cat").value;
+  const cat = BRAND.products ? "" : document.getElementById("up-cat").value;
   const producto = BRAND.products ? document.getElementById("up-product").value : "";
-  if(!linkIg||!cat){document.getElementById("up-err").style.display="block";document.getElementById("up-err").textContent="Completá el link de Instagram y la categoría.";return;}
+  if(!linkIg||(!cat&&!BRAND.products)){document.getElementById("up-err").style.display="block";document.getElementById("up-err").textContent=BRAND.products?"Completá el link de Instagram.":"Completá el link de Instagram y la categoría.";return;}
   if(BRAND.products && !producto){document.getElementById("up-err").style.display="block";document.getElementById("up-err").textContent="Seleccioná de qué producto es el video.";return;}
   // Validar que cada link sea de su plataforma (evita pegar el de IG en el campo de TikTok)
   if(!/instagram\.com\//i.test(linkIg)){document.getElementById("up-err").style.display="block";document.getElementById("up-err").textContent="El link de Instagram no parece válido — copialo desde la app de Instagram (debe contener instagram.com).";return;}
