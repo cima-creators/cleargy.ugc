@@ -297,7 +297,7 @@ select.finput option{background:white;}
 
     <div class="upload-card">
       <div class="upload-title">Nuevo video</div>
-      <div style="background:rgba(26,58,143,.06);border-radius:var(--radius-sm);padding:14px;margin-bottom:14px;">
+      <div id="up-links-card" style="background:rgba(26,58,143,.06);border-radius:var(--radius-sm);padding:14px;margin-bottom:14px;">
         <div style="font-size:12px;font-weight:700;color:var(--accent);margin-bottom:12px;">📱 Links del video</div>
         <div class="fgroup">
           <div class="flabel">📸 Link Instagram <span style="color:var(--accent2)">*</span></div>
@@ -309,7 +309,7 @@ select.finput option{background:white;}
         </div>
         <div style="font-size:11px;color:var(--muted);margin-top:8px;font-weight:600;">💡 1 video = 1 producción, aunque lo subas en las dos plataformas</div>
       </div>
-      <div style="background:rgba(26,58,143,.04);border-radius:var(--radius-xs);padding:10px 12px;margin-bottom:10px;font-size:11px;color:var(--muted);font-weight:600;">
+      <div id="up-sync-info" style="background:rgba(26,58,143,.04);border-radius:var(--radius-xs);padding:10px 12px;margin-bottom:10px;font-size:11px;color:var(--muted);font-weight:600;">
         📊 Las views, likes y shares se sincronizan automáticamente desde Instagram.
       </div>
       <div class="fgroup" id="up-product-group" style="display:none;">
@@ -563,7 +563,7 @@ const BRAND_CONFIGS = {
   },
   promedics: {
     border:'#b8d4e2', muted2:'#a8c8d8',
-    name:'Promedics', logoText:'PROMEDIC', defaultCampaignStart:'2026-07-02', sub:'Creators Hub',
+    name:'Promedics', logoText:'PROMEDIC', defaultCampaignStart:'2026-07-02', sub:'Creators Hub', driveOnly:true,
     logoImg:'data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="260" height="96"><rect width="260" height="96" rx="10" fill="%234E93B5"/><text x="130" y="54" font-family="Verdana,Arial,sans-serif" font-size="34" font-weight="bold" fill="white" text-anchor="middle" letter-spacing="-1">promedic</text><text x="130" y="78" font-family="Verdana,Arial,sans-serif" font-size="11" fill="white" text-anchor="middle" letter-spacing="6">health treatment</text></svg>',
     collection:'promedics', bgDark:'#cfe3ee',
     cats:['Review / unboxing','Antes y después','Tutorial de uso','Tips','Trend / challenge','Otro'],
@@ -619,6 +619,14 @@ document.addEventListener('DOMContentLoaded',function(){
     catSel.innerHTML = '<option value="">Seleccioná...</option>' + BRAND.cats.map(c=>'<option>'+c+'</option>').join('');
   }
   const prodSel = document.getElementById('up-product');
+  if(BRAND.driveOnly){
+    // Marca sin redes: los videos van solo a Drive — se ocultan los links de IG/TikTok
+    const lc = document.getElementById('up-links-card'); if(lc) lc.style.display = 'none';
+    const si = document.getElementById('up-sync-info'); if(si) si.style.display = 'none';
+    const dIn = document.getElementById('up-drive');
+    const dg = dIn && dIn.closest ? dIn.closest('.fgroup') : null;
+    if(dg){ const fl = dg.querySelector('.flabel'); if(fl) fl.innerHTML = '🎬 Link del video (Drive) <span style="color:var(--accent2)">*</span>'; }
+  }
   if(prodSel && BRAND.products){
     prodSel.innerHTML = '<option value="">Seleccioná...</option>' + BRAND.products.map(p=>'<option>'+p+'</option>').join('');
     const pg = document.getElementById('up-product-group');
@@ -1053,22 +1061,25 @@ function submitVideo(){
   if(linkTt && !linkTt.startsWith('http')) linkTt = 'https://' + linkTt;
   const cat = BRAND.products ? "" : document.getElementById("up-cat").value;
   const producto = BRAND.products ? document.getElementById("up-product").value : "";
-  if(!linkIg||(!cat&&!BRAND.products)){document.getElementById("up-err").style.display="block";document.getElementById("up-err").textContent=BRAND.products?"Completá el link de Instagram.":"Completá el link de Instagram y la categoría.";return;}
+  const driveVal = document.getElementById("up-drive").value.trim();
+  if(BRAND.driveOnly && !driveVal){document.getElementById("up-err").style.display="block";document.getElementById("up-err").textContent="Pegá el link de Drive del video.";return;}
+  if((!linkIg&&!BRAND.driveOnly)||(!cat&&!BRAND.products)){document.getElementById("up-err").style.display="block";document.getElementById("up-err").textContent=BRAND.driveOnly?"Seleccioná la categoría.":(BRAND.products?"Completá el link de Instagram.":"Completá el link de Instagram y la categoría.");return;}
   if(BRAND.products && !producto){document.getElementById("up-err").style.display="block";document.getElementById("up-err").textContent="Seleccioná de qué producto es el video.";return;}
   // Validar que cada link sea de su plataforma (evita pegar el de IG en el campo de TikTok)
-  if(!/instagram\.com\//i.test(linkIg)){document.getElementById("up-err").style.display="block";document.getElementById("up-err").textContent="El link de Instagram no parece válido — copialo desde la app de Instagram (debe contener instagram.com).";return;}
+  if(!BRAND.driveOnly && !/instagram\.com\//i.test(linkIg)){document.getElementById("up-err").style.display="block";document.getElementById("up-err").textContent="El link de Instagram no parece válido — copialo desde la app de Instagram (debe contener instagram.com).";return;}
   if(linkTt && !/tiktok\.com\//i.test(linkTt)){document.getElementById("up-err").style.display="block";document.getElementById("up-err").textContent="El link de TikTok no parece válido — copialo desde la app de TikTok (debe contener tiktok.com).";return;}
   // Dedup: verificar que no existe ya el mismo link (ignorando ?utm=, barras finales y mayúsculas)
   const _normLink = l => (l||'').trim().toLowerCase().split('?')[0].replace(/\/+$/,'').replace(/^https?:\/\/(www\.)?/,'');
   const alreadyExists = (sharedData.videos||[]).some(v =>
     (linkIg && _normLink(v.linkIg) === _normLink(linkIg)) ||
-    (linkTt && _normLink(v.linkTt) === _normLink(linkTt))
+    (linkTt && _normLink(v.linkTt) === _normLink(linkTt)) ||
+    (BRAND.driveOnly && driveVal && v.driveLink && _normLink(v.driveLink) === _normLink(driveVal))
   );
   if(alreadyExists){document.getElementById("up-err").style.display="block";document.getElementById("up-err").textContent="Este video ya fue cargado.";return;}
   document.getElementById("up-err").style.display="none";
   const day = getCampaignDay() || 1;
-  const platform = linkIg && linkTt ? "both" : linkIg ? "ig" : "tt";
-  const link = linkIg || linkTt;
+  const platform = BRAND.driveOnly ? "drive" : (linkIg && linkTt ? "both" : linkIg ? "ig" : "tt");
+  const link = linkIg || linkTt || driveVal;
   const video = {
     id: currentUser + '_' + Date.now() + '_' + Math.random().toString(36).slice(2,6),
     creator: currentUser,
