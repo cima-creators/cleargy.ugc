@@ -1300,14 +1300,14 @@ function renderBonos(){
     {
       key:"viral",
       title:"🔥 Video más viral de la semana",
-      desc:`El video con más views de la semana.`,
+      desc:`El video con más views de la semana — pero tiene que superar las 10.000 views para calificar. Si nadie llega, esa semana el bono no se otorga.`,
       amount:"$40.000",
       check:()=>gained.viral?"ganaste":"disponible"
     },
     {
       key:"racha",
       title:"📅 Racha completa",
-      desc:`Subí tus 5 videos por día, 7 días seguidos, y cobrás el bono (la barrita de tu inicio se llena con cada día completo). Se acredita solo, todas las veces que lo logres.`,
+      desc:`Subí tus 5 videos por día, 7 días SEGUIDOS, en tiempo y forma. Si un día no llegás a los 5, la racha arranca de cero. La barrita de tu inicio se llena con cada día completo y el bono se acredita solo, todas las veces que lo logres.`,
       amount:"$30.000 x racha de 7 días",
       check:()=>gained.racha?"ganaste":"disponible"
     },
@@ -1334,8 +1334,8 @@ function renderBonos(){
     },
     {
       key:"10k",
-      title:"⚡ Video del día 10K+",
-      desc:"Cada video que supere 10.000 views en 24 horas.",
+      title:"⚡ Video 10K+",
+      desc:"Cada video tuyo que supere las 10.000 views. Se acredita solo, una vez por video.",
       amount:"$10.000 c/u",
       check:()=>gained["10k"]?"ganaste":"disponible"
     },
