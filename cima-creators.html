@@ -937,10 +937,10 @@ function renderHome(){
   const banner = document.getElementById("home-streak-banner");
   // Celebración según nivel de racha
   let celebracion = "";
-  if(myVids.length > 0 && myVids.length % 35 === 0){
+  if(streak > 0 && streak % 7 === 0){
     celebracion = `<div style="margin-top:12px;background:linear-gradient(135deg,rgba(217,119,6,.18),rgba(245,166,35,.18));border:2.5px solid #d97706;border-radius:14px;padding:16px;text-align:center;box-shadow:0 4px 20px rgba(217,119,6,.25);">
       <div style="font-size:32px;margin-bottom:4px;">🏆🔥🏆</div>
-      <div style="font-family:'Nunito';font-size:16px;font-weight:900;color:#c45000;">¡${myVids.length} VIDEOS — RACHA COMPLETA!</div>
+      <div style="font-family:'Nunito';font-size:16px;font-weight:900;color:#c45000;">¡7 DÍAS SEGUIDOS — RACHA COMPLETA!</div>
       <div style="font-size:11px;font-family:'DM Mono';color:var(--muted);margin-top:4px;">Desbloqueaste el bono de $30.000 — se acredita solo 💰</div>
     </div>`;
   } else if(todayVids >= DAILY_VIDEOS && streak >= 3){
@@ -954,24 +954,31 @@ function renderHome(){
       <div style="font-family:'Nunito';font-size:14px;font-weight:800;color:#c47f00;">¡5 videos del día completos!</div>
     </div>`;
   }
-  // Tracker SIEMPRE visible: bono de racha = $30.000 por cada 35 videos subidos
-  // 7 barritas: cada una se llena al sumar 5 videos
-  const totalVids = myVids.length;
-  const enBloque = totalVids % 35;
-  const justoCompleto = totalVids > 0 && enBloque === 0;
-  const barritas = justoCompleto ? 7 : Math.floor(enBloque / 5);
-  const faltanVids = justoCompleto ? 0 : 35 - enBloque;
+  // Tracker SIEMPRE visible: bono de racha = $30.000 por cada 7 DÍAS SEGUIDOS con tus 5 videos diarios
+  // 7 barritas: una por cada día completo consecutivo (hoy en curso no corta la racha)
+  let rachaDias = 0;
+  for(let i = 0; i < day; i++){
+    const _rd=new Date();_rd.setDate(_rd.getDate()-i);
+    const _rk=`${_rd.getFullYear()}-${String(_rd.getMonth()+1).padStart(2,"0")}-${String(_rd.getDate()).padStart(2,"0")}`;
+    const _cnt=myVideos().filter(v=>v.date&&new Date(v.date).toLocaleDateString("sv")===_rk).length;
+    if(i===0 && _cnt<DAILY_VIDEOS) continue;
+    if(_cnt>=DAILY_VIDEOS) rachaDias++; else break;
+  }
+  const enBloque = rachaDias % 7;
+  const justoCompleto = rachaDias > 0 && enBloque === 0;
+  const barritas = justoCompleto ? 7 : enBloque;
+  const faltanDias = justoCompleto ? 0 : 7 - enBloque;
   const puntos = Array.from({length:7},(_,i)=>`<div style="flex:1;height:9px;border-radius:5px;background:${i<barritas?'linear-gradient(90deg,#f59e0b,#d97706)':'var(--surface3)'};"></div>`).join('');
   const tracker = `<div style="margin-top:12px;background:var(--surface2);border:1.5px solid var(--border);border-radius:14px;padding:13px 15px;">
     <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:9px;">
       <span style="font-size:12px;font-weight:800;color:var(--text);">🎯 Racha para el bono</span>
-      <span style="font-size:10px;font-family:'DM Mono';color:var(--muted);">${justoCompleto?35:enBloque}/35 videos · $30.000</span>
+      <span style="font-size:10px;font-family:'DM Mono';color:var(--muted);">${justoCompleto?7:enBloque}/7 días · $30.000</span>
     </div>
     <div style="display:flex;gap:4px;">${puntos}</div>
     <div style="font-size:10.5px;font-family:'DM Mono';color:var(--muted);margin-top:9px;">${
       justoCompleto
-        ? '¡Bloque de 35 completo! El bono se acredita solo 💰 — ya arranca tu próximo'
-        : `Te faltan ${faltanVids} videos para tus próximos $30.000 (cada 5 videos se llena una barrita)`
+        ? '¡Racha de 7 días completa! El bono se acredita solo 💰 — mañana arranca tu próxima'
+        : `Te falta${faltanDias===1?'':'n'} ${faltanDias} día${faltanDias===1?'':'s'} con tus 5 videos para tus próximos $30.000 (cada día completo llena una barrita)`
     }</div>
   </div>`;
   banner.style.display = "block";
@@ -1300,8 +1307,8 @@ function renderBonos(){
     {
       key:"racha",
       title:"📅 Racha completa",
-      desc:`Cada 35 videos subidos cobrás el bono (la barrita de tu inicio se llena con cada 5 videos). Se acredita solo, todas las veces que lo logres.`,
-      amount:"$30.000 c/35 videos",
+      desc:`Subí tus 5 videos por día, 7 días seguidos, y cobrás el bono (la barrita de tu inicio se llena con cada día completo). Se acredita solo, todas las veces que lo logres.`,
+      amount:"$30.000 x racha de 7 días",
       check:()=>gained.racha?"ganaste":"disponible"
     },
     {
