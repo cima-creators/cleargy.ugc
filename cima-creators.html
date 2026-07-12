@@ -1235,7 +1235,7 @@ function renderLeaderboard(){
       <div class="lb-avatar" style="border-color:${COLORS[c]};color:${COLORS[c]}">${AVATARS[c]}</div>
       <div class="lb-info">
         <div class="lb-name">${DISPLAY_NAMES[c]}${c===currentUser?" (vos)":""}</div>
-        <div class="lb-meta">${ventasPorCreadora[c]||0} ventas · ${fmtPesos((ventasPorCreadora[c]||0)*4333)}</div>
+        <div class="lb-meta">${ventasPorCreadora[c]||0} ventas · ${fmtPesos((ventasPorCreadora[c]||0)*COMISION_POR_VENTA)}</div>
       </div>
       <div class="lb-score"><div class="lb-score-val">${ventasPorCreadora[c]||0}</div><div class="lb-score-label">ventas</div></div>
     </div>`).join("");
