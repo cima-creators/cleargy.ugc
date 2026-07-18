@@ -762,6 +762,22 @@ function _startHeartbeat(){
   }, 60000); // chequear cada minuto
 }
 
+// [4b] RESYNC TOTAL al volver a la app: re-attachea TODOS los listeners (estado + videos + ventas).
+// Cura pantallas congeladas cuando el celu estuvo en segundo plano y los streams murieron.
+let _lastResync = 0;
+function _fullResync(){
+  const now = Date.now();
+  if(now - _lastResync < 60000) return; // como mucho 1 vez por minuto
+  if(!currentUser || !window._fbListen) return;
+  _lastResync = now;
+  try{ if(window._fbUnlisten) window._fbUnlisten(); }catch(e){}
+  window._fbUnlisten = window._fbListen((d)=>{ sharedData=_mergePending(d); _resetHeartbeat(); renderAll(); localStorage.setItem(BRAND_ID+'_data',JSON.stringify(d)); });
+  if(window._fbAttachSales) try{ window._fbAttachSales(); }catch(e){}
+}
+document.addEventListener('visibilitychange', ()=>{ if(!document.hidden) _fullResync(); });
+window.addEventListener('focus', ()=>_fullResync());
+window.addEventListener('online', ()=>_fullResync());
+
 // [5] BEFOREUNLOAD: advertir si hay una subida en curso
 let _uploadInProgress = false;
 let _isSubmitting = false; // doble-tap guard
@@ -1763,14 +1779,23 @@ loadData();
       };
     };
 
-    // Sales listener para ranking
+    // Sales listener para ranking — con auto-reintento (si muere por auth tardía o red, revive solo)
     const _salesColName = BRAND_COL_NAME === 'cleargy' ? 'sales' : BRAND_COL_NAME + '_sales';
     window.salesData = [];
-    onSnapshot(collection(db, _salesColName), (snap) => {
-      window.salesData = snap.docs.map(d => d.data());
-      const active = document.querySelector('.screen.active');
-      if(active && active.id === 'screen-leaderboard' && typeof renderLeaderboard === 'function') renderLeaderboard();
-    });
+    let _unsubSales = null;
+    const attachSales = () => {
+      try{ if(_unsubSales) _unsubSales(); }catch(e){}
+      _unsubSales = onSnapshot(collection(db, _salesColName), (snap) => {
+        window.salesData = snap.docs.map(d => d.data());
+        const active = document.querySelector('.screen.active');
+        if(active && active.id === 'screen-leaderboard' && typeof renderLeaderboard === 'function') renderLeaderboard();
+      }, (err) => {
+        console.error('sales onSnapshot error:', err);
+        setTimeout(attachSales, 8000);
+      });
+    };
+    attachSales();
+    window._fbAttachSales = attachSales;
 
     window.dispatchEvent(new CustomEvent('firebase-ready'));
   </script>
