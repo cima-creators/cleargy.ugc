@@ -545,7 +545,7 @@ const BRAND_CONFIGS = {
   },
   skinfinity: {
     border:'#b8d5c8', muted2:'#a8c5b8',
-    name:'Skinfinity', logoText:'SKINFINITY', defaultCampaignStart:'2026-07-02', sub:'Creators Hub', dailyVideos:3, videoGoal:100, noRacha:true,
+    name:'Skinfinity', logoText:'SKINFINITY', defaultCampaignStart:'2026-07-02', sub:'Creators Hub', dailyVideos:3, videoGoal:100, noRacha:true, salary:500000, minVideos:100,
     logoImg:'data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="260" height="80"><rect width="260" height="80" rx="10" fill="%23133327"/><text x="130" y="51" font-family="Georgia,serif" font-size="29" font-weight="bold" fill="white" text-anchor="middle" letter-spacing="1.5">SKINFINITY</text></svg>',
     collection:'skinfinity', bgDark:'#cfe3d8',
     cats:['Review / unboxing','Antes y después','Rutina / tutorial','Tips','Trend / challenge','Otro'],
@@ -654,9 +654,9 @@ document.addEventListener('DOMContentLoaded',function(){
 
 const CAMPAIGN_START = new Date(2026,4,25);
 const CAMPAIGN_DAYS = 30;
-const SALARY = 650000;
+const SALARY = BRAND.salary || 650000;
 const COMISION_POR_VENTA = 2500;
-const MIN_VIDEOS = 150;
+const MIN_VIDEOS = BRAND.minVideos || 150;
 // Ventana de gracia: hasta el viernes 19/6 los pendientes cuentan; desde ahí, solo aprobados. Rechazados nunca.
 const GRACE_END = new Date('2026-06-19T00:00:00-03:00');
 function cuentaPago(v){
@@ -943,7 +943,7 @@ function renderHome(){
   document.getElementById("home-today-videos").textContent = todayVids;
   const ventas = sharedData.ventas[currentUser]||0;
   const myAprob = myVids.filter(cuentaPago); // aprobados (+ pendientes durante la gracia)
-  const perVideo = Math.round(650000 * myAprob.length / 150);
+  const perVideo = Math.round(SALARY * myAprob.length / MIN_VIDEOS);
   const perVenta = ventas * 2500;
   const bonos = sharedData.bonos[currentUser]||0;
   // Racha — contar días consecutivos con 5 videos hasta hoy
