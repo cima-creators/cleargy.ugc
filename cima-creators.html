@@ -238,7 +238,7 @@ select.finput option{background:white;}
       <div class="stat-card accent">
         <div class="stat-label">Videos subidos</div>
         <div class="stat-val" id="home-total-videos" style="color:var(--accent)">0</div>
-        <div class="stat-sub">de 150 totales</div>
+        <div class="stat-sub" id="home-total-goal">de 150 totales</div>
       </div>
       <div style="grid-column:1/-1;display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;">
         <div class="stat-card gold">
@@ -1004,6 +1004,7 @@ function renderHome(){
 
   document.getElementById("home-ventas").textContent = ventas;
   document.getElementById("home-total-videos").textContent = myVids.length;
+  const _htg=document.getElementById("home-total-goal"); if(_htg) _htg.textContent = "de "+MIN_VIDEOS+" totales";
   document.getElementById("home-per-video").textContent = fmtPesos(perVideo);
   document.getElementById("home-per-venta").textContent = fmtPesos(perVenta);
   if(document.getElementById("home-bonos")) document.getElementById("home-bonos").textContent = fmtPesos(bonos);
