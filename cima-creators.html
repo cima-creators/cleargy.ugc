@@ -357,7 +357,8 @@ select.finput option{background:white;}
     <div style="font-family:'DM Mono';font-size:9px;letter-spacing:2px;color:var(--muted);text-transform:uppercase;margin-bottom:12px;">VENTAS</div>
     <div id="lb-ventas"></div>
 
-  <div style="font-family:'DM Mono';font-size:9px;letter-spacing:2px;color:var(--muted);text-transform:uppercase;margin:20px 0 12px;">🔥 VIDEO MÁS VIRAL</div>
+  <div style="font-family:'DM Mono';font-size:9px;letter-spacing:2px;color:var(--muted);text-transform:uppercase;margin:20px 0 12px;">🔥 VIDEOS MÁS VIRALES</div>
+    <div class="week-tabs" id="lb-viral-filter" style="display:none;"></div>
     <div id="lb-viral"></div>
   </div>
 
@@ -1262,17 +1263,28 @@ function renderLeaderboard(){
 
 
 
-  // Viral video
-  const allVids = sw===0
+  // Videos virales — con filtro por producto (inspo) en marcas que lo tienen
+  const _pf = window.lbProductFilter || "ALL";
+  const _vf = document.getElementById("lb-viral-filter");
+  if(_vf && BRAND.products){
+    _vf.style.display = "flex";
+    _vf.innerHTML = ['ALL'].concat(BRAND.products).map(p=>
+      `<button class="wtab ${(_pf===p)?'active':''}" onclick="window.lbProductFilter=${esc(JSON.stringify(p))};renderLeaderboard()">${p==='ALL'?'Todos':'📦 '+esc(p)}</button>`
+    ).join('');
+  }
+  let allVids = sw===0
     ? sharedData.videos.filter(v=>v.views>0)
     : sharedData.videos.filter(v=>v.views>0&&v.day&&getWeek(v.day)===sw);
+  if(BRAND.products && _pf!=="ALL") allVids = allVids.filter(v=>v.producto===_pf);
   if(allVids.length){
-    const topVid = [...allVids].sort((a,b)=>b.views-a.views)[0];
-    document.getElementById("lb-viral").innerHTML = `
+    const tops = [...allVids].sort((a,b)=>b.views-a.views).slice(0,3);
+    const medallas = ['🥇','🥈','🥉'];
+    document.getElementById("lb-viral").innerHTML = tops.map((topVid,i)=>`
       <div class="viral-card">
         <div class="viral-top">
+          <div style="font-size:22px;">${medallas[i]||''}</div>
           <div class="viral-avatar" style="border:2px solid ${COLORS[topVid.creator]};color:${COLORS[topVid.creator]}">${AVATARS[topVid.creator]}</div>
-          <div><div class="viral-creator">${DISPLAY_NAMES[topVid.creator]}</div><div style="font-size:10px;color:var(--muted);font-family:'DM Mono'">${topVid.day?'Día '+topVid.day+' · ':''} ${esc(topVid.cat||'')}</div></div>
+          <div><div class="viral-creator">${DISPLAY_NAMES[topVid.creator]}</div><div style="font-size:10px;color:var(--muted);font-family:'DM Mono'">${topVid.day?'Día '+topVid.day+' · ':''}${topVid.producto?'📦 '+esc(topVid.producto):esc(topVid.cat||'')}</div></div>
         </div>
         <div class="fire-badge">🔥 ${fmtV(topVid.views)} views</div>
         <div style="display:flex;gap:6px;margin-top:6px;">
@@ -1280,9 +1292,9 @@ function renderLeaderboard(){
           ${topVid.linkTt?`<button onclick="navigator.clipboard.writeText(${esc(JSON.stringify(topVid.linkTt))});showToast('Link TikTok copiado 📋')" style="padding:5px 12px;border-radius:20px;font-size:10px;font-family:'Nunito';font-weight:700;cursor:pointer;background:rgba(26,58,143,.08);border:1px solid rgba(26,58,143,.2);color:var(--blue);">🎵 Copiar TT</button>`:""}
           ${!topVid.linkIg&&!topVid.linkTt&&topVid.link?`<button onclick="navigator.clipboard.writeText(${esc(JSON.stringify(topVid.link))});showToast('Link copiado 📋')" style="padding:5px 12px;border-radius:20px;font-size:10px;font-family:'Nunito';font-weight:700;cursor:pointer;background:rgba(26,58,143,.08);border:1px solid rgba(26,58,143,.2);color:var(--blue);">📋 Copiar link</button>`:""}
         </div>
-      </div>`;
+      </div>`).join('');
   } else {
-    document.getElementById("lb-viral").innerHTML=`<div class="empty"><div class="empty-icon">📹</div><div class="empty-text">Sin videos esta semana aún</div></div>`;
+    document.getElementById("lb-viral").innerHTML=`<div class="empty"><div class="empty-icon">📹</div><div class="empty-text">${(BRAND.products&&_pf!=="ALL")?'Sin videos de este producto aún — ¡sé la primera! 🚀':'Sin videos esta semana aún'}</div></div>`;
   }
 }
 
