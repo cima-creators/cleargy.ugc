@@ -1491,8 +1491,12 @@ function renderFeatured(){
   // Filtro por producto (inspo) — solo en marcas con products
   const _vpf = document.getElementById("viral-product-filter");
   if(_vpf && BRAND.products){
-    _vpf.innerHTML = ['ALL'].concat(BRAND.products).map(p=>
-      `<button class="wtab ${viralProductFilter===p?'active':''}" onclick="setViralProduct(${esc(JSON.stringify(p))})">${p==='ALL'?'Todos':'📦 '+esc(p)}</button>`
+    // Ordenar productos por cantidad de videos virales (+5k), de mayor a menor
+    const _cnt = {}; BRAND.products.forEach(p=>_cnt[p]=0);
+    sharedData.videos.forEach(v=>{ if(v.views>=5000 && v.producto && _cnt[v.producto]!==undefined) _cnt[v.producto]++; });
+    const _ordenados = [...BRAND.products].sort((a,b)=>_cnt[b]-_cnt[a]);
+    _vpf.innerHTML = ['ALL'].concat(_ordenados).map(p=>
+      `<button class="wtab ${viralProductFilter===p?'active':''}" onclick="setViralProduct(${esc(JSON.stringify(p))})">${p==='ALL'?'Todos':'📦 '+esc(p)+' ('+_cnt[p]+')'}</button>`
     ).join('');
   }
   let featured = sharedData.videos.filter(v=>v.views>=5000);
