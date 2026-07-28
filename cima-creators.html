@@ -1495,7 +1495,7 @@ function renderFeatured(){
       `<button class="wtab ${viralProductFilter===p?'active':''}" onclick="setViralProduct(${esc(JSON.stringify(p))})">${p==='ALL'?'Todos':'📦 '+esc(p)}</button>`
     ).join('');
   }
-  let featured = sharedData.videos.filter(v=>v.views>=10000);
+  let featured = sharedData.videos.filter(v=>v.views>=5000);
   if(BRAND.products && viralProductFilter!=="ALL") featured = featured.filter(v=>v.producto===viralProductFilter);
   featured = [...featured].sort((a,b)=>(b.views||0)-(a.views||0));
   const list = document.getElementById("featured-list");
