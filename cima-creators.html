@@ -374,6 +374,7 @@ select.finput option{background:white;}
       <button class="wtab" id="vsort-featured" onclick="setVideoSort('featured',this)">⭐ Destacados</button>
       <button class="wtab" id="vsort-viral" onclick="setVideoSort('viral',this)">🔥 Virales</button>
     </div>
+    <div class="week-tabs" id="viral-product-filter" style="display:none;margin-bottom:12px;"></div>
     <div id="my-videos-list"></div>
     <div id="destacados-list" style="display:none;"></div>
     <div id="featured-list" style="display:none;"></div>
@@ -1473,6 +1474,8 @@ function setVideoSort(sort, el){
   document.getElementById("my-videos-list").style.display = (isFeat||isViral) ? "none" : "";
   document.getElementById("destacados-list").style.display = isFeat ? "" : "none";
   document.getElementById("featured-list").style.display = isViral ? "" : "none";
+  const _vpf = document.getElementById("viral-product-filter");
+  if(_vpf) _vpf.style.display = (isViral && BRAND.products) ? "flex" : "none";
   document.getElementById("mis-videos-label").textContent = isFeat ? "DESTACADOS DE LA SEMANA" : isViral ? "VIDEOS VIRALES" : "MIS VIDEOS";
   if(isFeat) renderDestacados();
   else if(isViral) renderFeatured();
@@ -1482,10 +1485,21 @@ function setVideoSort(sort, el){
 // ═══════════════════════════════════
 // FEATURED VIDEOS
 // ═══════════════════════════════════
+let viralProductFilter = "ALL";
+function setViralProduct(p){ viralProductFilter = p; renderFeatured(); }
 function renderFeatured(){
-  const featured = [...sharedData.videos.filter(v=>v.views>=10000)].sort((a,b)=>(b.views||0)-(a.views||0));
+  // Filtro por producto (inspo) — solo en marcas con products
+  const _vpf = document.getElementById("viral-product-filter");
+  if(_vpf && BRAND.products){
+    _vpf.innerHTML = ['ALL'].concat(BRAND.products).map(p=>
+      `<button class="wtab ${viralProductFilter===p?'active':''}" onclick="setViralProduct(${esc(JSON.stringify(p))})">${p==='ALL'?'Todos':'📦 '+esc(p)}</button>`
+    ).join('');
+  }
+  let featured = sharedData.videos.filter(v=>v.views>=10000);
+  if(BRAND.products && viralProductFilter!=="ALL") featured = featured.filter(v=>v.producto===viralProductFilter);
+  featured = [...featured].sort((a,b)=>(b.views||0)-(a.views||0));
   const list = document.getElementById("featured-list");
-  if(!featured.length){ list.innerHTML=`<div class="empty"><div class="empty-icon">🔥</div><div class="empty-text">Sin videos virales aún</div></div>`; return; }
+  if(!featured.length){ list.innerHTML=`<div class="empty"><div class="empty-icon">🔥</div><div class="empty-text">${(BRAND.products&&viralProductFilter!=="ALL")?'Sin videos virales de este producto aún — ¡sé la primera! 🚀':'Sin videos virales aún'}</div></div>`; return; }
   list.innerHTML = featured.map(v=>`
     <div style="background:rgba(22,163,74,.04);border-left:4px solid #16a34a;border-radius:14px;padding:14px;margin-bottom:8px;box-shadow:0 2px 12px rgba(22,163,74,.08);">
       <div style="display:flex;align-items:center;gap:8px;margin-bottom:8px;">
@@ -1500,7 +1514,7 @@ function renderFeatured(){
       </div>
       <div style="display:flex;gap:16px;align-items:center;">
         <div><div style="font-family:'Nunito';font-size:20px;font-weight:800;color:#16a34a;">${fmtV(v.views)}</div><div style="font-size:9px;font-family:'DM Mono';color:var(--muted);">views</div></div>
-        <span style="font-size:10px;font-family:'DM Mono';color:var(--muted);margin-left:auto;">${v.day?'Día '+v.day+' · ':''}${esc(v.cat||'')}</span>
+        <span style="font-size:10px;font-family:'DM Mono';color:var(--muted);margin-left:auto;">${v.day?'Día '+v.day+' · ':''}${v.producto?'📦 '+esc(v.producto):esc(v.cat||'')}</span>
       </div>
     </div>`).join("");
 }
