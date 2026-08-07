@@ -680,6 +680,7 @@ const CAMPAIGN_DAYS = 30;
 const SALARY = BRAND.salary || 650000;
 const COMISION_POR_VENTA = 2500;
 const MIN_VIDEOS = BRAND.minVideos || 150;
+const RACHA_ACTIVA = false; // Bono de racha DISCONTINUADO en todas las marcas (2026-08)
 // Ventana de gracia: hasta el viernes 19/6 los pendientes cuentan; desde ahí, solo aprobados. Rechazados nunca.
 const GRACE_END = new Date('2026-06-19T00:00:00-03:00');
 function cuentaPago(v){
@@ -978,13 +979,13 @@ function renderHome(){
   const banner = document.getElementById("home-streak-banner");
   // Celebración según nivel de racha
   let celebracion = "";
-  if(!BRAND.noRacha && streak > 0 && streak % 7 === 0){
+  if(RACHA_ACTIVA && !BRAND.noRacha && streak > 0 && streak % 7 === 0){
     celebracion = `<div style="margin-top:12px;background:linear-gradient(135deg,rgba(217,119,6,.18),rgba(245,166,35,.18));border:2.5px solid #d97706;border-radius:14px;padding:16px;text-align:center;box-shadow:0 4px 20px rgba(217,119,6,.25);">
       <div style="font-size:32px;margin-bottom:4px;">🏆🔥🏆</div>
       <div style="font-family:'Nunito';font-size:16px;font-weight:900;color:#c45000;">¡7 DÍAS SEGUIDOS — RACHA COMPLETA!</div>
       <div style="font-size:11px;font-family:'DM Mono';color:var(--muted);margin-top:4px;">Desbloqueaste el bono de $30.000 — se acredita solo 💰</div>
     </div>`;
-  } else if(!BRAND.noRacha && todayVids >= DAILY_VIDEOS && streak >= 3){
+  } else if(RACHA_ACTIVA && !BRAND.noRacha && todayVids >= DAILY_VIDEOS && streak >= 3){
     celebracion = `<div style="margin-top:12px;background:linear-gradient(135deg,rgba(245,100,0,.12),rgba(245,166,35,.12));border:2px solid rgba(245,120,0,.4);border-radius:14px;padding:14px 16px;text-align:center;">
       <div style="font-size:28px;margin-bottom:4px;">🔥🔥🔥</div>
       <div style="font-family:'Nunito';font-size:15px;font-weight:900;color:#c45000;">¡Racha de ${streak} días!</div>
@@ -1010,7 +1011,7 @@ function renderHome(){
   const barritas = justoCompleto ? 7 : enBloque;
   const faltanDias = justoCompleto ? 0 : 7 - enBloque;
   const puntos = Array.from({length:7},(_,i)=>`<div style="flex:1;height:9px;border-radius:5px;background:${i<barritas?'linear-gradient(90deg,#f59e0b,#d97706)':'var(--surface3)'};"></div>`).join('');
-  const tracker = BRAND.noRacha ? '' : `<div style="margin-top:12px;background:var(--surface2);border:1.5px solid var(--border);border-radius:14px;padding:13px 15px;">
+  const tracker = (!RACHA_ACTIVA || BRAND.noRacha) ? '' : `<div style="margin-top:12px;background:var(--surface2);border:1.5px solid var(--border);border-radius:14px;padding:13px 15px;">
     <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:9px;">
       <span style="font-size:12px;font-weight:800;color:var(--text);">🎯 Racha para el bono</span>
       <span style="font-size:10px;font-family:'DM Mono';color:var(--muted);">${justoCompleto?7:enBloque}/7 días · $30.000</span>
@@ -1394,7 +1395,7 @@ function renderBonos(){
     },
   ];
 
-  document.getElementById("bonos-list").innerHTML=bonos.filter(b=>!(BRAND.noRacha&&b.key==="racha")).map(b=>{
+  document.getElementById("bonos-list").innerHTML=bonos.filter(b=>!((!RACHA_ACTIVA||BRAND.noRacha)&&b.key==="racha")).map(b=>{
     const status=b.check();
     return`<div class="bono-card ${status==="ganaste"?"ganado":status==="disponible"?"available":""}">
       <div class="bono-title">${b.title}</div>
