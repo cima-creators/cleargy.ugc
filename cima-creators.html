@@ -680,6 +680,7 @@ const CAMPAIGN_DAYS = 30;
 const SALARY = BRAND.salary || 650000;
 const COMISION_POR_VENTA = 2500;
 const MIN_VIDEOS = BRAND.minVideos || 150;
+function viewsAcum(v){const ig=Number(v&&v.igViews)||0,tt=Number(v&&v.ttViews)||0;return (ig+tt)>0?ig+tt:(Number(v&&v.views)||0);}
 const RACHA_MONTO = BRAND.rachaMonto || 0; // 0 = bono de racha desactivado en esa marca
 const RACHA_ACTIVA = RACHA_MONTO > 0;
 // Ventana de gracia: hasta el viernes 19/6 los pendientes cuentan; desde ahí, solo aprobados. Rechazados nunca.
@@ -1058,7 +1059,7 @@ function videoCardHTML(v){
   const stLabel = v.status==="approved"?"✓ aprobado":v.status==="rejected"?"✗ rechazado":"pendiente";
   const dateStr = v.date?new Date(v.date).toLocaleDateString("es-AR",{day:"2-digit",month:"2-digit"}):"";
   const platIcon = v.platform==="ig"?"📸":v.platform==="tt"?"🎵":"📸🎵";
-  const views = v.views||0;
+  const views = viewsAcum(v);
   const viewsClass = views>=10000?"viral":views>=1000?"good":"low";
   const isViral = views>=10000;
   return `<div class="video-card ${stClass}" id="vc-${v.id}">
@@ -1515,15 +1516,15 @@ function renderFeatured(){
   if(_vpf && BRAND.products){
     // Ordenar productos por cantidad de videos virales (+5k), de mayor a menor
     const _cnt = {}; BRAND.products.forEach(p=>_cnt[p]=0);
-    sharedData.videos.forEach(v=>{ if(v.views>=5000 && v.producto && _cnt[v.producto]!==undefined) _cnt[v.producto]++; });
+    sharedData.videos.forEach(v=>{ if(viewsAcum(v)>=5000 && v.producto && _cnt[v.producto]!==undefined) _cnt[v.producto]++; });
     const _ordenados = [...BRAND.products].sort((a,b)=>_cnt[b]-_cnt[a]);
     _vpf.innerHTML = ['ALL'].concat(_ordenados).map(p=>
       `<button class="wtab ${viralProductFilter===p?'active':''}" onclick="setViralProduct(${esc(JSON.stringify(p))})">${p==='ALL'?'Todos':'📦 '+esc(p)+' ('+_cnt[p]+')'}</button>`
     ).join('');
   }
-  let featured = sharedData.videos.filter(v=>v.views>=5000);
+  let featured = sharedData.videos.filter(v=>viewsAcum(v)>=5000);
   if(BRAND.products && viralProductFilter!=="ALL") featured = featured.filter(v=>v.producto===viralProductFilter);
-  featured = [...featured].sort((a,b)=>(b.views||0)-(a.views||0));
+  featured = [...featured].sort((a,b)=>viewsAcum(b)-viewsAcum(a));
   const list = document.getElementById("featured-list");
   if(!featured.length){ list.innerHTML=`<div class="empty"><div class="empty-icon">🔥</div><div class="empty-text">${(BRAND.products&&viralProductFilter!=="ALL")?'Sin videos virales de este producto aún — ¡sé la primera! 🚀':'Sin videos virales aún'}</div></div>`; return; }
   list.innerHTML = featured.map(v=>`
@@ -1539,7 +1540,7 @@ function renderFeatured(){
         ${!v.linkIg&&!v.linkTt&&v.link?`<a href="${escUrl(v.link)}" target="_blank" style="padding:5px 12px;border-radius:20px;font-size:10px;font-family:'Nunito';font-weight:700;cursor:pointer;background:rgba(26,58,143,.08);border:1px solid rgba(26,58,143,.2);color:var(--blue);text-decoration:none;">📋 Ver video</a>`:""}
       </div>
       <div style="display:flex;gap:16px;align-items:center;">
-        <div><div style="font-family:'Nunito';font-size:20px;font-weight:800;color:#16a34a;">${fmtV(v.views)}</div><div style="font-size:9px;font-family:'DM Mono';color:var(--muted);">views</div></div>
+        <div><div style="font-family:'Nunito';font-size:20px;font-weight:800;color:#16a34a;">${fmtV(viewsAcum(v))}</div><div style="font-size:9px;font-family:'DM Mono';color:var(--muted);">views</div></div>
         <span style="font-size:10px;font-family:'DM Mono';color:var(--muted);margin-left:auto;">${v.day?'Día '+v.day+' · ':''}${v.producto?'📦 '+esc(v.producto):esc(v.cat||'')}</span>
       </div>
     </div>`).join("");
