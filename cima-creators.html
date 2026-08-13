@@ -307,6 +307,10 @@ select.finput option{background:white;}
           <div class="flabel">🎵 Link TikTok</div>
           <input class="finput" type="url" id="up-link-tt" placeholder="https://tiktok.com/@usuario/video/...">
         </div>
+        <div class="fgroup" id="up-fb-group" style="margin-top:10px;display:none;">
+          <div class="flabel">👥 Link Facebook</div>
+          <input class="finput" type="url" id="up-link-fb" placeholder="https://facebook.com/...">
+        </div>
         <div style="font-size:11px;color:var(--muted);margin-top:8px;font-weight:600;">💡 1 video = 1 producción, aunque lo subas en las dos plataformas</div>
       </div>
       <div id="up-sync-info" style="background:rgba(26,58,143,.04);border-radius:var(--radius-xs);padding:10px 12px;margin-bottom:10px;font-size:11px;color:var(--muted);font-weight:600;">
@@ -584,7 +588,7 @@ const BRAND_CONFIGS = {
     border:'#d8b8e2', muted2:'#c8a8d8',
     name:'Sofía Tarot', logoText:'SOFÍA TAROT', defaultCampaignStart:'2026-08-11', sub:'Creators Hub',
     logoImg:'data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="300" height="100"><rect width="300" height="100" rx="12" fill="%238B4A9C"/><g fill="white"><path d="M42 22 a26 26 0 1 0 20 46 a30 30 0 1 1 -20 -46 Z"/><circle cx="72" cy="26" r="3"/><circle cx="64" cy="70" r="2.5"/><circle cx="84" cy="52" r="2"/></g><text x="185" y="48" font-family="Georgia,serif" font-size="27" font-weight="bold" fill="white" text-anchor="middle" letter-spacing="2">SOFIA</text><text x="185" y="76" font-family="Georgia,serif" font-size="21" fill="white" text-anchor="middle" letter-spacing="7">TAROT</text></svg>',
-    collection:'sofiatarot', no100k:true, bgDark:'#e3cfee',
+    collection:'sofiatarot', no100k:true, facebook:true, bgDark:'#e3cfee',
     cats:['Tirada / lectura','Ritual','Signos / horóscopo','Review / testimonio','Trend / challenge','Tips espirituales','Otro'],
     accent:'#8B4A9C', accentLight:'#a45cb8', bg:'#f7eefb', surface2:'#f0e2f6', surface3:'#e9d6f1',
     text:'#2b0d33', muted:'#7a5a85', shadow:'139,74,156',
@@ -658,6 +662,7 @@ document.addEventListener('DOMContentLoaded',function(){
   if(catSel && BRAND.cats){
     catSel.innerHTML = '<option value="">Seleccioná...</option>' + BRAND.cats.map(c=>'<option>'+c+'</option>').join('');
   }
+  if(BRAND.facebook){ const _fg=document.getElementById('up-fb-group'); if(_fg) _fg.style.display='block'; }
   const _hdm = document.getElementById('home-daily-max');
   if(_hdm) _hdm.textContent = '/' + DAILY_VIDEOS;
   const prodSel = document.getElementById('up-product');
@@ -1104,6 +1109,7 @@ function videoCardHTML(v){
       <div class="vc-bottom">
         ${v.linkIg?`<a class="vc-copy-btn" href="${escUrl(v.linkIg)}" target="_blank" style="text-decoration:none;">📸 Ver en IG</a>`:""}
         ${v.linkTt?`<a class="vc-copy-btn" href="${escUrl(v.linkTt)}" target="_blank" style="text-decoration:none;">🎵 Ver en TT</a>`:""}
+        ${v.linkFb?`<a class="vc-copy-btn" href="${escUrl(v.linkFb)}" target="_blank" style="text-decoration:none;">👥 Ver en FB</a>`:""}
         ${!v.linkIg&&!v.linkTt&&v.link?`<a class="vc-copy-btn" href="${escUrl(v.link)}" target="_blank" style="text-decoration:none;">📋 Ver video</a>`:""}
         <button class="vc-del-btn" onclick="deleteMyVideo('${v.id}')">🗑</button>
       </div>
@@ -1131,6 +1137,8 @@ function submitVideo(){
   const cat = BRAND.products ? "" : document.getElementById("up-cat").value;
   const producto = BRAND.products ? document.getElementById("up-product").value : "";
   const driveVal = document.getElementById("up-drive").value.trim();
+  let linkFb = BRAND.facebook ? document.getElementById("up-link-fb").value.trim() : "";
+  if(linkFb && !linkFb.startsWith('http')) linkFb = 'https://' + linkFb;
   if(BRAND.driveOnly && !driveVal){document.getElementById("up-err").style.display="block";document.getElementById("up-err").textContent="Pegá el link de Drive del video.";return;}
   if((!linkIg&&!BRAND.driveOnly)||(!cat&&!BRAND.products)){document.getElementById("up-err").style.display="block";document.getElementById("up-err").textContent=BRAND.driveOnly?"Seleccioná la categoría.":(BRAND.products?"Completá el link de Instagram.":"Completá el link de Instagram y la categoría.");return;}
   if(BRAND.products && !producto){document.getElementById("up-err").style.display="block";document.getElementById("up-err").textContent="Seleccioná de qué producto es el video.";return;}
@@ -1155,6 +1163,7 @@ function submitVideo(){
     link,
     linkIg,
     linkTt,
+    linkFb,
     platform,
     views: 0,
     likes: 0,
@@ -1182,7 +1191,7 @@ function submitVideo(){
   };
 
   const clearForm = () => {
-    ["up-link-ig","up-link-tt","up-notes","up-drive"].forEach(id=>document.getElementById(id).value="");
+    ["up-link-ig","up-link-tt","up-link-fb","up-notes","up-drive"].forEach(id=>document.getElementById(id).value="");
     document.getElementById("up-cat").value="";
     const _ps=document.getElementById("up-product"); if(_ps) _ps.value="";
   };
@@ -1553,7 +1562,7 @@ function renderFeatured(){
       </div>
       <div style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:10px;">
         ${v.linkIg?`<a href="${escUrl(v.linkIg)}" target="_blank" style="padding:5px 12px;border-radius:20px;font-size:10px;font-family:'Nunito';font-weight:700;cursor:pointer;background:rgba(26,58,143,.08);border:1px solid rgba(26,58,143,.2);color:var(--blue);text-decoration:none;">📸 Ver en IG</a>`:""}
-        ${v.linkTt?`<a href="${escUrl(v.linkTt)}" target="_blank" style="padding:5px 12px;border-radius:20px;font-size:10px;font-family:'Nunito';font-weight:700;cursor:pointer;background:rgba(26,58,143,.08);border:1px solid rgba(26,58,143,.2);color:var(--blue);text-decoration:none;">🎵 Ver en TT</a>`:""}
+        ${v.linkTt?`<a href="${escUrl(v.linkTt)}" target="_blank" style="padding:5px 12px;border-radius:20px;font-size:10px;font-family:'Nunito';font-weight:700;cursor:pointer;background:rgba(26,58,143,.08);border:1px solid rgba(26,58,143,.2);color:var(--blue);text-decoration:none;">🎵 Ver en TT</a>`:""}${v.linkFb?`<a href="${escUrl(v.linkFb)}" target="_blank" style="padding:5px 12px;border-radius:20px;font-size:10px;font-family:'Nunito';font-weight:700;cursor:pointer;background:rgba(26,58,143,.08);border:1px solid rgba(26,58,143,.2);color:var(--blue);text-decoration:none;">👥 Ver en FB</a>`:""}
         ${!v.linkIg&&!v.linkTt&&v.link?`<a href="${escUrl(v.link)}" target="_blank" style="padding:5px 12px;border-radius:20px;font-size:10px;font-family:'Nunito';font-weight:700;cursor:pointer;background:rgba(26,58,143,.08);border:1px solid rgba(26,58,143,.2);color:var(--blue);text-decoration:none;">📋 Ver video</a>`:""}
       </div>
       <div style="display:flex;gap:16px;align-items:center;">
@@ -1585,7 +1594,7 @@ function renderDestacados(){
       </div>
       <div style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:10px;">
         ${v.linkIg?`<a href="${escUrl(v.linkIg)}" target="_blank" style="padding:5px 12px;border-radius:20px;font-size:10px;font-family:'Nunito';font-weight:700;cursor:pointer;background:rgba(26,58,143,.08);border:1px solid rgba(26,58,143,.2);color:var(--blue);text-decoration:none;">📸 Ver en IG</a>`:""}
-        ${v.linkTt?`<a href="${escUrl(v.linkTt)}" target="_blank" style="padding:5px 12px;border-radius:20px;font-size:10px;font-family:'Nunito';font-weight:700;cursor:pointer;background:rgba(26,58,143,.08);border:1px solid rgba(26,58,143,.2);color:var(--blue);text-decoration:none;">🎵 Ver en TT</a>`:""}
+        ${v.linkTt?`<a href="${escUrl(v.linkTt)}" target="_blank" style="padding:5px 12px;border-radius:20px;font-size:10px;font-family:'Nunito';font-weight:700;cursor:pointer;background:rgba(26,58,143,.08);border:1px solid rgba(26,58,143,.2);color:var(--blue);text-decoration:none;">🎵 Ver en TT</a>`:""}${v.linkFb?`<a href="${escUrl(v.linkFb)}" target="_blank" style="padding:5px 12px;border-radius:20px;font-size:10px;font-family:'Nunito';font-weight:700;cursor:pointer;background:rgba(26,58,143,.08);border:1px solid rgba(26,58,143,.2);color:var(--blue);text-decoration:none;">👥 Ver en FB</a>`:""}
         ${!v.linkIg&&!v.linkTt&&v.link?`<a href="${escUrl(v.link)}" target="_blank" style="padding:5px 12px;border-radius:20px;font-size:10px;font-family:'Nunito';font-weight:700;cursor:pointer;background:rgba(26,58,143,.08);border:1px solid rgba(26,58,143,.2);color:var(--blue);text-decoration:none;">📋 Ver video</a>`:""}
       </div>
       ${(v.adminNote||v.brandNote)?`<div style="font-size:12px;line-height:1.5;color:var(--text);background:rgba(245,158,11,.08);border-radius:8px;padding:8px 10px;margin-bottom:10px;">💬 ${esc(v.adminNote||v.brandNote)}</div>`:""}
