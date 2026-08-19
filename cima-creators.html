@@ -597,6 +597,20 @@ const BRAND_CONFIGS = {
       creadora3:{name:'Diego',pass:'pro3',avatar:'DI',color:'#3d7fa3'},
     }
   },
+  tierrafertil: {
+    border:'#d3ddc2', muted2:'#b7c7a2',
+    name:'Tierra Fértil', logoText:'TIERRA FÉRTIL', defaultCampaignStart:'2026-08-19', sub:'Creators Hub',
+    logoImg:'data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="320" height="92"><rect width="320" height="92" rx="12" fill="%23FFFFFF"/><text x="160" y="42" font-family="Georgia,serif" font-size="27" font-weight="700" fill="%234F6B2A" text-anchor="middle" letter-spacing="2">TIERRA</text><text x="160" y="73" font-family="Georgia,serif" font-size="27" font-style="italic" fill="%23A0724A" text-anchor="middle" letter-spacing="2">Fértil</text></svg>',
+    collection:'tierrafertil', no100k:true, bgDark:'#dde7cf',
+    cats:['Review / testimonio','Rutina / uso','Antes y después','Beneficios','Trend / challenge','Otro'],
+    accent:'#4F6B2A', accentLight:'#6D8C3E', bg:'#f5f8f0', surface2:'#eaf0e0', surface3:'#dfe8d2',
+    text:'#1f2b12', muted:'#66754f', shadow:'79,107,42',
+    goal: 750, dailyVideos:1, videoGoal:9, salary:120000, minVideos:5,
+    creators:{
+      creadora1:{name:'Creador 1',pass:'tierra1',avatar:'T1',color:'#4F6B2A',minVideos:5},
+      creadora2:{name:'Creador 2',pass:'tierra2',avatar:'T2',color:'#A0724A',minVideos:4},
+    }
+  },
   cortizen: {
     border:'#c3d2e6', muted2:'#adc0d8',
     name:'Cortizen', logoText:'CORTIZEN', defaultCampaignStart:'2026-08-19', sub:'Creators Hub',
@@ -765,6 +779,9 @@ const CAMPAIGN_DAYS = 30;
 const SALARY = BRAND.salary || 650000;
 const COMISION_POR_VENTA = 2500;
 const MIN_VIDEOS = BRAND.minVideos || 150;
+// Una creadora puede tener meta o pago propio (campañas donde no todos hacen la misma cantidad)
+const minMio = () => ((BRAND.creators[currentUser]||{}).minVideos) || MIN_VIDEOS;
+const salMio = () => ((BRAND.creators[currentUser]||{}).salary) || SALARY;
 function viewsAcum(v){const ig=Number(v&&v.igViews)||0,tt=Number(v&&v.ttViews)||0;return (ig+tt)>0?ig+tt:(Number(v&&v.views)||0);}
 const RACHA_MONTO = BRAND.rachaMonto || 0; // 0 = bono de racha desactivado en esa marca
 const RACHA_ACTIVA = RACHA_MONTO > 0;
@@ -1024,7 +1041,7 @@ function myVideos(){return (sharedData.videos||[]).filter(v=>v.creator===current
 function myVideosWeek(w){return myVideos().filter(v=>getWeek(v.day)===w);}
 function myVideoDay(d){return myVideos().filter(v=>v.day===d);}
 function totalComision(){
-  const base = Math.round(SALARY * (myVideos().length / MIN_VIDEOS));
+  const base = Math.round(salMio() * (myVideos().length / minMio()));
   const comVentas = (sharedData.ventas[currentUser]||0) * COMISION_POR_VENTA;
   const bonos = sharedData.bonos[currentUser]||0;
   return base + comVentas + bonos;
@@ -1054,7 +1071,7 @@ function renderHome(){
   document.getElementById("home-today-videos").textContent = todayVids;
   const ventas = sharedData.ventas[currentUser]||0;
   const myAprob = myVids.filter(cuentaPago); // aprobados (+ pendientes durante la gracia)
-  const perVideo = Math.round(SALARY * myAprob.length / MIN_VIDEOS);
+  const perVideo = Math.round(salMio() * myAprob.length / minMio());
   const perVenta = ventas * 2500;
   const bonos = sharedData.bonos[currentUser]||0;
   // Racha — contar días consecutivos con 5 videos hasta hoy
@@ -1127,7 +1144,7 @@ function renderHome(){
       : "reproducciones acumuladas";
   }
   document.getElementById("home-total-videos").textContent = myVids.length;
-  const _htg=document.getElementById("home-total-goal"); if(_htg) _htg.textContent = "de "+MIN_VIDEOS+" totales";
+  const _htg=document.getElementById("home-total-goal"); if(_htg) _htg.textContent = "de "+minMio()+" totales";
   document.getElementById("home-per-video").textContent = fmtPesos(perVideo);
   if(document.getElementById("home-bonos")) document.getElementById("home-bonos").textContent = fmtPesos(bonos);
   // La tarjeta de ventas solo aparece si la creadora efectivamente vendió
