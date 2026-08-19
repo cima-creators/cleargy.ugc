@@ -231,21 +231,16 @@ select.finput option{background:white;}
 
     <div class="stats-grid">
       <div class="stat-card">
-        <div class="stat-label">Ventas totales</div>
-        <div class="stat-val" id="home-ventas" style="color:var(--blue)">0</div>
-        <div class="stat-sub">unidades vendidas</div>
+        <div class="stat-label" id="home-kpi1-label">Views totales</div>
+        <div class="stat-val" id="home-kpi1" style="color:var(--blue)">0</div>
+        <div class="stat-sub" id="home-kpi1-sub">reproducciones acumuladas</div>
       </div>
       <div class="stat-card accent">
         <div class="stat-label">Videos subidos</div>
         <div class="stat-val" id="home-total-videos" style="color:var(--accent)">0</div>
         <div class="stat-sub" id="home-total-goal">totales de campaña</div>
       </div>
-      <div style="grid-column:1/-1;display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;">
-        <div class="stat-card gold">
-          <div class="stat-label">Ganado x ventas</div>
-          <div class="stat-val" id="home-per-venta" style="color:var(--gold);font-size:20px;">$0</div>
-          <div class="stat-sub">$2.500 por venta</div>
-        </div>
+      <div id="home-ganado-grid" style="grid-column:1/-1;display:grid;grid-template-columns:1fr 1fr;gap:10px;">
         <div class="stat-card gold">
           <div class="stat-label">Ganado x videos</div>
           <div class="stat-val" id="home-per-video" style="color:var(--gold);font-size:20px;">$0</div>
@@ -256,8 +251,26 @@ select.finput option{background:white;}
           <div class="stat-val" id="home-bonos" style="color:var(--gold);font-size:20px;">$0</div>
           <div class="stat-sub">bonos acumulados</div>
         </div>
+        <div class="stat-card gold" id="home-venta-card" style="display:none;">
+          <div class="stat-label">Ganado x ventas</div>
+          <div class="stat-val" id="home-per-venta" style="color:var(--gold);font-size:20px;">$0</div>
+          <div class="stat-sub">$2.500 por venta</div>
+        </div>
       </div>
     </div>
+
+    <!-- Ritmo de la semana: barras de videos por día (últimos 7) -->
+    <div id="home-semana" style="display:none;margin-top:16px;background:var(--surface);border-radius:18px;padding:18px 18px 14px;box-shadow:var(--shadow);border:1px solid var(--border);">
+      <div style="display:flex;justify-content:space-between;align-items:baseline;margin-bottom:14px;">
+        <span style="font-family:'DM Mono';font-size:9px;letter-spacing:2px;color:var(--muted);text-transform:uppercase;">TU SEMANA</span>
+        <span id="home-semana-tot" style="font-family:'DM Mono';font-size:10px;color:var(--muted);"></span>
+      </div>
+      <div id="home-semana-bars" style="display:flex;align-items:flex-end;gap:6px;height:76px;"></div>
+      <div id="home-semana-msg" style="font-size:10.5px;font-family:'DM Mono';color:var(--muted);margin-top:11px;"></div>
+    </div>
+
+    <!-- Tu mejor video -->
+    <div id="home-mejor" style="display:none;margin-top:16px;background:var(--surface);border-radius:18px;padding:18px;box-shadow:var(--shadow);border:1px solid var(--border);"></div>
 
     <!-- Resumen de cobros -->
     <div id="home-cobros" style="margin-top:16px;background:var(--surface);border-radius:18px;padding:18px;box-shadow:var(--shadow);border:1px solid var(--border);">
@@ -1100,12 +1113,38 @@ function renderHome(){
   banner.style.display = "block";
   banner.innerHTML = celebracion + tracker;
 
-  document.getElementById("home-ventas").textContent = ventas;
+  // KPI 1: views acumuladas (o videos aprobados en las marcas que solo entregan por Drive)
+  const _viewsTot = myVids.reduce((a,v)=>a+viewsAcum(v),0);
+  const _k1=document.getElementById("home-kpi1");
+  if(BRAND.driveOnly){
+    document.getElementById("home-kpi1-label").textContent = "Videos aprobados";
+    _k1.textContent = myAprob.length;
+    document.getElementById("home-kpi1-sub").textContent = "listos y contando";
+  } else {
+    _k1.textContent = _viewsTot.toLocaleString("es-AR");
+    document.getElementById("home-kpi1-sub").textContent = myVids.length
+      ? "promedio "+Math.round(_viewsTot/myVids.length).toLocaleString("es-AR")+" por video"
+      : "reproducciones acumuladas";
+  }
   document.getElementById("home-total-videos").textContent = myVids.length;
   const _htg=document.getElementById("home-total-goal"); if(_htg) _htg.textContent = "de "+MIN_VIDEOS+" totales";
   document.getElementById("home-per-video").textContent = fmtPesos(perVideo);
-  document.getElementById("home-per-venta").textContent = fmtPesos(perVenta);
   if(document.getElementById("home-bonos")) document.getElementById("home-bonos").textContent = fmtPesos(bonos);
+  // La tarjeta de ventas solo aparece si la creadora efectivamente vendió
+  const _vc=document.getElementById("home-venta-card");
+  if(_vc){
+    if(perVenta>0){
+      _vc.style.display="";
+      document.getElementById("home-per-venta").textContent = fmtPesos(perVenta);
+      document.getElementById("home-ganado-grid").style.gridTemplateColumns="1fr 1fr 1fr";
+    } else {
+      _vc.style.display="none";
+      document.getElementById("home-ganado-grid").style.gridTemplateColumns="1fr 1fr";
+    }
+  }
+
+  renderSemana(myVids);
+  renderMejorVideo(myVids);
 
   // Resumen de cobros
   const totalGanado = myVids.length > 0 ? (perVideo + perVenta + bonos) : 0;
@@ -1120,6 +1159,66 @@ function renderHome(){
   document.getElementById("home-recent-list").innerHTML = recent.length ?
     recent.map(v => videoCardHTML(v)).join("") :
     `<div class="empty"><div class="empty-icon">📹</div><div class="empty-text">Sin videos todavía</div></div>`;
+}
+
+// ── Barras de los últimos 7 días: ritmo real de subida (motiva más que "al día / atrasada")
+function renderSemana(myVids){
+  const box=document.getElementById("home-semana"); if(!box) return;
+  const dstr = d => d.toLocaleDateString("en-CA",{timeZone:"America/Argentina/Buenos_Aires"});
+  const hoy = new Date();
+  const dias=[];
+  for(let i=6;i>=0;i--){ const d=new Date(hoy); d.setDate(d.getDate()-i); dias.push(dstr(d)); }
+  const porDia={}; for(const d of dias) porDia[d]=0;
+  for(const v of myVids){ const k=v.date?String(v.date).slice(0,10):null; if(k && k in porDia) porDia[k]++; }
+  const vals=dias.map(d=>porDia[d]);
+  const total=vals.reduce((a,b)=>a+b,0);
+  if(total===0 && myVids.length===0){ box.style.display="none"; return; }
+  const tope=Math.max(DAILY_VIDEOS, ...vals);
+  const NOM=["D","L","M","M","J","V","S"];
+  box.style.display="block";
+  document.getElementById("home-semana-tot").textContent = total+" video"+(total===1?"":"s")+" en 7 días";
+  document.getElementById("home-semana-bars").innerHTML = dias.map((d,i)=>{
+    const n=vals[i], meta=n>=DAILY_VIDEOS, hoyEs=(i===6);
+    const h=Math.max(4, Math.round(n/tope*56));
+    const col=meta?"var(--accent)":n>0?"var(--gold)":"var(--border)";
+    const ini=NOM[new Date(d+"T12:00:00").getDay()];
+    return `<div style="flex:1;display:flex;flex-direction:column;align-items:center;gap:5px;">
+      <div style="font-family:'DM Mono';font-size:10px;font-weight:700;color:${n>0?"var(--text)":"var(--muted2)"};">${n}</div>
+      <div style="width:100%;height:${h}px;border-radius:5px;background:${col};${meta?"":"opacity:.85;"}"></div>
+      <div style="font-family:'DM Mono';font-size:9px;color:${hoyEs?"var(--accent)":"var(--muted2)"};font-weight:${hoyEs?800:500};">${ini}</div>
+    </div>`;
+  }).join("");
+  const completos=vals.filter(n=>n>=DAILY_VIDEOS).length;
+  document.getElementById("home-semana-msg").textContent =
+    completos===7 ? "🔥 Semana perfecta: llegaste a tu meta los 7 días"
+    : `${completos} de 7 días con tus ${DAILY_VIDEOS} videos — las barras verdes son los días completos`;
+}
+
+// ── Tu mejor video: el de más views (no aplica en marcas sin redes)
+function renderMejorVideo(myVids){
+  const box=document.getElementById("home-mejor"); if(!box) return;
+  if(BRAND.driveOnly){ box.style.display="none"; return; }
+  const conViews=myVids.filter(v=>viewsAcum(v)>0);
+  if(!conViews.length){ box.style.display="none"; return; }
+  const top=conViews.reduce((a,b)=>viewsAcum(b)>viewsAcum(a)?b:a);
+  const vt=viewsAcum(top);
+  const prom=Math.round(conViews.reduce((a,v)=>a+viewsAcum(v),0)/conViews.length);
+  const xVeces=prom>0?(vt/prom):0;
+  const fecha=top.date?new Date(String(top.date).slice(0,10)+"T12:00:00").toLocaleDateString("es-AR",{day:"2-digit",month:"long"}):"";
+  const link=escUrl(top.linkIg||top.linkTt||top.link||"");
+  const medalla = vt>=100000?"🚀":vt>=10000?"🔥":"⭐";
+  box.style.display="block";
+  box.innerHTML = `
+    <div style="font-family:'DM Mono';font-size:9px;letter-spacing:2px;color:var(--muted);text-transform:uppercase;margin-bottom:13px;">TU MEJOR VIDEO</div>
+    <div style="display:flex;align-items:center;gap:14px;">
+      <div style="font-size:32px;line-height:1;">${medalla}</div>
+      <div style="flex:1;min-width:0;">
+        <div style="font-family:'Nunito';font-size:26px;font-weight:900;color:var(--accent);letter-spacing:-1px;line-height:1;">${vt.toLocaleString("es-AR")}</div>
+        <div style="font-family:'DM Mono';font-size:10px;color:var(--muted);margin-top:4px;">views${fecha?" · "+fecha:""}</div>
+      </div>
+      ${link?`<a href="${link}" target="_blank" rel="noopener" style="flex-shrink:0;font-family:'DM Mono';font-size:10px;font-weight:700;color:var(--accent);text-decoration:none;border:1px solid var(--border);border-radius:9px;padding:8px 12px;">ver →</a>`:""}
+    </div>
+    ${xVeces>=1.5?`<div style="font-size:10.5px;font-family:'DM Mono';color:var(--muted);margin-top:12px;">Hizo ${xVeces.toFixed(1)}× más views que tu promedio — fijate qué tuvo de distinto y repetilo 👀</div>`:""}`;
 }
 
 // Escape de contenido cargado por usuarios (notas, links) — evita XSS y roturas de atributos
