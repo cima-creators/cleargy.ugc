@@ -328,6 +328,8 @@ textarea.fi{resize:vertical;min-height:70px;line-height:1.5;}
             <option value="approved">Aprobados</option>
             <option value="rejected">Rechazados</option>
             <option value="featured">⭐ Destacados</option>
+            <option value="crudo">🎬 Crudos</option>
+            <option value="publicado">📱 Publicados</option>
           </select>
           <select class="fsel" id="vf-product" onchange="renderVideos()" style="display:none;">
             <option value="ALL">📦 Todos los productos</option>
@@ -754,7 +756,7 @@ const BRAND_CONFIGS = {
   },
   skinfinity: {
     goal:500, // objetivo total de la campaña
-    name:'Skinfinity', logoText:'SKINFINITY', collection:'skinfinity', defaultCampaignStart:'2026-07-02', dailyVideos:3, videoGoal:100, noRacha:true, salary:450000, minVideos:100,
+    name:'Skinfinity', mixedDelivery:true, logoText:'SKINFINITY', collection:'skinfinity', defaultCampaignStart:'2026-07-02', dailyVideos:3, videoGoal:100, noRacha:true, salary:450000, minVideos:100,
     logoImg:'data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="260" height="80"><rect width="260" height="80" rx="10" fill="%23133327"/><text x="130" y="51" font-family="Georgia,serif" font-size="29" font-weight="bold" fill="white" text-anchor="middle" letter-spacing="1.5">SKINFINITY</text></svg>',
     no100k:true, adminPass:'skinfinity-admin-2025', adminPass2:'skinfinity-2025', adminPass3:'dani-2026', adminPass4:'abril-2026',
     accent:'#133327', accentLight:'#2a5a45', bg:'#eef5f1', surface2:'#e2ede7', border:'#c5dbd0',
@@ -1279,6 +1281,9 @@ function videoRow(v, compact=false){
   const metricsStr = (_igv||_ttv)
     ? [_igv?("📸 "+fmtV(_igv)):"", _ttv?("🎵 "+fmtV(_ttv)):""].filter(Boolean).join(" + ") + ((_igv&&_ttv)?(" = "+fmtV(_igv+_ttv)):"")
     : (v.views?fmtV(v.views)+" views":"—");
+  const crudoTag = v.crudo
+    ? `<span style="padding:2px 8px;border-radius:20px;font-size:9px;font-family:'DM Mono';font-weight:700;border:1px solid rgba(245,158,11,.35);color:#b45309;background:rgba(245,158,11,.1);">🎬 CRUDO</span>`
+    : "";
   const igBtn = v.linkIg
     ? `<a href="${escUrl(v.linkIg)}" target="_blank" style="padding:2px 8px;border-radius:20px;font-size:9px;font-family:'DM Mono';cursor:pointer;border:1px solid var(--border2);color:var(--muted);background:none;text-decoration:none;">📸 IG</a>`
     : "";
@@ -1288,7 +1293,7 @@ function videoRow(v, compact=false){
   const fbBtn = v.linkFb
     ? `<a href="${escUrl(v.linkFb)}" target="_blank" style="padding:2px 8px;border-radius:20px;font-size:9px;font-family:'DM Mono';cursor:pointer;border:1px solid var(--border2);color:var(--muted);background:none;text-decoration:none;">👥 FB</a>`
     : "";
-  const copyBtn = (igBtn||ttBtn||fbBtn) ? [igBtn,ttBtn,fbBtn].filter(Boolean).join(" ") : `<button onclick="copyLink('${v.id}',event)" style="padding:2px 8px;border-radius:20px;font-size:9px;font-family:'DM Mono';cursor:pointer;border:1px solid var(--border2);color:var(--muted);background:none;">📋 Copiar</button>`;
+  const copyBtn = (crudoTag||igBtn||ttBtn||fbBtn) ? [crudoTag,igBtn,ttBtn,fbBtn].filter(Boolean).join(" ") : `<button onclick="copyLink('${v.id}',event)" style="padding:2px 8px;border-radius:20px;font-size:9px;font-family:'DM Mono';cursor:pointer;border:1px solid var(--border2);color:var(--muted);background:none;">📋 Copiar</button>`;
   const startStr = campaignStartFor(v.creator);
   const calcDay = v.date ? Math.max(1,Math.floor((new Date(v.date)-new Date(startStr))/(86400000))+1) : (v.day||1);
   return`<tr>
@@ -1357,6 +1362,8 @@ function renderVideos(){
   const wf=document.getElementById("vf-views")?.value||"ALL";
   if(wf!=="ALL") vids=vids.filter(v=>viewsAcum(v)>=Number(wf));
   if(sf==="featured") vids=vids.filter(v=>v.featured||v.featuredAt);
+  else if(sf==="crudo") vids=vids.filter(v=>v.crudo);
+  else if(sf==="publicado") vids=vids.filter(v=>!v.crudo);
   else if(sf!=="ALL") vids=vids.filter(v=>v.status===sf);
   if(dateFrom) vids=vids.filter(v=>v.date&&v.date.slice(0,10)>=dateFrom);
   if(dateTo)   vids=vids.filter(v=>v.date&&v.date.slice(0,10)<=dateTo);

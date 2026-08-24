@@ -310,6 +310,24 @@ select.finput option{background:white;}
 
     <div class="upload-card">
       <div class="upload-title">Nuevo video</div>
+      <div id="up-tipo-card" style="display:none;margin-bottom:14px;">
+        <div class="flabel" style="margin-bottom:8px;">¿Qué tipo de video es?</div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;">
+          <button type="button" id="up-tipo-pub" onclick="setTipoEntrega('publicado')" style="border:2px solid var(--accent);background:rgba(26,58,143,.08);border-radius:var(--radius-sm);padding:12px 8px;cursor:pointer;font-family:inherit;text-align:center;">
+            <div style="font-size:20px;line-height:1;margin-bottom:5px;">📱</div>
+            <div style="font-size:12px;font-weight:800;color:var(--text);">Publicado</div>
+            <div style="font-size:9.5px;color:var(--muted);margin-top:2px;">en Instagram / TikTok</div>
+          </button>
+          <button type="button" id="up-tipo-cru" onclick="setTipoEntrega('crudo')" style="border:2px solid var(--border);background:transparent;border-radius:var(--radius-sm);padding:12px 8px;cursor:pointer;font-family:inherit;text-align:center;">
+            <div style="font-size:20px;line-height:1;margin-bottom:5px;">🎬</div>
+            <div style="font-size:12px;font-weight:800;color:var(--text);">Crudo</div>
+            <div style="font-size:9.5px;color:var(--muted);margin-top:2px;">solo para la marca</div>
+          </button>
+        </div>
+        <div id="up-tipo-msg" style="display:none;background:rgba(245,158,11,.09);border:1px solid rgba(245,158,11,.25);border-radius:var(--radius-xs);padding:9px 11px;margin-top:10px;font-size:11px;color:var(--muted);font-weight:600;">
+          🎬 Video crudo: no hace falta link de Instagram ni TikTok, solo el de Drive. <b>Cuenta igual para tu meta y para tu pago.</b>
+        </div>
+      </div>
       <div id="up-links-card" style="background:rgba(26,58,143,.06);border-radius:var(--radius-sm);padding:14px;margin-bottom:14px;">
         <div style="font-size:12px;font-weight:700;color:var(--accent);margin-bottom:12px;">📱 Links del video</div>
         <div class="fgroup">
@@ -565,7 +583,7 @@ const BRAND_CONFIGS = {
   },
   skinfinity: {
     border:'#b8d5c8', muted2:'#a8c5b8',
-    name:'Skinfinity', logoText:'SKINFINITY', defaultCampaignStart:'2026-07-02', sub:'Creators Hub', dailyVideos:3, videoGoal:100, noRacha:true, salary:450000, minVideos:100,
+    name:'Skinfinity', mixedDelivery:true, logoText:'SKINFINITY', defaultCampaignStart:'2026-07-02', sub:'Creators Hub', dailyVideos:3, videoGoal:100, noRacha:true, salary:450000, minVideos:100,
     logoImg:'data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="260" height="80"><rect width="260" height="80" rx="10" fill="%23133327"/><text x="130" y="51" font-family="Georgia,serif" font-size="29" font-weight="bold" fill="white" text-anchor="middle" letter-spacing="1.5">SKINFINITY</text></svg>',
     collection:'skinfinity', no100k:true, bgDark:'#cfe3d8',
     cats:['Review / unboxing','Antes y después','Rutina / tutorial','Tips','Trend / challenge','Otro'],
@@ -743,6 +761,11 @@ document.addEventListener('DOMContentLoaded',function(){
   const _hdm = document.getElementById('home-daily-max');
   if(_hdm) _hdm.textContent = '/' + DAILY_VIDEOS;
   const prodSel = document.getElementById('up-product');
+  if(BRAND.mixedDelivery && !BRAND.driveOnly){
+    // Marca mixta: la creadora elige si el video va publicado en redes o es crudo para la marca
+    const tc = document.getElementById('up-tipo-card'); if(tc) tc.style.display = 'block';
+    setTipoEntrega('publicado');
+  }
   if(BRAND.driveOnly){
     // Marca sin redes: los videos van solo a Drive — se ocultan los links de IG/TikTok
     const lc = document.getElementById('up-links-card'); if(lc) lc.style.display = 'none';
@@ -1246,7 +1269,7 @@ function videoCardHTML(v){
   const stClass = v.status==="approved"?"approved":v.status==="rejected"?"rejected":"pending";
   const stLabel = v.status==="approved"?"✓ aprobado":v.status==="rejected"?"✗ rechazado":"pendiente";
   const dateStr = v.date?new Date(v.date).toLocaleDateString("es-AR",{day:"2-digit",month:"2-digit"}):"";
-  const platIcon = v.platform==="ig"?"📸":v.platform==="tt"?"🎵":"📸🎵";
+  const platIcon = v.crudo?"🎬":v.platform==="drive"?"🎬":v.platform==="ig"?"📸":v.platform==="tt"?"🎵":"📸🎵";
   const views = viewsAcum(v);
   const viewsClass = views>=10000?"viral":views>=1000?"good":"low";
   const isViral = views>=10000;
@@ -1254,7 +1277,7 @@ function videoCardHTML(v){
     <div class="vc-day-badge">Día ${v.date?(()=>{const s=myCampaignStart();const[sy,sm,sd]=s.split("-").map(Number);return Math.max(1,Math.floor((new Date(v.date)-new Date(sy,sm-1,sd))/86400000)+1);})():(v.day||1)}</div>
     <div class="vc-body">
       <div class="vc-top">
-        <div style="font-size:13px;font-weight:800;color:var(--text);">${platIcon} ${esc(v.cat)}${dateStr?`<span style="font-family:'DM Mono';font-size:9px;font-weight:400;color:var(--muted);margin-left:8px;">${dateStr}</span>`:""}</div>
+        <div style="font-size:13px;font-weight:800;color:var(--text);">${platIcon} ${esc(v.cat)}${v.crudo?`<span style="display:inline-block;margin-left:6px;padding:1px 7px;border-radius:20px;background:rgba(245,158,11,.14);color:var(--gold);font-family:'DM Mono';font-size:8.5px;font-weight:700;vertical-align:middle;">CRUDO</span>`:""}${dateStr?`<span style="font-family:'DM Mono';font-size:9px;font-weight:400;color:var(--muted);margin-left:8px;">${dateStr}</span>`:""}</div>
         <span class="vc-status ${stClass}">${stLabel}</span>
       </div>
       ${v.notes?`<div style="background:var(--surface2);border-left:3px solid var(--border2);border-radius:0 8px 8px 0;padding:6px 11px;margin-bottom:6px;font-size:11px;line-height:1.5;color:var(--muted);">🏷 <strong>Tu nota:</strong> ${esc(v.notes)}</div>`:""}
@@ -1292,6 +1315,28 @@ function selectPlat(p, el){
   el.classList.add("active");
 }
 
+// Tipo de entrega (marcas mixtas): 'publicado' pide links de redes, 'crudo' solo el Drive
+let tipoEntrega = 'publicado';
+function setTipoEntrega(t){
+  tipoEntrega = t;
+  const pub=document.getElementById('up-tipo-pub'), cru=document.getElementById('up-tipo-cru');
+  const on='2px solid var(--accent)', off='2px solid var(--border)';
+  if(pub){ pub.style.border = t==='publicado'?on:off; pub.style.background = t==='publicado'?'rgba(26,58,143,.08)':'transparent'; }
+  if(cru){ cru.style.border = t==='crudo'?on:off; cru.style.background = t==='crudo'?'rgba(26,58,143,.08)':'transparent'; }
+  const lc=document.getElementById('up-links-card'); if(lc) lc.style.display = t==='crudo'?'none':'block';
+  const si=document.getElementById('up-sync-info'); if(si) si.style.display = t==='crudo'?'none':'block';
+  const msg=document.getElementById('up-tipo-msg'); if(msg) msg.style.display = t==='crudo'?'block':'none';
+  const dIn=document.getElementById('up-drive');
+  const dg=dIn&&dIn.closest?dIn.closest('.fgroup'):null;
+  if(dg){ const fl=dg.querySelector('.flabel');
+    if(fl) fl.innerHTML = t==='crudo'
+      ? '🎬 Link del video (Drive) <span style="color:var(--accent2)">*</span>'
+      : '🎬 Link del video original (Drive)'; }
+  const err=document.getElementById('up-err'); if(err) err.style.display='none';
+}
+// Un video es "crudo" si la marca no tiene redes, o si la creadora eligió ese modo
+function esCrudo(){ return BRAND.driveOnly || (BRAND.mixedDelivery && tipoEntrega==='crudo'); }
+
 function submitVideo(){
   // [GUARD] Prevenir doble-tap mientras se está guardando
   if(_isSubmitting) return;
@@ -1305,23 +1350,24 @@ function submitVideo(){
   const driveVal = document.getElementById("up-drive").value.trim();
   let linkFb = BRAND.facebook ? document.getElementById("up-link-fb").value.trim() : "";
   if(linkFb && !linkFb.startsWith('http')) linkFb = 'https://' + linkFb;
-  if(BRAND.driveOnly && !driveVal){document.getElementById("up-err").style.display="block";document.getElementById("up-err").textContent="Pegá el link de Drive del video.";return;}
-  if((!linkIg&&!BRAND.driveOnly)||(!cat&&!BRAND.products)){document.getElementById("up-err").style.display="block";document.getElementById("up-err").textContent=BRAND.driveOnly?"Seleccioná la categoría.":(BRAND.products?"Completá el link de Instagram.":"Completá el link de Instagram y la categoría.");return;}
+  const _crudo = esCrudo();
+  if(_crudo && !driveVal){document.getElementById("up-err").style.display="block";document.getElementById("up-err").textContent="Pegá el link de Drive del video.";return;}
+  if((!linkIg&&!_crudo)||(!cat&&!BRAND.products)){document.getElementById("up-err").style.display="block";document.getElementById("up-err").textContent=_crudo?"Seleccioná la categoría.":(BRAND.products?"Completá el link de Instagram.":"Completá el link de Instagram y la categoría.");return;}
   if(BRAND.products && !producto){document.getElementById("up-err").style.display="block";document.getElementById("up-err").textContent="Seleccioná de qué producto es el video.";return;}
   // Validar que cada link sea de su plataforma (evita pegar el de IG en el campo de TikTok)
-  if(!BRAND.driveOnly && !/instagram\.com\//i.test(linkIg)){document.getElementById("up-err").style.display="block";document.getElementById("up-err").textContent="El link de Instagram no parece válido — copialo desde la app de Instagram (debe contener instagram.com).";return;}
+  if(!_crudo && !/instagram\.com\//i.test(linkIg)){document.getElementById("up-err").style.display="block";document.getElementById("up-err").textContent="El link de Instagram no parece válido — copialo desde la app de Instagram (debe contener instagram.com).";return;}
   if(linkTt && !/tiktok\.com\//i.test(linkTt)){document.getElementById("up-err").style.display="block";document.getElementById("up-err").textContent="El link de TikTok no parece válido — copialo desde la app de TikTok (debe contener tiktok.com).";return;}
   // Dedup: verificar que no existe ya el mismo link (ignorando ?utm=, barras finales y mayúsculas)
   const _normLink = l => (l||'').trim().toLowerCase().split('?')[0].replace(/\/+$/,'').replace(/^https?:\/\/(www\.)?/,'');
   const alreadyExists = (sharedData.videos||[]).some(v =>
     (linkIg && _normLink(v.linkIg) === _normLink(linkIg)) ||
     (linkTt && _normLink(v.linkTt) === _normLink(linkTt)) ||
-    (BRAND.driveOnly && driveVal && v.driveLink && _normLink(v.driveLink) === _normLink(driveVal))
+    (_crudo && driveVal && v.driveLink && _normLink(v.driveLink) === _normLink(driveVal))
   );
   if(alreadyExists){document.getElementById("up-err").style.display="block";document.getElementById("up-err").textContent="Este video ya fue cargado.";return;}
   document.getElementById("up-err").style.display="none";
   const day = getCampaignDay() || 1;
-  const platform = BRAND.driveOnly ? "drive" : (linkIg && linkTt ? "both" : linkIg ? "ig" : "tt");
+  const platform = _crudo ? "drive" : (linkIg && linkTt ? "both" : linkIg ? "ig" : "tt");
   const link = linkIg || linkTt || driveVal;
   const video = {
     id: currentUser + '_' + Date.now() + '_' + Math.random().toString(36).slice(2,6),
@@ -1337,6 +1383,7 @@ function submitVideo(){
     saves: 0,
     cat,
     producto,
+    crudo: _crudo && !BRAND.driveOnly,
     notes: document.getElementById("up-notes").value,
     driveLink: document.getElementById("up-drive").value.trim(),
     day,
