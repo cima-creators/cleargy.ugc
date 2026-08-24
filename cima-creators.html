@@ -325,7 +325,7 @@ select.finput option{background:white;}
           </button>
         </div>
         <div id="up-tipo-msg" style="display:none;background:rgba(245,158,11,.09);border:1px solid rgba(245,158,11,.25);border-radius:var(--radius-xs);padding:9px 11px;margin-top:10px;font-size:11px;color:var(--muted);font-weight:600;">
-          🎬 Video crudo: no hace falta link de Instagram ni TikTok, solo el de Drive. <b>Cuenta igual para tu meta y para tu pago.</b>
+          🎬 Video crudo: no hace falta link de Instagram ni TikTok, solo el de Drive. Cuenta igual para tu meta y para tu pago, pero <b>tenés que explicar abajo por qué no va publicado</b>.
         </div>
       </div>
       <div id="up-links-card" style="background:rgba(26,58,143,.06);border-radius:var(--radius-sm);padding:14px;margin-bottom:14px;">
@@ -583,7 +583,7 @@ const BRAND_CONFIGS = {
   },
   skinfinity: {
     border:'#b8d5c8', muted2:'#a8c5b8',
-    name:'Skinfinity', mixedDelivery:true, logoText:'SKINFINITY', defaultCampaignStart:'2026-07-02', sub:'Creators Hub', dailyVideos:3, videoGoal:100, noRacha:true, salary:450000, minVideos:100,
+    name:'Skinfinity', logoText:'SKINFINITY', defaultCampaignStart:'2026-07-02', sub:'Creators Hub', dailyVideos:3, videoGoal:100, noRacha:true, salary:450000, minVideos:100,
     logoImg:'data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="260" height="80"><rect width="260" height="80" rx="10" fill="%23133327"/><text x="130" y="51" font-family="Georgia,serif" font-size="29" font-weight="bold" fill="white" text-anchor="middle" letter-spacing="1.5">SKINFINITY</text></svg>',
     collection:'skinfinity', no100k:true, bgDark:'#cfe3d8',
     cats:['Review / unboxing','Antes y después','Rutina / tutorial','Tips','Trend / challenge','Otro'],
@@ -761,8 +761,8 @@ document.addEventListener('DOMContentLoaded',function(){
   const _hdm = document.getElementById('home-daily-max');
   if(_hdm) _hdm.textContent = '/' + DAILY_VIDEOS;
   const prodSel = document.getElementById('up-product');
-  if(BRAND.mixedDelivery && !BRAND.driveOnly){
-    // Marca mixta: la creadora elige si el video va publicado en redes o es crudo para la marca
+  if(!BRAND.driveOnly){
+    // Toda marca con redes: la creadora elige si el video va publicado o es crudo para la marca
     const tc = document.getElementById('up-tipo-card'); if(tc) tc.style.display = 'block';
     setTipoEntrega('publicado');
   }
@@ -1332,10 +1332,19 @@ function setTipoEntrega(t){
     if(fl) fl.innerHTML = t==='crudo'
       ? '🎬 Link del video (Drive) <span style="color:var(--accent2)">*</span>'
       : '🎬 Link del video original (Drive)'; }
+  const nIn=document.getElementById('up-notes');
+  const ng=nIn&&nIn.closest?nIn.closest('.fgroup'):null;
+  if(ng){ const nl=ng.querySelector('.flabel');
+    if(nl) nl.innerHTML = t==='crudo'
+      ? 'Motivo <span style="color:var(--accent2)">*</span>'
+      : 'Notas (opcional)'; }
+  if(nIn) nIn.placeholder = t==='crudo'
+    ? 'ej: video crudo para que lo publique la marca'
+    : 'algo que quieras aclarar...';
   const err=document.getElementById('up-err'); if(err) err.style.display='none';
 }
 // Un video es "crudo" si la marca no tiene redes, o si la creadora eligió ese modo
-function esCrudo(){ return BRAND.driveOnly || (BRAND.mixedDelivery && tipoEntrega==='crudo'); }
+function esCrudo(){ return BRAND.driveOnly || tipoEntrega==='crudo'; }
 
 function submitVideo(){
   // [GUARD] Prevenir doble-tap mientras se está guardando
@@ -1352,6 +1361,13 @@ function submitVideo(){
   if(linkFb && !linkFb.startsWith('http')) linkFb = 'https://' + linkFb;
   const _crudo = esCrudo();
   if(_crudo && !driveVal){document.getElementById("up-err").style.display="block";document.getElementById("up-err").textContent="Pegá el link de Drive del video.";return;}
+  // Subir sin links de redes exige justificar por qué
+  const _notaVal = document.getElementById("up-notes").value.trim();
+  if(_crudo && !BRAND.driveOnly && _notaVal.length < 5){
+    document.getElementById("up-err").style.display="block";
+    document.getElementById("up-err").textContent="Contá en el motivo por qué este video no va publicado en redes.";
+    return;
+  }
   if((!linkIg&&!_crudo)||(!cat&&!BRAND.products)){document.getElementById("up-err").style.display="block";document.getElementById("up-err").textContent=_crudo?"Seleccioná la categoría.":(BRAND.products?"Completá el link de Instagram.":"Completá el link de Instagram y la categoría.");return;}
   if(BRAND.products && !producto){document.getElementById("up-err").style.display="block";document.getElementById("up-err").textContent="Seleccioná de qué producto es el video.";return;}
   // Validar que cada link sea de su plataforma (evita pegar el de IG en el campo de TikTok)
@@ -1384,7 +1400,7 @@ function submitVideo(){
     cat,
     producto,
     crudo: _crudo && !BRAND.driveOnly,
-    notes: document.getElementById("up-notes").value,
+    notes: _notaVal,
     driveLink: document.getElementById("up-drive").value.trim(),
     day,
     score: null,
