@@ -1332,16 +1332,18 @@ function renderStatusPanel(){
   el.innerHTML=CREATORS.map(c=>{
     const total=(data.videos||[]).filter(v=>v.creator===c&&v.status!=='rejected').length;
     const hoy=(data.videos||[]).filter(v=>v.creator===c&&argDate(v.date)===today).length;
-    const racha=getVideosOnDay(c,0)===0&&getVideosOnDay(c,1)===0;
+    // Alerta: no subió ni hoy ni ayer (nada que ver con el bono de racha)
+    const frenada=getVideosOnDay(c,0)===0&&getVideosOnDay(c,1)===0;
     const _dv=BRAND.dailyVideos||5;
-    const pct=Math.min(100,Math.round(total/_dv*100));
+    const _meta=minDe(c);
+    const pct=Math.min(100,Math.round(total/_meta*100));
     const color=COLORS[c]||"#6366f1";
     return`<div style="background:var(--surface2);border:1px solid var(--border);border-radius:12px;padding:12px 16px;">
       <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:6px;">
         <span style="font-family:'Nunito';font-weight:800;font-size:13px;color:${color}">${NAMES[c].split(" ")[0]}</span>
         <div style="display:flex;gap:6px;align-items:center;">
-          ${racha?'<span style="background:#fee2e2;color:#dc2626;font-size:9px;font-family:\'DM Mono\';padding:2px 7px;border-radius:20px;font-weight:700;">RACHA</span>':""}
-          <span style="font-family:'DM Mono';font-size:11px;color:var(--muted);">${total}/${_dv} total · ${hoy} hoy</span>
+          ${frenada?'<span style="background:#fee2e2;color:#dc2626;font-size:9px;font-family:\'DM Mono\';padding:2px 7px;border-radius:20px;font-weight:700;">2 DÍAS SIN SUBIR</span>':""}
+          <span style="font-family:'DM Mono';font-size:11px;color:var(--muted);">${total}/${_meta} total · <b style="color:${hoy>=_dv?'#16a34a':hoy>0?'#d97706':'var(--muted)'}">${hoy}</b>/${_dv} hoy</span>
         </div>
       </div>
       <div style="height:5px;background:var(--border);border-radius:3px;overflow:hidden;">
@@ -2819,7 +2821,7 @@ loadConfig();
 <!-- Auto-actualización: GitHub Pages cachea el HTML y los celulares lo retienen mucho más.
      Esto compara la versión publicada con la que está corriendo y refresca sola. -->
 <script>
-const APP_VERSION = '2026-08-24-b';
+const APP_VERSION = '2026-08-24-c';
 (function(){
   var CLAVE='cima_ver_reload';
   function hayAlguienEscribiendo(){
