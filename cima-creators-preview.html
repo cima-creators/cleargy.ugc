@@ -99,7 +99,7 @@ select.linput option{background:white;}
 .vc-meta{font-family:'Poppins';font-size:9px;color:var(--muted);letter-spacing:.5px;}
 .vc-status{font-size:9px;font-family:'Poppins';letter-spacing:.5px;padding:3px 9px;border-radius:20px;font-weight:600;white-space:nowrap;}
 .vc-status.approved{background:rgba(var(--acc-rgb),.1);color:var(--accent);}
-.vc-status.pending{background:rgba(96,128,160,.1);color:var(--muted);}
+.vc-status.pending{background:rgba(138,126,119,.1);color:var(--muted);}
 .vc-status.rejected{background:rgba(193,97,60,.1);color:var(--accent2);}
 .vc-metrics{display:flex;gap:22px;align-items:flex-end;margin:0 0 14px;}
 .vcm{display:flex;flex-direction:column;}
@@ -149,13 +149,13 @@ select.finput option{background:white;}
 
 /* BONOS */
 .bono-card{background:var(--surface);border-radius:var(--radius);padding:18px;margin-bottom:8px;box-shadow:var(--shadow);}
-.bono-card.ganado{background:rgba(245,166,35,.06);box-shadow:0 2px 16px rgba(245,166,35,.15);}
+.bono-card.ganado{background:rgba(176,123,46,.06);box-shadow:0 2px 16px rgba(176,123,46,.15);}
 .bono-title{font-size:15px;font-weight:800;margin-bottom:4px;color:var(--text);}
 .bono-desc{font-size:12px;color:var(--muted);margin-bottom:12px;line-height:1.6;font-weight:600;}
 .bono-amount{font-family:'Poppins';font-size:28px;font-weight:900;color:var(--accent);letter-spacing:-1px;}
 .bono-status{font-size:9px;font-family:'Poppins';letter-spacing:1px;padding:4px 12px;border-radius:20px;display:inline-block;margin-top:8px;text-transform:uppercase;font-weight:600;}
-.bono-status.disponible{background:rgba(96,128,160,.1);color:var(--muted);}
-.bono-status.ganaste{background:rgba(245,166,35,.15);color:var(--gold);}
+.bono-status.disponible{background:rgba(138,126,119,.1);color:var(--muted);}
+.bono-status.ganaste{background:rgba(176,123,46,.15);color:var(--gold);}
 .bono-status.perdiste{background:rgba(193,97,60,.1);color:var(--accent2);}
 
 /* IDEAS */
@@ -368,6 +368,20 @@ body{background:var(--bg);}
   color:var(--text) !important;border-radius:99px !important;font-weight:500 !important;
   font-size:12px !important;padding:8px 14px !important;
 }
+/* ---- últimos detalles para que todo hable el mismo idioma ---- */
+.bono-card{border:1px solid var(--border);box-shadow:none;border-radius:22px;}
+.bono-card.ganado{background:rgba(176,123,46,.06);box-shadow:none;border-color:rgba(176,123,46,.25);}
+.bono-status{font-size:10.5px;letter-spacing:.06em;text-transform:none;font-weight:500;padding:5px 13px;}
+.bono-amount{font-weight:700;letter-spacing:-.03em;}
+.bono-title{font-weight:600;letter-spacing:-.015em;}
+.bono-desc{font-weight:400;}
+.stitle{font-weight:700;letter-spacing:-.03em;}
+.ssub{font-weight:400;}
+.lb-item{border:1px solid var(--border);box-shadow:none;border-radius:20px;}
+.notif-card,.idea-card{border:1px solid var(--border);box-shadow:none;border-radius:20px;}
+.upload-card{border:1px solid var(--border);box-shadow:none;border-radius:22px;}
+.stat-card{border:1px solid var(--border);box-shadow:none;}
+.vsort-tab,.vf-tab{font-weight:500;}
 </style>
 </head>
 <body>
@@ -1338,18 +1352,18 @@ function renderHome(){
   // Celebración según nivel de racha
   let celebracion = "";
   if(RACHA_ACTIVA && !BRAND.noRacha && streak > 0 && streak % 7 === 0){
-    celebracion = `<div style="margin-top:12px;background:linear-gradient(135deg,rgba(217,119,6,.18),rgba(245,166,35,.18));border:2.5px solid #96682A;border-radius:14px;padding:16px;text-align:center;box-shadow:0 4px 20px rgba(217,119,6,.25);">
+    celebracion = `<div style="margin-top:12px;background:linear-gradient(135deg,rgba(217,119,6,.18),rgba(176,123,46,.18));border:2.5px solid #96682A;border-radius:14px;padding:16px;text-align:center;box-shadow:0 4px 20px rgba(217,119,6,.25);">
       <div style="font-size:32px;margin-bottom:4px;">🏆🔥🏆</div>
       <div style="font-family:'Poppins';font-size:16px;font-weight:900;color:#c45000;">¡7 DÍAS SEGUIDOS — RACHA COMPLETA!</div>
       <div style="font-size:11px;font-family:'Poppins';color:var(--muted);margin-top:4px;">Desbloqueaste el bono de ${fmtPesos(RACHA_MONTO)} — se acredita solo 💰</div>
     </div>`;
   } else if(RACHA_ACTIVA && !BRAND.noRacha && todayVids >= DAILY_VIDEOS && streak >= 3){
-    celebracion = `<div style="margin-top:12px;background:linear-gradient(135deg,rgba(245,100,0,.12),rgba(245,166,35,.12));border:2px solid rgba(245,120,0,.4);border-radius:14px;padding:14px 16px;text-align:center;">
+    celebracion = `<div style="margin-top:12px;background:linear-gradient(135deg,rgba(245,100,0,.12),rgba(176,123,46,.12));border:2px solid rgba(245,120,0,.4);border-radius:14px;padding:14px 16px;text-align:center;">
       <div style="font-size:28px;margin-bottom:4px;">🔥🔥🔥</div>
       <div style="font-family:'Poppins';font-size:15px;font-weight:900;color:#c45000;">¡Racha de ${streak} días!</div>
     </div>`;
   } else if(todayVids >= DAILY_VIDEOS){
-    celebracion = `<div style="margin-top:12px;background:rgba(245,166,35,.1);border:1px solid rgba(245,166,35,.35);border-radius:14px;padding:12px 16px;text-align:center;">
+    celebracion = `<div style="margin-top:12px;background:rgba(176,123,46,.1);border:1px solid rgba(176,123,46,.35);border-radius:14px;padding:12px 16px;text-align:center;">
       <div style="font-size:24px;margin-bottom:2px;">🔥</div>
       <div style="font-family:'Poppins';font-size:14px;font-weight:800;color:#c47f00;">¡${DAILY_VIDEOS} videos del día completos!</div>
     </div>`;
@@ -2346,7 +2360,7 @@ loadData();
 <!-- Auto-actualización: GitHub Pages cachea el HTML y los celulares lo retienen mucho más.
      Esto compara la versión publicada con la que está corriendo y refresca sola. -->
 <script>
-const APP_VERSION = 'preview-4';
+const APP_VERSION = 'preview-5';
 (function(){
   var CLAVE='cima_ver_reload';
   function hayAlguienEscribiendo(){
