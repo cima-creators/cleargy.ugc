@@ -7,22 +7,22 @@
 <meta http-equiv="Pragma" content="no-cache">
 <meta http-equiv="Expires" content="0">
 <title>Admin Panel</title>
-<link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800;900&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 <style>
 :root{
   --bg:#e8f4fc;--surface:#fff;--surface2:#f0f8ff;--surface3:#dbeeff;
   --border:#c5dff0;--border2:#a8cee5;
   --blue:#1a3a8f;--blue-light:#2a52c9;--blue-mid:#3b82c4;
   --accent:#1a3a8f;--accent-light:#2a52c9;--accent3:#2a52c9;
-  --accent2:#e85d26;--gold:#f59e0b;
+  --accent2:#C1613C;--gold:#B07B2E;
   --text:#0d1f4f;--muted:#6080a0;--muted2:#c5dff0;
   --radius:16px;--radius-sm:12px;--radius-xs:8px;
-  --shadow:0 1px 8px rgba(26,58,143,.08);
-  --shadow-md:0 4px 20px rgba(26,58,143,.12);
-  --shadow-lg:0 8px 40px rgba(26,58,143,.18);
+  --shadow:0 1px 8px rgba(var(--acc-rgb),.08);
+  --shadow-md:0 4px 20px rgba(var(--acc-rgb),.12);
+  --shadow-lg:0 8px 40px rgba(var(--acc-rgb),.18);
 }
 *{margin:0;padding:0;box-sizing:border-box;}
-body{background:var(--bg);color:var(--text);font-family:'Nunito',sans-serif;min-height:100vh;}
+body{background:var(--bg);color:var(--text);font-family:'Poppins',sans-serif;min-height:100vh;}
 ::-webkit-scrollbar{width:3px;height:3px;}
 ::-webkit-scrollbar-thumb{background:var(--border2);border-radius:3px;}
 
@@ -37,14 +37,14 @@ body{background:var(--bg);color:var(--text);font-family:'Nunito',sans-serif;min-
 }
 .login-logo-wrap{text-align:center;margin-bottom:32px;}
 .login-logo-wrap img{height:48px;}
-.login-tagline{font-family:'DM Mono';font-size:10px;letter-spacing:3px;text-transform:uppercase;color:var(--muted);margin-top:10px;}
+.login-tagline{font-family:'Poppins';font-size:10px;letter-spacing:3px;text-transform:uppercase;color:var(--muted);margin-top:10px;}
 .lg{display:flex;flex-direction:column;gap:6px;margin-bottom:14px;}
-.ll{font-family:'DM Mono';font-size:9px;letter-spacing:2px;text-transform:uppercase;color:var(--muted);}
-.li{background:var(--surface2);border:2px solid var(--border);color:var(--text);padding:13px 16px;border-radius:var(--radius-sm);font-size:15px;font-family:'Nunito';font-weight:600;outline:none;width:100%;transition:border-color .15s;}
+.ll{font-family:'Poppins';font-size:9px;letter-spacing:2px;text-transform:uppercase;color:var(--muted);}
+.li{background:var(--surface2);border:2px solid var(--border);color:var(--text);padding:13px 16px;border-radius:var(--radius-sm);font-size:15px;font-family:'Poppins';font-weight:600;outline:none;width:100%;transition:border-color .15s;}
 .li:focus{border-color:var(--blue-light);}
-.lb{width:100%;padding:15px;background:var(--blue);color:white;border:none;border-radius:var(--radius-sm);font-family:'Nunito';font-size:15px;font-weight:800;cursor:pointer;margin-top:6px;box-shadow:0 4px 16px rgba(26,58,143,.3);transition:all .15s;}
+.lb{width:100%;padding:15px;background:var(--blue);color:white;border:none;border-radius:var(--radius-sm);font-family:'Poppins';font-size:15px;font-weight:800;cursor:pointer;margin-top:6px;box-shadow:0 4px 16px rgba(var(--acc-rgb),.3);transition:all .15s;}
 .lb:hover{background:var(--blue-light);}
-.le{background:rgba(232,93,38,.08);border:2px solid rgba(232,93,38,.2);color:var(--accent2);padding:10px;border-radius:var(--radius-xs);font-size:12px;text-align:center;display:none;margin-top:10px;font-weight:700;}
+.le{background:rgba(193,97,60,.08);border:2px solid rgba(193,97,60,.2);color:var(--accent2);padding:10px;border-radius:var(--radius-xs);font-size:12px;text-align:center;display:none;margin-top:10px;font-weight:700;}
 .le.show{display:block;}
 
 /* LAYOUT */
@@ -68,7 +68,7 @@ body{background:var(--bg);color:var(--text);font-family:'Nunito',sans-serif;min-
 .ham-btn span{display:block;width:18px;height:2px;background:white;border-radius:2px;transition:all .25s;}
 .header-logo img{height:28px;}
 .header-actions{display:flex;gap:6px;}
-.hbtn{padding:7px 14px;border-radius:var(--radius-xs);font-family:'Nunito';font-size:12px;font-weight:700;cursor:pointer;border:2px solid rgba(255,255,255,.3);background:rgba(255,255,255,.1);color:white;transition:all .15s;white-space:nowrap;}
+.hbtn{padding:7px 14px;border-radius:var(--radius-xs);font-family:'Poppins';font-size:12px;font-weight:700;cursor:pointer;border:2px solid rgba(255,255,255,.3);background:rgba(255,255,255,.1);color:white;transition:all .15s;white-space:nowrap;}
 .hbtn:hover{border-color:var(--blue);color:var(--blue);}
 .hbtn.primary{background:var(--blue);color:white;border-color:var(--blue);}
 .hbtn.primary:hover{background:var(--blue-light);border-color:var(--blue-light);}
@@ -94,7 +94,7 @@ body{background:var(--bg);color:var(--text);font-family:'Nunito',sans-serif;min-
 .sidebar-inner{padding:12px 8px;}
 .sidebar-overlay{display:none;position:fixed;inset:0;top:56px;background:rgba(13,31,79,.25);z-index:98;backdrop-filter:blur(2px);}
 .sidebar-overlay.show{display:block;}
-.slabel{font-family:'DM Mono';font-size:8px;letter-spacing:2.5px;text-transform:uppercase;color:var(--muted2);padding:12px 10px 4px;}
+.slabel{font-family:'Poppins';font-size:8px;letter-spacing:2.5px;text-transform:uppercase;color:var(--muted2);padding:12px 10px 4px;}
 .nitem{
   display:flex;align-items:center;gap:10px;padding:10px 12px;
   cursor:pointer;font-size:13px;font-weight:700;border-radius:var(--radius-sm);
@@ -103,10 +103,10 @@ body{background:var(--bg);color:var(--text);font-family:'Nunito',sans-serif;min-
 .nitem:hover{color:var(--blue);background:var(--surface2);}
 .nitem.active{color:var(--blue);background:var(--surface2);box-shadow:inset 3px 0 0 var(--blue);}
 .ndot{width:6px;height:6px;border-radius:50%;flex-shrink:0;}
-.ppill{padding:7px 14px;border-radius:20px;font-size:11px;font-family:'Nunito';font-weight:700;cursor:pointer;border:2px solid var(--border);color:var(--muted);background:var(--surface);transition:all .12s;white-space:nowrap;}
+.ppill{padding:7px 14px;border-radius:20px;font-size:11px;font-family:'Poppins';font-weight:700;cursor:pointer;border:2px solid var(--border);color:var(--muted);background:var(--surface);transition:all .12s;white-space:nowrap;}
 .ppill:hover{border-color:var(--blue);color:var(--blue);}
 .ppill.active{background:var(--blue);color:white;border-color:var(--blue);}
-.nbadge{margin-left:auto;font-family:'DM Mono';font-size:9px;background:rgba(26,58,143,.1);padding:2px 8px;border-radius:20px;color:var(--blue);}
+.nbadge{margin-left:auto;font-family:'Poppins';font-size:9px;background:rgba(var(--acc-rgb),.1);padding:2px 8px;border-radius:20px;color:var(--blue);}
 
 /* CONTENT */
 .content{flex:1;overflow-y:auto;padding:24px;}
@@ -115,9 +115,9 @@ body{background:var(--bg);color:var(--text);font-family:'Nunito',sans-serif;min-
 /* VIEWS */
 .view{display:none;animation:fadeIn .2s ease;}.view.active{display:block;}
 @keyframes fadeIn{from{opacity:0;transform:translateY(4px)}to{opacity:1;transform:translateY(0)}}
-.view-title{font-family:'Nunito';font-size:24px;font-weight:900;letter-spacing:-.5px;margin-bottom:2px;}
+.view-title{font-family:'Poppins';font-size:24px;font-weight:900;letter-spacing:-.5px;margin-bottom:2px;}
 .view-sub{font-size:12px;color:var(--muted);margin-bottom:20px;font-weight:600;}
-.sec-label{font-family:'DM Mono';font-size:8px;letter-spacing:2.5px;text-transform:uppercase;color:var(--muted);margin-bottom:14px;padding-bottom:8px;border-bottom:2px solid var(--surface2);display:flex;align-items:center;gap:8px;}
+.sec-label{font-family:'Poppins';font-size:8px;letter-spacing:2.5px;text-transform:uppercase;color:var(--muted);margin-bottom:14px;padding-bottom:8px;border-bottom:2px solid var(--surface2);display:flex;align-items:center;gap:8px;}
 .sec-label::before{content:'';display:inline-block;width:3px;height:12px;background:var(--accent);border-radius:2px;}
 
 /* STAT CARDS - responsive grid */
@@ -126,27 +126,27 @@ body{background:var(--bg);color:var(--text);font-family:'Nunito',sans-serif;min-
 @media(max-width:600px){.stats-row{grid-template-columns:1fr 1fr;}}
 @media(max-width:430px){.stats-row{grid-template-columns:1fr 1fr;}}
 /* PERIOD PILLS */
-.period-pill{padding:6px 14px;border-radius:20px;font-size:11px;font-family:'Nunito';font-weight:700;cursor:pointer;border:2px solid var(--border2);color:var(--muted);background:var(--surface);transition:all .12s;}
-.period-pill.active{background:var(--blue);color:white;border-color:var(--blue);box-shadow:0 3px 10px rgba(26,58,143,.25);}
+.period-pill{padding:6px 14px;border-radius:20px;font-size:11px;font-family:'Poppins';font-weight:700;cursor:pointer;border:2px solid var(--border2);color:var(--muted);background:var(--surface);transition:all .12s;}
+.period-pill.active{background:var(--blue);color:white;border-color:var(--blue);box-shadow:0 3px 10px rgba(var(--acc-rgb),.25);}
 
 /* STAT CARDS */
 .stats-row{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:24px;}
 @media(max-width:600px){.stats-row{grid-template-columns:1fr 1fr;}}
-.scard{background:var(--surface);border-radius:14px;padding:20px 18px 16px;box-shadow:0 1px 8px rgba(26,58,143,.07);}
-.sc-label{font-family:'DM Mono';font-size:7px;letter-spacing:2px;color:var(--muted);text-transform:uppercase;margin-bottom:10px;}
-.sc-val{font-family:'Nunito';font-size:36px;font-weight:900;line-height:1;letter-spacing:-2px;}
-.sc-sub{font-size:9px;color:var(--muted);margin-top:6px;font-family:'DM Mono';letter-spacing:.5px;}
+.scard{background:var(--surface);border-radius:14px;padding:20px 18px 16px;box-shadow:0 1px 8px rgba(var(--acc-rgb),.07);}
+.sc-label{font-family:'Poppins';font-size:7px;letter-spacing:2px;color:var(--muted);text-transform:uppercase;margin-bottom:10px;}
+.sc-val{font-family:'Poppins';font-size:36px;font-weight:900;line-height:1;letter-spacing:-2px;}
+.sc-sub{font-size:9px;color:var(--muted);margin-top:6px;font-family:'Poppins';letter-spacing:.5px;}
 
 /* CREATOR GRID */
 .creator-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:24px;}
 @media(max-width:600px){.creator-grid{grid-template-columns:1fr 1fr;}}
 @media(max-width:430px){.creator-grid{grid-template-columns:1fr;}}
-.creator-card{background:var(--surface);border-radius:14px;padding:14px 16px;box-shadow:0 1px 8px rgba(26,58,143,.07);cursor:pointer;transition:all .15s;display:flex;align-items:center;gap:12px;}
-.creator-card:hover{box-shadow:0 4px 20px rgba(26,58,143,.13);transform:translateY(-1px);}
-.cc-avatar{width:40px;height:40px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-family:'DM Mono';font-size:12px;font-weight:700;flex-shrink:0;}
+.creator-card{background:var(--surface);border-radius:14px;padding:14px 16px;box-shadow:0 1px 8px rgba(var(--acc-rgb),.07);cursor:pointer;transition:all .15s;display:flex;align-items:center;gap:12px;}
+.creator-card:hover{box-shadow:0 4px 20px rgba(var(--acc-rgb),.13);transform:translateY(-1px);}
+.cc-avatar{width:40px;height:40px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-family:'Poppins';font-size:12px;font-weight:700;flex-shrink:0;}
 .cc-info{flex:1;min-width:0;}
 .cc-name{font-size:13px;font-weight:800;color:var(--text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;margin-bottom:3px;}
-.cc-meta{font-family:'DM Mono';font-size:9px;color:var(--muted);letter-spacing:.3px;}
+.cc-meta{font-family:'Poppins';font-size:9px;color:var(--muted);letter-spacing:.3px;}
 
 /* TABLE */
 .twrap{background:var(--surface);border-radius:var(--radius);overflow:hidden;margin-bottom:16px;box-shadow:var(--shadow);}
@@ -154,31 +154,31 @@ body{background:var(--bg);color:var(--text);font-family:'Nunito',sans-serif;min-
 @media(max-width:430px){table{min-width:400px;}}
 table{width:100%;border-collapse:collapse;min-width:500px;}
 thead tr{border-bottom:2px solid var(--surface2);}
-th{font-family:'DM Mono';font-size:8px;letter-spacing:1.5px;text-transform:uppercase;color:var(--muted);padding:12px 14px;text-align:left;font-weight:400;white-space:nowrap;background:var(--surface2);}
+th{font-family:'Poppins';font-size:8px;letter-spacing:1.5px;text-transform:uppercase;color:var(--muted);padding:12px 14px;text-align:left;font-weight:400;white-space:nowrap;background:var(--surface2);}
 tbody tr{border-bottom:1px solid var(--surface2);transition:background .1s;}
 tbody tr:hover{background:var(--surface3);}
 td{padding:11px 14px;font-size:12px;vertical-align:middle;}
 
 /* BADGE */
-.badge{display:inline-block;padding:3px 10px;border-radius:20px;font-size:9px;font-family:'DM Mono';font-weight:600;text-transform:uppercase;}
-.badge-approved{background:rgba(26,58,143,.1);color:var(--blue);}
-.badge-pending{background:rgba(96,128,160,.1);color:var(--muted);}
-.badge-rejected{background:rgba(232,93,38,.1);color:var(--accent2);}
+.badge{display:inline-block;padding:3px 10px;border-radius:20px;font-size:9px;font-family:'Poppins';font-weight:600;text-transform:uppercase;}
+.badge-approved{background:rgba(var(--acc-rgb),.1);color:var(--blue);}
+.badge-pending{background:rgba(138,126,119,.1);color:var(--muted);}
+.badge-rejected{background:rgba(193,97,60,.1);color:var(--accent2);}
 
 /* ACTIONS */
 .action-row{display:flex;gap:4px;flex-wrap:wrap;}
-.abtn{padding:5px 10px;border-radius:20px;font-size:9px;font-family:'DM Mono';cursor:pointer;border:1.5px solid;transition:all .12s;font-weight:600;white-space:nowrap;}
-.abtn-approve{border-color:rgba(26,58,143,.3);color:var(--blue);background:rgba(26,58,143,.05);}
-.abtn-approve:hover{background:rgba(26,58,143,.12);}
-.abtn-reject{border-color:rgba(232,93,38,.3);color:var(--accent2);background:rgba(232,93,38,.05);}
-.abtn-reject:hover{background:rgba(232,93,38,.12);}
+.abtn{padding:5px 10px;border-radius:20px;font-size:9px;font-family:'Poppins';cursor:pointer;border:1.5px solid;transition:all .12s;font-weight:600;white-space:nowrap;}
+.abtn-approve{border-color:rgba(var(--acc-rgb),.3);color:var(--blue);background:rgba(var(--acc-rgb),.05);}
+.abtn-approve:hover{background:rgba(var(--acc-rgb),.12);}
+.abtn-reject{border-color:rgba(193,97,60,.3);color:var(--accent2);background:rgba(193,97,60,.05);}
+.abtn-reject:hover{background:rgba(193,97,60,.12);}
 .abtn-neutral{border-color:var(--border2);color:var(--muted);background:none;}
 .abtn-neutral:hover{border-color:var(--blue-mid);color:var(--blue-mid);}
 
 /* FILTERS */
 .filters{display:flex;gap:8px;margin-bottom:12px;flex-wrap:wrap;align-items:center;}
-.fsel{background:var(--surface);border:2px solid var(--border);color:var(--muted);padding:8px 12px;border-radius:var(--radius-sm);font-size:12px;font-family:'Nunito';font-weight:600;cursor:pointer;outline:none;}
-.col-toggle{padding:4px 12px;border-radius:20px;font-size:10px;font-family:'DM Mono';font-weight:600;cursor:pointer;border:1.5px solid var(--border2);color:var(--muted);background:var(--surface);transition:all .12s;letter-spacing:.3px;}
+.fsel{background:var(--surface);border:2px solid var(--border);color:var(--muted);padding:8px 12px;border-radius:var(--radius-sm);font-size:12px;font-family:'Poppins';font-weight:600;cursor:pointer;outline:none;}
+.col-toggle{padding:4px 12px;border-radius:20px;font-size:10px;font-family:'Poppins';font-weight:600;cursor:pointer;border:1.5px solid var(--border2);color:var(--muted);background:var(--surface);transition:all .12s;letter-spacing:.3px;}
 .col-toggle.active{background:var(--accent);color:white;border-color:var(--accent);}
 
 
@@ -187,18 +187,18 @@ td{padding:11px 14px;font-size:12px;vertical-align:middle;}
 .overlay.open{display:flex;}
 .modal{background:var(--surface);border-radius:20px;width:100%;max-width:460px;padding:28px;box-shadow:var(--shadow-lg);max-height:90vh;overflow-y:auto;}
 .mhead{display:flex;justify-content:space-between;align-items:center;margin-bottom:20px;}
-.mtitle{font-family:'Nunito';font-size:20px;font-weight:900;}
+.mtitle{font-family:'Poppins';font-size:20px;font-weight:900;}
 .xbtn{background:var(--surface2);border:2px solid var(--border);color:var(--muted);cursor:pointer;padding:6px 12px;border-radius:var(--radius-xs);font-size:13px;font-weight:700;}
 .score-slider{width:100%;-webkit-appearance:none;height:6px;background:var(--surface2);border-radius:6px;outline:none;margin:14px 0;}
-.score-slider::-webkit-slider-thumb{-webkit-appearance:none;width:22px;height:22px;border-radius:50%;background:var(--blue);cursor:pointer;box-shadow:0 2px 8px rgba(26,58,143,.3);}
-.score-display{font-family:'Nunito';font-size:56px;font-weight:900;text-align:center;color:var(--blue);letter-spacing:-2px;}
+.score-slider::-webkit-slider-thumb{-webkit-appearance:none;width:22px;height:22px;border-radius:50%;background:var(--blue);cursor:pointer;box-shadow:0 2px 8px rgba(var(--acc-rgb),.3);}
+.score-display{font-family:'Poppins';font-size:56px;font-weight:900;text-align:center;color:var(--blue);letter-spacing:-2px;}
 
 /* FORM */
 .frow{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:12px;}
 .fgroup{display:flex;flex-direction:column;gap:6px;}
 .fgroup.full{grid-column:span 2;}
-.flabel{font-family:'DM Mono';font-size:9px;letter-spacing:1.5px;text-transform:uppercase;color:var(--muted);}
-.fi{background:var(--surface2);border:2px solid var(--border);color:var(--text);padding:10px 12px;border-radius:var(--radius-sm);font-size:13px;font-family:'Nunito';font-weight:600;outline:none;width:100%;}
+.flabel{font-family:'Poppins';font-size:9px;letter-spacing:1.5px;text-transform:uppercase;color:var(--muted);}
+.fi{background:var(--surface2);border:2px solid var(--border);color:var(--text);padding:10px 12px;border-radius:var(--radius-sm);font-size:13px;font-family:'Poppins';font-weight:600;outline:none;width:100%;}
 .fi:focus{border-color:var(--blue-light);}
 textarea.fi{resize:vertical;min-height:70px;line-height:1.5;}
 
@@ -212,7 +212,7 @@ textarea.fi{resize:vertical;min-height:70px;line-height:1.5;}
 .fin-card.pagado{border-left:3px solid var(--blue);}
 
 /* TOAST */
-.toast{position:fixed;bottom:24px;right:24px;background:var(--blue);color:white;padding:12px 20px;border-radius:12px;font-family:'Nunito';font-size:13px;font-weight:800;opacity:0;transition:all .25s;z-index:999;pointer-events:none;box-shadow:var(--shadow-md);}
+.toast{position:fixed;bottom:24px;right:24px;background:var(--blue);color:white;padding:12px 20px;border-radius:12px;font-family:'Poppins';font-size:13px;font-weight:800;opacity:0;transition:all .25s;z-index:999;pointer-events:none;box-shadow:var(--shadow-md);}
 .toast.show{opacity:1;}
 
 /* IDEA FORM */
@@ -220,16 +220,29 @@ textarea.fi{resize:vertical;min-height:70px;line-height:1.5;}
 
 /* VIRAL CARD */
 .viral-card{background:var(--surface);border-radius:var(--radius);padding:16px;margin-bottom:8px;display:flex;align-items:center;gap:14px;box-shadow:var(--shadow);border-left:4px solid var(--border2);}
-.viral-card.v-mega{border-left-color:#16a34a;background:rgba(22,163,74,.02);}
+.viral-card.v-mega{border-left-color:#3F8F6B;background:rgba(22,163,74,.02);}
 .viral-card.v-high{border-left-color:var(--accent);}
-.viral-rank{font-family:'Nunito';font-size:28px;font-weight:900;color:var(--muted2);min-width:32px;letter-spacing:-1px;}
-.viral-rank.r1{color:#f59e0b;}.viral-rank.r2{color:#9ca3af;}.viral-rank.r3{color:#cd9060;}
-.viral-views{font-family:'Nunito';font-size:24px;font-weight:900;line-height:1;letter-spacing:-1px;}
-.viral-views.v-mega{color:#16a34a;}
+.viral-rank{font-family:'Poppins';font-size:28px;font-weight:900;color:var(--muted2);min-width:32px;letter-spacing:-1px;}
+.viral-rank.r1{color:#B07B2E;}.viral-rank.r2{color:#9ca3af;}.viral-rank.r3{color:#cd9060;}
+.viral-views{font-family:'Poppins';font-size:24px;font-weight:900;line-height:1;letter-spacing:-1px;}
+.viral-views.v-mega{color:#3F8F6B;}
 .viral-views.v-high{color:var(--accent);}
-.viral-badge-pill{font-size:8px;font-family:'DM Mono';font-weight:700;padding:2px 7px;border-radius:20px;letter-spacing:.5px;display:inline-block;margin-top:3px;}
-.viral-badge-pill.mega{background:rgba(22,163,74,.12);color:#16a34a;}
-.viral-badge-pill.high{background:rgba(26,58,143,.1);color:var(--accent);}
+.viral-badge-pill{font-size:8px;font-family:'Poppins';font-weight:700;padding:2px 7px;border-radius:20px;letter-spacing:.5px;display:inline-block;margin-top:3px;}
+.viral-badge-pill.mega{background:rgba(22,163,74,.12);color:#3F8F6B;}
+.viral-badge-pill.high{background:rgba(var(--acc-rgb),.1);color:var(--accent);}
+/* ═══════════ PIEL CÁLIDA — admin, mismo idioma que la app ═══════════ */
+body{background:var(--bg);font-family:'Poppins',sans-serif;}
+.scard,.acard,.bono-card,.fin-card,.creator-card,.cc,.modal,.mbox{
+  border:1px solid var(--border);box-shadow:none;border-radius:var(--radius);
+}
+.sc-val,.big,.num{letter-spacing:-.03em;font-variant-numeric:tabular-nums;}
+.sc-label,.sec-label{letter-spacing:.12em;text-transform:uppercase;font-weight:600;font-size:10.5px;color:var(--muted);}
+.abtn,.hbtn,.fsel,.finput{border-radius:13px;font-family:'Poppins',sans-serif;font-weight:500;}
+.fsel,.finput{background:var(--surface2);border:1px solid var(--border);}
+.pill,.tag,.chip,.vc-status,.bono-status{border-radius:99px;font-weight:500;letter-spacing:0;text-transform:none;}
+table th{letter-spacing:.11em;text-transform:uppercase;font-weight:600;font-size:10.5px;color:var(--muted);}
+table td,table th{border-color:var(--border);}
+.sidebar,.side,.nav-side{background:var(--surface);border-right:1px solid var(--border);}
 </style>
 </head>
 <body>
@@ -237,7 +250,7 @@ textarea.fi{resize:vertical;min-height:70px;line-height:1.5;}
 <!-- LOGIN -->
 <div id="login-screen">
   <div class="login-box">
-    <div class="login-logo-wrap"><img id="login-brand-logo" src="" style="max-height:56px;max-width:200px;object-fit:contain;display:block;margin:0 auto;"><span id="login-brand-text" style="font-family:'Nunito';font-size:28px;font-weight:900;color:var(--blue);display:none;"></span>
+    <div class="login-logo-wrap"><img id="login-brand-logo" src="" style="max-height:56px;max-width:200px;object-fit:contain;display:block;margin:0 auto;"><span id="login-brand-text" style="font-family:'Poppins';font-size:28px;font-weight:900;color:var(--blue);display:none;"></span>
       <div class="login-tagline">Panel de Administración</div>
     </div>
     <div class="lg"><div class="ll">Contraseña</div>
@@ -254,7 +267,7 @@ textarea.fi{resize:vertical;min-height:70px;line-height:1.5;}
     <button class="ham-btn" onclick="toggleSidebar()">
       <span></span><span></span><span></span>
     </button>
-    <div class="header-logo"><img id="header-brand-logo" src="" style="height:34px;object-fit:contain;border-radius:8px;background:white;padding:3px 8px;"><span id="header-brand-text" style="font-family:'Nunito';font-size:18px;font-weight:900;color:white;display:none;"></span>
+    <div class="header-logo"><img id="header-brand-logo" src="" style="height:34px;object-fit:contain;border-radius:8px;background:white;padding:3px 8px;"><span id="header-brand-text" style="font-family:'Poppins';font-size:18px;font-weight:900;color:white;display:none;"></span>
     </div>
     <div class="header-actions">
       <button class="hbtn" onclick="openNotif()">✉ Mensaje</button>
@@ -272,13 +285,13 @@ textarea.fi{resize:vertical;min-height:70px;line-height:1.5;}
         <div class="nitem active" data-view="overview" onclick="nav(this)"><div class="ndot" style="background:var(--blue)"></div>Overview</div>
         <div class="nitem" data-view="videos" onclick="nav(this)"><div class="ndot" style="background:var(--blue-mid)"></div>Videos <span class="nbadge" id="nb-pending">0</span></div>
         <div class="nitem" data-view="bonos" onclick="nav(this)" id="nav-bonos"><div class="ndot" style="background:var(--accent2)"></div>Bonos</div>
-        <div class="nitem" data-view="viral" onclick="nav(this)"><div class="ndot" style="background:#0d9488)"></div>Videos Virales</div>
+        <div class="nitem" data-view="viral" onclick="nav(this)"><div class="ndot" style="background:#3F8F6B)"></div>Videos Virales</div>
         <div class="slabel">Comunicación</div>
         <div class="nitem" data-view="mensajes" onclick="nav(this)"><div class="ndot" style="background:var(--blue-light)"></div>Mensajes <span class="nbadge" id="nb-msgs">0</span></div>
         <div class="slabel">Finanzas</div>
-        <div class="nitem" data-view="shopify" onclick="nav(this)"><div class="ndot" style="background:#16a34a"></div>Ventas Shopify <span class="nbadge" id="nb-shopify">0</span></div>
+        <div class="nitem" data-view="shopify" onclick="nav(this)"><div class="ndot" style="background:#3F8F6B"></div>Ventas Shopify <span class="nbadge" id="nb-shopify">0</span></div>
         <div class="nitem" data-view="finanzas" onclick="nav(this)" id="nav-finanzas"><div class="ndot" style="background:var(--gold)"></div>Pagos</div>
-        <div class="nitem" data-view="comprobantes" onclick="nav(this)" id="nav-comprobantes"><div class="ndot" style="background:#0d9488"></div>Comprobantes</div>
+        <div class="nitem" data-view="comprobantes" onclick="nav(this)" id="nav-comprobantes"><div class="ndot" style="background:#3F8F6B"></div>Comprobantes</div>
         <div class="slabel">Config</div>
         <div class="nitem" data-view="config" onclick="nav(this)"><div class="ndot" style="background:var(--muted)"></div>Configuración</div>
       </div>
@@ -288,7 +301,7 @@ textarea.fi{resize:vertical;min-height:70px;line-height:1.5;}
 
       <!-- OVERVIEW -->
       <div id="view-overview" class="view active">
-        <div id="overview-date" style="font-family:'DM Mono';font-size:9px;letter-spacing:2px;text-transform:uppercase;color:var(--muted);margin-bottom:16px;"></div>
+        <div id="overview-date" style="font-family:'Poppins';font-size:9px;letter-spacing:2px;text-transform:uppercase;color:var(--muted);margin-bottom:16px;"></div>
         <div id="overview-hero" style="margin-bottom:16px;"></div>
         <div style="display:flex;gap:6px;margin-bottom:14px;" id="period-pills">
           <button class="period-pill active" onclick="setOverviewPeriod(1,this)">Hoy</button>
@@ -311,12 +324,12 @@ textarea.fi{resize:vertical;min-height:70px;line-height:1.5;}
         <div class="view-title">Videos</div>
         <div class="view-sub">Revisá, puntuá y aprobá el contenido</div>
         <div style="margin-bottom:12px;display:flex;align-items:center;gap:10px;flex-wrap:wrap;">
-          <button id="apify-sync-btn" class="hbtn" onclick="syncApify()" title="Solo videos de las últimas 48h" style="background:linear-gradient(135deg,#833ab4,#fd1d1d,#fcb045);color:white;border:none;padding:10px 18px;border-radius:12px;font-family:'Nunito';font-weight:800;font-size:13px;cursor:pointer;box-shadow:0 4px 14px rgba(131,58,180,.3);">📸 Sync IG</button>
-          <button id="tt-sync-btn" class="hbtn" onclick="syncTikTok()" title="Solo videos de las últimas 48h" style="background:linear-gradient(135deg,#010101,#69c9d0);color:white;border:none;padding:10px 18px;border-radius:12px;font-family:'Nunito';font-weight:800;font-size:13px;cursor:pointer;box-shadow:0 4px 14px rgba(0,0,0,.3);">🎵 Sync TikTok</button>
-          <button id="apify-full-btn" class="hbtn" onclick="syncApify(true)" title="Todos los videos" style="background:#555;color:white;border:none;padding:10px 14px;border-radius:12px;font-family:'Nunito';font-weight:700;font-size:12px;cursor:pointer;opacity:.8;">📸 todo</button>
-          <button id="tt-full-btn" class="hbtn" onclick="syncTikTok(true)" title="Todos los videos" style="background:#555;color:white;border:none;padding:10px 14px;border-radius:12px;font-family:'Nunito';font-weight:700;font-size:12px;cursor:pointer;opacity:.8;">🎵 todo</button>
-          <button id="wp-notify-btn" onclick="notifyNoVideos()" style="background:linear-gradient(135deg,#25d366,#128c7e);color:white;border:none;padding:10px 18px;border-radius:12px;font-family:'Nunito';font-weight:800;font-size:13px;cursor:pointer;box-shadow:0 4px 14px rgba(37,211,102,.3);">📲 Avisar sin videos</button>
-          <span id="sync-status" style="font-size:11px;color:#aaa;font-family:'DM Mono';"></span>
+          <button id="apify-sync-btn" class="hbtn" onclick="syncApify()" title="Solo videos de las últimas 48h" style="background:linear-gradient(135deg,#833ab4,#fd1d1d,#fcb045);color:white;border:none;padding:10px 18px;border-radius:12px;font-family:'Poppins';font-weight:800;font-size:13px;cursor:pointer;box-shadow:0 4px 14px rgba(131,58,180,.3);">📸 Sync IG</button>
+          <button id="tt-sync-btn" class="hbtn" onclick="syncTikTok()" title="Solo videos de las últimas 48h" style="background:linear-gradient(135deg,#010101,#69c9d0);color:white;border:none;padding:10px 18px;border-radius:12px;font-family:'Poppins';font-weight:800;font-size:13px;cursor:pointer;box-shadow:0 4px 14px rgba(0,0,0,.3);">🎵 Sync TikTok</button>
+          <button id="apify-full-btn" class="hbtn" onclick="syncApify(true)" title="Todos los videos" style="background:#555;color:white;border:none;padding:10px 14px;border-radius:12px;font-family:'Poppins';font-weight:700;font-size:12px;cursor:pointer;opacity:.8;">📸 todo</button>
+          <button id="tt-full-btn" class="hbtn" onclick="syncTikTok(true)" title="Todos los videos" style="background:#555;color:white;border:none;padding:10px 14px;border-radius:12px;font-family:'Poppins';font-weight:700;font-size:12px;cursor:pointer;opacity:.8;">🎵 todo</button>
+          <button id="wp-notify-btn" onclick="notifyNoVideos()" style="background:linear-gradient(135deg,#25d366,#128c7e);color:white;border:none;padding:10px 18px;border-radius:12px;font-family:'Poppins';font-weight:800;font-size:13px;cursor:pointer;box-shadow:0 4px 14px rgba(37,211,102,.3);">📲 Avisar sin videos</button>
+          <span id="sync-status" style="font-size:11px;color:#aaa;font-family:'Poppins';"></span>
         </div>
         <div class="filters">
           <select class="fsel" id="vf-creator" onchange="renderVideos()">
@@ -348,7 +361,7 @@ textarea.fi{resize:vertical;min-height:70px;line-height:1.5;}
           </select>
         </div>
         <div style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:12px;align-items:center;">
-          <span style="font-family:'DM Mono';font-size:8px;letter-spacing:1.5px;text-transform:uppercase;color:var(--muted);margin-right:4px;">Columnas:</span>
+          <span style="font-family:'Poppins';font-size:8px;letter-spacing:1.5px;text-transform:uppercase;color:var(--muted);margin-right:4px;">Columnas:</span>
           <button class="col-toggle active" data-col="cat" onclick="toggleCol('cat',this)">Categoría</button>
           <button class="col-toggle active" data-col="metrics" onclick="toggleCol('metrics',this)">Métricas</button>
           <button class="col-toggle active" data-col="nota" onclick="toggleCol('nota',this)">Nota</button>
@@ -681,8 +694,8 @@ const BRAND_CONFIGS = {
     creators:{
       creadora1:{name:'Nahue Argañaraz',avatar:'NA',color:'#7c3aed',phone:''},
       creadora2:{name:'Vane Contreras',avatar:'VC',color:'#2a8fd4',phone:'5491168213265'},
-      creadora3:{name:'María Leal',avatar:'ML',color:'#0d9488',phone:'5491130837262'},
-      creadora4:{name:'Daniela Baldassin',avatar:'DB',color:'#d97706',phone:'5493462573927'},
+      creadora3:{name:'María Leal',avatar:'ML',color:'#3F8F6B',phone:'5491130837262'},
+      creadora4:{name:'Daniela Baldassin',avatar:'DB',color:'#96682A',phone:'5493462573927'},
       creadora5:{name:'Facu Aguirre',avatar:'FA',color:'#059669',phone:''},
       creadora6:{name:'More Porto',avatar:'MP',color:'#db2777',phone:'5491132887601'},
       creadora7:{name:'Jessica Grant',avatar:'JG',color:'#0891b2',phone:'5492317627240'},
@@ -916,11 +929,26 @@ window.BRAND_COLLECTION = BRAND.collection;
   if(BRAND.border) { r.setProperty('--border', BRAND.border); r.setProperty('--border2', BRAND.border); }
   if(BRAND.text) r.setProperty('--text', BRAND.text);
   if(BRAND.muted) r.setProperty('--muted', BRAND.muted);
-  if(BRAND.shadow) {
-    r.setProperty('--shadow','0 1px 8px rgba('+BRAND.shadow+',.08)');
-    r.setProperty('--shadow-md','0 4px 20px rgba('+BRAND.shadow+',.12)');
-    r.setProperty('--shadow-lg','0 8px 40px rgba('+BRAND.shadow+',.18)');
-  }
+  // ── PIEL CÁLIDA: los neutros son iguales en todas las marcas; sólo el acento cambia.
+  r.setProperty('--bg','#FAF7F4');
+  r.setProperty('--surface','#FFFFFF');
+  r.setProperty('--surface2','#F6F2EE');
+  r.setProperty('--surface3','#EFE8E3');
+  r.setProperty('--border','#EFE8E3');
+  r.setProperty('--border2','#E2D8D1');
+  r.setProperty('--text','#26211E');
+  r.setProperty('--muted','#8A7E77');
+  r.setProperty('--muted2','#BCAFA8');
+  r.setProperty('--radius','20px');
+  r.setProperty('--radius-sm','16px');
+  r.setProperty('--radius-xs','12px');
+  r.setProperty('--shadow','0 1px 2px rgba(38,33,30,.04)');
+  r.setProperty('--shadow-md','0 6px 20px -10px rgba(38,33,30,.14)');
+  r.setProperty('--shadow-lg','0 12px 34px -14px rgba(38,33,30,.20)');
+  // --acc-rgb: el acento en componentes, para todos los tintes rgba()
+  const _hx=(BRAND.accent||'#26211E').replace('#','');
+  const _f=_hx.length===3?_hx.split('').map(c=>c+c).join(''):_hx;
+  r.setProperty('--acc-rgb', [0,2,4].map(k=>parseInt(_f.substr(k,2),16)).join(','));
 })();
 document.addEventListener('DOMContentLoaded',function(){
   document.title = BRAND.name + ' — Admin';
@@ -1209,32 +1237,32 @@ function renderOverview(){
     <div style="background:var(--blue);border-radius:20px;padding:24px 22px;color:white;">
       <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:20px;">
         <div>
-          <div style="font-family:'DM Mono';font-size:9px;letter-spacing:2px;opacity:.65;margin-bottom:6px;">DÍA DE CAMPAÑA</div>
-          <div style="font-family:'Nunito';font-size:52px;font-weight:900;line-height:1;letter-spacing:-2px;">${day}</div>
+          <div style="font-family:'Poppins';font-size:9px;letter-spacing:2px;opacity:.65;margin-bottom:6px;">DÍA DE CAMPAÑA</div>
+          <div style="font-family:'Poppins';font-size:52px;font-weight:900;line-height:1;letter-spacing:-2px;">${day}</div>
         </div>
         <div style="text-align:center;">
-          <div style="font-family:'DM Mono';font-size:9px;letter-spacing:2px;opacity:.65;margin-bottom:6px;">VENTAS</div>
-          <div style="font-family:'Nunito';font-size:52px;font-weight:900;line-height:1;letter-spacing:-2px;">${totalVentas}</div>
+          <div style="font-family:'Poppins';font-size:9px;letter-spacing:2px;opacity:.65;margin-bottom:6px;">VENTAS</div>
+          <div style="font-family:'Poppins';font-size:52px;font-weight:900;line-height:1;letter-spacing:-2px;">${totalVentas}</div>
         </div>
         <div style="text-align:right;">
-          <div style="font-family:'DM Mono';font-size:9px;letter-spacing:2px;opacity:.65;margin-bottom:6px;">TOTAL VIDEOS</div>
-          <div style="font-family:'Nunito';font-size:52px;font-weight:900;line-height:1;letter-spacing:-2px;">${totalVids}</div>
+          <div style="font-family:'Poppins';font-size:9px;letter-spacing:2px;opacity:.65;margin-bottom:6px;">TOTAL VIDEOS</div>
+          <div style="font-family:'Poppins';font-size:52px;font-weight:900;line-height:1;letter-spacing:-2px;">${totalVids}</div>
         </div>
       </div>
       <div style="background:rgba(255,255,255,.2);border-radius:6px;height:8px;">
         <div style="background:white;height:100%;width:${_vidPct}%;border-radius:6px;transition:width .4s;"></div>
       </div>
-      <div style="display:flex;justify-content:space-between;font-family:'DM Mono';font-size:9px;opacity:.4;margin-top:5px;">
+      <div style="display:flex;justify-content:space-between;font-family:'Poppins';font-size:9px;opacity:.4;margin-top:5px;">
         <span>0</span><span>${_goal} videos</span>
       </div>
     </div>
   `;
 
   document.getElementById("admin-stats").innerHTML=`
-    <div class="scard"><div class="sc-label">Videos · ${periodLabel}</div><div class="sc-val" style="color:#16a34a">${videosEnPeriodo.length}</div><div class="sc-sub">en el período</div></div>
+    <div class="scard"><div class="sc-label">Videos · ${periodLabel}</div><div class="sc-val" style="color:#3F8F6B">${videosEnPeriodo.length}</div><div class="sc-sub">en el período</div></div>
     <div class="scard"><div class="sc-label">Total videos</div><div class="sc-val" style="color:#2a8fd4">${totalVids}</div><div class="sc-sub">en la campaña</div></div>
-    <div class="scard"><div class="sc-label">👀 Views generadas</div><div class="sc-val" style="color:#0d9488">${fmtV(totalViews)}</div><div class="sc-sub">+${fmtV(viewsPeriodo)} ${periodLabel}</div></div>
-    <div class="scard"><div class="sc-label">Pendientes</div><div class="sc-val" style="color:#e85d26">${pending}</div><div class="sc-sub">sin aprobar</div></div>
+    <div class="scard"><div class="sc-label">👀 Views generadas</div><div class="sc-val" style="color:#3F8F6B">${fmtV(totalViews)}</div><div class="sc-sub">+${fmtV(viewsPeriodo)} ${periodLabel}</div></div>
+    <div class="scard"><div class="sc-label">Pendientes</div><div class="sc-val" style="color:#C1613C">${pending}</div><div class="sc-sub">sin aprobar</div></div>
     <div class="scard"><div class="sc-label">Virales</div><div class="sc-val" style="color:#7c3aed">${viral}</div><div class="sc-sub">+10K views</div></div>
   `;
 
@@ -1258,7 +1286,7 @@ function renderOverview(){
     return`<div class="creator-card" style="${_baja?'opacity:.6;':''}" onclick="document.getElementById('vf-creator').value='${c}';nav(document.querySelector('[data-view=videos]'))">
       <div class="cc-avatar" style="background:${_baja?'#dc262612':COLORS[c]+'18'};border:2px solid ${_baja?'#dc2626':COLORS[c]};color:${_baja?'#dc2626':COLORS[c]};">${!_baja&&_rank<3?['🥇','🥈','🥉'][_rank]+' ':''}${AVATARS[c]}</div>
       <div class="cc-info">
-        <div class="cc-name" style="${_baja?'color:#dc2626;':''}">${NAMES[c].split(' ')[0]}${_baja?` <span style="font-size:8px;font-family:'DM Mono';letter-spacing:1px;background:#dc262615;color:#dc2626;border:1px solid #dc262640;border-radius:8px;padding:1px 6px;vertical-align:1px;">BAJA</span>`:''}</div>
+        <div class="cc-name" style="${_baja?'color:#dc2626;':''}">${NAMES[c].split(' ')[0]}${_baja?` <span style="font-size:8px;font-family:'Poppins';letter-spacing:1px;background:#dc262615;color:#dc2626;border:1px solid #dc262640;border-radius:8px;padding:1px 6px;vertical-align:1px;">BAJA</span>`:''}</div>
         <div class="cc-meta">${ventas} ventas · ${fmtV(views)} views · ${vids.length} videos</div>
         <div style="height:3px;background:var(--surface2);border-radius:3px;margin-top:6px;overflow:hidden;">
           <div style="height:100%;width:${pct}%;background:${COLORS[c]};border-radius:3px;transition:width .4s;"></div>
@@ -1268,7 +1296,7 @@ function renderOverview(){
   }).join("");
 
   const recent=[...videosEnPeriodo].sort((a,b)=>new Date(b.date)-new Date(a.date)).slice(0,10);
-  document.getElementById("overview-videos").innerHTML=recent.length?recent.map(v=>videoRow(v,true)).join(""):`<tr><td colspan="6" style="text-align:center;color:var(--muted);padding:24px;font-family:'DM Mono';font-size:11px;">Sin videos en este período</td></tr>`;
+  document.getElementById("overview-videos").innerHTML=recent.length?recent.map(v=>videoRow(v,true)).join(""):`<tr><td colspan="6" style="text-align:center;color:var(--muted);padding:24px;font-family:'Poppins';font-size:11px;">Sin videos en este período</td></tr>`;
 }
 
 // Views ACUMULADAS de un video: IG + TikTok sumadas (si no hay desglose, usa el campo views)
@@ -1288,39 +1316,39 @@ function videoRow(v, compact=false){
     ? [_igv?("📸 "+fmtV(_igv)):"", _ttv?("🎵 "+fmtV(_ttv)):""].filter(Boolean).join(" + ") + ((_igv&&_ttv)?(" = "+fmtV(_igv+_ttv)):"")
     : (v.views?fmtV(v.views)+" views":"—");
   const crudoTag = v.crudo
-    ? `<span style="padding:2px 8px;border-radius:20px;font-size:9px;font-family:'DM Mono';font-weight:700;border:1px solid rgba(245,158,11,.35);color:#b45309;background:rgba(245,158,11,.1);">🎬 CRUDO</span>`
+    ? `<span style="padding:2px 8px;border-radius:20px;font-size:9px;font-family:'Poppins';font-weight:700;border:1px solid rgba(176,123,46,.35);color:#b45309;background:rgba(176,123,46,.1);">🎬 CRUDO</span>`
     : "";
   const igBtn = v.linkIg
-    ? `<a href="${escUrl(v.linkIg)}" target="_blank" style="padding:2px 8px;border-radius:20px;font-size:9px;font-family:'DM Mono';cursor:pointer;border:1px solid var(--border2);color:var(--muted);background:none;text-decoration:none;">📸 IG</a>`
+    ? `<a href="${escUrl(v.linkIg)}" target="_blank" style="padding:2px 8px;border-radius:20px;font-size:9px;font-family:'Poppins';cursor:pointer;border:1px solid var(--border2);color:var(--muted);background:none;text-decoration:none;">📸 IG</a>`
     : "";
   const ttBtn = v.linkTt
-    ? `<a href="${escUrl(v.linkTt)}" target="_blank" style="padding:2px 8px;border-radius:20px;font-size:9px;font-family:'DM Mono';cursor:pointer;border:1px solid var(--border2);color:var(--muted);background:none;text-decoration:none;">🎵 TT</a>`
+    ? `<a href="${escUrl(v.linkTt)}" target="_blank" style="padding:2px 8px;border-radius:20px;font-size:9px;font-family:'Poppins';cursor:pointer;border:1px solid var(--border2);color:var(--muted);background:none;text-decoration:none;">🎵 TT</a>`
     : "";
   const fbBtn = v.linkFb
-    ? `<a href="${escUrl(v.linkFb)}" target="_blank" style="padding:2px 8px;border-radius:20px;font-size:9px;font-family:'DM Mono';cursor:pointer;border:1px solid var(--border2);color:var(--muted);background:none;text-decoration:none;">👥 FB</a>`
+    ? `<a href="${escUrl(v.linkFb)}" target="_blank" style="padding:2px 8px;border-radius:20px;font-size:9px;font-family:'Poppins';cursor:pointer;border:1px solid var(--border2);color:var(--muted);background:none;text-decoration:none;">👥 FB</a>`
     : "";
-  const copyBtn = (crudoTag||igBtn||ttBtn||fbBtn) ? [crudoTag,igBtn,ttBtn,fbBtn].filter(Boolean).join(" ") : `<button onclick="copyLink('${v.id}',event)" style="padding:2px 8px;border-radius:20px;font-size:9px;font-family:'DM Mono';cursor:pointer;border:1px solid var(--border2);color:var(--muted);background:none;">📋 Copiar</button>`;
+  const copyBtn = (crudoTag||igBtn||ttBtn||fbBtn) ? [crudoTag,igBtn,ttBtn,fbBtn].filter(Boolean).join(" ") : `<button onclick="copyLink('${v.id}',event)" style="padding:2px 8px;border-radius:20px;font-size:9px;font-family:'Poppins';cursor:pointer;border:1px solid var(--border2);color:var(--muted);background:none;">📋 Copiar</button>`;
   const startStr = campaignStartFor(v.creator);
   const calcDay = v.date ? Math.max(1,Math.floor((new Date(v.date)-new Date(startStr))/(86400000))+1) : (v.day||1);
   return`<tr>
     <td><div style="display:flex;align-items:center;gap:8px;"><div style="width:26px;height:26px;border-radius:50%;background:${COLORS[v.creator]}22;border:1px solid ${COLORS[v.creator]};display:flex;align-items:center;justify-content:center;font-size:9px;font-weight:800;color:${COLORS[v.creator]}">${AVATARS[v.creator]}</div><span style="font-size:12px;">${NAMES[v.creator].split(' ')[0]}</span></div></td>
-    <td style="font-family:'DM Mono';font-size:11px;white-space:nowrap;">${v.date?new Date(v.date).toLocaleDateString("es-AR",{day:"2-digit",month:"2-digit"}):"—"} · D${calcDay}</td>
+    <td style="font-family:'Poppins';font-size:11px;white-space:nowrap;">${v.date?new Date(v.date).toLocaleDateString("es-AR",{day:"2-digit",month:"2-digit"}):"—"} · D${calcDay}</td>
     ${cols.plat?`<td style="font-size:11px;white-space:nowrap;">${v.linkIg&&v.linkTt?'📸🎵':v.linkIg?'📸':'🎵'}</td>`:""}
     ${cols.cat?`<td style="font-size:11px;color:var(--muted);max-width:120px;">${v.producto?`<div style="font-size:9.5px;font-weight:800;color:#7c3aed;background:rgba(124,58,237,.08);border:1px solid rgba(124,58,237,.25);border-radius:8px;padding:1px 7px;margin-bottom:2px;display:inline-block;white-space:nowrap;">📦 ${esc(v.producto)}</div><br>`:""}<span style="overflow:hidden;text-overflow:ellipsis;white-space:nowrap;display:inline-block;max-width:115px;">${esc(v.cat)}</span></td>`:""}
     <td style="white-space:nowrap;">${copyBtn}</td>
-    ${cols.metrics?`<td style="font-family:'DM Mono';font-size:10px;color:var(--muted);white-space:nowrap;">${metricsStr}</td>`:""}
+    ${cols.metrics?`<td style="font-family:'Poppins';font-size:10px;color:var(--muted);white-space:nowrap;">${metricsStr}</td>`:""}
     <td><span class="badge badge-${v.status}">${v.status==="approved"?"✓ Ok":v.status==="rejected"?"✗":"⏳"}</span></td>
     ${cols.nota?`<td style="min-width:150px;vertical-align:top;padding-top:8px;">
-      ${v.notes?`<div style="font-size:10px;font-family:'DM Mono';color:var(--muted);background:var(--surface2);border-left:2px solid var(--border2);padding:3px 7px;border-radius:0 6px 6px 0;margin-bottom:5px;max-width:145px;word-break:break-word;line-height:1.4;">🏷 ${esc(v.notes)}</div>`:""}
-      ${(window.adminRole==='brand'||v.brandNote)?`<input type="text" value="${esc(v.brandNote||'')}" placeholder="Nota marca..." onchange="setAdminNote('${v.id}',this.value)" ${window.adminRole!=='brand'?'readonly':''} style="background:rgba(217,119,6,.07);border:1px solid rgba(217,119,6,.3);padding:3px 7px;border-radius:var(--radius-xs);font-size:11px;font-family:'Nunito';width:140px;color:var(--text);outline:none;margin-bottom:4px;display:block;" title="Nota del dueño de marca">`:""}
-      ${(window.adminRole==='superadmin'||v.adminNote)?`<div style="display:flex;align-items:center;gap:4px;">${v.adminNoteBy?`<span style="flex-shrink:0;font-size:9px;font-weight:800;width:16px;height:16px;line-height:16px;text-align:center;border-radius:50%;color:#fff;background:${v.adminNoteBy==='D'?'#7c3aed':v.adminNoteBy==='A'?'#0d9488':'#2a52c9'};" title="${v.adminNoteBy==='D'?'Dani':v.adminNoteBy==='A'?'Abril':'Nacho'}">${v.adminNoteBy}</span>`:''}<input type="text" value="${esc(v.adminNote||'')}" placeholder="Tu nota..." onchange="setAdminNote('${v.id}',this.value)" ${window.adminRole!=='superadmin'?'readonly':''} style="background:rgba(42,82,201,.06);border:1px solid rgba(42,82,201,.25);padding:3px 7px;border-radius:var(--radius-xs);font-size:11px;font-family:'Nunito';width:${v.adminNoteBy?'122px':'140px'};color:var(--text);outline:none;" title="Nota del admin"></div>`:""}
+      ${v.notes?`<div style="font-size:10px;font-family:'Poppins';color:var(--muted);background:var(--surface2);border-left:2px solid var(--border2);padding:3px 7px;border-radius:0 6px 6px 0;margin-bottom:5px;max-width:145px;word-break:break-word;line-height:1.4;">🏷 ${esc(v.notes)}</div>`:""}
+      ${(window.adminRole==='brand'||v.brandNote)?`<input type="text" value="${esc(v.brandNote||'')}" placeholder="Nota marca..." onchange="setAdminNote('${v.id}',this.value)" ${window.adminRole!=='brand'?'readonly':''} style="background:rgba(217,119,6,.07);border:1px solid rgba(217,119,6,.3);padding:3px 7px;border-radius:var(--radius-xs);font-size:11px;font-family:'Poppins';width:140px;color:var(--text);outline:none;margin-bottom:4px;display:block;" title="Nota del dueño de marca">`:""}
+      ${(window.adminRole==='superadmin'||v.adminNote)?`<div style="display:flex;align-items:center;gap:4px;">${v.adminNoteBy?`<span style="flex-shrink:0;font-size:9px;font-weight:800;width:16px;height:16px;line-height:16px;text-align:center;border-radius:50%;color:#fff;background:${v.adminNoteBy==='D'?'#7c3aed':v.adminNoteBy==='A'?'#3F8F6B':'#2a52c9'};" title="${v.adminNoteBy==='D'?'Dani':v.adminNoteBy==='A'?'Abril':'Nacho'}">${v.adminNoteBy}</span>`:''}<input type="text" value="${esc(v.adminNote||'')}" placeholder="Tu nota..." onchange="setAdminNote('${v.id}',this.value)" ${window.adminRole!=='superadmin'?'readonly':''} style="background:rgba(var(--acc-rgb),.06);border:1px solid rgba(var(--acc-rgb),.25);padding:3px 7px;border-radius:var(--radius-xs);font-size:11px;font-family:'Poppins';width:${v.adminNoteBy?'122px':'140px'};color:var(--text);outline:none;" title="Nota del admin"></div>`:""}
     </td>`:""}
     <td><div class="action-row" style="flex-wrap:nowrap;">
       <button class="abtn abtn-approve" onclick="setStatus('${v.id}','approved')">✓</button>
       <button class="abtn abtn-reject" onclick="setStatus('${v.id}','rejected')">✗</button>
       <button class="abtn" style="border-color:rgba(74,143,255,.3);color:var(--accent3);background:rgba(74,143,255,.05);" onclick="openEditVideo('${v.id}')">✏</button>
-      ${v.driveLink?`<a href="${escUrl(v.driveLink)}" target="_blank" class="abtn" style="border-color:rgba(13,148,136,.3);color:#0d9488;background:rgba(13,148,136,.05);text-decoration:none;" title="Abrir en Drive">⬇</a>`:""}
-      <button class="abtn" style="border-color:rgba(232,93,38,.3);color:var(--accent2);background:rgba(232,93,38,.05);" onclick="adminDeleteVideo('${v.id}')">🗑</button>
+      ${v.driveLink?`<a href="${escUrl(v.driveLink)}" target="_blank" class="abtn" style="border-color:rgba(13,148,136,.3);color:#3F8F6B;background:rgba(13,148,136,.05);text-decoration:none;" title="Abrir en Drive">⬇</a>`:""}
+      <button class="abtn" style="border-color:rgba(193,97,60,.3);color:var(--accent2);background:rgba(193,97,60,.05);" onclick="adminDeleteVideo('${v.id}')">🗑</button>
     </div></td>
   </tr>`;
 }
@@ -1340,10 +1368,10 @@ function renderStatusPanel(){
     const color=COLORS[c]||"#6366f1";
     return`<div style="background:var(--surface2);border:1px solid var(--border);border-radius:12px;padding:12px 16px;">
       <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:6px;">
-        <span style="font-family:'Nunito';font-weight:800;font-size:13px;color:${color}">${NAMES[c].split(" ")[0]}</span>
+        <span style="font-family:'Poppins';font-weight:800;font-size:13px;color:${color}">${NAMES[c].split(" ")[0]}</span>
         <div style="display:flex;gap:6px;align-items:center;">
-          ${frenada?'<span style="background:#fee2e2;color:#dc2626;font-size:9px;font-family:\'DM Mono\';padding:2px 7px;border-radius:20px;font-weight:700;">2 DÍAS SIN SUBIR</span>':""}
-          <span style="font-family:'DM Mono';font-size:11px;color:var(--muted);">${total}/${_meta} total · <b style="color:${hoy>=_dv?'#16a34a':hoy>0?'#d97706':'var(--muted)'}">${hoy}</b>/${_dv} hoy</span>
+          ${frenada?'<span style="background:rgba(193,97,60,.12);color:#B0512F;font-size:10px;font-family:\'Poppins\';padding:3px 9px;border-radius:99px;font-weight:600;">2 DÍAS SIN SUBIR</span>':""}
+          <span style="font-family:'Poppins';font-size:11px;color:var(--muted);">${total}/${_meta} total · <b style="color:${hoy>=_dv?'#3F8F6B':hoy>0?'#96682A':'var(--muted)'}">${hoy}</b>/${_dv} hoy</span>
         </div>
       </div>
       <div style="height:5px;background:var(--border);border-radius:3px;overflow:hidden;">
@@ -1552,10 +1580,10 @@ setInterval(()=>{
 function renderBonos(){
   const isMonday = new Date().getDay()===1;
   const mondayBanner = isMonday ? `
-    <div style="background:rgba(245,158,11,.08);border:1.5px solid rgba(245,158,11,.35);border-radius:var(--radius);padding:14px 16px;margin-bottom:16px;display:flex;align-items:center;gap:12px;">
+    <div style="background:rgba(176,123,46,.08);border:1.5px solid rgba(176,123,46,.35);border-radius:var(--radius);padding:14px 16px;margin-bottom:16px;display:flex;align-items:center;gap:12px;">
       <span style="font-size:22px;">🔥</span>
       <div>
-        <div style="font-size:12px;font-weight:800;color:#d97706;">Es lunes — asignar bono viral de la semana</div>
+        <div style="font-size:12px;font-weight:800;color:#96682A;">Es lunes — asignar bono viral de la semana</div>
         <div style="font-size:11px;color:var(--muted);margin-top:2px;">Revisá <strong>Videos Virales</strong> y asigná el bono de $40.000 a la ganadora de esta semana</div>
       </div>
     </div>` : '';
@@ -1571,7 +1599,7 @@ function renderBonos(){
 
   const resetRow=`<div style="background:white;border-radius:var(--radius);padding:14px 16px;margin-bottom:16px;box-shadow:var(--shadow);display:flex;align-items:center;gap:12px;flex-wrap:wrap;">
     <span style="font-size:12px;font-weight:800;color:var(--muted);">Resetear bonos:</span>
-    ${CREATORS.map(c=>`<button onclick="resetCreadoraBonos('${c}')" style="padding:5px 12px;border-radius:20px;font-size:10px;font-family:'Nunito';font-weight:700;cursor:pointer;background:rgba(232,93,38,.06);border:1px solid rgba(232,93,38,.2);color:var(--accent2);">↺ ${NAMES[c].split(' ')[0]}</button>`).join('')}
+    ${CREATORS.map(c=>`<button onclick="resetCreadoraBonos('${c}')" style="padding:5px 12px;border-radius:20px;font-size:10px;font-family:'Poppins';font-weight:700;cursor:pointer;background:rgba(193,97,60,.06);border:1px solid rgba(193,97,60,.2);color:var(--accent2);">↺ ${NAMES[c].split(' ')[0]}</button>`).join('')}
   </div>`;
 
   const bonoCards=bonoTypes.filter(b=>!((!RACHA_ACTIVA||BRAND.noRacha)&&b.key==="racha")).filter(b=>!(BRAND.no100k&&b.key==="100k")).map(b=>`
@@ -1582,17 +1610,17 @@ function renderBonos(){
           <div style="font-size:12px;color:var(--muted);line-height:1.5;">${b.desc}</div>
         </div>
         <div style="text-align:right;flex-shrink:0;">
-          <div style="font-family:'Nunito';font-size:18px;font-weight:900;color:var(--blue);">${b.amount?fmtP(b.amount):"Variable"}</div>
+          <div style="font-family:'Poppins';font-size:18px;font-weight:900;color:var(--blue);">${b.amount?fmtP(b.amount):"Variable"}</div>
         </div>
       </div>
       <div style="border-top:1px solid var(--surface2);padding-top:14px;">
-        <div style="font-size:10px;font-family:'DM Mono';letter-spacing:1.5px;text-transform:uppercase;color:var(--muted);margin-bottom:10px;">Asignar bono a:</div>
+        <div style="font-size:10px;font-family:'Poppins';letter-spacing:1.5px;text-transform:uppercase;color:var(--muted);margin-bottom:10px;">Asignar bono a:</div>
         <div style="display:flex;gap:8px;flex-wrap:wrap;">
           ${CREATORS.map(c=>{
             const amount = b.calcAmount ? b.calcAmount(c) : b.amount;
             const currentBonos = data.bonos[c]||0;
             return `<button onclick="assignBono('${c}','${b.key}',${amount})"
-              style="display:flex;align-items:center;gap:6px;padding:8px 14px;border-radius:20px;font-size:12px;font-family:'Nunito';font-weight:700;cursor:pointer;background:${COLORS[c]}12;border:2px solid ${COLORS[c]}40;color:${COLORS[c]};transition:all .12s;"
+              style="display:flex;align-items:center;gap:6px;padding:8px 14px;border-radius:20px;font-size:12px;font-family:'Poppins';font-weight:700;cursor:pointer;background:${COLORS[c]}12;border:2px solid ${COLORS[c]}40;color:${COLORS[c]};transition:all .12s;"
               onmouseover="this.style.background='${COLORS[c]}25';this.style.borderColor='${COLORS[c]}'"
               onmouseout="this.style.background='${COLORS[c]}12';this.style.borderColor='${COLORS[c]}40'">
               <div style="width:24px;height:24px;border-radius:50%;background:${COLORS[c]}25;display:flex;align-items:center;justify-content:center;font-size:9px;">${AVATARS[c]}</div>
@@ -1605,12 +1633,12 @@ function renderBonos(){
     </div>`).join('');
 
   document.getElementById("bonos-admin-body").innerHTML = mondayBanner + resetRow + bonoCards + `
-    <div style="font-family:'DM Mono';font-size:9px;letter-spacing:2px;text-transform:uppercase;color:var(--muted);margin:20px 0 12px;">Bonos acumulados por creadora</div>
+    <div style="font-family:'Poppins';font-size:9px;letter-spacing:2px;text-transform:uppercase;color:var(--muted);margin:20px 0 12px;">Bonos acumulados por creadora</div>
     <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:10px;">
       ${CREATORS.map(c=>`<div style="background:white;border-radius:var(--radius-sm);padding:14px;box-shadow:var(--shadow);display:flex;align-items:center;gap:10px;">
         <div style="width:36px;height:36px;border-radius:50%;background:${COLORS[c]}12;border:2px solid ${COLORS[c]};display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;color:${COLORS[c]};flex-shrink:0;">${AVATARS[c]}</div>
         <div><div style="font-size:12px;font-weight:800;">${NAMES[c].split(' ')[0]}</div>
-        <div style="font-family:'Nunito';font-size:18px;font-weight:900;color:var(--gold);">${fmtP(data.bonos[c]||0)}</div></div>
+        <div style="font-family:'Poppins';font-size:18px;font-weight:900;color:var(--gold);">${fmtP(data.bonos[c]||0)}</div></div>
       </div>`).join('')}
     </div>
   `;
@@ -1651,20 +1679,20 @@ function renderViral(){
         <div class="viral-creator-name">${NAMES[v.creator].split(' ')[0]} · <span style="font-weight:600;color:var(--muted);">Día ${v.day}</span></div>
         <div class="viral-meta">${esc(v.cat)}</div>
         <div style="display:flex;gap:6px;margin-top:4px;flex-wrap:wrap;">
-          ${v.linkIg?`<a href="${escUrl(v.linkIg)}" target="_blank" style="padding:2px 8px;border-radius:20px;font-size:9px;font-family:'DM Mono';cursor:pointer;border:1px solid rgba(131,58,180,.3);color:#833ab4;background:rgba(131,58,180,.06);text-decoration:none;">📸 IG</a>`:""}
-          ${v.linkTt?`<a href="${escUrl(v.linkTt)}" target="_blank" style="padding:2px 8px;border-radius:20px;font-size:9px;font-family:'DM Mono';cursor:pointer;border:1px solid rgba(0,0,0,.2);color:#010101;background:rgba(0,0,0,.05);text-decoration:none;">🎵 TT</a>`:""}
-          ${v.driveLink?`<a href="${escUrl(v.driveLink)}" target="_blank" style="padding:2px 8px;border-radius:20px;font-size:9px;font-family:'DM Mono';cursor:pointer;border:1px solid rgba(13,148,136,.3);color:#0d9488;background:rgba(13,148,136,.05);text-decoration:none;">⬇ Drive</a>`:""}
+          ${v.linkIg?`<a href="${escUrl(v.linkIg)}" target="_blank" style="padding:2px 8px;border-radius:20px;font-size:9px;font-family:'Poppins';cursor:pointer;border:1px solid rgba(131,58,180,.3);color:#833ab4;background:rgba(131,58,180,.06);text-decoration:none;">📸 IG</a>`:""}
+          ${v.linkTt?`<a href="${escUrl(v.linkTt)}" target="_blank" style="padding:2px 8px;border-radius:20px;font-size:9px;font-family:'Poppins';cursor:pointer;border:1px solid rgba(0,0,0,.2);color:#010101;background:rgba(0,0,0,.05);text-decoration:none;">🎵 TT</a>`:""}
+          ${v.driveLink?`<a href="${escUrl(v.driveLink)}" target="_blank" style="padding:2px 8px;border-radius:20px;font-size:9px;font-family:'Poppins';cursor:pointer;border:1px solid rgba(13,148,136,.3);color:#3F8F6B;background:rgba(13,148,136,.05);text-decoration:none;">⬇ Drive</a>`:""}
         </div>
       </div>
       <div style="text-align:right;flex-shrink:0;">
         <div class="viral-views ${viewsClass}">${fmtV(v.views)}</div>
-        <div style="font-size:9px;font-family:'DM Mono';color:var(--muted);margin-top:2px;line-height:1.5;">
+        <div style="font-size:9px;font-family:'Poppins';color:var(--muted);margin-top:2px;line-height:1.5;">
           ${[v.igViews?`📸 ${fmtV(v.igViews)}`:(v.linkIg?`📸 —`:''),v.ttViews?`🎵 ${fmtV(v.ttViews)}`:(v.linkTt?`🎵 —`:'')].filter(Boolean).join(' · ')}
         </div>
         <span class="viral-badge-pill ${badgeClass}">${badgeLabel}</span>
       </div>
     </div>`;
-  }).join(""):`<div style="color:var(--muted);text-align:center;padding:40px;font-family:'DM Mono';font-size:11px;">Sin videos virales todavía</div>`;
+  }).join(""):`<div style="color:var(--muted);text-align:center;padding:40px;font-family:'Poppins';font-size:11px;">Sin videos virales todavía</div>`;
 }
 
 function openAddIdea(){
@@ -1703,10 +1731,10 @@ function renderIdeas(){
     [...data.ideas].reverse().map(i=>`
       <div style="background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:16px;margin-bottom:10px;display:flex;justify-content:space-between;align-items:flex-start;">
         <div>
-          <span style="font-size:9px;font-family:'DM Mono';padding:3px 10px;border-radius:20px;background:var(--surface3);color:var(--muted);display:inline-block;margin-bottom:8px;">${i.tag}</span>
+          <span style="font-size:9px;font-family:'Poppins';padding:3px 10px;border-radius:20px;background:var(--surface3);color:var(--muted);display:inline-block;margin-bottom:8px;">${i.tag}</span>
           <div style="font-size:14px;font-weight:600;margin-bottom:4px;">${i.title}</div>
           <div style="font-size:12px;color:var(--muted);line-height:1.5;">${i.desc}</div>
-          ${i.link?`<a href="${i.link}" target="_blank" style="color:var(--accent);font-size:11px;font-family:'DM Mono';text-decoration:none;display:block;margin-top:8px;">Ver referencia ↗</a>`:""}
+          ${i.link?`<a href="${i.link}" target="_blank" style="color:var(--accent);font-size:11px;font-family:'Poppins';text-decoration:none;display:block;margin-top:8px;">Ver referencia ↗</a>`:""}
         </div>
         <button onclick="deleteIdea(${i.id})" style="background:none;border:none;color:var(--muted);cursor:pointer;font-size:16px;padding:4px;" onmouseover="this.style.color='var(--accent2)'" onmouseout="this.style.color='var(--muted)'">✕</button>
       </div>`).join(""):
@@ -1929,26 +1957,26 @@ function openReporte(){
   }
   ov.innerHTML=`<div id="reporte-card" style="background:white;border-radius:18px;max-width:540px;width:100%;max-height:90vh;overflow:auto;padding:28px;box-shadow:0 20px 60px rgba(0,0,0,.3);">
     <div style="text-align:center;margin-bottom:18px;">
-      <div style="font-family:'DM Mono';font-size:9px;letter-spacing:3px;color:#999;text-transform:uppercase;">Reporte semanal</div>
-      <div style="font-family:'Nunito';font-size:24px;font-weight:900;color:#1a1a1a;">${BRAND.name}</div>
-      <div style="font-family:'DM Mono';font-size:10px;color:#999;">últimos 7 días · al ${fecha}</div>
+      <div style="font-family:'Poppins';font-size:9px;letter-spacing:3px;color:#999;text-transform:uppercase;">Reporte semanal</div>
+      <div style="font-family:'Poppins';font-size:24px;font-weight:900;color:#1a1a1a;">${BRAND.name}</div>
+      <div style="font-family:'Poppins';font-size:10px;color:#999;">últimos 7 días · al ${fecha}</div>
     </div>
     <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:18px;">
-      <div style="background:#f0f7f0;border-radius:12px;padding:14px;text-align:center;"><div style="font-family:'Nunito';font-size:26px;font-weight:900;color:#16a34a;">${r.vids.length}</div><div style="font-size:9px;font-family:'DM Mono';color:#888;">VIDEOS</div></div>
-      <div style="background:#f0f4fa;border-radius:12px;padding:14px;text-align:center;"><div style="font-family:'Nunito';font-size:26px;font-weight:900;color:#2a52c9;">${fmtV(r.views)}</div><div style="font-size:9px;font-family:'DM Mono';color:#888;">VIEWS</div></div>
-      <div style="background:#fdf3e7;border-radius:12px;padding:14px;text-align:center;"><div style="font-family:'Nunito';font-size:26px;font-weight:900;color:#d97706;">${r.ventas7}</div><div style="font-size:9px;font-family:'DM Mono';color:#888;">VENTAS</div></div>
+      <div style="background:#f0f7f0;border-radius:12px;padding:14px;text-align:center;"><div style="font-family:'Poppins';font-size:26px;font-weight:900;color:#3F8F6B;">${r.vids.length}</div><div style="font-size:9px;font-family:'Poppins';color:#888;">VIDEOS</div></div>
+      <div style="background:#f0f4fa;border-radius:12px;padding:14px;text-align:center;"><div style="font-family:'Poppins';font-size:26px;font-weight:900;color:#2a52c9;">${fmtV(r.views)}</div><div style="font-size:9px;font-family:'Poppins';color:#888;">VIEWS</div></div>
+      <div style="background:#fdf3e7;border-radius:12px;padding:14px;text-align:center;"><div style="font-family:'Poppins';font-size:26px;font-weight:900;color:#96682A;">${r.ventas7}</div><div style="font-size:9px;font-family:'Poppins';color:#888;">VENTAS</div></div>
     </div>
-    <div style="font-family:'DM Mono';font-size:9px;letter-spacing:2px;color:#999;margin-bottom:8px;">🔥 TOP VIDEOS DE LA CAMPAÑA</div>
+    <div style="font-family:'Poppins';font-size:9px;letter-spacing:2px;color:#999;margin-bottom:8px;">🔥 TOP VIDEOS DE LA CAMPAÑA</div>
     ${r.top.map((v,i)=>`<div style="display:flex;align-items:center;gap:10px;padding:8px 0;border-bottom:1px solid #f0f0f0;">
       <span style="font-size:16px;">${['🥇','🥈','🥉'][i]}</span>
-      <div style="flex:1;"><div style="font-size:12px;font-weight:800;color:#1a1a1a;">${NAMES[v.creator]?NAMES[v.creator].split(' ')[0]:esc(v.creator||'')}</div><div style="font-size:9px;font-family:'DM Mono';color:#999;">${esc(v.cat||'')}</div></div>
-      <div style="font-family:'Nunito';font-size:16px;font-weight:900;color:#16a34a;">${fmtV(viewsAcum(v))}</div>
+      <div style="flex:1;"><div style="font-size:12px;font-weight:800;color:#1a1a1a;">${NAMES[v.creator]?NAMES[v.creator].split(' ')[0]:esc(v.creator||'')}</div><div style="font-size:9px;font-family:'Poppins';color:#999;">${esc(v.cat||'')}</div></div>
+      <div style="font-family:'Poppins';font-size:16px;font-weight:900;color:#3F8F6B;">${fmtV(viewsAcum(v))}</div>
     </div>`).join('')}
-    <div style="font-family:'DM Mono';font-size:9px;letter-spacing:2px;color:#999;margin:14px 0 8px;">CREADORAS · ESTA SEMANA</div>
-    ${r.porCreadora.map(x=>`<div style="display:flex;justify-content:space-between;font-size:11px;padding:4px 0;"><span style="font-weight:700;color:#1a1a1a;">${NAMES[x.c].split(' ')[0]}</span><span style="font-family:'DM Mono';color:#777;">${x.n} videos · ${fmtV(x.vw)} views</span></div>`).join('')}
+    <div style="font-family:'Poppins';font-size:9px;letter-spacing:2px;color:#999;margin:14px 0 8px;">CREADORAS · ESTA SEMANA</div>
+    ${r.porCreadora.map(x=>`<div style="display:flex;justify-content:space-between;font-size:11px;padding:4px 0;"><span style="font-weight:700;color:#1a1a1a;">${NAMES[x.c].split(' ')[0]}</span><span style="font-family:'Poppins';color:#777;">${x.n} videos · ${fmtV(x.vw)} views</span></div>`).join('')}
     <div style="display:flex;gap:8px;margin-top:18px;" class="no-print">
-      <button onclick="copiarReporteWp()" style="flex:1;padding:11px;background:#25d366;color:white;border:none;border-radius:10px;font-family:'Nunito';font-weight:800;font-size:12px;cursor:pointer;">📲 Copiar para WhatsApp</button>
-      <button onclick="imprimirReporte()" style="flex:1;padding:11px;background:var(--accent);color:white;border:none;border-radius:10px;font-family:'Nunito';font-weight:800;font-size:12px;cursor:pointer;">🖨 Guardar PDF</button>
+      <button onclick="copiarReporteWp()" style="flex:1;padding:11px;background:#25d366;color:white;border:none;border-radius:10px;font-family:'Poppins';font-weight:800;font-size:12px;cursor:pointer;">📲 Copiar para WhatsApp</button>
+      <button onclick="imprimirReporte()" style="flex:1;padding:11px;background:var(--accent);color:white;border:none;border-radius:10px;font-family:'Poppins';font-weight:800;font-size:12px;cursor:pointer;">🖨 Guardar PDF</button>
     </div>
   </div>`;
 }
@@ -1962,7 +1990,7 @@ function copiarReporteWp(){
 function imprimirReporte(){
   const card=document.getElementById('reporte-card');
   const w=window.open('','_blank');
-  w.document.write('<html><head><title>Reporte '+BRAND.name+'</title><link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;700;800;900&family=DM+Mono&display=swap" rel="stylesheet"><style>body{font-family:Nunito,sans-serif;padding:24px;max-width:560px;margin:0 auto;} .no-print{display:none;}</style></head><body>'+card.innerHTML+'</body></html>');
+  w.document.write('<html><head><title>Reporte '+BRAND.name+'</title><link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800&display=swap" rel="stylesheet"><style>body{font-family:Poppins,sans-serif;padding:24px;max-width:560px;margin:0 auto;} .no-print{display:none;}</style></head><body>'+card.innerHTML+'</body></html>');
   w.document.close();
   setTimeout(()=>w.print(), 700);
 }
@@ -1996,8 +2024,8 @@ function renderMensajes(){
       <div>
         <div style="display:flex;align-items:center;gap:8px;margin-bottom:6px;">
           <span style="font-size:16px;">${tipoIcon[n.tipo]||"📋"}</span>
-          <span style="font-size:10px;font-family:'DM Mono';color:var(--muted);">${n.to==="ALL"?"Todas":NAMES[n.to]}</span>
-          <span style="font-size:10px;font-family:'DM Mono';color:var(--muted2);">${new Date(n.date).toLocaleString("es-AR")}</span>
+          <span style="font-size:10px;font-family:'Poppins';color:var(--muted);">${n.to==="ALL"?"Todas":NAMES[n.to]}</span>
+          <span style="font-size:10px;font-family:'Poppins';color:var(--muted2);">${new Date(n.date).toLocaleString("es-AR")}</span>
         </div>
         <div style="font-size:13px;line-height:1.5;">${n.msg}</div>
       </div>
@@ -2127,11 +2155,11 @@ function renderFinanzas(){
       ${rows.map(r=>`
         <div style="background:white;border-radius:var(--radius);padding:16px;box-shadow:var(--shadow);">
           <div style="display:flex;align-items:center;gap:8px;margin-bottom:10px;">
-            <div style="width:36px;height:36px;border-radius:50%;background:${COLORS[r.c]}22;border:2px solid ${COLORS[r.c]};display:flex;align-items:center;justify-content:center;font-family:'DM Mono';font-size:11px;font-weight:500;color:${COLORS[r.c]}">${AVATARS[r.c]}</div>
+            <div style="width:36px;height:36px;border-radius:50%;background:${COLORS[r.c]}22;border:2px solid ${COLORS[r.c]};display:flex;align-items:center;justify-content:center;font-family:'Poppins';font-size:11px;font-weight:500;color:${COLORS[r.c]}">${AVATARS[r.c]}</div>
             <div style="font-size:12px;font-weight:800;color:var(--text);">${NAMES[r.c]}</div>
           </div>
-          <div style="font-family:'Nunito';font-size:11px;color:var(--muted);margin-bottom:2px;">Restante a pagar</div>
-          <div style="font-family:'Nunito';font-size:28px;font-weight:900;color:${r.deuda>0?"var(--accent2)":"var(--blue)"};letter-spacing:-1px;">$${r.deuda.toLocaleString("es-AR")}</div>
+          <div style="font-family:'Poppins';font-size:11px;color:var(--muted);margin-bottom:2px;">Restante a pagar</div>
+          <div style="font-family:'Poppins';font-size:28px;font-weight:900;color:${r.deuda>0?"var(--accent2)":"var(--blue)"};letter-spacing:-1px;">$${r.deuda.toLocaleString("es-AR")}</div>
           <div style="font-size:10px;color:var(--muted);margin:4px 0 8px;font-weight:600;">Total: $${r.total.toLocaleString("es-AR")} · Pagado: $${r.pagado.toLocaleString("es-AR")}</div>
           <div style="border-top:1px solid var(--surface2);padding-top:8px;margin-bottom:8px;display:flex;flex-direction:column;gap:3px;">
             <div style="display:flex;justify-content:space-between;font-size:10px;color:var(--muted);">
@@ -2141,7 +2169,7 @@ function renderFinanzas(){
               <span>🛒 Ventas (${data.ventas[r.c]||0} × $2.500)</span><span style="font-weight:700;color:var(--text);">$${r.comVentas.toLocaleString("es-AR")}</span>
             </div>`:''}
             ${r.vids10k.length>0?`<div style="display:flex;justify-content:space-between;font-size:10px;color:var(--muted);">
-              <span>⚡ Bono 10K (${r.vids10k.length} videos)</span><span style="font-weight:700;color:#f59e0b;">$${(r.vids10k.length*10000).toLocaleString("es-AR")}</span>
+              <span>⚡ Bono 10K (${r.vids10k.length} videos)</span><span style="font-weight:700;color:#B07B2E;">$${(r.vids10k.length*10000).toLocaleString("es-AR")}</span>
             </div>`:''}
             ${r.got100k?`<div style="display:flex;justify-content:space-between;font-size:10px;color:var(--muted);">
               <span>🚀 Bono 100K (1er video)</span><span style="font-weight:700;color:#ef4444;">$75.000</span>
@@ -2150,35 +2178,35 @@ function renderFinanzas(){
               <span>📅 Racha completa</span><div style="display:flex;align-items:center;gap:4px;">${r.rachaCount>1?`<span style="font-size:9px;background:#8b5cf620;color:#8b5cf6;border-radius:8px;padding:1px 5px;font-weight:800;">×${r.rachaCount}</span>`:''}<span style="font-weight:700;color:#8b5cf6;">${fmtP(r.rachaMontoReal)}</span></div>
             </div>`:''}
             ${r.viralCount>0?`<div style="display:flex;justify-content:space-between;font-size:10px;color:var(--muted);align-items:center;">
-              <span>🔥 Video viral</span><div style="display:flex;align-items:center;gap:4px;">${r.viralCount>1?`<span style="font-size:9px;background:#d9770620;color:#d97706;border-radius:8px;padding:1px 5px;font-weight:800;">×${r.viralCount}</span>`:''}<span style="font-weight:700;color:#d97706;">${fmtP(r.viralCount*40000)}</span></div>
+              <span>🔥 Video viral</span><div style="display:flex;align-items:center;gap:4px;">${r.viralCount>1?`<span style="font-size:9px;background:#96682A20;color:#96682A;border-radius:8px;padding:1px 5px;font-weight:800;">×${r.viralCount}</span>`:''}<span style="font-weight:700;color:#96682A;">${fmtP(r.viralCount*40000)}</span></div>
             </div>`:''}
             ${r.ventasCount>0?`<div style="display:flex;justify-content:space-between;font-size:10px;color:var(--muted);align-items:center;">
-              <span>🏆 Más ventas semana</span><div style="display:flex;align-items:center;gap:4px;">${r.ventasCount>1?`<span style="font-size:9px;background:#16a34a20;color:#16a34a;border-radius:8px;padding:1px 5px;font-weight:800;">×${r.ventasCount}</span>`:''}<span style="font-weight:700;color:#16a34a;">${fmtP(r.ventasCount*40000)}</span></div>
+              <span>🏆 Más ventas semana</span><div style="display:flex;align-items:center;gap:4px;">${r.ventasCount>1?`<span style="font-size:9px;background:#3F8F6B20;color:#3F8F6B;border-radius:8px;padding:1px 5px;font-weight:800;">×${r.ventasCount}</span>`:''}<span style="font-weight:700;color:#3F8F6B;">${fmtP(r.ventasCount*40000)}</span></div>
             </div>`:''}
           </div>
-          <div style="display:flex;align-items:center;justify-content:space-between;padding:8px 10px;border-radius:var(--radius-xs);background:${r.deuda>0?"rgba(232,93,38,.06)":"rgba(26,58,143,.06)"};">
+          <div style="display:flex;align-items:center;justify-content:space-between;padding:8px 10px;border-radius:var(--radius-xs);background:${r.deuda>0?"rgba(193,97,60,.06)":"rgba(var(--acc-rgb),.06)"};">
             <span style="font-size:11px;font-weight:700;color:${r.deuda>0?"var(--accent2)":"var(--blue)"};">${r.deuda>0?"⚠️ Pendiente":"✓ Al día"}</span>
           </div>
           <div style="border-top:1px solid var(--surface2);margin-top:8px;padding-top:8px;">
             <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px;">
-              <span style="font-size:9px;font-family:'DM Mono';letter-spacing:1.5px;color:var(--muted);text-transform:uppercase;">Pagos quincenales</span>
-              <span style="font-size:9px;font-family:'DM Mono';color:var(--muted);">📅 video 1: ${r.vids>0?new Date(campaignStartFor(r.c)+'T12:00:00').toLocaleDateString('es-AR',{day:'2-digit',month:'2-digit'})+' · día '+Math.max(1,r.diaHoy):'sin videos aún'}</span>
+              <span style="font-size:9px;font-family:'Poppins';letter-spacing:1.5px;color:var(--muted);text-transform:uppercase;">Pagos quincenales</span>
+              <span style="font-size:9px;font-family:'Poppins';color:var(--muted);">📅 video 1: ${r.vids>0?new Date(campaignStartFor(r.c)+'T12:00:00').toLocaleDateString('es-AR',{day:'2-digit',month:'2-digit'})+' · día '+Math.max(1,r.diaHoy):'sin videos aún'}</span>
             </div>
             ${[['Q1 · días 1-15', r.q1, r.diaHoy>=15], ['Q2 · días 16-30', r.q2, r.diaHoy>=30]].map(([lbl,q,cerrada])=>`
             <div style="display:flex;justify-content:space-between;align-items:center;gap:6px;margin-bottom:5px;">
               <div>
                 <div style="font-size:10px;font-weight:800;color:var(--text);">${lbl} ${q.completa?'✅':cerrada?'⚠️':''}</div>
-                <div style="font-size:9px;font-family:'DM Mono';color:var(--muted);">${q.qv}/${QUINCENA_META} videos · ${q.qventas} ventas</div>
+                <div style="font-size:9px;font-family:'Poppins';color:var(--muted);">${q.qv}/${QUINCENA_META} videos · ${q.qventas} ventas</div>
               </div>
               <div style="display:flex;align-items:center;gap:6px;">
                 <span style="font-size:11px;font-weight:800;color:${q.completa||cerrada?'var(--accent)':'var(--muted)'};">$${q.sugerido.toLocaleString("es-AR")}</span>
-                ${(q.completa||cerrada)&&q.sugerido>0?`<button onclick="openPago('${r.c}',${q.sugerido})" title="Registrar pago de esta quincena" style="padding:4px 9px;background:var(--accent);color:white;border:none;border-radius:8px;font-family:'Nunito';font-size:10px;font-weight:800;cursor:pointer;">💰 Pagar</button>`:''}
+                ${(q.completa||cerrada)&&q.sugerido>0?`<button onclick="openPago('${r.c}',${q.sugerido})" title="Registrar pago de esta quincena" style="padding:4px 9px;background:var(--accent);color:white;border:none;border-radius:8px;font-family:'Poppins';font-size:10px;font-weight:800;cursor:pointer;">💰 Pagar</button>`:''}
               </div>
             </div>`).join('')}
-            <div style="font-size:8.5px;font-family:'DM Mono';color:var(--muted2);line-height:1.4;">Sugerido = base por videos de la quincena + ventas de la quincena. Los bonos van aparte (acumulados arriba).</div>
+            <div style="font-size:8.5px;font-family:'Poppins';color:var(--muted2);line-height:1.4;">Sugerido = base por videos de la quincena + ventas de la quincena. Los bonos van aparte (acumulados arriba).</div>
           </div>
-          <button onclick="openPago('${r.c}',${r.deuda})" style="width:100%;margin-top:8px;padding:8px;background:var(--accent);color:white;border:none;border-radius:var(--radius-xs);font-family:'Nunito';font-size:12px;font-weight:700;cursor:pointer;">+ Registrar pago</button>
-          <button onclick="resetPagosCreadora('${r.c}')" style="width:100%;margin-top:6px;padding:6px;background:none;border:1px solid var(--border);border-radius:var(--radius-xs);font-family:'DM Mono';font-size:10px;color:var(--muted);cursor:pointer;">↺ Resetear pagos</button>
+          <button onclick="openPago('${r.c}',${r.deuda})" style="width:100%;margin-top:8px;padding:8px;background:var(--accent);color:white;border:none;border-radius:var(--radius-xs);font-family:'Poppins';font-size:12px;font-weight:700;cursor:pointer;">+ Registrar pago</button>
+          <button onclick="resetPagosCreadora('${r.c}')" style="width:100%;margin-top:6px;padding:6px;background:none;border:1px solid var(--border);border-radius:var(--radius-xs);font-family:'Poppins';font-size:10px;color:var(--muted);cursor:pointer;">↺ Resetear pagos</button>
         </div>`).join("")}
     </div>
   `;
@@ -2187,11 +2215,11 @@ function renderFinanzas(){
   const hist = [...data.pagos].sort((a,b)=>b.fecha.localeCompare(a.fecha));
   document.getElementById("pagos-historial").innerHTML = hist.length ?
     hist.map(p=>`<tr>
-      <td><div style="display:flex;align-items:center;gap:8px;"><div style="width:28px;height:28px;border-radius:50%;background:${COLORS[p.creator]}22;border:1px solid ${COLORS[p.creator]};display:flex;align-items:center;justify-content:center;font-family:'DM Mono';font-size:10px;color:${COLORS[p.creator]}">${AVATARS[p.creator]}</div>${NAMES[p.creator]}</div></td>
-      <td style="font-family:'Nunito';font-size:16px;font-weight:800;color:var(--accent);">$${p.monto.toLocaleString("es-AR")}</td>
+      <td><div style="display:flex;align-items:center;gap:8px;"><div style="width:28px;height:28px;border-radius:50%;background:${COLORS[p.creator]}22;border:1px solid ${COLORS[p.creator]};display:flex;align-items:center;justify-content:center;font-family:'Poppins';font-size:10px;color:${COLORS[p.creator]}">${AVATARS[p.creator]}</div>${NAMES[p.creator]}</div></td>
+      <td style="font-family:'Poppins';font-size:16px;font-weight:800;color:var(--accent);">$${p.monto.toLocaleString("es-AR")}</td>
       <td style="font-size:11px;color:var(--muted);">${p.concepto||"Pago campaña"}</td>
-      <td style="font-family:'DM Mono';font-size:10px;color:var(--muted);">${p.fecha}</td>
-      <td><span style="background:rgba(26,58,143,.1);color:var(--accent);padding:3px 10px;border-radius:20px;font-size:9px;font-family:'DM Mono';">✓ Pagado</span></td>
+      <td style="font-family:'Poppins';font-size:10px;color:var(--muted);">${p.fecha}</td>
+      <td><span style="background:rgba(var(--acc-rgb),.1);color:var(--accent);padding:3px 10px;border-radius:20px;font-size:9px;font-family:'Poppins';">✓ Pagado</span></td>
     </tr>`).join("") :
     `<tr><td colspan="5" style="text-align:center;color:var(--muted);padding:24px;">Sin pagos registrados</td></tr>`;
 }
@@ -2340,29 +2368,29 @@ function renderComprobantes(){
   const pendientes=comps.filter(c=>!c.pagado).reduce((s,c)=>s+c.monto,0);
   document.getElementById('comp-stats').innerHTML=`
     <div style="background:white;border-radius:var(--radius-sm);padding:14px;box-shadow:var(--shadow);text-align:center;">
-      <div style="font-size:10px;font-family:'DM Mono';color:var(--muted);letter-spacing:1px;">TOTAL</div>
-      <div style="font-family:'Nunito';font-size:20px;font-weight:900;color:var(--text);">${fmtP(total)}</div>
+      <div style="font-size:10px;font-family:'Poppins';color:var(--muted);letter-spacing:1px;">TOTAL</div>
+      <div style="font-family:'Poppins';font-size:20px;font-weight:900;color:var(--text);">${fmtP(total)}</div>
     </div>
     <div style="background:white;border-radius:var(--radius-sm);padding:14px;box-shadow:var(--shadow);text-align:center;">
-      <div style="font-size:10px;font-family:'DM Mono';color:var(--muted);letter-spacing:1px;">PAGADO</div>
-      <div style="font-family:'Nunito';font-size:20px;font-weight:900;color:var(--blue);">${fmtP(pagados)}</div>
+      <div style="font-size:10px;font-family:'Poppins';color:var(--muted);letter-spacing:1px;">PAGADO</div>
+      <div style="font-family:'Poppins';font-size:20px;font-weight:900;color:var(--blue);">${fmtP(pagados)}</div>
     </div>
     <div style="background:white;border-radius:var(--radius-sm);padding:14px;box-shadow:var(--shadow);text-align:center;">
-      <div style="font-size:10px;font-family:'DM Mono';color:var(--muted);letter-spacing:1px;">PENDIENTE</div>
-      <div style="font-family:'Nunito';font-size:20px;font-weight:900;color:var(--accent2);">${fmtP(pendientes)}</div>
+      <div style="font-size:10px;font-family:'Poppins';color:var(--muted);letter-spacing:1px;">PENDIENTE</div>
+      <div style="font-family:'Poppins';font-size:20px;font-weight:900;color:var(--accent2);">${fmtP(pendientes)}</div>
     </div>`;
   const tipoLabel={sueldo:"Sueldo",ventas:"Comisión",bono:"Bono",otro:"Otro"};
   document.getElementById('comp-tbody').innerHTML=comps.length?comps.map(c=>`
     <tr>
       <td><div style="display:flex;align-items:center;gap:8px;">
-        <div style="width:28px;height:28px;border-radius:50%;background:${COLORS[c.creator]}22;border:1px solid ${COLORS[c.creator]};display:flex;align-items:center;justify-content:center;font-family:'DM Mono';font-size:10px;color:${COLORS[c.creator]}">${AVATARS[c.creator]}</div>
+        <div style="width:28px;height:28px;border-radius:50%;background:${COLORS[c.creator]}22;border:1px solid ${COLORS[c.creator]};display:flex;align-items:center;justify-content:center;font-family:'Poppins';font-size:10px;color:${COLORS[c.creator]}">${AVATARS[c.creator]}</div>
         ${NAMES[c.creator]}
       </div></td>
-      <td><span style="background:rgba(26,58,143,.08);color:var(--blue);padding:2px 8px;border-radius:20px;font-size:10px;font-family:'DM Mono';">${tipoLabel[c.tipo]||c.tipo}</span></td>
-      <td style="font-family:'Nunito';font-size:15px;font-weight:800;color:var(--accent);">${fmtP(c.monto)}</td>
+      <td><span style="background:rgba(var(--acc-rgb),.08);color:var(--blue);padding:2px 8px;border-radius:20px;font-size:10px;font-family:'Poppins';">${tipoLabel[c.tipo]||c.tipo}</span></td>
+      <td style="font-family:'Poppins';font-size:15px;font-weight:800;color:var(--accent);">${fmtP(c.monto)}</td>
       <td style="font-size:12px;color:var(--muted);">${c.concepto||"—"}</td>
-      <td style="font-family:'DM Mono';font-size:10px;color:var(--muted);">${c.fecha}</td>
-      <td><span style="padding:3px 10px;border-radius:20px;font-size:9px;font-family:'DM Mono';background:${c.pagado?"rgba(26,58,143,.1)":"rgba(232,93,38,.1)"};color:${c.pagado?"var(--blue)":"var(--accent2)"};">${c.pagado?"✓ Pagado":"⏳ Pendiente"}</span></td>
+      <td style="font-family:'Poppins';font-size:10px;color:var(--muted);">${c.fecha}</td>
+      <td><span style="padding:3px 10px;border-radius:20px;font-size:9px;font-family:'Poppins';background:${c.pagado?"rgba(var(--acc-rgb),.1)":"rgba(193,97,60,.1)"};color:${c.pagado?"var(--blue)":"var(--accent2)"};">${c.pagado?"✓ Pagado":"⏳ Pendiente"}</span></td>
       <td style="display:flex;gap:6px;align-items:center;">
         ${c.archivo?`<button onclick="verArchivo(${c.id})" style="background:none;border:none;color:var(--blue);cursor:pointer;font-size:13px;padding:4px;" title="Ver comprobante">📎</button>`:''}
         <button onclick="deleteComprobante(${c.id})" style="background:none;border:none;color:var(--muted);cursor:pointer;font-size:16px;padding:4px;" onmouseover="this.style.color='var(--accent2)'" onmouseout="this.style.color='var(--muted)'">✕</button>
@@ -2380,16 +2408,16 @@ function renderConfigCreadoras(){
   wrap.innerHTML=CREATORS.map(c=>`
     <div style="padding:14px;background:var(--surface2);border-radius:var(--radius-sm);margin-bottom:8px;">
       <div style="display:flex;align-items:center;gap:12px;margin-bottom:10px;">
-        <div style="width:36px;height:36px;border-radius:50%;background:${COLORS[c]}22;border:2px solid ${COLORS[c]};display:flex;align-items:center;justify-content:center;font-family:'DM Mono';font-size:11px;color:${COLORS[c]};flex-shrink:0;">${AVATARS[c]}</div>
+        <div style="width:36px;height:36px;border-radius:50%;background:${COLORS[c]}22;border:2px solid ${COLORS[c]};display:flex;align-items:center;justify-content:center;font-family:'Poppins';font-size:11px;color:${COLORS[c]};flex-shrink:0;">${AVATARS[c]}</div>
         <div style="flex:1;">
           <div style="font-size:13px;font-weight:800;">${NAMES[c]}</div>
-          <div style="font-size:10px;font-family:'DM Mono';color:var(--muted);">Videos: ${data.videos.filter(v=>v.creator===c&&v.status!=='rejected').length} · Ventas: ${data.ventas[c]||0} · Bonos: ${fmtP(data.bonos[c]||0)}</div>
+          <div style="font-size:10px;font-family:'Poppins';color:var(--muted);">Videos: ${data.videos.filter(v=>v.creator===c&&v.status!=='rejected').length} · Ventas: ${data.ventas[c]||0} · Bonos: ${fmtP(data.bonos[c]||0)}</div>
         </div>
       </div>
       <div style="display:flex;align-items:center;gap:8px;">
-        <span style="font-size:10px;font-family:'DM Mono';color:var(--muted);white-space:nowrap;">Inicio campaña:</span>
+        <span style="font-size:10px;font-family:'Poppins';color:var(--muted);white-space:nowrap;">Inicio campaña:</span>
         <input type="date" value="${data.startDates[c]||''}" onchange="saveStartDate('${c}',this.value)"
-          style="flex:1;padding:5px 8px;border-radius:var(--radius-xs);border:1px solid var(--border);font-size:11px;font-family:'DM Mono';color:var(--text);background:white;">
+          style="flex:1;padding:5px 8px;border-radius:var(--radius-xs);border:1px solid var(--border);font-size:11px;font-family:'Poppins';color:var(--text);background:white;">
       </div>
     </div>`).join('');
 }
@@ -2412,7 +2440,7 @@ function submitNewCreadora(){
   if(data.extraCreators.find(c=>c.name.toLowerCase()===nombre.toLowerCase())){
     showToast("Ya existe una creadora con ese nombre");return;
   }
-  const palette=['#f59e0b','#10b981','#8b5cf6','#f43f5e','#06b6d4','#84cc16','#ec4899','#14b8a6'];
+  const palette=['#B07B2E','#10b981','#8b5cf6','#f43f5e','#06b6d4','#84cc16','#ec4899','#14b8a6'];
   const idx=CREATORS.length+data.extraCreators.length;
   const key='creadora'+(idx+1);
   const color=palette[data.extraCreators.length%palette.length];
@@ -2448,7 +2476,7 @@ loadConfig();
     const el = document.getElementById('shopify-content');
     if(!el) return;
     if(!salesData.length){
-      el.innerHTML=`<div style="text-align:center;padding:48px;color:var(--muted);font-family:'DM Mono';font-size:11px;line-height:1.8;">Sin ventas registradas todavía.<br>Las ventas aparecen acá cuando alguien compra usando el link UTM de una creadora.</div>`;
+      el.innerHTML=`<div style="text-align:center;padding:48px;color:var(--muted);font-family:'Poppins';font-size:11px;line-height:1.8;">Sin ventas registradas todavía.<br>Las ventas aparecen acá cuando alguien compra usando el link UTM de una creadora.</div>`;
       return;
     }
     const byCreator={};
@@ -2464,44 +2492,44 @@ loadConfig();
     if(badge)badge.textContent=totalVentas;
     el.innerHTML=`
       <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-bottom:20px;">
-        <div style="background:var(--surface);border-radius:var(--radius);padding:16px;box-shadow:var(--shadow);border-left:4px solid #16a34a;">
-          <div style="font-family:'DM Mono';font-size:9px;letter-spacing:1px;color:var(--muted);text-transform:uppercase;margin-bottom:6px;">Total ventas</div>
-          <div style="font-family:'Nunito';font-size:28px;font-weight:900;color:#16a34a;">${totalVentas}</div>
+        <div style="background:var(--surface);border-radius:var(--radius);padding:16px;box-shadow:var(--shadow);border-left:4px solid #3F8F6B;">
+          <div style="font-family:'Poppins';font-size:9px;letter-spacing:1px;color:var(--muted);text-transform:uppercase;margin-bottom:6px;">Total ventas</div>
+          <div style="font-family:'Poppins';font-size:28px;font-weight:900;color:#3F8F6B;">${totalVentas}</div>
         </div>
         <div style="background:var(--surface);border-radius:var(--radius);padding:16px;box-shadow:var(--shadow);border-left:4px solid var(--accent);">
-          <div style="font-family:'DM Mono';font-size:9px;letter-spacing:1px;color:var(--muted);text-transform:uppercase;margin-bottom:6px;">Total recaudado</div>
-          <div style="font-family:'Nunito';font-size:24px;font-weight:900;color:var(--accent);">${fmtP(totalAmount)}</div>
+          <div style="font-family:'Poppins';font-size:9px;letter-spacing:1px;color:var(--muted);text-transform:uppercase;margin-bottom:6px;">Total recaudado</div>
+          <div style="font-family:'Poppins';font-size:24px;font-weight:900;color:var(--accent);">${fmtP(totalAmount)}</div>
         </div>
         <div style="background:var(--surface);border-radius:var(--radius);padding:16px;box-shadow:var(--shadow);border-left:4px solid var(--gold);">
-          <div style="font-family:'DM Mono';font-size:9px;letter-spacing:1px;color:var(--muted);text-transform:uppercase;margin-bottom:6px;">Mejor creadora</div>
-          <div style="font-family:'Nunito';font-size:16px;font-weight:900;color:var(--gold);">${top?NAMES[top].split(' ')[0]:'—'}</div>
+          <div style="font-family:'Poppins';font-size:9px;letter-spacing:1px;color:var(--muted);text-transform:uppercase;margin-bottom:6px;">Mejor creadora</div>
+          <div style="font-family:'Poppins';font-size:16px;font-weight:900;color:var(--gold);">${top?NAMES[top].split(' ')[0]:'—'}</div>
         </div>
       </div>
       <div style="margin-bottom:20px;">
         ${sorted.filter(c=>byCreator[c].count>0).map(c=>`
           <div style="background:var(--surface);border-radius:var(--radius);padding:14px;margin-bottom:8px;box-shadow:var(--shadow);display:flex;align-items:center;gap:12px;">
-            <div style="width:36px;height:36px;border-radius:50%;background:${COLORS[c]}18;border:2px solid ${COLORS[c]};display:flex;align-items:center;justify-content:center;font-family:'DM Mono';font-size:11px;font-weight:700;color:${COLORS[c]};flex-shrink:0;">${AVATARS[c]}</div>
+            <div style="width:36px;height:36px;border-radius:50%;background:${COLORS[c]}18;border:2px solid ${COLORS[c]};display:flex;align-items:center;justify-content:center;font-family:'Poppins';font-size:11px;font-weight:700;color:${COLORS[c]};flex-shrink:0;">${AVATARS[c]}</div>
             <div style="flex:1;">
               <div style="font-weight:700;font-size:13px;">${NAMES[c]}</div>
-              <div style="font-size:10px;font-family:'DM Mono';color:var(--muted);">${byCreator[c].count} venta${byCreator[c].count!==1?'s':''}</div>
+              <div style="font-size:10px;font-family:'Poppins';color:var(--muted);">${byCreator[c].count} venta${byCreator[c].count!==1?'s':''}</div>
             </div>
             <div style="text-align:right;">
-              <div style="font-family:'Nunito';font-size:18px;font-weight:900;color:#16a34a;">${fmtP(byCreator[c].total)}</div>
-              <div style="font-size:9px;font-family:'DM Mono';color:var(--muted);">comisión: ${fmtP(byCreator[c].count*COMISION_POR_VENTA)}</div>
+              <div style="font-family:'Poppins';font-size:18px;font-weight:900;color:#3F8F6B;">${fmtP(byCreator[c].total)}</div>
+              <div style="font-size:9px;font-family:'Poppins';color:var(--muted);">comisión: ${fmtP(byCreator[c].count*COMISION_POR_VENTA)}</div>
             </div>
           </div>`).join('')}
-        ${sorted.every(c=>!byCreator[c].count)?'<div style="text-align:center;padding:20px;color:var(--muted);font-family:\'DM Mono\';font-size:11px;">Sin ventas aún</div>':''}
+        ${sorted.every(c=>!byCreator[c].count)?'<div style="text-align:center;padding:20px;color:var(--muted);font-family:\'Poppins\';font-size:11px;">Sin ventas aún</div>':''}
       </div>
-      <div style="font-family:'DM Mono';font-size:9px;letter-spacing:2px;color:var(--muted);text-transform:uppercase;margin-bottom:10px;">Últimas ventas</div>
+      <div style="font-family:'Poppins';font-size:9px;letter-spacing:2px;color:var(--muted);text-transform:uppercase;margin-bottom:10px;">Últimas ventas</div>
       <div style="background:var(--surface);border-radius:var(--radius);box-shadow:var(--shadow);overflow:hidden;">
         <table style="width:100%;border-collapse:collapse;">
           <thead><tr style="border-bottom:1px solid var(--border);">
-            <th style="padding:10px 14px;text-align:left;font-family:'DM Mono';font-size:9px;letter-spacing:1px;color:var(--muted);">CREADORA</th>
-            <th style="padding:10px 14px;text-align:left;font-family:'DM Mono';font-size:9px;letter-spacing:1px;color:var(--muted);">PRODUCTO</th>
-            <th style="padding:10px 14px;text-align:center;font-family:'DM Mono';font-size:9px;letter-spacing:1px;color:var(--muted);">CÓDIGO</th>
-            <th style="padding:10px 14px;text-align:right;font-family:'DM Mono';font-size:9px;letter-spacing:1px;color:var(--muted);">MONTO</th>
-            <th style="padding:10px 14px;text-align:right;font-family:'DM Mono';font-size:9px;letter-spacing:1px;color:var(--muted);">FECHA / HORA</th>
-            <th style="padding:10px 14px;text-align:right;font-family:'DM Mono';font-size:9px;letter-spacing:1px;color:var(--muted);">ORDEN / TOKEN</th>
+            <th style="padding:10px 14px;text-align:left;font-family:'Poppins';font-size:9px;letter-spacing:1px;color:var(--muted);">CREADORA</th>
+            <th style="padding:10px 14px;text-align:left;font-family:'Poppins';font-size:9px;letter-spacing:1px;color:var(--muted);">PRODUCTO</th>
+            <th style="padding:10px 14px;text-align:center;font-family:'Poppins';font-size:9px;letter-spacing:1px;color:var(--muted);">CÓDIGO</th>
+            <th style="padding:10px 14px;text-align:right;font-family:'Poppins';font-size:9px;letter-spacing:1px;color:var(--muted);">MONTO</th>
+            <th style="padding:10px 14px;text-align:right;font-family:'Poppins';font-size:9px;letter-spacing:1px;color:var(--muted);">FECHA / HORA</th>
+            <th style="padding:10px 14px;text-align:right;font-family:'Poppins';font-size:9px;letter-spacing:1px;color:var(--muted);">ORDEN / TOKEN</th>
           </tr></thead>
           <tbody>
             ${[...salesData].sort((a,b)=>(b.date||'').localeCompare(a.date||'')).slice(0,50).map(s=>`
@@ -2511,10 +2539,10 @@ loadConfig();
                   <span style="font-size:12px;">${(NAMES[s.creator]||s.creator||'—').split(' ')[0]}</span>
                 </div></td>
                 <td style="padding:10px 14px;font-size:11px;color:var(--muted);max-width:140px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${s.product||'—'}</td>
-                <td style="padding:10px 14px;text-align:center;">${s.coupon?`<span style="font-family:'DM Mono';font-size:10px;font-weight:700;color:#7c3aed;background:rgba(124,58,237,.1);border:1px solid rgba(124,58,237,.25);border-radius:8px;padding:2px 7px;">${s.coupon}</span>`:'<span style="font-size:10px;color:var(--muted2);opacity:.5;">UTM</span>'}</td>
-                <td style="padding:10px 14px;text-align:right;font-family:'Nunito';font-weight:800;font-size:13px;color:#16a34a;">${fmtP(s.amount||0)}</td>
-                <td style="padding:10px 14px;text-align:right;font-family:'DM Mono';font-size:10px;color:var(--muted);">${(s.date||'').split('T')[0]}<br><span style="font-size:9px;opacity:.7;">${s.hora||(s.date||'').split('T')[1]?.slice(0,5)||''}</span></td>
-                <td style="padding:10px 14px;text-align:right;font-family:'DM Mono';font-size:10px;color:var(--muted);white-space:nowrap;">${s.orderNumber?`#${s.orderNumber}`:'—'}${s.token?`<br><span title="${s.token}" onclick="navigator.clipboard.writeText('${s.token}');showToast('Token copiado 📋')" style="font-size:9px;opacity:.6;cursor:pointer;text-decoration:underline dotted;">${String(s.token).slice(0,10)}… 📋</span>`:''}</td>
+                <td style="padding:10px 14px;text-align:center;">${s.coupon?`<span style="font-family:'Poppins';font-size:10px;font-weight:700;color:#7c3aed;background:rgba(124,58,237,.1);border:1px solid rgba(124,58,237,.25);border-radius:8px;padding:2px 7px;">${s.coupon}</span>`:'<span style="font-size:10px;color:var(--muted2);opacity:.5;">UTM</span>'}</td>
+                <td style="padding:10px 14px;text-align:right;font-family:'Poppins';font-weight:800;font-size:13px;color:#3F8F6B;">${fmtP(s.amount||0)}</td>
+                <td style="padding:10px 14px;text-align:right;font-family:'Poppins';font-size:10px;color:var(--muted);">${(s.date||'').split('T')[0]}<br><span style="font-size:9px;opacity:.7;">${s.hora||(s.date||'').split('T')[1]?.slice(0,5)||''}</span></td>
+                <td style="padding:10px 14px;text-align:right;font-family:'Poppins';font-size:10px;color:var(--muted);white-space:nowrap;">${s.orderNumber?`#${s.orderNumber}`:'—'}${s.token?`<br><span title="${s.token}" onclick="navigator.clipboard.writeText('${s.token}');showToast('Token copiado 📋')" style="font-size:9px;opacity:.6;cursor:pointer;text-decoration:underline dotted;">${String(s.token).slice(0,10)}… 📋</span>`:''}</td>
               </tr>`).join('')}
           </tbody>
         </table>
@@ -2821,7 +2849,7 @@ loadConfig();
 <!-- Auto-actualización: GitHub Pages cachea el HTML y los celulares lo retienen mucho más.
      Esto compara la versión publicada con la que está corriendo y refresca sola. -->
 <script>
-const APP_VERSION = '2026-08-24-c';
+const APP_VERSION = '2026-08-25-b';
 (function(){
   var CLAVE='cima_ver_reload';
   function hayAlguienEscribiendo(){
