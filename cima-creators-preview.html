@@ -861,8 +861,8 @@ window.BRAND_COLLECTION = BRAND.collection;
 document.addEventListener('DOMContentLoaded',function(){
   // Apply brand colors to login background
   const ls = document.getElementById('login-screen');
-  if(ls) ls.style.background = 'linear-gradient(160deg,'+BRAND.bg+' 0%,'+BRAND.bgDark+' 100%)';
-  document.body.style.background = BRAND.bg;
+  if(ls) ls.style.background = 'linear-gradient(165deg,#FDFBF9 0%,#F3EDE7 100%)';
+  document.body.style.background = '#FAF7F4'; // piel cálida, igual en todas las marcas
   // Replace Cleargy img logo with brand logo
   const loginLogo = document.querySelector('#login-screen img');
   if(loginLogo && BRAND.logoImg){
