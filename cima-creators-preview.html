@@ -354,6 +354,20 @@ body{background:var(--bg);}
 /* el separador de "últimos videos" en el mismo tono */
 .sec-divider-label{font-family:'Poppins';font-size:10.5px;letter-spacing:.13em;
   text-transform:uppercase;color:var(--muted);font-weight:600;}
+/* ---- la barra de arriba tapa el contenido al scrollear ---- */
+.topbar{background:var(--bg) !important;}
+.topbar::after{
+  content:'';position:absolute;left:0;right:0;bottom:-18px;height:18px;
+  background:linear-gradient(var(--bg),rgba(250,247,244,0));pointer-events:none;
+}
+.topbar{position:sticky;top:0;}
+
+/* ---- botones de las tarjetas de video ---- */
+.vc-copy-btn{
+  background:var(--surface2) !important;border:1px solid var(--border) !important;
+  color:var(--text) !important;border-radius:99px !important;font-weight:500 !important;
+  font-size:12px !important;padding:8px 14px !important;
+}
 </style>
 </head>
 <body>
@@ -2328,7 +2342,7 @@ loadData();
 <!-- Auto-actualización: GitHub Pages cachea el HTML y los celulares lo retienen mucho más.
      Esto compara la versión publicada con la que está corriendo y refresca sola. -->
 <script>
-const APP_VERSION = 'preview-2';
+const APP_VERSION = 'preview-3';
 (function(){
   var CLAVE='cima_ver_reload';
   function hayAlguienEscribiendo(){
