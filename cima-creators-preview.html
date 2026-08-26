@@ -206,6 +206,7 @@ body{background:var(--bg);}
   padding:8px 15px;font-size:12.5px;font-weight:600;color:var(--text);white-space:nowrap;
 }
 .logout-btn{background:none;border:0;cursor:pointer;padding:6px;line-height:0;color:var(--muted2);}
+#topbar-logo{display:none !important;}
 .logout-btn svg{width:20px;height:20px;stroke:currentColor;fill:none;stroke-width:1.7;stroke-linecap:round;stroke-linejoin:round;}
 
 /* ---- tarjeta principal con el aro ---- */
@@ -916,8 +917,9 @@ document.addEventListener('DOMContentLoaded',function(){
   // Topbar logo
   const _tl=document.getElementById('topbar-logo');
   const _tt=document.getElementById('topbar-brand-text');
-  if(BRAND.logoImg){if(_tl){_tl.src=BRAND.logoImg;_tl.style.display='block';}if(_tt)_tt.style.display='none';}
-  else{if(_tl)_tl.style.display='none';if(_tt){_tt.textContent=BRAND.logoText||BRAND.name;_tt.style.display='block';}}
+  // En la piel nueva la barra muestra "Hola, <nombre>": el logo de marca queda sólo en el login.
+  if(_tl) _tl.style.display='none';
+  if(_tt) _tt.style.display='none';
   document.title = BRAND.name + ' — Creators';
 });
 
