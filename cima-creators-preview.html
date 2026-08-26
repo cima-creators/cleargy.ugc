@@ -40,7 +40,7 @@ select.linput option{background:white;}
 .lerr.show{display:block;}
 
 /* APP */
-#app{display:none;padding-bottom:80px;}
+#app{display:none;padding-bottom:118px;}
 #app.show{display:block;}
 
 /* TOP BAR */
@@ -1375,7 +1375,7 @@ function renderSemana(myVids){
   const completos=vals.filter(n=>n>=DAILY_VIDEOS).length;
   document.getElementById("home-semana-msg").textContent =
     completos===7 ? "🔥 Semana perfecta: llegaste a tu meta los 7 días"
-    : `${completos} de 7 días con tus ${DAILY_VIDEOS} videos — las barras verdes son los días completos`;
+    : `${completos} de 7 días con tus ${DAILY_VIDEOS} videos — las barras llenas son los días completos`;
 }
 
 // ── Tu mejor video: el de más views (no aplica en marcas sin redes)
