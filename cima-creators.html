@@ -382,6 +382,20 @@ body{background:var(--bg);}
 .upload-card{border:1px solid var(--border);box-shadow:none;border-radius:22px;}
 .stat-card{border:1px solid var(--border);box-shadow:none;}
 .vsort-tab,.vf-tab{font-weight:500;}
+/* ---- tu link con UTM ---- */
+.link-card{margin:12px 16px 0;background:var(--surface);border:1px solid var(--border);
+  border-radius:22px;padding:17px 18px 16px;}
+.lk-head{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:10px;}
+.lk-cod{font-size:12.5px;font-weight:600;color:var(--accent);background:rgba(var(--acc-rgb),.10);
+  border-radius:99px;padding:4px 12px;white-space:nowrap;}
+.lk-url{background:var(--surface2);border:1px solid var(--border);border-radius:14px;
+  padding:12px 13px;font-size:11.5px;color:var(--muted);word-break:break-all;line-height:1.5;
+  font-weight:400;}
+.lk-btn{width:100%;margin-top:10px;background:var(--accent);color:#fff;border:0;border-radius:16px;
+  padding:13px;font-family:'Poppins';font-size:14.5px;font-weight:600;letter-spacing:-.01em;cursor:pointer;}
+.lk-btn:active{opacity:.9;}
+.lk-btn.ok{background:#3F8F6B;}
+.lk-hint{font-size:11.5px;color:var(--muted);margin-top:10px;line-height:1.45;}
 </style>
 </head>
 <body>
@@ -480,6 +494,17 @@ body{background:var(--bg);}
         </span>
         <span class="pay-left" id="home-pay-pct">0%</span>
       </div>
+    </div>
+
+    <!-- Tu link con UTM + tu código -->
+    <div id="home-link" class="link-card" style="display:none;">
+      <div class="lk-head">
+        <span class="lb">Tu link para compartir</span>
+        <span class="lk-cod" id="home-cupon" style="display:none;"></span>
+      </div>
+      <div class="lk-url" id="home-utm">—</div>
+      <button class="lk-btn" id="home-copy-btn" onclick="copiarMiLink()">Copiar mi link</button>
+      <div class="lk-hint">Pegalo en tu bio y en las historias. Todo lo que se compre desde ahí te suma la venta.</div>
     </div>
 
     <!-- Tu mejor video -->
@@ -851,15 +876,15 @@ const BRAND_CONFIGS = {
     border:'#d2d6da', muted2:'#bcc2c8',
     name:'Lagos', logoText:'LAGOS', defaultCampaignStart:'2026-08-19', sub:'Creators Hub',
     logoImg:'data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="300" height="96"><rect width="300" height="96" rx="12" fill="%23F2F3F4"/><g fill="%23A7ACB1"><rect x="36" y="24" width="9" height="40"/><rect x="36" y="55" width="26" height="9"/><rect x="52" y="24" width="9" height="9"/><rect x="66" y="24" width="9" height="22"/></g><text x="185" y="56" font-family="Arial Black,Arial,sans-serif" font-size="38" font-weight="900" fill="%23A7ACB1" text-anchor="middle" letter-spacing="-1">LAGOS</text><rect x="100" y="68" width="170" height="6" fill="%23A7ACB1"/></svg>',
-    collection:'lagos', no100k:true, bgDark:'#dfe3e6',
+    collection:'lagos', storeUrl:'',  // ← poner acá el dominio de la tienda de Lagos no100k:true, bgDark:'#dfe3e6',
     cats:['Review / unboxing','Antes y después','Tutorial de uso','Tips','Trend / challenge','Otro'],
     accent:'#5A626A', accentLight:'#7c858e', bg:'#f4f6f7', surface2:'#eaedef', surface3:'#e0e4e7',
     text:'#1e2429', muted:'#6b747c', shadow:'90,98,106',
     goal: 195, dailyVideos:2, videoGoal:65, salary:450000, minVideos:65,
     creators:{
-      creadora1:{name:'Vane',pass:'lagos1',avatar:'VA',color:'#5A626A'},
-      creadora2:{name:'Juli de Diego',pass:'lagos2',avatar:'JD',color:'#3f464d'},
-      creadora3:{name:'Georgina',pass:'lagos3',avatar:'GE',color:'#7c858e'},
+      creadora1:{name:'Vane',pass:'lagos1',cupon:'VANE10',avatar:'VA',color:'#5A626A'},
+      creadora2:{name:'Juli de Diego',pass:'lagos2',cupon:'JULI10',avatar:'JD',color:'#3f464d'},
+      creadora3:{name:'Georgina',pass:'lagos3',cupon:'GEO10',avatar:'GE',color:'#7c858e'},
     }
   },
   mentralabs: {
@@ -1422,6 +1447,7 @@ function renderHome(){
   }
 
   renderSemana(myVids);
+  renderMiLink();
   renderMejorVideo(myVids);
 
   // Resumen de cobros
@@ -1505,6 +1531,44 @@ function renderMejorVideo(myVids){
       ${link?`<a href="${link}" target="_blank" rel="noopener" style="flex-shrink:0;font-family:'Poppins';font-size:10px;font-weight:700;color:var(--accent);text-decoration:none;border:1px solid var(--border);border-radius:9px;padding:8px 12px;">ver →</a>`:""}
     </div>
     ${xVeces>=1.5?`<div style="font-size:10.5px;font-family:'Poppins';color:var(--muted);margin-top:12px;">Hizo ${xVeces.toFixed(1)}× más views que tu promedio — fijate qué tuvo de distinto y repetilo 👀</div>`:""}`;
+}
+
+// ── Link con UTM propio de cada creadora (sólo si la marca tiene tienda cargada) ──
+function miLinkUtm(){
+  if(!BRAND.storeUrl || !currentUser) return "";
+  const base = BRAND.storeUrl.replace(/\/+$/,'');
+  const sep = base.includes('?') ? '&' : '?';
+  return base + sep + 'utm_source=instagram&utm_medium=ugc&utm_campaign=' + currentUser;
+}
+function renderMiLink(){
+  const box = document.getElementById('home-link'); if(!box) return;
+  const url = miLinkUtm();
+  if(!url){ box.style.display = 'none'; return; }
+  box.style.display = 'block';
+  document.getElementById('home-utm').textContent = url;
+  const cod = (BRAND.creators[currentUser]||{}).cupon;
+  const chip = document.getElementById('home-cupon');
+  if(chip){
+    if(cod){ chip.textContent = 'Tu código: ' + cod; chip.style.display = ''; }
+    else chip.style.display = 'none';
+  }
+}
+async function copiarMiLink(){
+  const url = miLinkUtm(); if(!url) return;
+  const btn = document.getElementById('home-copy-btn');
+  try{ await navigator.clipboard.writeText(url); }
+  catch(e){
+    // Safari viejo: fallback con un input temporal
+    const t=document.createElement('textarea'); t.value=url; t.style.position='fixed'; t.style.opacity='0';
+    document.body.appendChild(t); t.select();
+    try{ document.execCommand('copy'); }catch(_){ }
+    document.body.removeChild(t);
+  }
+  if(btn){
+    const antes = btn.textContent;
+    btn.textContent = '✓ Copiado'; btn.classList.add('ok');
+    setTimeout(()=>{ btn.textContent = antes; btn.classList.remove('ok'); }, 1800);
+  }
 }
 
 // Escape de contenido cargado por usuarios (notas, links) — evita XSS y roturas de atributos
@@ -2360,7 +2424,7 @@ loadData();
 <!-- Auto-actualización: GitHub Pages cachea el HTML y los celulares lo retienen mucho más.
      Esto compara la versión publicada con la que está corriendo y refresca sola. -->
 <script>
-const APP_VERSION = '2026-08-25-b';
+const APP_VERSION = '2026-08-25-c';
 (function(){
   var CLAVE='cima_ver_reload';
   function hayAlguienEscribiendo(){
