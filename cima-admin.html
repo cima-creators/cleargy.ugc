@@ -797,6 +797,17 @@ const BRAND_CONFIGS = {
       creadora3:{name:'Diego',avatar:'DI',color:'#3d7fa3',phone:''},
     }
   },
+  silq: {
+    goal:60, // objetivo total de la campaña
+    name:'SILQ', logoText:'SILQ', collection:'silq', defaultCampaignStart:'2026-08-29', dailyVideos:2, videoGoal:60, no100k:true, noRacha:true, salary:400000, minVideos:60,
+    logoImg:'data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="300" height="110"><rect width="300" height="110" rx="14" fill="%23F2EFE9"/><text x="150" y="73" font-family="Helvetica,Arial,sans-serif" font-size="56" font-weight="700" fill="%23191713" text-anchor="middle" letter-spacing="-1">SILQ</text></svg>',
+    adminPass:'silq-admin-2025', adminPass2:'silq-2025', adminPass3:'dani-2026', adminPass4:'abril-2026',
+    accent:'#191713', accentLight:'#4A443B', bg:'#f6f3ed', surface2:'#ece7dd', border:'#e0dbd2',
+    text:'#191713', muted:'#7a7166', shadow:'25,23,19', loginBg:'linear-gradient(135deg,#f6f3ed 0%,#ece7dd 50%,#ddd7cc 100%)',
+    creators:{
+      creadora1:{name:'Juani',avatar:'JU',color:'#191713',phone:''},
+    }
+  },
   tierrafertil: {
     goal:9, // objetivo total de la campaña
     name:'Tierra Fértil', logoText:'TIERRA FÉRTIL', collection:'tierrafertil', defaultCampaignStart:'2026-08-19', dailyVideos:1, videoGoal:9, no100k:true, salary:120000, minVideos:5,
@@ -2849,7 +2860,7 @@ loadConfig();
 <!-- Auto-actualización: GitHub Pages cachea el HTML y los celulares lo retienen mucho más.
      Esto compara la versión publicada con la que está corriendo y refresca sola. -->
 <script>
-const APP_VERSION = '2026-08-25-b';
+const APP_VERSION = '2026-08-29-c';
 (function(){
   var CLAVE='cima_ver_reload';
   function hayAlguienEscribiendo(){
