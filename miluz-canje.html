@@ -1,0 +1,1135 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#FBF7F2">
+<meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+<meta http-equiv="Pragma" content="no-cache">
+<meta http-equiv="Expires" content="0">
+<title>MiLuz · Creadoras</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap">
+<style>
+:root{
+  /* claro y cálido, la paleta de MiLuz — el estilo viene de las formas */
+  --bg:#FBF7F2;
+  --bg2:#F4EDE4;
+  --sup:#FFFFFF;
+  --sup2:#F6EFE6;
+  --linea:#EBE0D2;
+  --linea2:#DFD1BE;
+  --tx:#2A231D;
+  --tx2:#6B5E51;
+  --tx3:#9C8D7C;
+  --rosa:#C4636F;
+  --ok:#4F8C63;
+  --alerta:#C08A2E;
+  --no:#C0524C;
+  --grad:linear-gradient(135deg,#D97E73 0%,#C4636F 48%,#9E5A86 100%);
+  --r:22px;
+}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{margin:0;padding:0}
+body{
+  background:var(--bg);color:var(--tx);
+  font-family:Manrope,-apple-system,system-ui,sans-serif;
+  font-size:15px;line-height:1.5;letter-spacing:-.01em;
+  -webkit-font-smoothing:antialiased;
+  background-image:
+    radial-gradient(880px 400px at 10% -10%, rgba(217,126,115,.13), transparent 62%),
+    radial-gradient(720px 360px at 95% 2%, rgba(158,90,134,.09), transparent 60%);
+  background-attachment:fixed;
+}
+.wrap{max-width:460px;margin:0 auto;padding:0 18px 40px}
+
+h1{font-size:1.6rem;font-weight:800;line-height:1.15;margin:0 0 6px;letter-spacing:-.03em}
+h2{font-size:1.06rem;font-weight:700;margin:0 0 10px;letter-spacing:-.02em}
+.lead{color:var(--tx2);margin:0 0 22px;font-size:.94rem}
+.eyebrow{font-size:.68rem;font-weight:700;letter-spacing:.16em;text-transform:uppercase;color:var(--rosa);margin:0 0 8px}
+small{color:var(--tx3);font-size:.8rem;line-height:1.45;display:block}
+
+/* ── encabezado ── */
+.head{display:flex;align-items:center;gap:13px;padding:24px 0 20px}
+.head .av{
+  width:44px;height:44px;border-radius:50%;flex:0 0 auto;
+  background:var(--grad);display:grid;place-items:center;font-weight:800;font-size:.9rem;color:#fff
+}
+.head .hi{flex:1;min-width:0}
+.head .hi span{display:block;color:var(--tx3);font-size:.82rem}
+.head .hi b{display:block;font-size:1.06rem;font-weight:700;letter-spacing:-.02em}
+
+/* ── tarjetas ── */
+.card{
+  background:var(--sup);border:1px solid var(--linea);border-radius:var(--r);
+  box-shadow:0 1px 2px rgba(42,35,29,.04);
+  padding:20px;margin-bottom:12px
+}
+.card.sutil{background:var(--bg2)}
+.glass{
+  background:rgba(255,255,255,.6);border:1px solid var(--linea2);
+  backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px)
+}
+
+/* ── tarjeta estrella con degradé ── */
+.hero{
+  background:var(--grad);color:#fff;border-radius:24px;padding:24px;margin-bottom:14px;
+  position:relative;overflow:hidden;box-shadow:0 16px 34px -16px rgba(196,99,111,.45)
+}
+.hero::after{
+  content:"";position:absolute;right:-52px;top:-52px;width:190px;height:190px;
+  border-radius:50%;background:rgba(255,255,255,.12)
+}
+.hero .lb{font-size:.78rem;color:rgba(255,255,255,.82);position:relative;z-index:1}
+.hero .big{
+  font-size:3.1rem;font-weight:800;line-height:1;margin:8px 0 4px;
+  letter-spacing:-.04em;position:relative;z-index:1
+}
+.hero .sub2{font-size:.9rem;color:rgba(255,255,255,.9);position:relative;z-index:1}
+.hero .badge{
+  display:inline-block;margin-top:14px;padding:6px 13px;border-radius:99px;
+  background:rgba(255,255,255,.22);color:#fff;font-size:.78rem;font-weight:700;position:relative;z-index:1
+}
+
+/* ── hero con anillo ── */
+.hero.con-anillo{display:flex;align-items:center;gap:18px}
+.hero-anillo{flex:0 0 132px;position:relative;z-index:1;display:none}
+.hero.con-anillo .hero-anillo{display:block}
+.hero-tx{flex:1;min-width:0;position:relative;z-index:1}
+.hero.con-anillo .big{font-size:1.35rem!important;line-height:1.2;margin:0 0 6px}
+.hero.con-anillo .lb{display:none}
+#anillo-arco{transition:stroke-dashoffset .6s cubic-bezier(.4,0,.2,1)}
+#anillo text{font-family:Manrope,sans-serif}
+#anillo #anillo-num{letter-spacing:-2px}
+
+/* ── próxima meta ── */
+.card.meta{display:flex;align-items:center;gap:13px;padding:15px 17px}
+.ic-meta{flex:0 0 26px;height:26px;color:var(--rosa)}
+.ic-meta svg{width:100%;height:100%;display:block}
+.meta-tx{flex:1;min-width:0}
+.meta-tx b{display:block;font-size:.88rem;font-weight:700}
+.meta-tx small{margin-top:1px}
+.puntos{display:flex;gap:4px;flex:0 0 auto}
+.puntos i{width:9px;height:9px;border-radius:50%;background:#EFDCDE;display:block}
+.puntos i.on{background:var(--rosa)}
+
+/* ── accesos circulares ── */
+.accesos{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:14px}
+/* si el grupo todavía no existe, quedan 3 y no tienen que dejar hueco */
+.accesos.tres{grid-template-columns:repeat(3,1fr)}
+.accesos.cuatro{grid-template-columns:repeat(4,1fr)}
+.accesos.cinco{grid-template-columns:repeat(5,1fr);gap:7px}
+.accesos.cinco .acceso{padding:13px 2px 10px}
+.accesos.cinco .ic{width:21px;height:21px;margin-bottom:6px}
+.accesos.cinco span{font-size:.63rem;letter-spacing:-.02em}
+.acceso{
+  background:var(--sup);border:1px solid var(--linea);border-radius:18px;
+  box-shadow:0 1px 2px rgba(42,35,29,.04);
+  padding:15px 6px 12px;text-align:center;text-decoration:none;color:var(--tx);
+  display:block;transition:border-color .15s,transform .1s
+}
+.acceso:active{transform:scale(.96)}
+.acceso:hover{border-color:var(--linea2)}
+.acceso .ic{width:23px;height:23px;display:block;margin:0 auto 7px;color:var(--rosa)}
+.acceso span{font-size:.7rem;color:var(--tx2);font-weight:600}
+
+/* ── filas ── */
+.fila{display:flex;align-items:center;gap:13px;padding:12px 0;border-top:1px solid var(--linea)}
+.fila:first-of-type{border-top:0;padding-top:0}
+.fila .cua{
+  flex:0 0 42px;height:42px;border-radius:13px;background:var(--sup2);
+  display:grid;place-items:center;color:var(--tx3)
+}
+.fila .cua svg{width:20px;height:20px;display:block}
+.fila.hecho .cua{background:rgba(79,140,99,.13);color:var(--ok)}
+.fila.activo .cua{background:var(--grad);color:#fff}
+.fila .tx{flex:1;min-width:0}
+.fila .tx b{display:block;font-size:.92rem;font-weight:700}
+.fila.pend .tx b{color:var(--tx3);font-weight:600}
+.fila .tx small{margin-top:1px}
+
+/* ── formulario ── */
+label{display:block;margin:0 0 15px}
+label .lb{display:block;font-size:.8rem;font-weight:600;margin-bottom:7px;color:var(--tx2)}
+label .hint{font-weight:400;color:var(--tx3)}
+input,select{
+  width:100%;padding:14px 15px;font:inherit;font-size:16px;color:var(--tx);
+  background:var(--bg2);border:1px solid var(--linea);border-radius:14px;outline:none;
+}
+input::placeholder{color:var(--tx3)}
+input:focus,select:focus{border-color:var(--rosa);background:var(--sup);box-shadow:0 0 0 3px rgba(196,99,111,.12)}
+select{appearance:none;background-image:linear-gradient(45deg,transparent 50%,var(--tx3) 50%),linear-gradient(135deg,var(--tx3) 50%,transparent 50%);background-position:calc(100% - 19px) 22px,calc(100% - 14px) 22px;background-size:5px 5px;background-repeat:no-repeat}
+.row{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.err{color:var(--no);font-size:.76rem;margin-top:6px;display:none}
+label.malo input,label.malo select{border-color:var(--no)}
+label.malo .err{display:block}
+
+.check{display:flex;gap:12px;align-items:flex-start;margin:0 0 16px;cursor:pointer}
+.check input{width:21px;height:21px;flex:0 0 auto;margin-top:1px;accent-color:var(--rosa)}
+.check span{font-size:.85rem;line-height:1.5;color:var(--tx2)}
+
+/* ── pasos del formulario ── */
+.pasos-barra{display:flex;gap:6px;margin:0 0 16px}
+.pasos-barra i{flex:1;height:4px;border-radius:99px;background:var(--linea);display:block;transition:background .25s}
+.pasos-barra i.on{background:var(--rosa)}
+.par{display:grid;grid-template-columns:auto 1fr;gap:9px}
+.par .btn.sec{padding-left:22px;padding-right:22px}
+
+/* ── botones ── */
+.btn{
+  display:block;width:100%;padding:16px;border:0;border-radius:15px;
+  background:var(--grad);color:#fff;font:inherit;font-weight:700;font-size:1rem;
+  cursor:pointer;text-align:center;text-decoration:none;letter-spacing:-.01em;
+  box-shadow:0 10px 22px -10px rgba(196,99,111,.55)
+}
+.btn:disabled{background:var(--sup2);color:var(--tx3);box-shadow:none;cursor:default}
+.btn.sec{background:var(--sup2);color:var(--tx);box-shadow:none;border:1px solid var(--linea)}
+
+/* ── paleta ── */
+.tonos{display:grid;grid-template-columns:repeat(4,1fr);gap:11px;margin-top:6px}
+.tono{cursor:pointer;text-align:center}
+.tono input{display:none}
+.tono .sw{
+  aspect-ratio:1;border-radius:50%;border:2px solid var(--linea);display:block;
+  position:relative;transition:transform .13s,border-color .13s
+}
+.tono input:checked + .sw{border-color:var(--rosa);transform:scale(1.09);box-shadow:0 0 0 3px rgba(196,99,111,.2)}
+.tono input:checked + .sw::after{
+  content:"✓";position:absolute;inset:0;display:grid;place-items:center;
+  color:#fff;font-size:1.05rem;font-weight:800;text-shadow:0 1px 4px rgba(0,0,0,.6)
+}
+.tono .nm{font-size:.64rem;color:var(--tx3);margin-top:6px;display:block;line-height:1.2}
+.tono.off{opacity:.28;pointer-events:none}
+
+/* ── cifras de rendimiento ── */
+.cifras{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}
+.cifras div{background:var(--bg2);border-radius:14px;padding:13px 10px;text-align:center}
+.cifras b{display:block;font-size:1.3rem;font-weight:800;letter-spacing:-.02em;font-variant-numeric:tabular-nums}
+.cifras span{display:block;font-size:.68rem;color:var(--tx3);font-weight:600;margin-top:3px}
+
+/* ── bonos ── */
+.bono{padding:14px 0;border-top:1px solid var(--linea)}
+.bono:first-of-type{border-top:0;padding-top:0}
+.bono-cab{display:flex;align-items:baseline;gap:10px;margin-bottom:3px}
+.bono-cab b{font-size:.95rem;font-weight:700}
+.bono-cab span{margin-left:auto;font-size:.95rem;font-weight:800;color:var(--rosa);white-space:nowrap}
+.progreso{height:6px;border-radius:99px;background:var(--bg2);overflow:hidden;margin-top:9px}
+.progreso i{display:block;height:100%;border-radius:99px;background:var(--grad);width:0;transition:width .5s cubic-bezier(.4,0,.2,1)}
+.bono.ganado .bono-cab span{color:var(--ok)}
+.bono.ganado .progreso i{background:var(--ok)}
+
+/* ── código ── */
+.codigo{
+  border:1.5px dashed var(--linea2);border-radius:16px;padding:18px;text-align:center;
+  background:var(--bg2);cursor:pointer;user-select:none
+}
+.codigo b{
+  display:block;font-size:1.7rem;font-weight:800;letter-spacing:.05em;
+  background:var(--grad);-webkit-background-clip:text;background-clip:text;
+  -webkit-text-fill-color:transparent
+}
+.codigo span{display:block;font-size:.68rem;letter-spacing:.12em;text-transform:uppercase;color:var(--tx3);margin-top:8px}
+.codigo.ok{border-color:var(--ok)} .codigo.ok span{color:var(--ok)}
+
+/* ── link con utm ── */
+.link{
+  display:flex;align-items:center;gap:12px;margin-top:11px;padding:12px 14px;
+  border:1px solid var(--linea);border-radius:14px;background:var(--sup)
+}
+.link-tx{flex:1;min-width:0}
+.link-tx b{display:block;font-size:.72rem;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--tx3)}
+.link-tx span{
+  display:block;font-size:.82rem;color:var(--tx2);margin-top:2px;
+  white-space:nowrap;overflow:hidden;text-overflow:ellipsis
+}
+.link-btn{
+  flex:0 0 auto;border:1px solid var(--linea);background:var(--bg2);color:var(--rosa);
+  border-radius:11px;padding:9px 14px;font:inherit;font-size:.82rem;font-weight:700;cursor:pointer
+}
+.link-btn:hover{background:var(--rosa);color:#fff;border-color:var(--rosa)}
+.link-btn.ok{background:var(--ok);color:#fff;border-color:var(--ok)}
+
+/* ── varios ── */
+.chip{
+  display:inline-block;padding:6px 13px;border-radius:99px;font-size:.72rem;font-weight:700;
+  letter-spacing:.05em;text-transform:uppercase;background:rgba(196,99,111,.12);color:var(--rosa)
+}
+.oculto{display:none!important}
+.centro{text-align:center}
+.spinner{
+  width:26px;height:26px;border:2.5px solid var(--sup2);border-top-color:var(--rosa);
+  border-radius:50%;animation:g .7s linear infinite;margin:70px auto
+}
+@keyframes g{to{transform:rotate(360deg)}}
+ul.limpia{margin:0;padding-left:1.05rem}
+ul.limpia li{margin-bottom:.5rem;font-size:.88rem;color:var(--tx2)}
+.brief h3{font-size:.96rem;font-weight:700;margin:1.5rem 0 .5rem;color:var(--tx)}
+.brief h3:first-child{margin-top:0}
+.brief p{font-size:.88rem;color:var(--tx2);margin:0 0 .7rem}
+.no{color:var(--no);font-weight:700}
+.si{color:var(--ok);font-weight:700}
+.ref{display:flex;gap:12px;align-items:center;padding:11px 0;border-top:1px solid var(--linea);text-decoration:none;color:inherit}
+.ref:first-child{border-top:0}
+.ref .play{flex:0 0 38px;height:38px;border-radius:12px;background:var(--sup2);display:grid;place-items:center;color:var(--rosa)}
+.ref b{display:block;font-size:.86rem;font-weight:700}
+.ref small{font-size:.74rem}
+.nivel{display:flex;align-items:center;gap:13px}
+.nivel .n{
+  width:46px;height:46px;border-radius:15px;background:var(--grad);color:#fff;
+  display:grid;place-items:center;font-weight:800;font-size:1.15rem
+}
+
+#demonav{
+  position:fixed;left:0;right:0;bottom:0;z-index:99;
+  background:rgba(251,247,242,.92);backdrop-filter:blur(16px);border-top:1px solid var(--linea2);
+  padding:9px 10px calc(9px + env(safe-area-inset-bottom));
+  display:flex;gap:6px;overflow-x:auto;justify-content:flex-start
+}
+#demonav button{
+  flex:0 0 auto;background:var(--sup2);color:var(--tx2);border:1px solid var(--linea);
+  border-radius:9px;padding:8px 12px;font:inherit;font-size:.72rem;font-weight:700;cursor:pointer;white-space:nowrap
+}
+#demonav button:hover{background:var(--rosa);color:#fff;border-color:var(--rosa)}
+#demonav .lbl{color:var(--tx3);font-size:.62rem;letter-spacing:.12em;text-transform:uppercase;align-self:center;padding:0 6px}
+body.condemo .wrap{padding-bottom:84px}
+</style>
+</head>
+<body>
+
+<div class="wrap">
+
+  <div class="head">
+    <div class="av" id="av">MI</div>
+    <div class="hi">
+      <span id="saludo">Hola</span>
+      <b id="quien">MiLuz · Creadoras</b>
+    </div>
+  </div>
+
+  <!-- ══ CARGANDO ══ -->
+  <section id="v-load">
+    <div class="spinner"></div>
+    <p class="centro"><small>Un segundo…</small></p>
+  </section>
+
+  <!-- ══ LINK INVÁLIDO ══ -->
+  <section id="v-error" class="oculto">
+    <div class="card centro">
+      <h2>Este link no es válido</h2>
+      <small>Puede que haya vencido o que se haya copiado incompleto. Escribinos por Instagram y te mandamos uno nuevo.</small>
+    </div>
+  </section>
+
+  <!-- ══ 1 · FICHA ══ -->
+  <section id="v-ficha" class="oculto">
+    <div class="hero" id="hero-bienvenida">
+      <div class="lb">Buenas noticias</div>
+      <div class="big" style="font-size:1.9rem">¡Entraste<br>al equipo!</div>
+      <div class="sub2">Revisamos tu perfil y nos encantó.</div>
+      <span class="badge" id="hero-paso">Paso 1 de 3</span>
+    </div>
+
+    <div class="pasos-barra" id="pasos-barra">
+      <i class="on"></i><i></i><i></i>
+    </div>
+    <h1 id="paso-tit">Tus datos</h1>
+    <p class="lead" id="paso-sub">Empezamos por lo básico.</p>
+
+    <form id="form-ficha" novalidate>
+      <div class="paso" data-paso="1">
+      <div class="card">
+        <label>
+          <span class="lb">Nombre y apellido</span>
+          <input name="nombre" autocomplete="name" required>
+          <span class="err">Completá tu nombre</span>
+        </label>
+        <div class="row">
+          <label>
+            <span class="lb">DNI</span>
+            <input name="dni" inputmode="numeric" required>
+            <span class="err">Falta el DNI</span>
+          </label>
+          <label>
+            <span class="lb">Nacimiento</span>
+            <input name="nacimiento" type="date" required>
+            <span class="err">Falta la fecha</span>
+          </label>
+        </div>
+        <label>
+          <span class="lb">WhatsApp <span class="hint">con código de área</span></span>
+          <input name="tel" inputmode="tel" placeholder="11 5555 5555" required>
+          <span class="err">Falta tu WhatsApp</span>
+        </label>
+        <label style="margin-bottom:0">
+          <span class="lb">Email</span>
+          <input name="email" type="email" autocomplete="email" required>
+          <span class="err">Revisá el email</span>
+        </label>
+      </div>
+      <button class="btn" type="button" data-ir="2">Seguir</button>
+      </div>
+
+      <div class="paso oculto" data-paso="2">
+      <div class="card">
+        <label>
+          <span class="lb">Calle y número</span>
+          <input name="calle" autocomplete="street-address" required>
+          <span class="err">Falta la dirección</span>
+        </label>
+        <div class="row">
+          <label>
+            <span class="lb">Piso / depto <span class="hint">opcional</span></span>
+            <input name="piso">
+          </label>
+          <label>
+            <span class="lb">Código postal</span>
+            <input name="cp" inputmode="numeric" required>
+            <span class="err">Falta el CP</span>
+          </label>
+        </div>
+        <div class="row">
+          <label>
+            <span class="lb">Localidad</span>
+            <input name="localidad" required>
+            <span class="err">Falta la localidad</span>
+          </label>
+          <label>
+            <span class="lb">Provincia</span>
+            <select name="provincia" required><option value="">Elegí…</option></select>
+            <span class="err">Elegí una</span>
+          </label>
+        </div>
+        <label style="margin-bottom:0">
+          <span class="lb">Referencia <span class="hint">opcional</span></span>
+          <input name="referencia" placeholder="Portón negro, timbre 3B">
+        </label>
+      </div>
+      <div class="par">
+        <button class="btn sec" type="button" data-ir="1">Atrás</button>
+        <button class="btn" type="button" data-ir="3">Seguir</button>
+      </div>
+      </div>
+
+      <div class="paso oculto" data-paso="3">
+      <div class="card">
+        <small style="margin-bottom:14px">Tu kit lleva el Tratamiento Fénix más dos esmaltes Ultra Efecto Gel.</small>
+        <div class="tonos" id="tonos"></div>
+        <span class="err" id="err-tonos">Elegí exactamente dos</span>
+      </div>
+
+      <div class="card sutil">
+        <label class="check">
+          <input type="checkbox" name="terminos" required>
+          <span>Autorizo a MiLuz a usar el contenido que publique en su perfil y en su publicidad. Confirmo que tengo <b style="color:var(--tx)">uñas naturales</b> y que los datos son correctos.</span>
+        </label>
+        <span class="err" id="err-terminos" style="margin-top:-8px">Necesitamos tu confirmación</span>
+        <div class="par">
+          <button class="btn sec" type="button" data-ir="2">Atrás</button>
+          <button class="btn" type="submit" id="btn-ficha">Listo, mandá mi kit</button>
+        </div>
+      </div>
+      </div>
+    </form>
+  </section>
+
+  <!-- ══ 2 · BRIEFING ══ -->
+  <section id="v-brief" class="oculto">
+    <p class="eyebrow">Paso 2 de 2</p>
+    <h1>Cómo hacemos el video</h1>
+    <p class="lead">Cinco minutos de lectura. Es la diferencia entre un video que funciona y uno que no.</p>
+    <div class="card brief" id="brief-cuerpo"></div>
+    <div class="card sutil">
+      <label class="check">
+        <input type="checkbox" id="chk-brief">
+        <span>Lo leí y entiendo lo que tengo que hacer.</span>
+      </label>
+      <button class="btn" id="btn-brief" disabled>Confirmar y activar mi envío</button>
+      <small style="margin-top:12px;text-align:center">Recién cuando confirmes entrás en la lista de envíos.</small>
+    </div>
+  </section>
+
+  <!-- ══ 3 · ESTADO ══ -->
+  <section id="v-estado" class="oculto">
+
+    <div class="hero" id="hero">
+      <div class="hero-anillo" id="hero-anillo">
+        <svg width="132" height="132" viewBox="0 0 132 132" id="anillo">
+          <circle cx="66" cy="66" r="55" fill="none" stroke="rgba(255,255,255,.28)" stroke-width="11"></circle>
+          <circle id="anillo-arco" cx="66" cy="66" r="55" fill="none" stroke="#fff" stroke-width="11"
+                  stroke-linecap="round" stroke-dasharray="345.6" stroke-dashoffset="345.6"
+                  transform="rotate(-90 66 66)"></circle>
+          <text id="anillo-num" x="66" y="70" text-anchor="middle" font-size="46" font-weight="800" fill="#fff">—</text>
+          <text id="anillo-de" x="66" y="90" text-anchor="middle" font-size="11.5" font-weight="600" fill="rgba(255,255,255,.85)"></text>
+        </svg>
+      </div>
+      <div class="hero-tx">
+        <div class="lb" id="hero-lb">Tu estado</div>
+        <div class="big" id="hero-big">—</div>
+        <div class="sub2" id="hero-sub">—</div>
+        <span class="badge" id="hero-badge">En curso</span>
+      </div>
+    </div>
+
+    <!-- próxima meta -->
+    <div class="card meta" id="bloque-meta">
+      <span class="ic-meta">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2.8l2.7 5.9 6.4.7-4.8 4.4 1.3 6.4L12 17l-5.6 3.2 1.3-6.4L2.9 9.4l6.4-.7z"/></svg>
+      </span>
+      <div class="meta-tx">
+        <b id="meta-tit">—</b>
+        <small id="meta-sub">—</small>
+      </div>
+      <span class="puntos" id="meta-puntos"></span>
+    </div>
+
+    <div class="accesos">
+      <a class="acceso" id="a-brief"><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M9 3h6v3H9z"/><path d="M6.5 6H5.5A1.5 1.5 0 0 0 4 7.5v12A1.5 1.5 0 0 0 5.5 21h13a1.5 1.5 0 0 0 1.5-1.5v-12A1.5 1.5 0 0 0 18.5 6h-1"/><path d="M8.5 12h7M8.5 16h4.5"/></svg><span>Briefing</span></a>
+      <a class="acceso" id="a-grupo" target="_blank" rel="noopener"><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M9 17a8 8 0 1 0-5.3-2L3 21l5.4-1.6A8 8 0 0 0 9 17z"/><circle cx="9" cy="12" r=".9" fill="currentColor" stroke="none"/><circle cx="12.5" cy="12" r=".9" fill="currentColor" stroke="none"/></svg><span>Grupo</span></a>
+      <a class="acceso" id="a-llamada" target="_blank" rel="noopener"><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="6.5" width="12.5" height="11" rx="2.5"/><path d="M15.5 11l5-2.6v7.2l-5-2.6z"/></svg><span>Llamada</span></a>
+      <a class="acceso" id="a-bonos"><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2.8l2.7 5.9 6.4.7-4.8 4.4 1.3 6.4L12 17l-5.6 3.2 1.3-6.4L2.9 9.4l6.4-.7z"/></svg><span>Bonos</span></a>
+      <a class="acceso" id="a-codigo"><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M4 10.5h16V19a1.5 1.5 0 0 1-1.5 1.5h-13A1.5 1.5 0 0 1 4 19z"/><rect x="2.8" y="7" width="18.4" height="3.5" rx="1.2"/><path d="M12 7v13.5"/><path d="M12 7c-2 0-3.4-.8-3.4-2.1S9.9 3.2 12 7zM12 7c2 0 3.4-.8 3.4-2.1S14.1 3.2 12 7z"/></svg><span>Código</span></a>
+    </div>
+
+    <!-- ya me llegó -->
+    <div class="card" id="bloque-llego">
+      <h2>¿Ya te llegó el kit?</h2>
+      <small style="margin-bottom:14px">Tocá acá cuando lo tengas en la mano. Ahí arrancan tus 7 días — no antes, así el correo no te come el plazo.</small>
+      <button class="btn" id="btn-llego">Sí, ya me llegó</button>
+    </div>
+
+    <div class="card">
+      <h2>Tu recorrido</h2>
+      <div id="pasos"></div>
+    </div>
+
+    <div class="card" id="bloque-subir">
+      <h2>Ya publiqué mi collab</h2>
+      <small style="margin-bottom:14px">Pegá el link del reel. Verificamos solos que MiLuz esté como colaboradora.</small>
+      <label>
+        <span class="lb">Link del reel</span>
+        <input id="in-reel" inputmode="url" placeholder="instagram.com/reel/...">
+        <span class="err" id="err-reel">Pegá un link de Instagram válido</span>
+      </label>
+      <button class="btn" id="btn-reel">Enviar</button>
+    </div>
+
+    <!-- cómo le está yendo -->
+    <div class="card" id="bloque-rendimiento">
+      <h2>Tu collab</h2>
+      <div class="cifras">
+        <div><b id="r-views">—</b><span>views</span></div>
+        <div><b id="r-ventas">—</b><span>ventas</span></div>
+        <div><b id="r-comision">—</b><span>tu comisión</span></div>
+      </div>
+      <small id="r-nota" style="margin-top:12px"></small>
+    </div>
+
+    <!-- bonos -->
+    <div class="card" id="bloque-bonos">
+      <h2>Tus bonos</h2>
+      <small style="margin-bottom:14px">Además del kit, hay plata en juego todos los meses.</small>
+
+      <div class="bono" id="bono-viral">
+        <div class="bono-cab">
+          <b>Bono viral</b>
+          <span id="bono-viral-monto">$50.000</span>
+        </div>
+        <small id="bono-viral-cond">—</small>
+        <div class="progreso"><i id="bono-viral-barra"></i></div>
+        <small id="bono-viral-txt" style="margin-top:6px"></small>
+      </div>
+
+      <div class="bono">
+        <div class="bono-cab">
+          <b>Podio del mes</b>
+          <span id="bono-podio-monto">$150.000</span>
+        </div>
+        <small id="bono-podio-txt">Las tres collabs con más views del mes cobran premio.</small>
+      </div>
+
+      <div class="bono">
+        <div class="bono-cab">
+          <b>Comisión por ventas</b>
+          <span id="bono-comision-pct">10%</span>
+        </div>
+        <small>De todo lo que se venda con tu código. Se liquida a fin de mes.</small>
+      </div>
+    </div>
+
+    <div class="card" id="bloque-codigo">
+      <h2>Tu código de descuento</h2>
+      <small style="margin-bottom:14px">Nombralo en el video y dejalo fijado en los comentarios. Tus seguidoras compran con descuento y vos ganás comisión por cada venta.</small>
+      <div class="codigo" id="codigo" role="button" tabindex="0">
+        <b id="codigo-txt">—</b>
+        <span id="codigo-copiar">Tocá para copiar</span>
+      </div>
+
+      <div class="link" id="bloque-link">
+        <div class="link-tx">
+          <b>Tu link</b>
+          <span id="link-url">—</span>
+        </div>
+        <button class="link-btn" id="link-copiar">Copiar</button>
+      </div>
+      <small style="margin-top:10px">El código es para las que te ven y compran después.
+      El link es para tu historia y tu bio: cuenta la venta aunque no se acuerden del código.</small>
+    </div>
+
+    <div class="card">
+      <div class="nivel">
+        <div class="n" id="nivel-num">1</div>
+        <div>
+          <b id="nivel-nom" style="font-size:.98rem">Recluta</b>
+          <small id="nivel-txt"></small>
+        </div>
+      </div>
+    </div>
+
+    <div class="card sutil">
+      <h2>¿Dudas?</h2>
+      <small>Preguntá en el grupo, es lo más rápido. La llamada es todos los jueves a las 16. También podés escribirnos a <b style="color:var(--tx)" id="ig-handle">@miluz</b>.</small>
+    </div>
+  </section>
+
+</div>
+
+<script>
+const API = 'https://us-central1-cleargy-creators.cloudfunctions.net/canje';
+const DEMO = new URLSearchParams(location.search).has('demo') || location.protocol === 'data:';
+
+const CONFIG = {
+  ig: '@miluz',
+  tienda: 'https://miluzcosmetic.com',
+  grupoWpp: '',   // todavía no existe — el acceso se esconde solo hasta que lo pegues
+  llamada: { dia:'Jueves', hora:'16:00', link:'https://meet.google.com/REEMPLAZAR' },
+  bonos: {
+    viralViews: 10000,      // views que disparan el bono viral
+    viralMonto: 25000,      // ARS
+    podio:     [150000, 100000, 50000],   // 1°, 2° y 3° del mes
+    comision:  15           // % sobre las ventas con su código
+  }
+};
+
+const TONOS = [
+  {id:'via-lactea',    nom:'Vía láctea',    hex:'#F0E7DE'},
+  {id:'bco-perlado',   nom:'Bco perlado',   hex:'#EDE4D9'},
+  {id:'blanco',        nom:'Blanco',        hex:'#F7F5F2'},
+  {id:'arena',         nom:'Arena',         hex:'#D8C2A4'},
+  {id:'rosa-palo',     nom:'Rosa palo',     hex:'#E3BFBC'},
+  {id:'rosa-crepe',    nom:'Rosa crepé',    hex:'#D99BA0'},
+  {id:'rosa-old',      nom:'Rosa old',      hex:'#C08A8C'},
+  {id:'marron-canela', nom:'Marrón canela', hex:'#9C6141'},
+  {id:'chocolate',     nom:'Chocolate',     hex:'#4A2C20'},
+  {id:'tomate',        nom:'Tomate',        hex:'#D6432F'},
+  {id:'rojo-love',     nom:'Rojo love',     hex:'#B3122B'},
+  {id:'pasion',        nom:'Pasión',        hex:'#C41E4A'},
+  {id:'rubi',          nom:'Rubí',          hex:'#8E1F3D'},
+  {id:'negro',         nom:'Negro',         hex:'#1A1718'},
+];
+
+const REFERENCIAS = [
+  {t:'Aplicación en primer plano', u:'https://instagram.com/reel/REEMPLAZAR', n:'El formato estrella: una sola pasada, sin cabina.'},
+  {t:'"Nadie te contó esto"',      u:'https://instagram.com/reel/REEMPLAZAR', n:'El ángulo educativo sobre el daño del salón.'},
+  {t:'"Salí del semi"',            u:'https://instagram.com/reel/REEMPLAZAR', n:'Historia real, con el antes y el después.'},
+  {t:'Los dos colores',            u:'https://instagram.com/reel/REEMPLAZAR', n:'El más fácil si nunca hiciste contenido de uñas.'}
+];
+
+const PROVINCIAS = ['Buenos Aires','CABA','Catamarca','Chaco','Chubut','Córdoba','Corrientes','Entre Ríos','Formosa','Jujuy','La Pampa','La Rioja','Mendoza','Misiones','Neuquén','Río Negro','Salta','San Juan','San Luis','Santa Cruz','Santa Fe','Santiago del Estero','Tierra del Fuego','Tucumán'];
+
+const BRIEFING = `
+<h3>Antes que nada</h3>
+<p><b style="color:var(--tx)">Consultá en el grupo antes de aplicarte el color</b> si tenés dudas. Un mensaje antes te ahorra un video que no sirve.</p>
+<h3>Qué vende MiLuz de verdad</h3>
+<p>No vendemos uñas lindas: vendemos dejar de esconder las manos. Muchas clientas llegan con las uñas arruinadas del semipermanente y con vergüenza de mostrarlas. Tu video le habla a ella.</p>
+<p>La frase que ordena todo: <b style="color:var(--tx)">primero se repara, después se embellece</b>.</p>
+<h3>El formato que mejor funciona</h3>
+<p>La aplicación en primer plano: cobertura total en una sola pasada, secado al aire, sin cabina y sin torno. Es el video de deseo puro y el que más se guarda.</p>
+<h3>Reglas técnicas</h3>
+<ul class="limpia">
+  <li>Vertical, mínimo 15 segundos.</li>
+  <li>Buena luz sobre las manos. Si podés, natural.</li>
+  <li>Sin marca de agua de TikTok.</li>
+  <li>Audio original o en tendencia.</li>
+</ul>
+<h3>Lo que NO se puede decir</h3>
+<ul class="limpia">
+  <li><span class="no">Nunca</span> le digas "esmalte" ni "un fortalecedor más" al Fénix. Es un <b style="color:var(--tx)">dermorreparador ungueal</b>.</li>
+  <li><span class="no">Nunca</span> menciones el color antes que la reparación.</li>
+  <li><span class="no">Nunca</span> hables mal de las manicuristas. Son parte de nuestro público.</li>
+  <li>No uses <b style="color:var(--tx)">nutre</b>, <b style="color:var(--tx)">hidrata</b> ni <b style="color:var(--tx)">revitaliza</b>.</li>
+  <li>Nada de "el único que funciona" ni promesas absolutas.</li>
+</ul>
+<h3>El paso que más se olvida</h3>
+<p><span class="si">Obligatorio:</span> al publicar entrá en <b style="color:var(--tx)">Etiquetar personas → Invitar colaborador</b> y poné <b style="color:var(--tx)">@miluz</b>. Sin eso el video no cuenta como collab.</p>
+<h3>Tu código de descuento</h3>
+<p>Nombralo en el video y dejalo fijado en los comentarios. Tus seguidoras compran con descuento y vos ganás comisión por cada venta.</p>
+<h3>El plazo</h3>
+<p>Tenés <b style="color:var(--tx)">7 días desde que el kit llega a tu casa</b>. Avisanos en la app cuando lo recibas.</p>
+<h3>Mirá estos antes de grabar</h3>
+<p>Cuatro reels que ya funcionaron. Copiá la estructura, no el contenido.</p>
+<div id="refs"></div>`;
+
+let D = null;
+const $ = s => document.querySelector(s);
+const ver = id => {
+  ['v-load','v-error','v-ficha','v-brief','v-estado'].forEach(v =>
+    $('#'+v).classList.toggle('oculto', v !== id));
+  window.scrollTo(0,0);
+};
+const TOKEN = new URLSearchParams(location.search).get('t');
+
+async function api(accion, datos){
+  if (DEMO) return demo(accion, datos);
+  const r = await fetch(API, {
+    method:'POST', headers:{'Content-Type':'application/json'},
+    body: JSON.stringify({ accion, token: TOKEN, ...datos })
+  });
+  if (!r.ok) throw new Error('http '+r.status);
+  return r.json();
+}
+
+let _mem = null;
+const _ls = {
+  leer(){ try { return JSON.parse(localStorage.getItem('miluz_demo')||'null'); } catch { return _mem; } },
+  guardar(v){ _mem = v; try { localStorage.setItem('miluz_demo', JSON.stringify(v)); } catch {} }
+};
+function demo(accion, datos){
+  const g = _ls.leer() || {
+    estado:'invitada', ig:'sofi.deco', nivel:1,
+    nombre:'Sofía Pérez', tel:'11 5555 1234', email:'sofi@mail.com',
+    provincia:'Córdoba', tonos:['rubi','rosa-palo']
+  };
+  if (accion === 'ficha'){ Object.assign(g, datos.ficha, {estado:'ficha_completa'}); }
+  if (accion === 'briefing'){ g.estado = 'briefing_ok'; }
+  if (accion === 'llego'){ g.estado = 'recibido'; g.deadline = Date.now()+7*864e5; }
+  if (accion === 'reel'){ g.estado = 'publicado'; g.reel = datos.url; }
+  if (accion === 'avanzar'){
+    g.estado = datos.a;
+    g.codigo = 'SOFI10';
+    if (datos.a === 'recibido') g.deadline = Date.now()+5*864e5;
+    if (datos.a === 'cumplida') g.nivel = 2;
+    if (['publicado','cumplida'].includes(datos.a)){
+      g.reel = { url:'#', views: 62400 };
+      g.ventas = 11; g.facturado = 220000; g.posicionMes = 2;
+    }
+  }
+  _ls.guardar(g);
+  return Promise.resolve({ok:true, creadora:g});
+}
+
+function pintarTonos(){
+  $('#tonos').innerHTML = TONOS.map(t => `
+    <label class="tono">
+      <input type="checkbox" name="tono" value="${t.id}">
+      <span class="sw" style="background:${t.hex}"></span>
+      <span class="nm">${t.nom}</span>
+    </label>`).join('');
+  $('#tonos').addEventListener('change', () => {
+    const sel = [...document.querySelectorAll('input[name=tono]:checked')];
+    document.querySelectorAll('.tono').forEach(l =>
+      l.classList.toggle('off', sel.length >= 2 && !l.querySelector('input').checked));
+    if (sel.length === 2) $('#err-tonos').style.display = 'none';
+  });
+}
+function pintarProvincias(){
+  const s = document.querySelector('select[name=provincia]');
+  PROVINCIAS.forEach(p => s.insertAdjacentHTML('beforeend', `<option>${p}</option>`));
+}
+
+/* Lo que ya cargó en la landing viene del backend: se precarga y se
+   muestra como confirmación, no como campo vacío para volver a escribir. */
+function precargar(){
+  if (!D) return;
+  [['nombre',D.nombre],['tel',D.tel],['email',D.email],['provincia',D.provincia]]
+    .forEach(([campo, valor]) => {
+      if (!valor) return;
+      const c = document.querySelector(`#form-ficha [name="${campo}"]`);
+      if (c && !c.value) c.value = valor;
+    });
+  if (Array.isArray(D.tonos) && D.tonos.length === 2){
+    D.tonos.forEach(id => {
+      const c = document.querySelector(`#tonos input[value="${id}"]`);
+      if (c) c.checked = true;
+    });
+    document.querySelector('#tonos')?.dispatchEvent(new Event('change'));
+  }
+  // el paso 1 pasa a ser una confirmación: se avisa y se abre en el 2
+  const yaTiene = D.nombre && D.tel && D.email;
+  if (yaTiene){
+    TITULOS[1] = ['Confirmá tus datos', 'Los trajimos de tu aplicación. Corregí lo que haga falta.'];
+    const t = document.querySelector('#paso-tit');
+    if (t && PASO === 1){ t.textContent = TITULOS[1][0]; document.querySelector('#paso-sub').textContent = TITULOS[1][1]; }
+  }
+}
+
+function validar(f){
+  let ok = true;
+  f.querySelectorAll('[required]').forEach(c => {
+    if (c.type === 'checkbox') return;
+    const malo = !c.value.trim() || (c.type === 'email' && !/^\S+@\S+\.\S+$/.test(c.value));
+    c.closest('label').classList.toggle('malo', malo);
+    if (malo) ok = false;
+  });
+  const tonos = [...document.querySelectorAll('input[name=tono]:checked')];
+  $('#err-tonos').style.display = tonos.length === 2 ? 'none' : 'block';
+  if (tonos.length !== 2) ok = false;
+  const t = f.querySelector('[name=terminos]');
+  $('#err-terminos').style.display = t.checked ? 'none' : 'block';
+  if (!t.checked) ok = false;
+  return ok;
+}
+
+/* ── navegación entre pasos ── */
+let PASO = 1;
+const TITULOS = {
+  1: ['Tus datos',              'Empezamos por lo básico.'],
+  2: ['¿A dónde te lo mandamos?','Para que el kit llegue bien.'],
+  3: ['Elegí tus dos colores',   'La parte linda.']
+};
+function irAPaso(n){
+  PASO = n;
+  document.querySelectorAll('.paso').forEach(p =>
+    p.classList.toggle('oculto', +p.dataset.paso !== n));
+  document.querySelectorAll('#pasos-barra i').forEach((b,i) =>
+    b.classList.toggle('on', i < n));
+  $('#hero-paso').textContent = `Paso ${n} de 3`;
+  $('#paso-tit').textContent = TITULOS[n][0];
+  $('#paso-sub').textContent = TITULOS[n][1];
+  $('#hero-bienvenida').classList.toggle('oculto', n !== 1);
+  window.scrollTo({top:0, behavior:'smooth'});
+}
+/* valida solo los campos del paso actual */
+function validaPaso(n){
+  const cont = document.querySelector(`.paso[data-paso="${n}"]`);
+  let ok = true;
+  cont.querySelectorAll('[required]').forEach(c => {
+    if (c.type === 'checkbox') return;
+    const malo = !c.value.trim() || (c.type === 'email' && !/^\S+@\S+\.\S+$/.test(c.value));
+    c.closest('label').classList.toggle('malo', malo);
+    if (malo) ok = false;
+  });
+  if (!ok) cont.querySelector('.malo')?.scrollIntoView({block:'center',behavior:'smooth'});
+  return ok;
+}
+document.querySelectorAll('[data-ir]').forEach(b => b.addEventListener('click', () => {
+  const destino = +b.dataset.ir;
+  if (destino > PASO && !validaPaso(PASO)) return;   // atrás nunca valida
+  guardarBorrador();
+  irAPaso(destino);
+}));
+
+/* lo que ya cargó no se pierde si cierra la app */
+function guardarBorrador(){
+  try {
+    const d = Object.fromEntries(new FormData($('#form-ficha')).entries());
+    localStorage.setItem('miluz_borrador', JSON.stringify({paso: PASO, d}));
+  } catch {}
+}
+function traerBorrador(){
+  try {
+    const b = JSON.parse(localStorage.getItem('miluz_borrador') || 'null');
+    if (!b) return;
+    Object.entries(b.d).forEach(([k,v]) => {
+      const c = document.querySelector(`#form-ficha [name="${k}"]`);
+      if (c && c.type !== 'checkbox') c.value = v;
+    });
+    if (b.paso > 1) irAPaso(b.paso);
+  } catch {}
+}
+
+$('#form-ficha').addEventListener('submit', async e => {
+  e.preventDefault();
+  const f = e.target;
+  if (!validar(f)) return;
+  const b = $('#btn-ficha'); b.disabled = true; b.textContent = 'Guardando…';
+  const ficha = Object.fromEntries(new FormData(f).entries());
+  ficha.tonos = [...document.querySelectorAll('input[name=tono]:checked')].map(c => c.value);
+  delete ficha.tono;
+  try {
+    D = (await api('ficha', {ficha})).creadora;
+    try { localStorage.removeItem('miluz_borrador'); } catch {}
+    cabecera(); ver('v-brief');
+  }
+  catch { b.disabled = false; b.textContent = 'Guardar y seguir'; alert('No pudimos guardar. Probá de nuevo.'); }
+});
+
+$('#chk-brief').addEventListener('change', e => $('#btn-brief').disabled = !e.target.checked);
+$('#btn-brief').addEventListener('click', async () => {
+  const b = $('#btn-brief'); b.disabled = true; b.textContent = 'Confirmando…';
+  try { D = (await api('briefing', {})).creadora; pintarEstado(); ver('v-estado'); }
+  catch { b.disabled = false; b.textContent = 'Confirmar y activar mi envío'; }
+});
+
+$('#btn-llego').addEventListener('click', async () => {
+  const b = $('#btn-llego'); b.disabled = true; b.textContent = 'Listo…';
+  try { D = (await api('llego', {})).creadora; pintarEstado(); }
+  catch { b.disabled = false; b.textContent = 'Sí, ya me llegó'; }
+});
+
+$('#btn-reel').addEventListener('click', async () => {
+  const i = $('#in-reel'), url = i.value.trim();
+  const ok = /instagram\.com\/(reel|p)\//i.test(url);
+  $('#err-reel').style.display = ok ? 'none' : 'block';
+  if (!ok) return;
+  const b = $('#btn-reel'); b.disabled = true; b.textContent = 'Verificando…';
+  try { D = (await api('reel', {url})).creadora; pintarEstado(); }
+  catch { b.disabled = false; b.textContent = 'Enviar'; }
+});
+
+function copiarCodigo(){
+  const t = $('#codigo-txt').textContent.trim();
+  if (!t || t === '—') return;
+  const fin = () => {
+    $('#codigo').classList.add('ok');
+    $('#codigo-copiar').textContent = '¡Copiado!';
+    setTimeout(() => { $('#codigo').classList.remove('ok'); $('#codigo-copiar').textContent = 'Tocá para copiar'; }, 1800);
+  };
+  navigator.clipboard ? navigator.clipboard.writeText(t).then(fin).catch(fin) : fin();
+}
+$('#codigo').addEventListener('click', copiarCodigo);
+$('#a-codigo').addEventListener('click', () => $('#bloque-codigo').scrollIntoView({behavior:'smooth',block:'center'}));
+$('#a-brief').addEventListener('click', () => ver('v-brief'));
+function copiar(texto, boton, textoOk){
+  const fin = () => { boton.classList.add('ok'); const a = boton.textContent;
+    boton.textContent = textoOk; setTimeout(() => { boton.classList.remove('ok'); boton.textContent = a; }, 1800); };
+  navigator.clipboard ? navigator.clipboard.writeText(texto).then(fin).catch(fin) : fin();
+}
+$('#link-copiar').addEventListener('click', () => {
+  const u = $('#link-url').dataset.url;
+  if (u) copiar(u, $('#link-copiar'), '¡Copiado!');
+});
+
+$('#a-bonos').addEventListener('click', () => $('#bloque-bonos').scrollIntoView({behavior:'smooth',block:'center'}));
+
+/* ═══ Los dos esmaltes que eligió pintan su app ═══
+   Se respeta el tono, pero si viene muy claro se oscurece hasta que
+   el texto blanco encima se lea. Sin esto, "blanco leche" rompe todo. */
+const LUZ_MIN = 0.34, LUZ_MAX = 0.50;  // 0.50 = 3,34:1 con texto blanco en el peor tono
+
+function aHsl(hex){
+  const m = /^#?([\da-f]{6})$/i.exec(String(hex).trim());
+  if (!m) return null;
+  const n = parseInt(m[1],16);
+  let r=(n>>16&255)/255, g=(n>>8&255)/255, b=(n&255)/255;
+  const mx=Math.max(r,g,b), mn=Math.min(r,g,b), l=(mx+mn)/2;
+  let h=0, sa=0;
+  if (mx!==mn){
+    const d=mx-mn;
+    sa = l>.5 ? d/(2-mx-mn) : d/(mx+mn);
+    h = mx===r ? (g-b)/d+(g<b?6:0) : mx===g ? (b-r)/d+2 : (r-g)/d+4;
+    h/=6;
+  }
+  return {h:h*360, s:sa, l};
+}
+function seguro(hex, fallback){
+  const c = aHsl(hex);
+  if (!c) return fallback;
+  const l = Math.min(LUZ_MAX, Math.max(LUZ_MIN, c.l));
+  const sat = Math.max(.22, Math.min(.62, c.s));   // gris puro no sirve de fondo
+  return `hsl(${Math.round(c.h)} ${Math.round(sat*100)}% ${Math.round(l*100)}%)`;
+}
+function pintarConSusColores(){
+  const ids = (D && D.tonos) || [];
+  if (ids.length < 2) return;                       // sin colores: queda el de marca
+  const hex = id => (TONOS.find(t => t.id === id) || {}).hex;
+  const a = seguro(hex(ids[0]), '#D97E73');
+  const b = seguro(hex(ids[1]), '#9E5A86');
+  document.documentElement.style.setProperty('--grad', `linear-gradient(135deg, ${a} 0%, ${b} 100%)`);
+  document.documentElement.style.setProperty('--rosa', a);
+}
+
+const NIVELES = {
+  1:['Recluta','Cumplí tu primera collab y desbloqueás el siguiente envío.'],
+  2:['Activa','Ya cumpliste una. Seguí así y llegás a Embajadora.'],
+  3:['Embajadora','Kit completo todos los meses y los lanzamientos antes que nadie.'],
+  4:['Staff CIMA','Sos candidata a creadora paga de la red.']
+};
+const FLUJO = [
+  ['aprobada',  '<svg viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.8\" stroke-linecap=\"round\" stroke-linejoin=\"round\"><path d="M4 12.5l5.5 5.5L20 7"/></svg>','Te aceptamos',        'Tus datos ya están cargados.'],
+  ['enviado',   '<svg viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.8\" stroke-linecap=\"round\" stroke-linejoin=\"round\"><path d="M3 7.5l9-4 9 4-9 4z"/><path d="M3 7.5v9l9 4 9-4v-9"/><path d="M12 11.5v9"/></svg>','Kit despachado',      'Va en camino a tu casa.'],
+  ['recibido',  '<svg viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.8\" stroke-linecap=\"round\" stroke-linejoin=\"round\"><path d="M3.5 11L12 4l8.5 7"/><path d="M5.5 9.7V19a1 1 0 0 0 1 1h11a1 1 0 0 0 1-1V9.7"/></svg>','Te llegó',            'Arrancaron tus 7 días.'],
+  ['publicado', '<svg viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.8\" stroke-linecap=\"round\" stroke-linejoin=\"round\"><rect x="3" y="6" width="18" height="13" rx="2.5"/><path d="M10 10.5l5 3-5 3z"/></svg>','Publicaste tu collab','La estamos revisando.'],
+  ['cumplida',  '<svg viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.8\" stroke-linecap=\"round\" stroke-linejoin=\"round\"><path d="M12 2.8l2.7 5.9 6.4.7-4.8 4.4 1.3 6.4L12 17l-5.6 3.2 1.3-6.4L2.9 9.4l6.4-.7z"/></svg>','Listo',               'Collab aprobada y nivel actualizado.']
+];
+const ORDEN = ['briefing_ok','aprobada','enviado','recibido','publicado','cumplida'];
+
+function cabecera(){
+  const n = (D && D.nombre) ? String(D.nombre).split(' ')[0] : '';
+  if (n){
+    $('#saludo').textContent = 'Hola,';
+    $('#quien').textContent = n + ' 👋';
+    $('#av').textContent = n.slice(0,2).toUpperCase();
+  }
+}
+
+const pesos = n => '$' + Math.round(n).toLocaleString('es-AR');
+const numero = n => Math.round(n).toLocaleString('es-AR');
+
+/* Lo que ganó y lo que puede ganar. Aparece recién cuando publicó:
+   antes no hay nada que mostrar y una tarjeta en cero desmotiva. */
+function pintarPlata(){
+  const B = CONFIG.bonos;
+  const publicado = ['publicado','cumplida'].includes(D.estado);
+  const views  = (D.reel && D.reel.views) || 0;
+  const ventas = D.ventas || 0;
+  const facturado = D.facturado || 0;
+  const comision = Math.round(facturado * B.comision / 100);
+
+  $('#bloque-rendimiento').classList.toggle('oculto', !publicado);
+  if (publicado){
+    $('#r-views').textContent   = views ? numero(views) : '—';
+    $('#r-ventas').textContent  = numero(ventas);
+    $('#r-comision').textContent = comision ? pesos(comision) : '$0';
+    $('#r-nota').textContent = views
+      ? 'Se actualiza solo cada 24 horas.'
+      : 'Todavía estamos midiendo tu reel. En unas horas aparece.';
+  }
+
+  // bono viral: barra de progreso hacia el umbral
+  const ganoViral = views >= B.viralViews;
+  $('#bono-viral').classList.toggle('ganado', ganoViral);
+  $('#bono-viral-monto').textContent = pesos(B.viralMonto);
+  $('#bono-viral-cond').textContent = `Si tu reel pasa las ${numero(B.viralViews)} views.`;
+  $('#bono-viral-barra').style.width = Math.min(100, views / B.viralViews * 100) + '%';
+  $('#bono-viral-txt').textContent = !publicado
+    ? `Se mide sobre tu reel cuando lo publiques.`
+    : ganoViral
+      ? `¡Lo ganaste! ${numero(views)} views.`
+      : `${numero(views)} de ${numero(B.viralViews)} views.`;
+
+  $('#bono-podio-monto').textContent = pesos(B.podio[0]);
+  $('#bono-podio-txt').textContent = D.posicionMes
+    ? `Vas ${D.posicionMes}° este mes.` + (D.posicionMes <= 3 ? ` Estás cobrando ${pesos(B.podio[D.posicionMes-1])}.` : '')
+    : 'Las tres collabs con más views del mes cobran premio.';
+
+  $('#bono-comision-pct').textContent = B.comision + '%';
+}
+
+function pintarEstado(){
+  cabecera();
+  pintarConSusColores();
+  const e = D.estado, pos = ORDEN.indexOf(e);
+
+  $('#pasos').innerHTML = FLUJO.map(p => {
+    const hecho = pos > ORDEN.indexOf(p[0]);
+    const activo = e === p[0];
+    return `<div class="fila ${hecho?'hecho':(activo?'activo':'pend')}">
+      <span class="cua">${hecho ? '<svg viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.8\" stroke-linecap=\"round\" stroke-linejoin=\"round\"><path d="M4 12.5l5.5 5.5L20 7"/></svg>' : p[1]}</span>
+      <span class="tx"><b>${p[2]}</b><small>${p[3]}</small></span></div>`;
+  }).join('');
+
+  const dias = D.deadline ? Math.max(0, Math.ceil((D.deadline - Date.now())/864e5)) : null;
+  const cab = {
+    briefing_ok:['Tu estado','Ya estás<br>en la lista','Te avisamos cuando salga tu kit.','En preparación'],
+    aprobada:   ['Tu estado','Preparando<br>tu kit','En breve lo despachamos.','En preparación'],
+    enviado:    ['Tu kit','Va en<br>camino','Avisanos cuando te llegue.','Despachado'],
+    recibido:   ['Te quedan',
+                 (dias === 1 ? 'Te queda<br>un día' : 'Te quedan<br>' + (dias!==null?dias:'—') + ' días'),
+                 'Tu kit ya llegó. Grabá tranquila.','En curso'],
+    publicado:  ['Tu collab','Recibimos<br>tu reel','Lo estamos verificando.','Revisando'],
+    cumplida:   ['Tu collab','¡Listo!','Ya podés pedir tu próximo kit.','Completada'],
+    vencida:    ['Tu plazo','Se venció','Escribinos por Instagram si querés otra oportunidad.','Vencida']
+  }[e] || ['Tu estado','—','','En curso'];
+
+  /* anillo: solo cuando hay plazo corriendo */
+  const conAnillo = (e === 'recibido' && dias !== null);
+  $('#hero').classList.toggle('con-anillo', conAnillo);
+  if (conAnillo){
+    const total = 7, hechos = Math.min(total, Math.max(0, total - dias));
+    const largo = 2 * Math.PI * 55;
+    $('#anillo-arco').setAttribute('stroke-dashoffset', String(largo * hechos / total));
+    $('#anillo-num').textContent = dias;
+    $('#anillo-de').textContent = 'de ' + total + ' días';
+  }
+
+  /* próxima meta: la razón para volver */
+  const nv = D.nivel || 1;
+  const faltan = Math.max(0, 3 - (D.cumplidas || (nv >= 2 ? 1 : 0)));
+  const hayMeta = nv < 3 && ['recibido','enviado','publicado','cumplida','briefing_ok','aprobada'].includes(e);
+  $('#bloque-meta').classList.toggle('oculto', !hayMeta);
+  if (hayMeta){
+    $('#meta-tit').textContent = faltan === 1
+      ? 'Una collab más y sos Embajadora'
+      : `${faltan} collabs más y sos Embajadora`;
+    $('#meta-sub').textContent = 'Kit completo todos los meses.';
+    $('#meta-puntos').innerHTML = [0,1,2].map(i =>
+      `<i class="${i < 3 - faltan ? 'on' : ''}"></i>`).join('');
+  }
+
+  $('#hero-lb').textContent = cab[0];
+  $('#hero-big').innerHTML = cab[1];
+  $('#hero-big').style.fontSize = (e === 'recibido') ? '3.6rem' : '1.9rem';
+  $('#hero-sub').textContent = cab[2];
+  $('#hero-badge').textContent = cab[3];
+
+  $('#bloque-llego').classList.toggle('oculto', e !== 'enviado');
+  $('#bloque-subir').classList.toggle('oculto', e !== 'recibido');
+  pintarPlata();
+
+  const cod = D.codigo || '';
+  $('#bloque-codigo').classList.toggle('oculto', !cod);
+  $('#a-codigo').style.display = cod ? '' : 'none';
+  if (cod){
+    $('#codigo-txt').textContent = cod;
+    // mismo identificador que el código: una sola atribución para los dos caminos
+    const url = `${CONFIG.tienda}/?utm_source=ig&utm_medium=creadora&utm_campaign=${cod.toLowerCase()}`;
+    $('#link-url').textContent = url.replace(/^https?:\/\//, '');
+    $('#link-url').dataset.url = url;
+  }
+
+  const n = D.nivel || 1;
+  $('#nivel-num').textContent = n;
+  $('#nivel-nom').textContent = NIVELES[n][0];
+  $('#nivel-txt').textContent = NIVELES[n][1];
+}
+
+function barraDemo(){
+  const irA = a => api('avanzar',{a}).then(r => { D = r.creadora; pintarEstado(); ver('v-estado'); });
+  const nav = document.createElement('nav');
+  nav.id = 'demonav';
+  nav.innerHTML = '<span class="lbl">Demo</span>';
+  [['Ficha',()=>ver('v-ficha')],['Briefing',()=>ver('v-brief')],
+   ['En lista',()=>irA('briefing_ok')],['Despachado',()=>irA('enviado')],
+   ['Te llegó',()=>irA('recibido')],['Publicado',()=>irA('publicado')],
+   ['Cumplida',()=>irA('cumplida')],['Vencida',()=>irA('vencida')]
+  ].forEach(([t,fn]) => {
+    const b = document.createElement('button'); b.textContent = t; b.onclick = fn; nav.appendChild(b);
+  });
+  document.body.appendChild(nav);
+  document.body.classList.add('condemo');
+}
+
+(async function init(){
+  pintarTonos(); pintarProvincias();
+  $('#brief-cuerpo').innerHTML = BRIEFING;
+  $('#refs').innerHTML = REFERENCIAS.map(r => `
+    <a class="ref" href="${r.u}" target="_blank" rel="noopener">
+      <span class="play">▶</span>
+      <span><b>${r.t}</b><small>${r.n}</small></span></a>`).join('');
+  if (CONFIG.grupoWpp) $('#a-grupo').href = CONFIG.grupoWpp;
+  else $('#a-grupo').style.display = 'none';
+  const grilla = document.querySelector('.accesos');
+  const cuantos = [...document.querySelectorAll('.acceso')].filter(a => a.style.display !== 'none').length;
+  grilla?.classList.toggle('tres',  cuantos === 3);
+  grilla?.classList.toggle('cuatro',cuantos === 4);
+  grilla?.classList.toggle('cinco', cuantos === 5);
+  $('#a-llamada').href = CONFIG.llamada.link;
+  $('#ig-handle').textContent = CONFIG.ig;
+
+  if (DEMO) barraDemo();
+  if (!TOKEN && !DEMO){ ver('v-error'); return; }
+  try {
+    const r = await api('estado', {});
+    if (!r.ok){ ver('v-error'); return; }
+    D = r.creadora; cabecera();
+    if (D.estado === 'invitada'){ precargar(); traerBorrador(); ver('v-ficha'); }
+    else if (D.estado === 'ficha_completa') ver('v-brief');
+    else { pintarEstado(); ver('v-estado'); }
+  } catch { if (DEMO){ precargar(); traerBorrador(); } ver(DEMO ? 'v-ficha' : 'v-error'); }
+})();
+
+const APP_VERSION = '2026-08-26-b';
+</script>
+</body>
+</html>

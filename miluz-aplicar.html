@@ -1,0 +1,563 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#FBF7F2">
+<meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+<title>MiLuz · Sumate como creadora</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap">
+<style>
+:root{
+  --bg:#FBF7F2; --bg2:#F4EDE4; --sup:#FFFFFF; --sup2:#F6EFE6;
+  --linea:#EBE0D2; --linea2:#DFD1BE;
+  --tx:#2A231D; --tx2:#6B5E51; --tx3:#9C8D7C;
+  --rosa:#C4636F; --ok:#4F8C63; --no:#C0524C;
+  --grad:linear-gradient(135deg,#D97E73 0%,#C4636F 48%,#9E5A86 100%);
+}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{margin:0;padding:0;height:100%}
+body{
+  background:var(--bg);color:var(--tx);
+  font-family:Manrope,-apple-system,system-ui,sans-serif;
+  font-size:16px;line-height:1.5;letter-spacing:-.01em;-webkit-font-smoothing:antialiased;
+  background-image:
+    radial-gradient(880px 400px at 10% -10%, rgba(217,126,115,.13), transparent 62%),
+    radial-gradient(720px 360px at 95% 2%, rgba(158,90,134,.09), transparent 60%);
+  background-attachment:fixed;
+  display:flex;flex-direction:column;min-height:100dvh;
+}
+
+/* ── progreso ── */
+.top{position:sticky;top:0;z-index:10;background:rgba(251,247,242,.92);backdrop-filter:blur(12px)}
+.barra{height:3px;background:var(--linea)}
+.barra i{display:block;height:100%;background:var(--grad);width:0;transition:width .35s cubic-bezier(.4,0,.2,1)}
+.top .fila{
+  max-width:520px;margin:0 auto;padding:12px 20px;
+  display:flex;align-items:center;gap:12px
+}
+.top .marca{font-weight:800;font-size:.95rem;letter-spacing:-.02em}
+.top .cuenta{margin-left:auto;font-size:.78rem;color:var(--tx3);font-variant-numeric:tabular-nums}
+.volver{
+  border:0;background:none;padding:6px;margin:-6px 0 -6px -6px;cursor:pointer;
+  color:var(--tx3);display:grid;place-items:center;border-radius:8px
+}
+.volver:hover{background:var(--bg2);color:var(--tx)}
+.volver svg{width:20px;height:20px;display:block}
+.volver[hidden]{visibility:hidden}
+
+/* ── pantalla ── */
+main{flex:1;display:flex;align-items:center;justify-content:center;padding:24px 20px 40px}
+.paso{width:100%;max-width:520px;display:none;animation:entra .32s cubic-bezier(.2,.8,.3,1)}
+.paso.on{display:block}
+@keyframes entra{from{opacity:0;transform:translateY(14px)}to{opacity:1;transform:none}}
+@media (prefers-reduced-motion:reduce){
+  .paso{animation:none}
+  .barra i{transition:none}
+}
+
+.pregunta{font-size:clamp(1.5rem,5.5vw,2rem);font-weight:800;line-height:1.16;margin:0 0 10px;letter-spacing:-.03em;text-wrap:balance}
+.ayuda{margin:0 0 24px;color:var(--tx2);font-size:.98rem;line-height:1.55}
+.ayuda b{color:var(--tx);font-weight:700}
+
+/* ── campos ── */
+.campo{
+  width:100%;padding:17px 18px;font:inherit;font-size:17px;color:var(--tx);
+  background:var(--sup);border:1.5px solid var(--linea);border-radius:15px;outline:none
+}
+.campo::placeholder{color:var(--tx3)}
+.campo:focus{border-color:var(--rosa);box-shadow:0 0 0 4px rgba(196,99,111,.13)}
+.conArroba{position:relative}
+.conArroba span{position:absolute;left:18px;top:50%;transform:translateY(-50%);color:var(--tx3);font-size:17px;pointer-events:none}
+.conArroba .campo{padding-left:36px}
+
+/* ── opciones ── */
+.ops{display:flex;flex-direction:column;gap:10px}
+.op{
+  display:flex;align-items:center;gap:14px;padding:16px 18px;cursor:pointer;
+  background:var(--sup);border:1.5px solid var(--linea);border-radius:15px;
+  transition:border-color .12s,background .12s
+}
+.op:hover{border-color:var(--linea2)}
+.op input{position:absolute;opacity:0;pointer-events:none}
+.op .tec{
+  flex:0 0 30px;height:30px;border-radius:9px;background:var(--bg2);color:var(--tx3);
+  display:grid;place-items:center;font-size:.82rem;font-weight:700
+}
+.op .et{flex:1;font-size:1rem;font-weight:600}
+.op .et small{display:block;font-weight:400;font-size:.85rem;color:var(--tx3);margin-top:2px}
+.op:has(input:checked){border-color:var(--rosa);background:#FDF6F5}
+.op:has(input:checked) .tec{background:var(--grad);color:#fff}
+
+/* ── fotos ── */
+.fotos{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.slot{
+  position:relative;aspect-ratio:3/4;border-radius:16px;overflow:hidden;
+  border:1.5px dashed var(--linea2);background:var(--sup);
+  display:grid;place-items:center;cursor:pointer;text-align:center;padding:14px
+}
+.slot:hover{border-color:var(--rosa)}
+.slot input{position:absolute;inset:0;opacity:0;cursor:pointer}
+.slot img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}
+.slot .ph{display:grid;gap:8px;justify-items:center;color:var(--tx3);pointer-events:none}
+.slot .ph svg{width:26px;height:26px}
+.slot .ph b{font-size:.85rem;font-weight:700;color:var(--tx2)}
+.slot .ph small{font-size:.75rem;line-height:1.35}
+.slot.lleno{border-style:solid;border-color:var(--ok)}
+.slot .quitar{
+  position:absolute;right:8px;top:8px;z-index:2;width:30px;height:30px;border:0;border-radius:9px;
+  background:rgba(42,35,29,.7);color:#fff;cursor:pointer;display:none;place-items:center;font-size:1rem
+}
+.slot.lleno .quitar{display:grid}
+.tip{
+  margin-top:14px;padding:13px 15px;border-radius:13px;background:var(--bg2);
+  border:1px solid var(--linea);font-size:.85rem;color:var(--tx2);line-height:1.5
+}
+.tip b{color:var(--tx)}
+
+/* ── colores ── */
+.tonos{display:grid;grid-template-columns:repeat(4,1fr);gap:12px}
+.tono{cursor:pointer;text-align:center}
+.tono input{display:none}
+.tono .sw{aspect-ratio:1;border-radius:50%;border:2px solid var(--linea);display:block;position:relative;transition:transform .13s}
+.tono input:checked+.sw{border-color:var(--rosa);transform:scale(1.09);box-shadow:0 0 0 3px rgba(196,99,111,.2)}
+.tono input:checked+.sw::after{content:"✓";position:absolute;inset:0;display:grid;place-items:center;color:#fff;font-weight:800;text-shadow:0 1px 4px rgba(0,0,0,.55)}
+.tono .nm{font-size:.68rem;color:var(--tx3);margin-top:6px;display:block;line-height:1.2}
+.tono.off{opacity:.28;pointer-events:none}
+
+/* ── botones ── */
+.btn{
+  display:block;width:100%;margin-top:22px;padding:17px;border:0;border-radius:15px;
+  background:var(--grad);color:#fff;font:inherit;font-weight:700;font-size:1.02rem;cursor:pointer;
+  box-shadow:0 10px 22px -10px rgba(196,99,111,.55)
+}
+.btn:disabled{background:var(--sup2);color:var(--tx3);box-shadow:none;cursor:default}
+.err{color:var(--no);font-size:.85rem;margin-top:10px;display:none}
+.err.ver{display:block}
+
+/* ── portada y cierre ── */
+.centro{text-align:center}
+.hero-t{font-size:clamp(2rem,7vw,2.7rem);font-weight:800;line-height:1.05;letter-spacing:-.035em;margin:0 0 14px;text-wrap:balance}
+.reqs{display:flex;flex-direction:column;gap:9px;margin:24px 0 0;text-align:left}
+.req{display:flex;gap:11px;align-items:flex-start;font-size:.95rem;color:var(--tx2)}
+.req svg{flex:0 0 19px;width:19px;height:19px;color:var(--ok);margin-top:2px}
+.sello{
+  width:74px;height:74px;border-radius:50%;background:var(--grad);color:#fff;
+  display:grid;place-items:center;margin:0 auto 20px
+}
+.sello svg{width:34px;height:34px}
+.chip{
+  display:inline-block;padding:7px 15px;border-radius:99px;background:var(--bg2);
+  border:1px solid var(--linea);font-size:.82rem;font-weight:700;color:var(--tx2);margin-bottom:18px
+}
+</style>
+</head>
+<body>
+
+<div class="top">
+  <div class="barra"><i id="barra"></i></div>
+  <div class="fila">
+    <button class="volver" id="volver" hidden aria-label="Volver">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 18l-6-6 6-6"/></svg>
+    </button>
+    <span class="marca">MiLuz</span>
+    <span class="cuenta" id="cuenta"></span>
+  </div>
+</div>
+
+<main id="main"></main>
+
+<script>
+/* ═══════════════════════════════════════════════════════════════
+   MiLuz · Aplicación de creadoras
+   Una pregunta por pantalla. El @usuario va PRIMERO a propósito:
+   apenas lo tenemos, se dispara la verificación por atrás mientras
+   ella sigue completando, así no hay ninguna espera al final.
+   ═══════════════════════════════════════════════════════════════ */
+
+const API = 'https://us-central1-cleargy-creators.cloudfunctions.net/canje';
+const MARCA = 'miluz';
+
+const TONOS = [
+  {id:'via-lactea',nom:'Vía láctea',hex:'#F0E7DE'}, {id:'bco-perlado',nom:'Bco perlado',hex:'#EDE4D9'},
+  {id:'blanco',nom:'Blanco',hex:'#F7F5F2'},         {id:'arena',nom:'Arena',hex:'#D8C2A4'},
+  {id:'rosa-palo',nom:'Rosa palo',hex:'#E3BFBC'},   {id:'rosa-crepe',nom:'Rosa crepé',hex:'#D99BA0'},
+  {id:'rosa-old',nom:'Rosa old',hex:'#C08A8C'},     {id:'marron-canela',nom:'Marrón canela',hex:'#9C6141'},
+  {id:'chocolate',nom:'Chocolate',hex:'#4A2C20'},   {id:'tomate',nom:'Tomate',hex:'#D6432F'},
+  {id:'rojo-love',nom:'Rojo love',hex:'#B3122B'},   {id:'pasion',nom:'Pasión',hex:'#C41E4A'},
+  {id:'rubi',nom:'Rubí',hex:'#8E1F3D'},             {id:'negro',nom:'Negro',hex:'#1A1718'},
+];
+
+const PROVINCIAS = ['Buenos Aires','CABA','Catamarca','Chaco','Chubut','Córdoba','Corrientes','Entre Ríos','Formosa','Jujuy','La Pampa','La Rioja','Mendoza','Misiones','Neuquén','Río Negro','Salta','San Juan','San Luis','Santa Cruz','Santa Fe','Santiago del Estero','Tierra del Fuego','Tucumán'];
+
+/* ── lo que vamos juntando ── */
+const R = { fotos: [] };
+/* Si llegó desde el DM de ManyChat, el link trae su id (?mc=...).
+   Con eso el backend puede escribirle SIEMPRE, sin ventana de 24 h. */
+R.manychatId = new URLSearchParams(location.search).get('mc') || null;
+let i = 0;                 // pantalla actual
+let idAplicante = null;    // lo devuelve el backend al registrar el @usuario
+
+/* ── definición del cuestionario ────────────────────────────────
+   Cada paso: pregunta, ayuda, cómo se renderiza y cómo se valida. */
+const PASOS = [
+
+  { tipo:'portada' },
+
+  { tipo:'texto', campo:'ig', arroba:true,
+    q:'¿Cuál es tu Instagram?',
+    a:'Lo primero, porque mientras completás el resto vamos mirando tu perfil.',
+    ph:'tu.usuario', teclado:'text',
+    valida: v => v.replace(/[^a-z0-9._]/gi,'').length >= 2 || 'Escribí tu usuario, sin el @' },
+
+  { tipo:'opciones', campo:'unas',
+    q:'¿Cómo tenés las uñas?',
+    a:'El producto es esmalte y tratamiento: sobre uñas esculpidas o soft gel no se puede usar.',
+    ops:[
+      ['naturales','Naturales','Son mis uñas, sin nada puesto encima'],
+      ['esculpidas','Esculpidas o acrílicas','Con extensión de acrílico o gel'],
+      ['softgel','Soft gel o capping','Con una capa de gel encima de la uña']
+    ] },
+
+  { tipo:'opciones', campo:'estado',
+    q:'¿Y cómo están hoy?',
+    a:'Contestá lo que sea cierto. Hay lugar para los dos casos.',
+    ops:[
+      ['largas','Sanas y largas','Puedo mostrarlas así como están'],
+      ['cortas','Sanas pero cortas','Prolijas, pero las llevo cortitas'],
+      ['debiles','Débiles o quebradizas','Se me descaman o se rompen']
+    ] },
+
+  { tipo:'fotos',
+    q:'Mostranos tus manos',
+    a:'Es el requisito que más miramos. <b>Una foto alcanza; dos es mejor.</b> Con luz natural y las uñas a la vista.' },
+
+  { tipo:'texto', campo:'nombre',
+    q:'¿Cómo te llamás?',
+    a:'Nombre y apellido, como figura en tu documento.',
+    ph:'Nombre y apellido', teclado:'text', auto:'name',
+    valida: v => v.trim().split(/\s+/).length >= 2 || 'Poné nombre y apellido' },
+
+  { tipo:'texto', campo:'tel',
+    q:'¿Tu WhatsApp?',
+    a:'Es por donde te avisamos si quedás. Con código de área, sin el 15.',
+    ph:'11 5555 5555', teclado:'tel',
+    valida: v => v.replace(/\D/g,'').length >= 8 || 'Revisá el número' },
+
+  { tipo:'texto', campo:'email',
+    q:'¿Y tu mail?',
+    a:'Por si el WhatsApp falla.',
+    ph:'vos@mail.com', teclado:'email', auto:'email',
+    valida: v => /^\S+@\S+\.\S+$/.test(v.trim()) || 'Revisá el mail' },
+
+  { tipo:'select', campo:'provincia',
+    q:'¿De qué provincia sos?',
+    a:'Mandamos a todo el país.',
+    ops: PROVINCIAS },
+
+  { tipo:'opciones', campo:'semi',
+    q:'¿Usás o usaste semipermanente?',
+    a:'No es para descartarte — al contrario, tu historia le interesa mucho a la marca.',
+    ops:[
+      ['ahora','Sí, ahora mismo','Me lo hago seguido'],
+      ['antes','Usaba, ya no','Lo dejé hace un tiempo'],
+      ['nunca','Nunca me hice','Siempre uñas naturales']
+    ] },
+
+  { tipo:'opciones', campo:'rubro',
+    q:'¿Trabajás con uñas?',
+    a:'Las manicuristas tienen su propio programa, con otro briefing.',
+    ops:[
+      ['no','No, hago contenido nomás',''],
+      ['manicurista','Sí, soy manicurista',''],
+      ['aprendiendo','Estoy aprendiendo','']
+    ] },
+
+  { tipo:'colores',
+    q:'Si quedás, ¿qué dos colores querés?',
+    a:'Van en tu kit junto con el Tratamiento Fénix.' },
+
+  { tipo:'cierre' }
+];
+
+const $ = s => document.querySelector(s);
+const main = $('#main');
+
+/* ── redimensionado en el navegador ────────────────────────────
+   Sube 80 KB, no 4 MB: el celular hace el trabajo y el envío
+   funciona con datos móviles flojos. */
+function achicar(file, lado = 900, calidad = .82){
+  return new Promise((ok, mal) => {
+    const fr = new FileReader();
+    fr.onerror = () => mal(new Error('no se pudo leer'));
+    fr.onload = () => {
+      const img = new Image();
+      img.onerror = () => mal(new Error('no es una imagen'));
+      img.onload = () => {
+        const e = Math.min(1, lado / Math.max(img.width, img.height));
+        const c = document.createElement('canvas');
+        c.width = Math.round(img.width * e);
+        c.height = Math.round(img.height * e);
+        c.getContext('2d').drawImage(img, 0, 0, c.width, c.height);
+        ok(c.toDataURL('image/jpeg', calidad));
+      };
+      img.src = fr.result;
+    };
+    fr.readAsDataURL(file);
+  });
+}
+
+/* ── verificación en paralelo ──────────────────────────────────
+   Se dispara apenas tenemos el @usuario. Para cuando termina el
+   formulario, el perfil ya está medido. */
+function registrarIg(ig){
+  fetch(API, {
+    method:'POST', headers:{'Content-Type':'application/json'},
+    body: JSON.stringify({ accion:'registrar', marca:MARCA, ig })
+  })
+  .then(r => r.json())
+  .then(d => { if (d && d.id) idAplicante = d.id; })
+  .catch(() => {});   // si falla, se resuelve al enviar
+}
+
+/* ── render ────────────────────────────────────────────────────*/
+function pintar(){
+  const p = PASOS[i];
+  const total = PASOS.length - 1;
+  $('#barra').style.width = (i / total * 100) + '%';
+  $('#volver').hidden = i === 0 || i === PASOS.length - 1;
+  $('#cuenta').textContent = (i > 0 && i < PASOS.length - 1) ? `${i} de ${total - 1}` : '';
+
+  main.innerHTML = '';
+  const d = document.createElement('div');
+  d.className = 'paso on';
+  d.innerHTML = plantilla(p);
+  main.appendChild(d);
+  conectar(p, d);
+  const foco = d.querySelector('input[type=text],input[type=tel],input[type=email],select');
+  if (foco) setTimeout(() => foco.focus({preventScroll:true}), 120);
+}
+
+function plantilla(p){
+  if (p.tipo === 'portada') return `
+    <div class="centro">
+      <span class="chip">Buscamos 200 creadoras por mes</span>
+      <h1 class="hero-t">Te mandamos el kit.<br>Vos hacés un video.</h1>
+      <p class="ayuda">Tratamiento Fénix y dos esmaltes Ultra Efecto Gel, sin costo. A cambio,
+      un reel en colaboración con MiLuz.</p>
+    </div>
+    <div class="reqs">
+      ${['Uñas naturales, sin esculpidas ni soft gel',
+         'Cuenta pública con al menos 1.000 seguidores',
+         'Que publiques seguido: 10 posts en los últimos 3 meses',
+         'Vivir en Argentina'].map(t => `
+        <div class="req">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 12.5l5.5 5.5L20 7"/></svg>
+          <span>${t}</span>
+        </div>`).join('')}
+    </div>
+    <button class="btn" data-sig>Empezar · 2 minutos</button>`;
+
+  if (p.tipo === 'texto') return `
+    <h2 class="pregunta">${p.q}</h2>
+    <p class="ayuda">${p.a}</p>
+    ${p.arroba
+      ? `<div class="conArroba"><span>@</span><input class="campo" id="c" type="text" inputmode="${p.teclado}" placeholder="${p.ph}" autocomplete="off" autocapitalize="none" spellcheck="false" value="${R[p.campo]||''}"></div>`
+      : `<input class="campo" id="c" type="${p.teclado==='email'?'email':p.teclado==='tel'?'tel':'text'}" inputmode="${p.teclado}" placeholder="${p.ph}" autocomplete="${p.auto||'off'}" value="${R[p.campo]||''}">`}
+    <p class="err" id="e"></p>
+    <button class="btn" data-sig>Seguir</button>`;
+
+  if (p.tipo === 'opciones') return `
+    <h2 class="pregunta">${p.q}</h2>
+    <p class="ayuda">${p.a}</p>
+    <div class="ops">
+      ${p.ops.map(([v,t,s],n) => `
+        <label class="op">
+          <input type="radio" name="o" value="${v}" ${R[p.campo]===v?'checked':''}>
+          <span class="tec">${String.fromCharCode(65+n)}</span>
+          <span class="et">${t}${s?`<small>${s}</small>`:''}</span>
+        </label>`).join('')}
+    </div>
+    <p class="err" id="e"></p>`;
+
+  if (p.tipo === 'select') return `
+    <h2 class="pregunta">${p.q}</h2>
+    <p class="ayuda">${p.a}</p>
+    <select class="campo" id="c">
+      <option value="">Elegí…</option>
+      ${p.ops.map(o => `<option ${R.provincia===o?'selected':''}>${o}</option>`).join('')}
+    </select>
+    <p class="err" id="e"></p>
+    <button class="btn" data-sig>Seguir</button>`;
+
+  if (p.tipo === 'fotos') return `
+    <h2 class="pregunta">${p.q}</h2>
+    <p class="ayuda">${p.a}</p>
+    <div class="fotos">
+      ${[0,1].map(n => `
+        <label class="slot ${R.fotos[n]?'lleno':''}" data-n="${n}">
+          ${R.fotos[n] ? `<img src="${R.fotos[n]}" alt="Foto ${n+1}">` : `
+            <span class="ph">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M4 8.5h3l1.5-2h7L17 8.5h3a1.5 1.5 0 0 1 1.5 1.5v8A1.5 1.5 0 0 1 20 19.5H4A1.5 1.5 0 0 1 2.5 18v-8A1.5 1.5 0 0 1 4 8.5z"/><circle cx="12" cy="13.5" r="3.2"/></svg>
+              <b>${n===0?'Foto 1':'Foto 2'}</b>
+              <small>${n===0?'Obligatoria':'Opcional'}</small>
+            </span>`}
+          <input type="file" accept="image/*" capture="environment">
+          <button type="button" class="quitar" aria-label="Quitar">✕</button>
+        </label>`).join('')}
+    </div>
+    <div class="tip">
+      <b>Que se vean bien:</b> la mano abierta, con luz de ventana y sin filtros.
+      Si tenés esmalte puesto, mejor así como está — no hace falta que te lo saques.
+    </div>
+    <p class="err" id="e"></p>
+    <button class="btn" data-sig>Seguir</button>`;
+
+  if (p.tipo === 'colores') return `
+    <h2 class="pregunta">${p.q}</h2>
+    <p class="ayuda">${p.a}</p>
+    <div class="tonos" id="tonos">
+      ${TONOS.map(t => `
+        <label class="tono">
+          <input type="checkbox" value="${t.id}" ${(R.tonos||[]).includes(t.id)?'checked':''}>
+          <span class="sw" style="background:${t.hex}"></span>
+          <span class="nm">${t.nom}</span>
+        </label>`).join('')}
+    </div>
+    <p class="err" id="e"></p>
+    <button class="btn" data-sig>Enviar mi aplicación</button>`;
+
+  if (p.tipo === 'cierre') return `
+    <div class="centro">
+      <div class="sello">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M4 12.5l5.5 5.5L20 7"/></svg>
+      </div>
+      <h2 class="pregunta">¡Listo!</h2>
+      <p class="ayuda">Recibimos tu aplicación y ya estamos mirando tu perfil.
+      Si quedás, te escribimos por WhatsApp en los próximos días con el link para
+      completar tus datos de envío.</p>
+      <p class="ayuda" style="margin-bottom:0">Mientras tanto, seguinos en
+      <b>@miluz</b> — ahí publicamos las collabs de las chicas.</p>
+    </div>`;
+
+  return '';
+}
+
+/* ── comportamiento por tipo de pantalla ───────────────────────*/
+function conectar(p, d){
+  const sig = d.querySelector('[data-sig]');
+  if (sig) sig.onclick = avanzar;
+
+  if (p.tipo === 'texto' || p.tipo === 'select'){
+    const c = d.querySelector('#c');
+    c.addEventListener('keydown', e => { if (e.key === 'Enter'){ e.preventDefault(); avanzar(); } });
+    if (p.tipo === 'select') c.addEventListener('change', () => { if (c.value) avanzar(); });
+  }
+
+  if (p.tipo === 'opciones'){
+    // elegir avanza sola: es lo que hace que se sienta rápido
+    d.querySelectorAll('input[name=o]').forEach(r =>
+      r.addEventListener('change', () => { R[p.campo] = r.value; setTimeout(avanzar, 220); }));
+  }
+
+  if (p.tipo === 'fotos'){
+    d.querySelectorAll('.slot').forEach(slot => {
+      const n = +slot.dataset.n;
+      slot.querySelector('input').addEventListener('change', async e => {
+        const f = e.target.files && e.target.files[0];
+        if (!f) return;
+        try {
+          R.fotos[n] = await achicar(f);
+          pintar();
+        } catch { mostrarError('No pudimos leer esa imagen. Probá con otra.'); }
+      });
+      slot.querySelector('.quitar').addEventListener('click', e => {
+        e.preventDefault(); e.stopPropagation();
+        R.fotos[n] = null; R.fotos = R.fotos.filter(Boolean); pintar();
+      });
+    });
+  }
+
+  if (p.tipo === 'colores'){
+    d.querySelector('#tonos').addEventListener('change', () => {
+      const sel = [...d.querySelectorAll('#tonos input:checked')];
+      d.querySelectorAll('.tono').forEach(l =>
+        l.classList.toggle('off', sel.length >= 2 && !l.querySelector('input').checked));
+      R.tonos = sel.map(c => c.value);
+    });
+  }
+}
+
+function mostrarError(t){
+  const e = $('#e'); if (!e) return;
+  e.textContent = t; e.classList.add('ver');
+}
+
+/* ── avanzar ───────────────────────────────────────────────────*/
+async function avanzar(){
+  const p = PASOS[i];
+  const e = $('#e'); if (e) e.classList.remove('ver');
+
+  if (p.tipo === 'texto'){
+    const v = $('#c').value;
+    const ok = p.valida ? p.valida(v) : true;
+    if (ok !== true){ mostrarError(ok); return; }
+    R[p.campo] = v.trim().replace(/^@/, '');
+    if (p.campo === 'ig') registrarIg(R.ig);   // arranca la verificación
+  }
+
+  if (p.tipo === 'select'){
+    const v = $('#c').value;
+    if (!v){ mostrarError('Elegí una provincia'); return; }
+    R[p.campo] = v;
+  }
+
+  if (p.tipo === 'opciones' && !R[p.campo]){ mostrarError('Elegí una opción'); return; }
+
+  if (p.tipo === 'fotos' && !R.fotos.filter(Boolean).length){
+    mostrarError('Necesitamos al menos una foto de tus manos'); return;
+  }
+
+  if (p.tipo === 'colores'){
+    if ((R.tonos || []).length !== 2){ mostrarError('Elegí exactamente dos'); return; }
+    await enviar();
+    return;
+  }
+
+  i++; pintar();
+}
+
+$('#volver').onclick = () => { if (i > 0){ i--; pintar(); } };
+
+/* ── envío ─────────────────────────────────────────────────────*/
+async function enviar(){
+  const btn = document.querySelector('[data-sig]');
+  btn.disabled = true; btn.textContent = 'Enviando…';
+  try {
+    const r = await fetch(API, {
+      method:'POST', headers:{'Content-Type':'application/json'},
+      body: JSON.stringify({
+        accion:'aplicar', marca:MARCA, id:idAplicante,
+        manychatId: R.manychatId,
+        datos:{
+          ig:R.ig, nombre:R.nombre, tel:R.tel, email:R.email, provincia:R.provincia,
+          unas:R.unas, estado:R.estado, semi:R.semi, rubro:R.rubro, tonos:R.tonos
+        },
+        fotos: R.fotos.filter(Boolean)
+      })
+    });
+    if (!r.ok) throw new Error('http ' + r.status);
+    i = PASOS.length - 1; pintar();
+  } catch {
+    btn.disabled = false; btn.textContent = 'Enviar mi aplicación';
+    mostrarError('No pudimos enviarla. Revisá tu conexión y probá de nuevo.');
+  }
+}
+
+pintar();
+const APP_VERSION = '2026-08-26-a';
+</script>
+</body>
+</html>
