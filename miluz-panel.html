@@ -20,6 +20,8 @@
   --sombra:0 1px 2px rgba(42,35,29,.04);
 }
 *{box-sizing:border-box}
+.verreel{color:#C4636F;text-decoration:none;font-weight:600}
+.verreel:hover{text-decoration:underline}
 html{touch-action:manipulation;-webkit-text-size-adjust:100%}
 body{
   margin:0;background:var(--crema);color:var(--tinta);
@@ -1100,7 +1102,7 @@ function pintarCreadoras(){
       <tbody>${lista.map(c => {
         const [et,cl] = ETIQUETA[c.estado] || [c.estado,''];
         return `<tr>
-          <td><b>${c.nom}</b><span class="n2">@${c.ig}</span></td>
+          <td><b>${c.nom}</b><span class="n2">@${c.ig}${c.reel ? ` · <a href="${c.reel}" target="_blank" rel="noopener" class="verreel">ver reel</a>` : ''}</span></td>
           <td><span class="pill ${cl}">${et}</span>${c.bono?'<span class="pill ok" style="margin-left:4px">bono</span>':''}</td>
           <td class="num">${c.views ? c.views.toLocaleString('es-AR') : '—'}</td>
           <td class="num">${c.ventas || '—'}</td>
@@ -1129,8 +1131,8 @@ function pintarCreadoras(){
 $('#buscar').addEventListener('input', pintarCreadoras);
 $('#btn-csv-cre').onclick = () => {
   const com = e => Math.round(e.monto * ECONOMIA.comision / 100);
-  const filas = [['Nombre','Instagram','Estado','Views','Ventas','Comision','Nivel']]
-    .concat(CREADORAS.map(c => [c.nom,'@'+c.ig,c.estado,c.views,c.ventas,com(c),c.nivel]));
+  const filas = [['Nombre','Instagram','Estado','Views','Ventas','Comision','Nivel','Reel']]
+    .concat(CREADORAS.map(c => [c.nom,'@'+c.ig,c.estado,c.views,c.ventas,com(c),c.nivel,c.reel||'']));
   const csv = filas.map(f => f.map(x => `"${String(x).replace(/"/g,'""')}"`).join(',')).join('\n');
   const a = document.createElement('a');
   a.href = URL.createObjectURL(new Blob(['\ufeff'+csv], {type:'text/csv;charset=utf-8'}));
