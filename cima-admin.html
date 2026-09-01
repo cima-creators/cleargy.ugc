@@ -544,6 +544,14 @@ table td,table th{border-color:var(--border);}
       <div class="fgroup"><div class="flabel">Shares</div><input class="fi" type="number" id="edit-shares"></div>
       <div class="fgroup"><div class="flabel">Saves</div><input class="fi" type="number" id="edit-saves"></div>
     </div>
+    <div id="edit-links-group" style="display:none;border-top:1px solid var(--border);padding-top:14px;margin-bottom:4px;">
+      <div class="flabel" style="margin-bottom:9px;">Links del video</div>
+      <div class="fgroup"><div class="flabel">Instagram</div><input class="fi" type="url" id="edit-link-ig" placeholder="https://instagram.com/reel/..."></div>
+      <div class="fgroup"><div class="flabel">TikTok</div><input class="fi" type="url" id="edit-link-tt" placeholder="https://tiktok.com/@usuario/video/..."></div>
+      <div class="fgroup" id="edit-link-fb-group" style="display:none;"><div class="flabel">Facebook</div><input class="fi" type="url" id="edit-link-fb" placeholder="https://facebook.com/..."></div>
+      <div class="fgroup"><div class="flabel">Drive</div><input class="fi" type="url" id="edit-link-drive" placeholder="https://drive.google.com/..."></div>
+      <div style="font-size:11px;color:var(--muted);margin:-4px 0 12px;line-height:1.45;">Si corregís un link de Instagram o TikTok, las views se vuelven a leer en el próximo sync.</div>
+    </div>
     <div class="fgroup" id="edit-product-group" style="display:none;">
       <div class="flabel">📦 Producto</div>
       <select class="fi" id="edit-product"><option value="">— Sin producto —</option></select>
@@ -1101,6 +1109,29 @@ function setOverviewPeriod(days,el){
   renderOverview();
 }
 
+// Permite entrar directo a una vista desde un link del dashboard:
+//   ...cima-admin.html?brand=X&ver=finanzas&creador=creadora5
+function irADestinoDeUrl(){
+  const q = new URLSearchParams(window.location.search);
+  const ver = q.get('ver'), quien = q.get('creador');
+  if(!ver) return;
+  const item = document.querySelector('.nitem[data-view="'+ver.replace(/[^a-z]/gi,'')+'"]');
+  if(!item) return;
+  setTimeout(()=>{
+    nav(item);
+    if(!quien) return;
+    setTimeout(()=>{
+      const card = document.getElementById('fin-'+quien);
+      if(!card) return;
+      card.scrollIntoView({behavior:'smooth', block:'center'});
+      card.style.transition='box-shadow .3s, outline-color .3s';
+      card.style.outline='2px solid var(--accent)';
+      card.style.outlineOffset='3px';
+      setTimeout(()=>{ card.style.outline='2px solid transparent'; }, 2600);
+    }, 500);
+  }, 700);
+}
+
 function enterAdmin(){
   localStorage.setItem(BRAND_ID+"_admin_session", window.adminRole||"superadmin");
   document.getElementById("login-screen").style.display="none";
@@ -1141,6 +1172,7 @@ function enterAdmin(){
   }
   if(window._fbListen) startAdminListen();
   else window.addEventListener('firebase-ready', startAdminListen, {once:true});
+  irADestinoDeUrl();
 }
 
 function doAdminLogin(){
@@ -1791,12 +1823,37 @@ function openEditVideo(id){
   document.getElementById("edit-shares").value = v.shares||0;
   document.getElementById("edit-saves").value = v.saves||0;
   const _evp=document.getElementById("edit-product"); if(_evp) _evp.value = v.producto||"";
+  // Los links solo los edita el equipo de CIMA (Nacho, Dani, Abril), no la marca
+  const _lg=document.getElementById("edit-links-group");
+  if(_lg){
+    _lg.style.display = window.adminRole==='superadmin' ? 'block' : 'none';
+    document.getElementById("edit-link-ig").value = v.linkIg||"";
+    document.getElementById("edit-link-tt").value = v.linkTt||"";
+    document.getElementById("edit-link-drive").value = v.driveLink||"";
+    const _fb=document.getElementById("edit-link-fb-group");
+    if(_fb){ _fb.style.display = BRAND.facebook ? 'block' : 'none'; document.getElementById("edit-link-fb").value = v.linkFb||""; }
+  }
   document.getElementById("edit-featured").checked = v.featured||false;
   document.getElementById("edit-overlay").classList.add("open");
 }
 function submitEditVideo(){
   const v = data.videos.find(x=>x.id==editVideoId);
   if(!v) return;
+  if(window.adminRole==='superadmin'){
+    const limpio = u => { u=(u||'').trim(); if(u && !/^https?:\/\//i.test(u)) u='https://'+u; return u; };
+    const ig=limpio(document.getElementById("edit-link-ig").value);
+    const tt=limpio(document.getElementById("edit-link-tt").value);
+    const dr=limpio(document.getElementById("edit-link-drive").value);
+    if(ig && !/instagram\.com\//i.test(ig)){ alert("El link de Instagram no parece válido."); return; }
+    if(tt && !/tiktok\.com\//i.test(tt)){ alert("El link de TikTok no parece válido."); return; }
+    if(dr && !/drive\.google\.com/i.test(dr)){ alert("El link de Drive no parece válido."); return; }
+    // Si cambió un link de redes, se resetea el contador de scrapes para que el sync lo vuelva a medir
+    if(ig!==(v.linkIg||"") || tt!==(v.linkTt||"")){ v._scrapes=0; v._lastScrapeAt=0; }
+    v.linkIg=ig; v.linkTt=tt; v.driveLink=dr;
+    if(BRAND.facebook){ v.linkFb=limpio(document.getElementById("edit-link-fb").value); }
+    v.link = ig || tt || dr || v.link;
+    v.platform = BRAND.driveOnly||v.crudo ? "drive" : (ig&&tt ? "both" : ig ? "ig" : tt ? "tt" : v.platform);
+  }
   v.views = parseInt(document.getElementById("edit-views").value)||0;
   v.likes = parseInt(document.getElementById("edit-likes").value)||0;
   v.shares = parseInt(document.getElementById("edit-shares").value)||0;
@@ -2184,7 +2241,7 @@ function renderFinanzas(){
   document.getElementById("finanzas-resumen").innerHTML = `
     <div class="creator-grid">
       ${rows.map(r=>`
-        <div style="background:white;border-radius:var(--radius);padding:16px;box-shadow:var(--shadow);">
+        <div id="fin-${r.c}" style="background:white;border-radius:var(--radius);padding:16px;box-shadow:var(--shadow);outline:2px solid transparent;">
           <div style="display:flex;align-items:center;gap:8px;margin-bottom:10px;">
             <div style="width:36px;height:36px;border-radius:50%;background:${COLORS[r.c]}22;border:2px solid ${COLORS[r.c]};display:flex;align-items:center;justify-content:center;font-family:'Poppins';font-size:11px;font-weight:500;color:${COLORS[r.c]}">${AVATARS[r.c]}</div>
             <div style="font-size:12px;font-weight:800;color:var(--text);">${NAMES[r.c]}</div>
@@ -2880,7 +2937,7 @@ loadConfig();
 <!-- Auto-actualización: GitHub Pages cachea el HTML y los celulares lo retienen mucho más.
      Esto compara la versión publicada con la que está corriendo y refresca sola. -->
 <script>
-const APP_VERSION = '2026-08-29-j';
+const APP_VERSION = '2026-08-29-l';
 (function(){
   var CLAVE='cima_ver_reload';
   function hayAlguienEscribiendo(){
