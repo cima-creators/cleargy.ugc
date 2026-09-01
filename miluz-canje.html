@@ -187,6 +187,25 @@ label.malo .err{display:block}
 .btn:disabled{background:var(--sup2);color:var(--tx3);box-shadow:none;cursor:default}
 .btn.sec{background:var(--sup2);color:var(--tx);box-shadow:none;border:1px solid var(--linea)}
 
+/* ── popup ── */
+dialog.pop{
+  border:0;border-radius:20px;padding:0;max-width:400px;width:calc(100% - 36px);
+  background:var(--sup);color:var(--tx);box-shadow:0 24px 60px -18px rgba(42,35,29,.4)
+}
+dialog.pop::backdrop{background:rgba(42,35,29,.45)}
+.pop .cuerpo{padding:24px}
+.pop h2{margin:0 0 4px;font-size:1.35rem;letter-spacing:-.03em}
+.pop .cuando{
+  display:flex;align-items:baseline;gap:8px;margin:14px 0 16px;padding:14px 16px;
+  border-radius:14px;background:var(--bg2);border:1px solid var(--linea)
+}
+.pop .cuando b{font-size:1.05rem}
+.pop .cuando span{color:var(--tx2);font-size:.92rem}
+.pop ul{margin:0 0 16px;padding-left:18px;color:var(--tx2);font-size:.94rem;line-height:1.6}
+.pop ul li{margin-bottom:5px}
+.pop .nota{font-size:.85rem;color:var(--tx3);margin:0 0 18px;line-height:1.5}
+.pop .cerrar{margin-top:9px}
+
 /* ── paleta ── */
 .tonos{display:grid;grid-template-columns:repeat(4,1fr);gap:11px;margin-top:6px}
 .tono{cursor:pointer;text-align:center}
@@ -487,7 +506,7 @@ body.condemo .wrap{padding-bottom:84px}
     <div class="accesos">
       <a class="acceso" id="a-brief"><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M9 3h6v3H9z"/><path d="M6.5 6H5.5A1.5 1.5 0 0 0 4 7.5v12A1.5 1.5 0 0 0 5.5 21h13a1.5 1.5 0 0 0 1.5-1.5v-12A1.5 1.5 0 0 0 18.5 6h-1"/><path d="M8.5 12h7M8.5 16h4.5"/></svg><span>Briefing</span></a>
       <a class="acceso" id="a-grupo" target="_blank" rel="noopener"><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M9 17a8 8 0 1 0-5.3-2L3 21l5.4-1.6A8 8 0 0 0 9 17z"/><circle cx="9" cy="12" r=".9" fill="currentColor" stroke="none"/><circle cx="12.5" cy="12" r=".9" fill="currentColor" stroke="none"/></svg><span>Comunidad</span></a>
-      <a class="acceso" id="a-llamada" target="_blank" rel="noopener"><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="6.5" width="12.5" height="11" rx="2.5"/><path d="M15.5 11l5-2.6v7.2l-5-2.6z"/></svg><span>Llamada</span></a>
+      <a class="acceso" id="a-llamada"><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="6.5" width="12.5" height="11" rx="2.5"/><path d="M15.5 11l5-2.6v7.2l-5-2.6z"/></svg><span>Llamada</span></a>
       <a class="acceso" id="a-bonos"><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2.8l2.7 5.9 6.4.7-4.8 4.4 1.3 6.4L12 17l-5.6 3.2 1.3-6.4L2.9 9.4l6.4-.7z"/></svg><span>Bonos</span></a>
       <a class="acceso" id="a-codigo"><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M4 10.5h16V19a1.5 1.5 0 0 1-1.5 1.5h-13A1.5 1.5 0 0 1 4 19z"/><rect x="2.8" y="7" width="18.4" height="3.5" rx="1.2"/><path d="M12 7v13.5"/><path d="M12 7c-2 0-3.4-.8-3.4-2.1S9.9 3.2 12 7zM12 7c2 0 3.4-.8 3.4-2.1S14.1 3.2 12 7z"/></svg><span>Código</span></a>
     </div>
@@ -1117,7 +1136,11 @@ function barraDemo(){
   grilla?.classList.toggle('tres',  cuantos === 3);
   grilla?.classList.toggle('cuatro',cuantos === 4);
   grilla?.classList.toggle('cinco', cuantos === 5);
-  $('#a-llamada').href = CONFIG.llamada.link;
+  $('#ll-entrar').href = CONFIG.llamada.link;
+  $('#ll-dia').textContent = CONFIG.llamada.dia;
+  $('#ll-hora').textContent = CONFIG.llamada.hora;
+  $('#a-llamada').addEventListener('click', () => $('#pop-llamada').showModal());
+  $('#ll-cerrar').addEventListener('click', () => $('#pop-llamada').close());
   $('#ig-handle').textContent = CONFIG.ig;
 
   if (DEMO) barraDemo();
@@ -1134,5 +1157,19 @@ function barraDemo(){
 
 const APP_VERSION = '2026-08-26-b';
 </script>
+<dialog class="pop" id="pop-llamada">
+  <div class="cuerpo">
+    <h2>Llamada de entrenamiento</h2>
+    <div class="cuando"><b id="ll-dia">Jueves</b><span>de <b id="ll-hora">16:00</b> a 17:00</span></div>
+    <ul>
+      <li>Los reels que mejor funcionaron y por qué</li>
+      <li>Cómo grabar para que se vea el antes y el después</li>
+      <li>Dudas en vivo: luz, encuadre, edición</li>
+    </ul>
+    <p class="nota">Traé tu video si querés que lo miremos antes de que lo subas. Se graba, así que si no llegás la ves después en la comunidad.</p>
+    <a class="btn" id="ll-entrar" target="_blank" rel="noopener">Entrar a la llamada</a>
+    <button class="btn sec cerrar" id="ll-cerrar">Cerrar</button>
+  </div>
+</dialog>
 </body>
 </html>
