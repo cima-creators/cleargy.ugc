@@ -577,6 +577,7 @@ async function cargar(){
 
   CREADORAS = todas.fichas.map(f => ({
     nom: f.nombre || f.ig, ig: f.ig, estado: f.estado, nivel: f.nivel,
+    pideHumana: f.pideHumana || null, quiereOtro: f.quiereOtro || null,
     views: f.views, ventas: f.ventas, monto: f.facturado, bono: f.bono,
   }));
 
@@ -1034,6 +1035,7 @@ function pintarResumen(){
     <div class="bloque">
       <h2>Qué necesita atención</h2>
       <p class="n2">Ordenado por urgencia.</p>
+      ${(() => { const n = (CREADORAS||[]).filter(c => c.pideHumana).length; return n ? `<div class="alerta urg"><b>${n}</b> pidieron hablar con alguien desde el bot — escribirles hoy por Instagram (están marcadas en Creadoras)</div>` : ''; })()}
       ${m.vencidas ? `<div class="alerta urg"><b>${m.vencidas}</b> vencidas sin publicar — dar de baja</div>` : ''}
       ${m.sinRecibir ? `<div class="alerta urg"><b>${m.sinRecibir}</b> despachadas hace más de 10 días y nunca confirmaron que llegó — revisar con el correo</div>` : ''}
       ${m.vencenEn2Dias ? `<div class="alerta med"><b>${m.vencenEn2Dias}</b> vencen en 2 días — el recordatorio ya salió solo</div>` : ''}
@@ -1103,7 +1105,7 @@ function pintarCreadoras(){
         const [et,cl] = ETIQUETA[c.estado] || [c.estado,''];
         return `<tr>
           <td><b>${c.nom}</b><span class="n2">@${c.ig}${c.reel ? ` · <a href="${c.reel}" target="_blank" rel="noopener" class="verreel">ver reel</a>` : ''}</span></td>
-          <td><span class="pill ${cl}">${et}</span>${c.bono?'<span class="pill ok" style="margin-left:4px">bono</span>':''}</td>
+          <td><span class="pill ${cl}">${et}</span>${c.bono?'<span class="pill ok" style="margin-left:4px">bono</span>':''}${c.pideHumana?'<span class="pill no" style="margin-left:4px" title="Tocó “Hablar con alguien” en el bot">pide hablar</span>':''}${c.quiereOtro?'<span class="pill" style="margin-left:4px">quiere otro kit</span>':''}</td>
           <td class="num">${c.views ? c.views.toLocaleString('es-AR') : '—'}</td>
           <td class="num">${c.ventas || '—'}</td>
           <td class="num">${c.monto ? pesos(com(c)) : '—'}</td>
