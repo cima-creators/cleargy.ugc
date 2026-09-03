@@ -533,6 +533,17 @@ const NOMBRE_TONO = {
   'rojo-love':'Rojo love','pasion':'Pasión','rubi':'Rubí','negro':'Negro'
 };
 
+function ENVIOS_desde(env){
+  ENVIOS = env.fichas.map(f => ({
+    id: f.id, nom: (f.datos && f.datos.nombre) || f.ig, ig: f.ig,
+    dir: f.datos ? `${f.datos.calle}${f.datos.piso ? ', ' + f.datos.piso : ''}` : '—',
+    loc: f.datos ? `${f.datos.localidad} · ${f.datos.provincia}` : '—',
+    cp: (f.datos && f.datos.cp) || '—',
+    tonos: ((f.datos && f.datos.tonos) || []).map(t => NOMBRE_TONO[t] || t).join(' · '),
+    estado: f.estado === 'enviado' ? 'despachado' : 'listo',
+  }));
+}
+
 /* Trae todo del backend y lo vuelca en las mismas estructuras que
    usan las pantallas — así el render no distingue demo de real. */
 async function cargar(){
@@ -557,14 +568,7 @@ async function cargar(){
   }));
   total = APLICANTES.length; i = 0;
 
-  ENVIOS = env.fichas.map(f => ({
-    id: f.id, nom: (f.datos && f.datos.nombre) || f.ig, ig: f.ig,
-    dir: f.datos ? `${f.datos.calle}${f.datos.piso ? ', ' + f.datos.piso : ''}` : '—',
-    loc: f.datos ? `${f.datos.localidad} · ${f.datos.provincia}` : '—',
-    cp: (f.datos && f.datos.cp) || '—',
-    tonos: ((f.datos && f.datos.tonos) || []).map(t => NOMBRE_TONO[t] || t).join(' · '),
-    estado: f.estado === 'enviado' ? 'despachado' : 'listo',
-  }));
+  ENVIOS_desde(env);
 
   ENTREGAS = ent.fichas.map(f => ({
     id: f.id, nom: (f.datos && f.datos.nombre) || f.ig, ig: f.ig,
@@ -578,6 +582,8 @@ async function cargar(){
   CREADORAS = todas.fichas.map(f => ({
     nom: f.nombre || f.ig, ig: f.ig, estado: f.estado, nivel: f.nivel,
     pideHumana: f.pideHumana || null, quiereOtro: f.quiereOtro || null,
+    id: f.id, seguidores: f.seguidores ?? null, posts90: f.posts90 ?? null, vistas: f.vistas ?? null,
+    motivo: f.motivo || null, unas: f.unas || null, manychatId: f.manychatId || null,
     views: f.views, ventas: f.ventas, monto: f.facturado, bono: f.bono,
   }));
 
@@ -1069,7 +1075,17 @@ function pintarResumen(){
 /* ── creadoras ── */
 const ETIQUETA = {
   cumplida:['Cumplida','ok'], publicado:['Publicada','esp'], enviado:['Kit en camino',''],
-  recibido:['Grabando',''], vencida:['Vencida','no'], invitada:['Sin ficha','']
+  recibido:['Grabando',''], vencida:['Vencida','no'], invitada:['Aceptada · sin ficha','esp'],
+  ficha_completa:['Ficha completa',''], briefing_ok:['En lista de envío',''],
+  iniciada:['No terminó de aplicar',''], enviada:['Aplicó · midiendo',''], en_cola:['En cola',''],
+  revisar:['A revisar','esp'], por_revisar:['A revisar','esp'],
+  descartada:['Descartada por filtro','no'], rechazada:['Rechazada','no'],
+};
+const MOTIVO = {
+  unas:'uñas no naturales', privada:'cuenta privada', pocos_seguidores:'menos de 1.000 seguidores',
+  poco_activa:'menos de 10 posts en 90 días', poco_activa_pero_llega:'postea poco pero llega bien',
+  pocos_reels:'menos de 3 reels medidos', pocas_views:'menos de 1.000 views por reel',
+  sin_datos:'Apify no pudo medir', posible_inflada:'views muy bajas para sus seguidores', tel_repetido:'teléfono repetido',
 };
 let ordenCre = 'views', ascCre = false;
 
@@ -1098,30 +1114,37 @@ function pintarCreadoras(){
     : `<table>
       <thead><tr>
         ${th('nom','Creadora')}${th('estado','Estado')}
-        ${th('views','Views','num')}${th('ventas','Ventas','num')}
-        ${th('monto','Comisión','num')}${th('nivel','Nivel','num')}
+        ${th('seguidores','Seguidores','num')}${th('posts90','Posts 90d','num')}${th('vistas','Views/reel','num')}
+        ${th('unas','Uñas')}${th('views','Views collab','num')}${th('ventas','Ventas','num')}
+        ${th('monto','Comisión','num')}
       </tr></thead>
       <tbody>${lista.map(c => {
         const [et,cl] = ETIQUETA[c.estado] || [c.estado,''];
         return `<tr>
-          <td><b>${c.nom}</b><span class="n2">@${c.ig}${c.reel ? ` · <a href="${c.reel}" target="_blank" rel="noopener" class="verreel">ver reel</a>` : ''}</span></td>
-          <td><span class="pill ${cl}">${et}</span>${c.bono?'<span class="pill ok" style="margin-left:4px">bono</span>':''}${c.pideHumana?'<span class="pill no" style="margin-left:4px" title="Tocó “Hablar con alguien” en el bot">pide hablar</span>':''}${c.quiereOtro?'<span class="pill" style="margin-left:4px">quiere otro kit</span>':''}</td>
+          <td><b>${c.nom}</b><span class="n2"><a href="https://instagram.com/${c.ig}" target="_blank" rel="noopener" class="verreel">@${c.ig}</a>${c.reel ? ` · <a href="${c.reel}" target="_blank" rel="noopener" class="verreel">ver reel</a>` : ''}</span></td>
+          <td><span class="pill ${cl}">${et}</span>${c.motivo?`<span class="n2" title="Motivo del filtro automático">${MOTIVO[c.motivo]||c.motivo}</span>`:''}${c.bono?'<span class="pill ok" style="margin-left:4px">bono</span>':''}${c.pideHumana?'<span class="pill no" style="margin-left:4px" title="Tocó “Hablar con alguien” en el bot">pide hablar</span>':''}${c.quiereOtro?'<span class="pill" style="margin-left:4px">quiere otro kit</span>':''}${['invitada','ficha_completa','briefing_ok'].includes(c.estado)&&c.id?`<button class="mini copiar" data-link="https://cima-creators.github.io/cleargy.ugc/miluz-canje.html?t=${c.id}" title="${c.manychatId?'El DM salió solo; por si acaso':'No tiene DM automático: mandáselo por Instagram'}">${c.manychatId?'copiar link':'⚠ mandar link a mano'}</button>`:''}</td>
+          <td class="num">${c.seguidores!=null ? c.seguidores.toLocaleString('es-AR') : '—'}</td>
+          <td class="num">${c.posts90!=null ? c.posts90 : '—'}</td>
+          <td class="num">${c.vistas!=null ? c.vistas.toLocaleString('es-AR') : '—'}</td>
+          <td>${c.unas ? ({naturales:'Naturales',esculpidas:'Esculpidas',semi:'Semi',otras:'Otras'}[c.unas]||c.unas) : '—'}</td>
           <td class="num">${c.views ? c.views.toLocaleString('es-AR') : '—'}</td>
           <td class="num">${c.ventas || '—'}</td>
           <td class="num">${c.monto ? pesos(com(c)) : '—'}</td>
-          <td class="num">${c.nivel}</td>
         </tr>`;}).join('')}
       </tbody>
       <tfoot><tr>
         <td><b>${lista.length} creadoras</b></td>
         <td>${tot.bonos} con bono</td>
+        <td></td><td></td><td></td><td></td>
         <td class="num"><b>${tot.views.toLocaleString('es-AR')}</b></td>
         <td class="num"><b>${tot.ventas}</b></td>
         <td class="num"><b>${pesos(tot.com)}</b></td>
-        <td></td>
       </tr></tfoot>
     </table>`;
 
+  document.querySelectorAll('#tabla-creadoras .copiar').forEach(b => b.onclick = () => {
+    navigator.clipboard.writeText(b.dataset.link).then(() => { b.textContent = 'copiado ✓'; setTimeout(() => pintarCreadoras(), 1500); });
+  });
   document.querySelectorAll('#tabla-creadoras .orden').forEach(h => h.onclick = () => {
     const c = h.dataset.o;
     if (c === ordenCre) ascCre = !ascCre; else { ordenCre = c; ascCre = (c === 'nom'); }
@@ -1207,6 +1230,14 @@ function pintarTodo(){
   if (!CLAVE){
     CLAVE = (prompt('Clave del panel:') || '').trim();
     _ss.set('canje_clave', CLAVE);
+  }
+  if (CLAVE === 'miluz-envios-2026'){
+    // logistica: solo Envios
+    document.querySelectorAll('.lat button[data-t]').forEach(b => { if (b.dataset.t !== 'envios') b.remove(); });
+    VISTAS.forEach(t => $('#t-'+t).classList.toggle('oculto', t !== 'envios'));
+    try { const env = await api('envios'); ENVIOS_desde(env); pintarEnvios(); }
+    catch (e) { _ss.del('canje_clave'); alert('Clave incorrecta o sin permiso.'); location.reload(); }
+    return;
   }
   try { await cargar(); pintarTodo(); }
   catch (e) {
