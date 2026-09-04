@@ -819,6 +819,14 @@ function decidir(qué, motivo){
   if (!DEMO && ficha.id){
     const mapa = { aceptada:'aceptar', despues:'despues', rechazada:'rechazar' };
     api('decidir', { id: ficha.id, decision: mapa[qué], motivo })
+      .then(r => {
+        // Si no hay DM automático (ManyChat no nos dio su ID), el link se manda a mano.
+        if (r && r.link && r.enviado === false){
+          navigator.clipboard?.writeText(r.link).catch(() => {});
+          alert('Aceptada, pero el DM automático NO salió (Instagram no nos dio su ID).\n\n' +
+                'Su link ya quedó copiado — mandáselo por Instagram a @' + ficha.ig + ':\n' + r.link);
+        }
+      })
       .catch(() => alert('No se pudo guardar la decisión de @' + ficha.ig + '. Reintentá.'));
   }
   i++;
