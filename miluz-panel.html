@@ -829,7 +829,7 @@ function decidir(qué, motivo){
     api('decidir', { id: ficha.id, decision: mapa[qué], motivo })
       .then(r => {
         // Si no hay DM automático (ManyChat no nos dio su ID), el link se manda a mano.
-        if (r && r.link && r.enviado === false){
+        if (r && r.link && r.enviado === false && !r.yaAvisada){
           navigator.clipboard?.writeText(r.link).catch(() => {});
           alert('Aceptada, pero el DM automático NO salió (Instagram no nos dio su ID).\n\n' +
                 'Su link ya quedó copiado — mandáselo por Instagram a @' + ficha.ig + ':\n' + r.link);
