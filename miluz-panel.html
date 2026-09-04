@@ -413,6 +413,7 @@ tfoot td{background:var(--arena);font-weight:700;color:var(--tinta);border-top:1
   .barrasup{gap:7px}
   .bsec{padding:11px 13px;font-size:.8rem;flex:1}
 }
+.fcre.activo{background:var(--tx,#111);color:#fff;border-color:var(--tx,#111)} .fcre .n{margin-left:4px;font-weight:700}
 </style>
 </head>
 <body>
@@ -482,6 +483,12 @@ tfoot td{background:var(--arena);font-weight:700;color:var(--tinta);border-top:1
     <div class="barrasup">
       <input class="buscar" id="buscar" type="search" placeholder="Buscar…" autocomplete="off">
       <button class="bsec" id="btn-csv-cre">Exportar</button>
+    </div>
+    <div class="barrasup" id="filtro-cre" style="gap:6px;flex-wrap:wrap">
+      <button class="bsec fcre activo" data-f="todas">Todas</button>
+      <button class="bsec fcre" data-f="mano">⚠ Mandar link a mano <span class="n" id="n-mano">0</span></button>
+      <button class="bsec fcre" data-f="aceptadas">Aceptadas</button>
+      <button class="bsec fcre" data-f="revisar">Para revisar</button>
     </div>
     <div id="tabla-creadoras"></div>
   </section>
@@ -584,6 +591,7 @@ async function cargar(){
     pideHumana: f.pideHumana || null, quiereOtro: f.quiereOtro || null,
     id: f.id, seguidores: f.seguidores ?? null, posts90: f.posts90 ?? null, vistas: f.vistas ?? null,
     motivo: f.motivo || null, unas: f.unas || null, manychatId: f.manychatId || null,
+    avisadaEn: f.avisadaEn || null, avisadaManual: !!f.avisadaManual, decididaEn: f.decididaEn || null,
     views: f.views, ventas: f.ventas, monto: f.facturado, bono: f.bono,
   }));
 
@@ -1049,6 +1057,7 @@ function pintarResumen(){
     <div class="bloque">
       <h2>Qué necesita atención</h2>
       <p class="n2">Ordenado por urgencia.</p>
+      ${(() => { const n = (CREADORAS||[]).filter(c => c.estado === 'invitada' && !c.avisadaEn).length; return n ? `<div class="alerta urg"><b>${n}</b> aceptadas sin DM automático — mandarles el link a mano (Creadoras → “Mandar link a mano”)</div>` : ''; })()}
       ${(() => { const n = (CREADORAS||[]).filter(c => c.pideHumana).length; return n ? `<div class="alerta urg"><b>${n}</b> pidieron hablar con alguien desde el bot — escribirles hoy por Instagram (están marcadas en Creadoras)</div>` : ''; })()}
       ${m.vencidas ? `<div class="alerta urg"><b>${m.vencidas}</b> vencidas sin publicar — dar de baja</div>` : ''}
       ${m.sinRecibir ? `<div class="alerta urg"><b>${m.sinRecibir}</b> despachadas hace más de 10 días y nunca confirmaron que llegó — revisar con el correo</div>` : ''}
@@ -1096,10 +1105,27 @@ const MOTIVO = {
   sin_datos:'Apify no pudo medir', posible_inflada:'views muy bajas para sus seguidores', tel_repetido:'teléfono repetido',
 };
 let ordenCre = 'views', ascCre = false;
+let filtroCre = 'todas';
+document.addEventListener('click', e => {
+  const b = e.target.closest('.fcre'); if (!b) return;
+  filtroCre = b.dataset.f;
+  document.querySelectorAll('.fcre').forEach(x => x.classList.toggle('activo', x === b));
+  pintarCreadoras();
+});
 
 function pintarCreadoras(){
   const q = ($('#buscar')?.value || '').trim().toLowerCase();
+  const PREVIAS = ['iniciada','enviada','en_cola','revisar','por_revisar','descartada','rechazada'];
+  const SIN_AVISO = c => c.estado === 'invitada' && !c.avisadaEn;
+  const pasaFiltro = c =>
+    filtroCre === 'mano'      ? SIN_AVISO(c)
+    : filtroCre === 'aceptadas' ? !PREVIAS.includes(c.estado)
+    : filtroCre === 'revisar'   ? ['revisar','por_revisar','en_cola'].includes(c.estado)
+    : true;
+  const nMano = CREADORAS.filter(SIN_AVISO).length;
+  const nm = $('#n-mano'); if (nm) nm.textContent = nMano;
   const lista = CREADORAS
+    .filter(pasaFiltro)
     .filter(c => !q || c.nom.toLowerCase().includes(q) || c.ig.toLowerCase().includes(q))
     .sort((a,b) => {
       const x = a[ordenCre], y = b[ordenCre];
@@ -1130,7 +1156,10 @@ function pintarCreadoras(){
         const [et,cl] = ETIQUETA[c.estado] || [c.estado,''];
         return `<tr>
           <td><b>${c.nom}</b><span class="n2"><a href="https://instagram.com/${c.ig}" target="_blank" rel="noopener" class="verreel">@${c.ig}</a>${c.reel ? ` · <a href="${c.reel}" target="_blank" rel="noopener" class="verreel">ver reel</a>` : ''}</span></td>
-          <td><span class="pill ${cl}">${et}</span>${c.motivo?`<span class="n2" title="Motivo del filtro automático">${MOTIVO[c.motivo]||c.motivo}</span>`:''}${c.bono?'<span class="pill ok" style="margin-left:4px">bono</span>':''}${c.pideHumana?'<span class="pill no" style="margin-left:4px" title="Tocó “Hablar con alguien” en el bot">pide hablar</span>':''}${c.quiereOtro?'<span class="pill" style="margin-left:4px">quiere otro kit</span>':''}${['invitada','ficha_completa','briefing_ok'].includes(c.estado)&&c.id?`<button class="mini copiar" data-link="https://cima-creators.github.io/cleargy.ugc/miluz-canje.html?t=${c.id}" title="${c.manychatId?'El DM salió solo; por si acaso':'No tiene DM automático: mandáselo por Instagram'}">${c.manychatId?'copiar link':'⚠ mandar link a mano'}</button>`:''}</td>
+          <td><span class="pill ${cl}">${et}</span>${c.motivo?`<span class="n2" title="Motivo del filtro automático">${MOTIVO[c.motivo]||c.motivo}</span>`:''}${c.bono?'<span class="pill ok" style="margin-left:4px">bono</span>':''}${c.pideHumana?'<span class="pill no" style="margin-left:4px" title="Tocó “Hablar con alguien” en el bot">pide hablar</span>':''}${c.quiereOtro?'<span class="pill" style="margin-left:4px">quiere otro kit</span>':''}${c.estado==='invitada'&&c.id?(c.avisadaEn
+  ? `<span class="pill ok" style="margin-left:4px" title="${c.avisadaManual?'Vane le mandó el link a mano':'El DM de aceptación salió solo'}">${c.avisadaManual?'link a mano ✓':'DM enviado ✓'}</span><button class="mini copiar" data-link="https://cima-creators.github.io/cleargy.ugc/miluz-canje.html?t=${c.id}">copiar link</button>`
+  : `<button class="mini copiar" data-link="https://cima-creators.github.io/cleargy.ugc/miluz-canje.html?t=${c.id}" title="No le llegó el DM automático (hace más de 24 h que no escribe): copiá el link y mandáselo por Instagram desde @miluz.arg">⚠ mandar link a mano</button><button class="mini yamande" data-id="${c.id}" title="Marcar que ya se lo mandaste">✓ ya se lo mandé</button>`)
+  :(['ficha_completa','briefing_ok'].includes(c.estado)&&c.id?`<button class="mini copiar" data-link="https://cima-creators.github.io/cleargy.ugc/miluz-canje.html?t=${c.id}">copiar link</button>`:'')}</td>
           <td class="num">${c.seguidores!=null ? c.seguidores.toLocaleString('es-AR') : '—'}</td>
           <td class="num">${c.posts90!=null ? c.posts90 : '—'}</td>
           <td class="num">${c.vistas!=null ? c.vistas.toLocaleString('es-AR') : '—'}</td>
@@ -1152,6 +1181,14 @@ function pintarCreadoras(){
 
   document.querySelectorAll('#tabla-creadoras .copiar').forEach(b => b.onclick = () => {
     navigator.clipboard.writeText(b.dataset.link).then(() => { b.textContent = 'copiado ✓'; setTimeout(() => pintarCreadoras(), 1500); });
+  });
+  document.querySelectorAll('#tabla-creadoras .yamande').forEach(b => b.onclick = async () => {
+    b.disabled = true; b.textContent = '…';
+    try {
+      await api('avisada', { id: b.dataset.id });
+      const c = CREADORAS.find(x => x.id === b.dataset.id); if (c) { c.avisadaEn = Date.now(); c.avisadaManual = true; }
+      pintarCreadoras();
+    } catch (e) { alert('No se pudo marcar: ' + e.message); b.disabled = false; b.textContent = '✓ ya se lo mandé'; }
   });
   document.querySelectorAll('#tabla-creadoras .orden').forEach(h => h.onclick = () => {
     const c = h.dataset.o;
@@ -1255,7 +1292,7 @@ function pintarTodo(){
     pintarTodo();
   }
 })();
-const APP_VERSION = '2026-08-26-b';
+const APP_VERSION = '2026-09-04-a';
 </script>
 </body>
 </html>
