@@ -413,6 +413,11 @@ tfoot td{background:var(--arena);font-weight:700;color:var(--tinta);border-top:1
   .barrasup{gap:7px}
   .bsec{padding:11px 13px;font-size:.8rem;flex:1}
 }
+.pill{white-space:nowrap}
+td.acciones{white-space:nowrap}
+td.acciones .mini{display:inline-block;margin:0 0 0 6px;padding:4px 9px;border-radius:99px;border:1px solid var(--linea,#e5dfd6);background:#fff;font:inherit;font-size:.8rem;color:var(--tx,#111);text-decoration:none;cursor:pointer;vertical-align:middle}
+td.acciones .mini:hover{background:var(--beige,#f3ede6)}
+td.acciones .pill{vertical-align:middle}
 .fcre.activo{background:var(--tx,#111);color:#fff;border-color:var(--tx,#111)} .fcre .n{margin-left:4px;font-weight:700}
 </style>
 </head>
@@ -834,13 +839,13 @@ function decidir(qué, motivo){
       .then(r => {
         // Si no hay DM automático (ManyChat no nos dio su ID), el link se manda a mano.
         if (r && r.link && r.enviado === false && !r.yaAvisada){
-          navigator.clipboard?.writeText(r.link).catch(() => {});
+          navigator.clipboard?.writeText(mensajeAceptada(ficha.nom, r.link)).catch(() => {});
           const porque = r.motivo === 'ventana'
             ? 'hace más de 24 h que no le escribe al bot y Instagram bloquea el DM'
             : 'nunca interactuó con el bot, no tenemos su ID de Instagram';
-          const wa = waLink(r.tel, (ficha.nombre || '').split(' ')[0], r.link);
+          const wa = waLink(r.tel, ficha.nom, r.link);
           const ir = confirm('Aceptada, pero el DM automático NO salió: ' + porque + '.\n\n' +
-                'Su link ya quedó copiado. Mandáselo a mano a @' + ficha.ig +
+                'El mensaje con su link ya quedó copiado. Pegáselo por Instagram a @' + ficha.ig +
                 (wa ? '\n\n¿Abrir WhatsApp con el mensaje armado? (Cancelar = lo mandás por Instagram)' : ''));
           if (ir && wa) window.open(wa, '_blank');
         }
@@ -1100,13 +1105,19 @@ function pintarResumen(){
 }
 
 /* ── WhatsApp: link con el mensaje armado (números argentinos) ── */
+const LINK_APP = id => 'https://cima-creators.github.io/cleargy.ugc/miluz-canje.html?t=' + id;
+function mensajeAceptada(nombre, link){
+  const n = (nombre || '').trim().split(' ')[0];
+  return `¡Hola${n ? ' ' + n : ''}! 💛 Te escribimos de MiLuz: ¡quedaste aprobada para el equipo de creadoras! 🎉\n\n` +
+    `Para armarte el kit necesitamos que completes tus datos (dirección y los tonos que querés). Son 2 minutos, entrá acá:\n${link}\n\n` +
+    `Cualquier duda, respondé este mensaje.`;
+}
 function waLink(tel, nombre, link){
   let d = String(tel || '').replace(/\D/g, '');
   if (!d) return null;
   if (d.startsWith('549')) {} else if (d.startsWith('54')) d = '549' + d.slice(2);
   else { if (d.startsWith('0')) d = d.slice(1); d = d.replace(/^(\d{2,4})15/, '$1'); d = '549' + d; }
-  const msg = `¡Hola ${nombre || ''}! Soy del equipo de MiLuz 💛 ¡Entraste al equipo de creadoras! 🎉 Completá tus datos acá y armamos tu kit, son 2 minutos: ${link}`;
-  return `https://wa.me/${d}?text=${encodeURIComponent(msg)}`;
+  return `https://wa.me/${d}?text=${encodeURIComponent(mensajeAceptada(nombre, link))}`;
 }
 
 /* ── creadoras ── */
@@ -1177,16 +1188,13 @@ function pintarCreadoras(){
         ${th('nom','Creadora')}${th('estado','Estado')}
         ${th('seguidores','Seguidores','num')}${th('posts90','Posts 90d','num')}${th('vistas','Views/reel','num')}
         ${th('unas','Uñas')}${th('views','Views collab','num')}${th('ventas','Ventas','num')}
-        ${th('monto','Comisión','num')}
+        ${th('monto','Comisión','num')}<th>DM</th>
       </tr></thead>
       <tbody>${lista.map(c => {
         const [et,cl] = ETIQUETA[c.estado] || [c.estado,''];
         return `<tr>
           <td><b>${c.nom}</b><span class="n2"><a href="https://instagram.com/${c.ig}" target="_blank" rel="noopener" class="verreel">@${c.ig}</a>${c.reel ? ` · <a href="${c.reel}" target="_blank" rel="noopener" class="verreel">ver reel</a>` : ''}</span></td>
-          <td><span class="pill ${cl}">${et}</span>${c.motivo?`<span class="n2" title="Motivo del filtro automático">${MOTIVO[c.motivo]||c.motivo}</span>`:''}${c.bono?'<span class="pill ok" style="margin-left:4px">bono</span>':''}${c.pideHumana?'<span class="pill no" style="margin-left:4px" title="Tocó “Hablar con alguien” en el bot">pide hablar</span>':''}${c.quiereOtro?'<span class="pill" style="margin-left:4px">quiere otro kit</span>':''}${c.estado==='invitada'&&c.id?(c.avisadaEn
-  ? `<span class="pill ok" style="margin-left:4px" title="${c.avisadaManual?'Vane le mandó el link a mano':'El DM de aceptación salió solo'}">${c.avisadaManual?'link a mano ✓':'DM enviado ✓'}</span><button class="mini copiar" data-link="https://cima-creators.github.io/cleargy.ugc/miluz-canje.html?t=${c.id}">copiar link</button>`
-  : `<button class="mini copiar" data-link="https://cima-creators.github.io/cleargy.ugc/miluz-canje.html?t=${c.id}" title="No le llegó el DM automático (hace más de 24 h que no escribe): copiá el link y mandáselo por Instagram desde @miluz.arg">⚠ mandar link a mano</button>${c.tel?`<a class="mini" style="text-decoration:none" target="_blank" href="${waLink(c.tel, (c.nom||'').split(' ')[0], 'https://cima-creators.github.io/cleargy.ugc/miluz-canje.html?t='+c.id)}" title="Abre WhatsApp con el mensaje y el link ya escritos">📲 WhatsApp</a>`:''}<button class="mini yamande" data-id="${c.id}" title="Marcar que ya se lo mandaste">✓ ya se lo mandé</button>`)
-  :(['ficha_completa','briefing_ok'].includes(c.estado)&&c.id?`<button class="mini copiar" data-link="https://cima-creators.github.io/cleargy.ugc/miluz-canje.html?t=${c.id}">copiar link</button>`:'')}</td>
+          <td><span class="pill ${cl}">${et}</span>${c.motivo?`<span class="n2" title="Motivo del filtro automático">${MOTIVO[c.motivo]||c.motivo}</span>`:''}${c.bono?'<span class="pill ok" style="margin-left:4px">bono</span>':''}${c.pideHumana?'<span class="pill no" style="margin-left:4px" title="Tocó “Hablar con alguien” en el bot">pide hablar</span>':''}${c.quiereOtro?'<span class="pill" style="margin-left:4px">quiere otro kit</span>':''}</td>
           <td class="num">${c.seguidores!=null ? c.seguidores.toLocaleString('es-AR') : '—'}</td>
           <td class="num">${c.posts90!=null ? c.posts90 : '—'}</td>
           <td class="num">${c.vistas!=null ? c.vistas.toLocaleString('es-AR') : '—'}</td>
@@ -1194,7 +1202,10 @@ function pintarCreadoras(){
           <td class="num">${c.views ? c.views.toLocaleString('es-AR') : '—'}</td>
           <td class="num">${c.ventas || '—'}</td>
           <td class="num">${c.monto ? pesos(com(c)) : '—'}</td>
-        </tr>`;}).join('')}
+        <td class="acciones">${c.estado==='invitada'&&c.id ? (c.avisadaEn
+            ? `<span class="pill ok" title="${c.avisadaManual?'Se le mandó el link a mano':'El DM de aceptación salió solo'}">${c.avisadaManual?'a mano ✓':'DM ✓'}</span><button class="mini copiar" data-id="${c.id}" data-nom="${(c.nom||'').replace(/"/g,'')}">copiar</button>`
+            : `<span class="pill no" title="No le llegó el DM automático: hace más de 24 h que no interactúa con el bot">sin DM</span><button class="mini copiar" data-id="${c.id}" data-nom="${(c.nom||'').replace(/"/g,'')}" title="Copia el mensaje completo con su link para pegarlo por Instagram">copiar msj</button>${c.tel?`<a class="mini" target="_blank" href="${waLink(c.tel, c.nom, LINK_APP(c.id))}" title="Abre WhatsApp con el mensaje armado">WhatsApp</a>`:''}<button class="mini yamande" data-id="${c.id}" title="Marcar que ya se lo mandaste">listo ✓</button>`)
+          : (['ficha_completa','briefing_ok'].includes(c.estado)&&c.id ? `<button class="mini copiar" data-id="${c.id}" data-nom="${(c.nom||'').replace(/"/g,'')}">copiar</button>` : '')}</td></tr>`;}).join('')}
       </tbody>
       <tfoot><tr>
         <td><b>${lista.length} creadoras</b></td>
@@ -1202,12 +1213,12 @@ function pintarCreadoras(){
         <td></td><td></td><td></td><td></td>
         <td class="num"><b>${tot.views.toLocaleString('es-AR')}</b></td>
         <td class="num"><b>${tot.ventas}</b></td>
-        <td class="num"><b>${pesos(tot.com)}</b></td>
+        <td class="num"><b>${pesos(tot.com)}</b></td><td></td>
       </tr></tfoot>
     </table>`;
 
   document.querySelectorAll('#tabla-creadoras .copiar').forEach(b => b.onclick = () => {
-    navigator.clipboard.writeText(b.dataset.link).then(() => { b.textContent = 'copiado ✓'; setTimeout(() => pintarCreadoras(), 1500); });
+    navigator.clipboard.writeText(mensajeAceptada(b.dataset.nom, LINK_APP(b.dataset.id))).then(() => { b.textContent = 'copiado ✓'; setTimeout(() => pintarCreadoras(), 1500); });
   });
   document.querySelectorAll('#tabla-creadoras .yamande').forEach(b => b.onclick = async () => {
     b.disabled = true; b.textContent = '…';
@@ -1319,7 +1330,7 @@ function pintarTodo(){
     pintarTodo();
   }
 })();
-const APP_VERSION = '2026-09-05-b';
+const APP_VERSION = '2026-09-05-c';
 </script>
 </body>
 </html>
