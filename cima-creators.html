@@ -867,6 +867,23 @@ const BRAND_CONFIGS = {
       creadora2:{name:'Ale',pass:'pure2',avatar:'AL',color:'#E03428'},
     }
   },
+  menlab: {
+    border:'#d6d6d6', muted2:'#b5b5b5',
+    name:'MenLab', logoText:'MENLAB', defaultCampaignStart:'2026-09-08', sub:'Creators Hub',
+    logoImg:'data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="320" height="104"><rect width="320" height="104" rx="12" fill="%23000000"/><text x="160" y="70" font-family="Arial Black,Arial,sans-serif" font-size="46" font-weight="900" font-style="italic" fill="%23FFFFFF" text-anchor="middle" letter-spacing="-1">MenLab</text></svg>',
+    collection:'menlab', no100k:true, noRacha:true, bgDark:'#d9d9d9',
+    cats:['Review / testimonio','Rutina / uso','Antes y después','Beneficios','Trend / challenge','Otro'],
+    accent:'#111111', accentLight:'#3a3a3a', bg:'#f4f4f4', surface2:'#e9e9e9', surface3:'#dedede',
+    text:'#111111', muted:'#6b6b6b', shadow:'17,17,17',
+    goal: 200, dailyVideos:2, videoGoal:50, salary:370000, minVideos:50,
+    storeUrl:'',
+    creators:{
+      creadora1:{name:'Creador 1',pass:'menlab1',avatar:'C1',color:'#111111'},
+      creadora2:{name:'Creador 2',pass:'menlab2',avatar:'C2',color:'#3a3a3a'},
+      creadora3:{name:'Creador 3',pass:'menlab3',avatar:'C3',color:'#5c5c5c'},
+      creadora4:{name:'Creador 4',pass:'menlab4',avatar:'C4',color:'#7e7e7e'},
+    }
+  },
   silq: {
     border:'#e0dbd2', muted2:'#c2b9ac',
     name:'SILQ', logoText:'SILQ', defaultCampaignStart:'2026-08-29', sub:'Creators Hub',
@@ -2473,7 +2490,7 @@ loadData();
 <!-- Auto-actualización: GitHub Pages cachea el HTML y los celulares lo retienen mucho más.
      Esto compara la versión publicada con la que está corriendo y refresca sola. -->
 <script>
-const APP_VERSION = '2026-09-01-d';
+const APP_VERSION = '2026-09-05-a';
 (function(){
   var CLAVE='cima_ver_reload';
   function hayAlguienEscribiendo(){
