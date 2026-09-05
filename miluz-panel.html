@@ -595,6 +595,7 @@ async function cargar(){
     id: f.id, seguidores: f.seguidores ?? null, posts90: f.posts90 ?? null, vistas: f.vistas ?? null,
     motivo: f.motivo || null, unas: f.unas || null, manychatId: f.manychatId || null,
     avisadaEn: f.avisadaEn || null, avisadaManual: !!f.avisadaManual, decididaEn: f.decididaEn || null,
+    tel: f.tel || null,
     views: f.views, ventas: f.ventas, monto: f.facturado, bono: f.bono,
   }));
 
@@ -834,8 +835,14 @@ function decidir(qué, motivo){
         // Si no hay DM automático (ManyChat no nos dio su ID), el link se manda a mano.
         if (r && r.link && r.enviado === false && !r.yaAvisada){
           navigator.clipboard?.writeText(r.link).catch(() => {});
-          alert('Aceptada, pero el DM automático NO salió (Instagram no nos dio su ID).\n\n' +
-                'Su link ya quedó copiado — mandáselo por Instagram a @' + ficha.ig + ':\n' + r.link);
+          const porque = r.motivo === 'ventana'
+            ? 'hace más de 24 h que no le escribe al bot y Instagram bloquea el DM'
+            : 'nunca interactuó con el bot, no tenemos su ID de Instagram';
+          const wa = waLink(r.tel, (ficha.nombre || '').split(' ')[0], r.link);
+          const ir = confirm('Aceptada, pero el DM automático NO salió: ' + porque + '.\n\n' +
+                'Su link ya quedó copiado. Mandáselo a mano a @' + ficha.ig +
+                (wa ? '\n\n¿Abrir WhatsApp con el mensaje armado? (Cancelar = lo mandás por Instagram)' : ''));
+          if (ir && wa) window.open(wa, '_blank');
         }
       })
       .catch(() => alert('No se pudo guardar la decisión de @' + ficha.ig + '. Reintentá.'));
@@ -1092,6 +1099,16 @@ function pintarResumen(){
     </div>`;
 }
 
+/* ── WhatsApp: link con el mensaje armado (números argentinos) ── */
+function waLink(tel, nombre, link){
+  let d = String(tel || '').replace(/\D/g, '');
+  if (!d) return null;
+  if (d.startsWith('549')) {} else if (d.startsWith('54')) d = '549' + d.slice(2);
+  else { if (d.startsWith('0')) d = d.slice(1); d = d.replace(/^(\d{2,4})15/, '$1'); d = '549' + d; }
+  const msg = `¡Hola ${nombre || ''}! Soy del equipo de MiLuz 💛 ¡Entraste al equipo de creadoras! 🎉 Completá tus datos acá y armamos tu kit, son 2 minutos: ${link}`;
+  return `https://wa.me/${d}?text=${encodeURIComponent(msg)}`;
+}
+
 /* ── creadoras ── */
 const ETIQUETA = {
   cumplida:['Cumplida','ok'], publicado:['Publicada','esp'], enviado:['Kit en camino',''],
@@ -1168,7 +1185,7 @@ function pintarCreadoras(){
           <td><b>${c.nom}</b><span class="n2"><a href="https://instagram.com/${c.ig}" target="_blank" rel="noopener" class="verreel">@${c.ig}</a>${c.reel ? ` · <a href="${c.reel}" target="_blank" rel="noopener" class="verreel">ver reel</a>` : ''}</span></td>
           <td><span class="pill ${cl}">${et}</span>${c.motivo?`<span class="n2" title="Motivo del filtro automático">${MOTIVO[c.motivo]||c.motivo}</span>`:''}${c.bono?'<span class="pill ok" style="margin-left:4px">bono</span>':''}${c.pideHumana?'<span class="pill no" style="margin-left:4px" title="Tocó “Hablar con alguien” en el bot">pide hablar</span>':''}${c.quiereOtro?'<span class="pill" style="margin-left:4px">quiere otro kit</span>':''}${c.estado==='invitada'&&c.id?(c.avisadaEn
   ? `<span class="pill ok" style="margin-left:4px" title="${c.avisadaManual?'Vane le mandó el link a mano':'El DM de aceptación salió solo'}">${c.avisadaManual?'link a mano ✓':'DM enviado ✓'}</span><button class="mini copiar" data-link="https://cima-creators.github.io/cleargy.ugc/miluz-canje.html?t=${c.id}">copiar link</button>`
-  : `<button class="mini copiar" data-link="https://cima-creators.github.io/cleargy.ugc/miluz-canje.html?t=${c.id}" title="No le llegó el DM automático (hace más de 24 h que no escribe): copiá el link y mandáselo por Instagram desde @miluz.arg">⚠ mandar link a mano</button><button class="mini yamande" data-id="${c.id}" title="Marcar que ya se lo mandaste">✓ ya se lo mandé</button>`)
+  : `<button class="mini copiar" data-link="https://cima-creators.github.io/cleargy.ugc/miluz-canje.html?t=${c.id}" title="No le llegó el DM automático (hace más de 24 h que no escribe): copiá el link y mandáselo por Instagram desde @miluz.arg">⚠ mandar link a mano</button>${c.tel?`<a class="mini" style="text-decoration:none" target="_blank" href="${waLink(c.tel, (c.nom||'').split(' ')[0], 'https://cima-creators.github.io/cleargy.ugc/miluz-canje.html?t='+c.id)}" title="Abre WhatsApp con el mensaje y el link ya escritos">📲 WhatsApp</a>`:''}<button class="mini yamande" data-id="${c.id}" title="Marcar que ya se lo mandaste">✓ ya se lo mandé</button>`)
   :(['ficha_completa','briefing_ok'].includes(c.estado)&&c.id?`<button class="mini copiar" data-link="https://cima-creators.github.io/cleargy.ugc/miluz-canje.html?t=${c.id}">copiar link</button>`:'')}</td>
           <td class="num">${c.seguidores!=null ? c.seguidores.toLocaleString('es-AR') : '—'}</td>
           <td class="num">${c.posts90!=null ? c.posts90 : '—'}</td>
@@ -1302,7 +1319,7 @@ function pintarTodo(){
     pintarTodo();
   }
 })();
-const APP_VERSION = '2026-09-05-a';
+const APP_VERSION = '2026-09-05-b';
 </script>
 </body>
 </html>
