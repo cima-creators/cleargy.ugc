@@ -414,10 +414,10 @@ tfoot td{background:var(--arena);font-weight:700;color:var(--tinta);border-top:1
   .bsec{padding:11px 13px;font-size:.8rem;flex:1}
 }
 .pill{white-space:nowrap}
-td.acciones{white-space:nowrap}
-td.acciones .mini{display:inline-block;margin:0 0 0 6px;padding:4px 9px;border-radius:99px;border:1px solid var(--linea,#e5dfd6);background:#fff;font:inherit;font-size:.8rem;color:var(--tx,#111);text-decoration:none;cursor:pointer;vertical-align:middle}
-td.acciones .mini:hover{background:var(--beige,#f3ede6)}
-td.acciones .pill{vertical-align:middle}
+td.dmacc{white-space:nowrap;vertical-align:middle}
+td.dmacc .mini{display:inline-block;margin:0 0 0 6px;padding:4px 9px;border-radius:99px;border:1px solid var(--linea,#e5dfd6);background:#fff;font:inherit;font-size:.8rem;color:var(--tx,#111);text-decoration:none;cursor:pointer;vertical-align:middle}
+td.dmacc .mini:hover{background:var(--beige,#f3ede6)}
+td.dmacc .pill{margin-right:2px;vertical-align:middle}
 .fcre.activo{background:var(--tx,#111);color:#fff;border-color:var(--tx,#111)} .fcre .n{margin-left:4px;font-weight:700}
 </style>
 </head>
@@ -1194,7 +1194,7 @@ function pintarCreadoras(){
         const [et,cl] = ETIQUETA[c.estado] || [c.estado,''];
         return `<tr>
           <td><b>${c.nom}</b><span class="n2"><a href="https://instagram.com/${c.ig}" target="_blank" rel="noopener" class="verreel">@${c.ig}</a>${c.reel ? ` · <a href="${c.reel}" target="_blank" rel="noopener" class="verreel">ver reel</a>` : ''}</span></td>
-          <td><span class="pill ${cl}">${et}</span>${c.motivo?`<span class="n2" title="Motivo del filtro automático">${MOTIVO[c.motivo]||c.motivo}</span>`:''}${c.bono?'<span class="pill ok" style="margin-left:4px">bono</span>':''}${c.pideHumana?'<span class="pill no" style="margin-left:4px" title="Tocó “Hablar con alguien” en el bot">pide hablar</span>':''}${c.quiereOtro?'<span class="pill" style="margin-left:4px">quiere otro kit</span>':''}</td><td class="acciones">${c.estado==='invitada'&&c.id ? (c.avisadaEn
+          <td><span class="pill ${cl}">${et}</span>${c.motivo?`<span class="n2" title="Motivo del filtro automático">${MOTIVO[c.motivo]||c.motivo}</span>`:''}${c.bono?'<span class="pill ok" style="margin-left:4px">bono</span>':''}${c.pideHumana?'<span class="pill no" style="margin-left:4px" title="Tocó “Hablar con alguien” en el bot">pide hablar</span>':''}${c.quiereOtro?'<span class="pill" style="margin-left:4px">quiere otro kit</span>':''}</td><td class="dmacc">${c.estado==='invitada'&&c.id ? (c.avisadaEn
             ? `<span class="pill ok" title="${c.avisadaManual?'Se le mandó el link a mano':'El DM de aceptación salió solo'}">${c.avisadaManual?'a mano ✓':'DM ✓'}</span><button class="mini copiar" data-id="${c.id}" data-nom="${(c.nom||'').replace(/"/g,'')}">copiar</button>`
             : `<span class="pill no" title="No le llegó el DM automático: hace más de 24 h que no interactúa con el bot">sin DM</span><button class="mini copiar" data-id="${c.id}" data-nom="${(c.nom||'').replace(/"/g,'')}" title="Copia el mensaje completo con su link para pegarlo por Instagram">copiar</button>${c.tel?`<a class="mini" target="_blank" href="${waLink(c.tel, c.nom, LINK_APP(c.id))}" title="Abre WhatsApp con el mensaje armado">WhatsApp</a>`:''}<button class="mini yamande" data-id="${c.id}" title="Marcar que ya se lo mandaste">listo</button>`)
           : (['ficha_completa','briefing_ok'].includes(c.estado)&&c.id ? `<button class="mini copiar" data-id="${c.id}" data-nom="${(c.nom||'').replace(/"/g,'')}">copiar</button>` : '')}</td>
@@ -1330,7 +1330,7 @@ function pintarTodo(){
     pintarTodo();
   }
 })();
-const APP_VERSION = '2026-09-05-d';
+const APP_VERSION = '2026-09-05-e';
 </script>
 </body>
 </html>
