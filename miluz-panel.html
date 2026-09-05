@@ -486,9 +486,12 @@ tfoot td{background:var(--arena);font-weight:700;color:var(--tinta);border-top:1
     </div>
     <div class="barrasup" id="filtro-cre" style="gap:6px;flex-wrap:wrap">
       <button class="bsec fcre activo" data-f="todas">Todas</button>
-      <button class="bsec fcre" data-f="mano">⚠ Mandar link a mano <span class="n" id="n-mano">0</span></button>
-      <button class="bsec fcre" data-f="aceptadas">Aceptadas</button>
-      <button class="bsec fcre" data-f="revisar">Para revisar</button>
+      <button class="bsec fcre" data-f="revisar">Para revisar <span class="n" data-n="revisar">0</span></button>
+      <button class="bsec fcre" data-f="ficha">1 · Aceptadas, falta la ficha <span class="n" data-n="ficha">0</span></button>
+      <button class="bsec fcre" data-f="enviar">2 · Ficha lista, hay que enviar <span class="n" data-n="enviar">0</span></button>
+      <button class="bsec fcre" data-f="enviados">3 · Kit enviado <span class="n" data-n="enviados">0</span></button>
+      <button class="bsec fcre" data-f="recibieron">4 · Ya lo recibieron <span class="n" data-n="recibieron">0</span></button>
+      <button class="bsec fcre" data-f="mano">⚠ Mandar link a mano <span class="n" data-n="mano">0</span></button>
     </div>
     <div id="tabla-creadoras"></div>
   </section>
@@ -1117,13 +1120,20 @@ function pintarCreadoras(){
   const q = ($('#buscar')?.value || '').trim().toLowerCase();
   const PREVIAS = ['iniciada','enviada','en_cola','revisar','por_revisar','descartada','rechazada'];
   const SIN_AVISO = c => c.estado === 'invitada' && !c.avisadaEn;
-  const pasaFiltro = c =>
-    filtroCre === 'mano'      ? SIN_AVISO(c)
-    : filtroCre === 'aceptadas' ? !PREVIAS.includes(c.estado)
-    : filtroCre === 'revisar'   ? ['revisar','por_revisar','en_cola'].includes(c.estado)
-    : true;
-  const nMano = CREADORAS.filter(SIN_AVISO).length;
-  const nm = $('#n-mano'); if (nm) nm.textContent = nMano;
+  const FILTROS = {
+    todas:      c => true,
+    revisar:    c => ['revisar','por_revisar','en_cola'].includes(c.estado),
+    ficha:      c => c.estado === 'invitada',
+    enviar:     c => ['ficha_completa','briefing_ok'].includes(c.estado),
+    enviados:   c => c.estado === 'enviado',
+    recibieron: c => ['recibido','publicado','cumplida'].includes(c.estado),
+    mano:       SIN_AVISO,
+    aceptadas:  c => !PREVIAS.includes(c.estado),
+  };
+  const pasaFiltro = FILTROS[filtroCre] || FILTROS.todas;
+  document.querySelectorAll('#filtro-cre [data-n]').forEach(el => {
+    el.textContent = CREADORAS.filter(FILTROS[el.dataset.n] || (() => false)).length;
+  });
   const lista = CREADORAS
     .filter(pasaFiltro)
     .filter(c => !q || c.nom.toLowerCase().includes(q) || c.ig.toLowerCase().includes(q))
@@ -1292,7 +1302,7 @@ function pintarTodo(){
     pintarTodo();
   }
 })();
-const APP_VERSION = '2026-09-04-b';
+const APP_VERSION = '2026-09-05-a';
 </script>
 </body>
 </html>
