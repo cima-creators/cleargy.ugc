@@ -614,6 +614,21 @@ body.condemo .wrap{padding-bottom:84px}
 
 </div>
 
+<dialog class="pop" id="pop-llamada">
+  <div class="cuerpo">
+    <h2>Llamada de entrenamiento</h2>
+    <div class="cuando"><b id="ll-dia">Jueves</b><span>de <b id="ll-hora">16:00</b> a 17:00</span></div>
+    <ul>
+      <li>Los reels que mejor funcionaron y por qué</li>
+      <li>Cómo grabar para que se vea el antes y el después</li>
+      <li>Dudas en vivo: luz, encuadre, edición</li>
+    </ul>
+    <p class="nota">Traé tu video si querés que lo miremos antes de que lo subas. Se graba, así que si no llegás la ves después en la comunidad.</p>
+    <a class="btn" id="ll-entrar" target="_blank" rel="noopener">Entrar a la llamada</a>
+    <button class="btn sec cerrar" id="ll-cerrar">Cerrar</button>
+  </div>
+</dialog>
+
 <script>
 const API = 'https://us-central1-cleargy-creators.cloudfunctions.net/canje';
 const DEMO = new URLSearchParams(location.search).has('demo') || location.protocol === 'data:';
@@ -1157,21 +1172,7 @@ function barraDemo(){
   } catch { if (DEMO){ precargar(); traerBorrador(); } ver(DEMO ? 'v-ficha' : 'v-error'); }
 })();
 
-const APP_VERSION = '2026-09-04-a';
+const APP_VERSION = '2026-09-05-a';
 </script>
-<dialog class="pop" id="pop-llamada">
-  <div class="cuerpo">
-    <h2>Llamada de entrenamiento</h2>
-    <div class="cuando"><b id="ll-dia">Jueves</b><span>de <b id="ll-hora">16:00</b> a 17:00</span></div>
-    <ul>
-      <li>Los reels que mejor funcionaron y por qué</li>
-      <li>Cómo grabar para que se vea el antes y el después</li>
-      <li>Dudas en vivo: luz, encuadre, edición</li>
-    </ul>
-    <p class="nota">Traé tu video si querés que lo miremos antes de que lo subas. Se graba, así que si no llegás la ves después en la comunidad.</p>
-    <a class="btn" id="ll-entrar" target="_blank" rel="noopener">Entrar a la llamada</a>
-    <button class="btn sec cerrar" id="ll-cerrar">Cerrar</button>
-  </div>
-</dialog>
 </body>
 </html>
