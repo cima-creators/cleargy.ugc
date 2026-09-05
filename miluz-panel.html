@@ -551,10 +551,12 @@ const NOMBRE_TONO = {
 function ENVIOS_desde(env){
   ENVIOS = env.fichas.map(f => ({
     id: f.id, nom: (f.datos && f.datos.nombre) || f.ig, ig: f.ig,
-    dir: f.datos ? `${f.datos.calle}${f.datos.piso ? ', ' + f.datos.piso : ''}` : '—',
-    loc: f.datos ? `${f.datos.localidad} · ${f.datos.provincia}` : '—',
-    cp: (f.datos && f.datos.cp) || '—',
-    tonos: ((f.datos && f.datos.tonos) || []).map(t => NOMBRE_TONO[t] || t).join(' · '),
+    // La ficha (2do form) guarda la dirección arriba del todo; `datos` es la aplicación inicial.
+    dir: f.calle ? `${f.calle}${f.piso ? ', ' + f.piso : ''}` : '—',
+    loc: [f.localidad || (f.datos && f.datos.localidad), f.provincia || (f.datos && f.datos.provincia)].filter(Boolean).join(' · ') || '—',
+    cp: f.cp || '—',
+    dni: f.dni || '—', tel: f.tel || (f.datos && f.datos.tel) || '—',
+    tonos: (f.tonos || (f.datos && f.datos.tonos) || []).map(t => NOMBRE_TONO[t] || t).join(' · '),
     estado: f.estado === 'enviado' ? 'despachado' : 'listo',
   }));
 }
@@ -881,9 +883,9 @@ function pintarEnvios(){
 }
 
 $('#btn-csv').onclick = () => {
-  const filas = [['Nombre','Instagram','Direccion','Localidad','CP','Colores']]
+  const filas = [['Nombre','DNI','Telefono','Instagram','Direccion','Localidad','CP','Colores']]
     .concat(ENVIOS.filter(e => e.estado === 'listo')
-      .map(e => [e.nom, '@'+e.ig, e.dir, e.loc, e.cp, e.tonos]));
+      .map(e => [e.nom, e.dni, e.tel, '@'+e.ig, e.dir, e.loc, e.cp, e.tonos]));
   const csv = filas.map(f => f.map(c => `"${String(c).replace(/"/g,'""')}"`).join(',')).join('\n');
   const a = document.createElement('a');
   a.href = URL.createObjectURL(new Blob(['﻿'+csv], {type:'text/csv;charset=utf-8'}));
@@ -1330,7 +1332,7 @@ function pintarTodo(){
     pintarTodo();
   }
 })();
-const APP_VERSION = '2026-09-05-e';
+const APP_VERSION = '2026-09-05-f';
 </script>
 </body>
 </html>
