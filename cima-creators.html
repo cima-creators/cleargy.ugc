@@ -835,6 +835,23 @@ const BRAND_CONFIGS = {
       creadora3:{name:'Diego',pass:'pro3',avatar:'DI',color:'#3d7fa3'},
     }
   },
+  paperblank: {
+    border:'#e0e0de', muted2:'#b3b3af',
+    name:'Paperblank', logoText:'PAPERBLANK', defaultCampaignStart:'2026-09-01', sub:'Creators Hub',
+    logoImg:'data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="300" height="110"><rect width="300" height="110" rx="12" fill="%23000000"/><g transform="translate(58 12)"><circle cx="43" cy="43" r="36" fill="none" stroke="%23EFEDE4" stroke-width="7" stroke-linecap="round" stroke-dasharray="196 30" transform="rotate(105 43 43)"/><path d="M34 8 h17 v78 l-8.5 9 -8.5 -9 z" fill="%23EFEDE4"/><path d="M51 20 h6 a24 24 0 0 1 0 48 h-6 z" fill="%23EFEDE4"/></g><text x="200" y="63" font-family="Georgia,serif" font-size="25" fill="%23EFEDE4" text-anchor="middle" letter-spacing="1">Paperblank</text></svg>',
+    collection:'paperblank', no100k:true, noRacha:true, bgDark:'#dcdcda',
+    cats:['Review / testimonio','Rutina / uso','Antes y después','Beneficios','Trend / challenge','Otro'],
+    accent:'#23262A', accentLight:'#4E545C', bg:'#f5f5f4', surface2:'#ececeb', surface3:'#e2e2e0',
+    text:'#1e2023', muted:'#767a80', shadow:'35,38,42',
+    goal: 300, dailyVideos:3, videoGoal:75, salary:500000, minVideos:75,
+    storeUrl:'',
+    creators:{
+      creadora1:{name:'Dani',pass:'paperdani',avatar:'DA',color:'#23262A'},
+      creadora2:{name:'Georgina',pass:'papergeo',avatar:'GE',color:'#4E545C'},
+      creadora3:{name:'Creadora 3',pass:'paper3',avatar:'C3',color:'#33373C'},
+      creadora4:{name:'Creadora 4',pass:'paper4',avatar:'C4',color:'#6B7078'},
+    }
+  },
   purewall: {
     border:'#cfdcea', muted2:'#adc0d5',
     name:'PureWall', logoText:'PUREWALL', defaultCampaignStart:'2026-09-01', sub:'Creators Hub',
@@ -2456,7 +2473,7 @@ loadData();
 <!-- Auto-actualización: GitHub Pages cachea el HTML y los celulares lo retienen mucho más.
      Esto compara la versión publicada con la que está corriendo y refresca sola. -->
 <script>
-const APP_VERSION = '2026-09-01-b';
+const APP_VERSION = '2026-09-01-c';
 (function(){
   var CLAVE='cima_ver_reload';
   function hayAlguienEscribiendo(){
