@@ -555,7 +555,8 @@ function ENVIOS_desde(env){
     dir: f.calle ? `${f.calle}${f.piso ? ', ' + f.piso : ''}` : '—',
     loc: [f.localidad || (f.datos && f.datos.localidad), f.provincia || (f.datos && f.datos.provincia)].filter(Boolean).join(' · ') || '—',
     cp: f.cp || '—',
-    dni: f.dni || '—', tel: f.tel || (f.datos && f.datos.tel) || '—',
+    dni: f.dni || '—', tel: f.tel || (f.datos && f.datos.tel) || '',
+    avisoDespachoEn: f.avisoDespachoEn || null,
     tonos: (f.tonos || (f.datos && f.datos.tonos) || []).map(t => NOMBRE_TONO[t] || t).join(' · '),
     estado: f.estado === 'enviado' ? 'despachado' : 'listo',
   }));
@@ -866,7 +867,7 @@ function pintarEnvios(){
     <table>
       <thead><tr>
         <th style="width:34px"></th><th>Creadora</th><th>Dirección</th>
-        <th>Colores</th><th>Estado</th>
+        <th>Colores</th><th>Estado</th><th>Aviso</th>
       </tr></thead>
       <tbody>${ENVIOS.map((e,ix) => `
         <tr>
@@ -876,6 +877,9 @@ function pintarEnvios(){
           <td>${e.tonos}</td>
           <td><span class="pill ${e.estado === 'despachado' ? 'ok' : 'esp'}">
             ${e.estado === 'despachado' ? 'Despachado' : 'Para enviar'}</span></td>
+          <td class="dmacc">${e.estado !== 'despachado' ? '' : (e.avisoDespachoEn
+            ? `<span class="pill ok" title="Le llegó el DM 'tu kit salió'">DM ✓</span>`
+            : `<span class="pill no" title="No le llegó el DM: hace más de 24 h que no escribe al bot (Instagram lo bloquea)">sin DM</span>${e.tel ? `<a class="mini" target="_blank" href="${waLinkTexto(e.tel, mensajeDespachado(e.nom))}" title="Abre WhatsApp con el aviso armado">WhatsApp</a>` : ''}`)}</td>
         </tr>`).join('')}
       </tbody>
     </table>`;
@@ -897,7 +901,12 @@ $('#btn-desp').onclick = () => {
   if (!sel.length){ alert('Marcá al menos una.'); return; }
   if (!DEMO){
     const ids = sel.map(ix => ENVIOS[ix].id).filter(Boolean);
-    api('despachar', { ids }).catch(() => alert('No se pudo marcar el despacho. Reintentá.'));
+    api('despachar', { ids }).then(r => {
+      (r && r.resultados || []).forEach(x => { const e = ENVIOS.find(v => v.id === x.id); if (e) e.avisoDespachoEn = x.enviado ? Date.now() : null; });
+      const sinDm = (r && r.resultados || []).filter(x => !x.enviado).length;
+      pintarEnvios();
+      if (sinDm) alert(`Despachadas ${r.cuantas}. A ${sinDm} no les llegó el DM "tu kit salió" (hace más de 24 h que no escriben al bot): usá el botón WhatsApp de cada fila para avisarles.`);
+    }).catch(() => alert('No se pudo marcar el despacho. Reintentá.'));
   }
   sel.forEach(ix => ENVIOS[ix].estado = 'despachado');
   pintarEnvios();
@@ -1113,6 +1122,19 @@ function mensajeAceptada(nombre, link){
   return `¡Hola${n ? ' ' + n : ''}! 💛 Te escribimos de MiLuz: ¡quedaste aprobada para el equipo de creadoras! 🎉\n\n` +
     `Para armarte el kit necesitamos que completes tus datos (dirección y los tonos que querés). Son 2 minutos, entrá acá:\n${link}\n\n` +
     `Cualquier duda, respondé este mensaje.`;
+}
+function mensajeDespachado(nombre){
+  const n = (nombre || '').trim().split(' ')[0];
+  return `¡Hola${n ? ' ' + n : ''}! 💛 Te escribimos de MiLuz: ¡tu kit ya salió! 📦 Llega en 3 a 5 días.\n\n` +
+    `Apenas lo tengas en la mano, entrá a tu app y tocá "Lo recibí" (o respondé LLEGÓ por Instagram): ahí arrancan tus 7 días para publicar. ` +
+    `Cualquier duda, respondé este mensaje.`;
+}
+function waLinkTexto(tel, texto){
+  let d = String(tel || '').replace(/\D/g, '');
+  if (!d) return null;
+  if (d.startsWith('549')) {} else if (d.startsWith('54')) d = '549' + d.slice(2);
+  else { if (d.startsWith('0')) d = d.slice(1); d = d.replace(/^(\d{2,4})15/, '$1'); d = '549' + d; }
+  return `https://wa.me/${d}?text=${encodeURIComponent(texto)}`;
 }
 function waLink(tel, nombre, link){
   let d = String(tel || '').replace(/\D/g, '');
@@ -1332,7 +1354,7 @@ function pintarTodo(){
     pintarTodo();
   }
 })();
-const APP_VERSION = '2026-09-05-f';
+const APP_VERSION = '2026-09-05-g';
 </script>
 </body>
 </html>
