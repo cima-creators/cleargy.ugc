@@ -968,7 +968,7 @@ function tarjetaDrive(e){
           <span class="pill">${e.nro===1?'primera collab':`collab n° ${e.nro}`}</span>
         </div>
         ${e.estado === 'cambios' ? `<div class="aviso med"><b>Le pedimos:</b> ${e.motivo || '—'}</div>`
-          : `<div class="aviso med"><b>Qué hacer:</b> abrí la carpeta, fijate que el video abra con uno de los 3 ganchos y nombre el código. Si está bien, subilo desde @miluz.arg como collab (Etiquetar personas → Invitar colaborador → @${e.ig}) y pegá acá el link del reel.</div>`}
+          : `<div class="aviso med"><b>Qué hacer:</b> abrí la carpeta, fijate que el video abra con uno de los 4 ganchos, dure 35 segundos o más, muestre la cara y nombre el código. Si está bien, subilo desde @miluz.arg como collab (Etiquetar personas → Invitar colaborador → @${e.ig}) y pegá acá el link del reel.</div>`}
         <div class="acc">
           <button class="b duda" onclick="pedirCambios(${ix})">Pedir cambios</button>
           <button class="b no" onclick="resolverEntrega(${ix},0)">Rechazar</button>
@@ -1029,7 +1029,7 @@ window.pedirCollab = ix => {
   alert('Le mandamos por Instagram el paso a paso para aceptar la invitación.\nSigue acá hasta que la acepte (el sistema lo verifica solo).');
 };
 window.pedirCambios = ix => {
-  const motivo = prompt('¿Qué tiene que cambiar? (le llega tal cual por Instagram)\nEj: "Arrancá con uno de los 3 ganchos" / "No se ve el código" / "Grabalo con luz natural"');
+  const motivo = prompt('¿Qué tiene que cambiar? (le llega tal cual por Instagram)\nEj: "Arrancá con uno de los 4 ganchos" / "No se ve el código" / "Grabalo con luz natural"');
   if (motivo === null) return;
   if (!DEMO) api('resolver', { id: ENTREGAS[ix].id, decision: 'cambios', motivo }).catch(() => alert('No se pudo enviar. Reintentá.'));
   ENTREGAS[ix].estado = 'cambios'; ENTREGAS[ix].motivo = motivo; pintarEntregas();
@@ -1403,7 +1403,7 @@ function pintarTodo(){
     pintarTodo();
   }
 })();
-const APP_VERSION = '2026-09-05-h';
+const APP_VERSION = '2026-09-05-i';
 </script>
 </body>
 </html>

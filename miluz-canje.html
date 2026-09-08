@@ -548,7 +548,7 @@ body.condemo .wrap{padding-bottom:84px}
     <!-- bonos -->
     <div class="card" id="bloque-bonos">
       <h2>Tus bonos</h2>
-      <small style="margin-bottom:14px">Además del kit, hay plata en juego todos los meses.</small>
+      <small style="margin-bottom:14px">Además del kit, hay plata en juego todos los meses. Y no es una sola: cuando terminás una collab podés pedir otro kit y hacer <b style="color:var(--tx)">+1</b>. Las views y los bonos se van sumando.</small>
 
       <div class="bono" id="bono-viral">
         <div class="bono-cab">
@@ -1048,7 +1048,7 @@ function pintarPlata(){
   $('#bono-viral-cond').textContent = `Si tu reel pasa las ${numero(B.viralViews)} views.`;
   $('#bono-viral-barra').style.width = Math.min(100, views / B.viralViews * 100) + '%';
   $('#bono-viral-txt').textContent = !publicado
-    ? `Se mide sobre tu reel cuando lo publiques.`
+    ? `Se mide sobre tu reel cuando lo publiquemos.`
     : ganoViral
       ? `¡Lo ganaste! ${numero(views)} views.`
       : `${numero(views)} de ${numero(B.viralViews)} views.`;
@@ -1195,7 +1195,7 @@ function barraDemo(){
   } catch { if (DEMO){ precargar(); traerBorrador(); } ver(DEMO ? 'v-ficha' : 'v-error'); }
 })();
 
-const APP_VERSION = '2026-09-05-d';
+const APP_VERSION = '2026-09-05-e';
 </script>
 </body>
 </html>
