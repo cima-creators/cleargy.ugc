@@ -524,14 +524,14 @@ body.condemo .wrap{padding-bottom:84px}
     </div>
 
     <div class="card" id="bloque-subir">
-      <h2>Ya publiqué mi collab</h2>
-      <small style="margin-bottom:14px">Pegá el link del reel. Verificamos solos que MiLuz esté como colaboradora.</small>
+      <h2 id="subir-tit">Entregá tu contenido</h2>
+      <small style="margin-bottom:14px">Subí a una carpeta de Google Drive <b style="color:var(--tx)">el video y las 5 fotos del proceso</b>, compartila con "Cualquier persona con el enlace" y pegá el link acá. El reel lo subimos nosotras como collab desde @miluz.arg.</small>
       <label>
-        <span class="lb">Link del reel</span>
-        <input id="in-reel" inputmode="url" placeholder="instagram.com/reel/...">
-        <span class="err" id="err-reel">Pegá un link de Instagram válido</span>
+        <span class="lb">Link de la carpeta de Drive</span>
+        <input id="in-drive" inputmode="url" placeholder="drive.google.com/drive/folders/...">
+        <span class="err" id="err-drive">Pegá un link de Google Drive válido (y fijate que esté compartido)</span>
       </label>
-      <button class="btn" id="btn-reel">Enviar</button>
+      <button class="btn" id="btn-drive">Entregar</button>
     </div>
 
     <!-- cómo le está yendo -->
@@ -703,14 +703,19 @@ const BRIEFING = `
   <li>No uses <b style="color:var(--tx)">nutre</b>, <b style="color:var(--tx)">hidrata</b> ni <b style="color:var(--tx)">revitaliza</b>.</li>
   <li>Nada de "el único que funciona" ni promesas absolutas.</li>
 </ul>
-<h3>El paso que más se olvida</h3>
-<p><span class="si">Obligatorio:</span> al publicar entrá en <b style="color:var(--tx)">Etiquetar personas → Invitar colaborador</b> y poné <b style="color:var(--tx)">@miluz.arg</b>. Sin eso el video no cuenta como collab.</p>
-<h3>Además del reel: 5 fotos del proceso</h3>
-<p>Sacá <b style="color:var(--tx)">5 fotos mientras lo usás</b> (las uñas antes, aplicando, el resultado) y mandalas por DM a <b style="color:var(--tx)">@miluz.arg</b>. No hace falta que las subas a tu perfil: las usamos nosotras.</p>
+<h3>Cómo entregar</h3>
+<p>Vos <b style="color:var(--tx)">no publicás el reel</b>: nos mandás el video y lo subimos nosotras desde @miluz.arg como collab con vos.</p>
+<ul class="limpia">
+  <li><span class="si">1</span> Creá una carpeta en Google Drive con <b style="color:var(--tx)">el video</b> y <b style="color:var(--tx)">5 fotos del proceso</b> (las uñas antes, aplicando, el resultado).</li>
+  <li><span class="si">2</span> Compartila con <b style="color:var(--tx)">"Cualquier persona con el enlace"</b>.</li>
+  <li><span class="si">3</span> Pegá el link en tu app, en "Entregá tu contenido".</li>
+</ul>
+<h3>Cuando lo subamos</h3>
+<p>Te va a llegar una <b style="color:var(--tx)">invitación de colaboración</b> en Instagram (Notificaciones → "te invitó a colaborar"). <span class="si">Aceptala</span>: así el reel aparece también en tu perfil y cuenta como tu collab. Y <b style="color:var(--tx)">resubilo a tus historias</b> ese mismo día.</p>
 <h3>Tu código de descuento</h3>
 <p>Nombralo en el video y dejalo fijado en los comentarios. Tus seguidoras compran con descuento y vos ganás comisión por cada venta.</p>
 <h3>El plazo</h3>
-<p>Tenés <b style="color:var(--tx)">7 días desde que el kit llega a tu casa</b>. Avisanos en la app cuando lo recibas.</p>
+<p>Tenés <b style="color:var(--tx)">7 días desde que el kit llega a tu casa</b> para mandarnos el video. Avisanos en la app cuando lo recibas.</p>
 <h3>Mirá estos antes de grabar</h3>
 <p>Cuatro reels de Mi Luz que ya funcionaron. Copiá la estructura, no el contenido.</p>
 <div id="refs"></div>`;
@@ -912,14 +917,14 @@ $('#btn-llego').addEventListener('click', async () => {
   catch { b.disabled = false; b.textContent = 'Sí, ya me llegó'; }
 });
 
-$('#btn-reel').addEventListener('click', async () => {
-  const i = $('#in-reel'), url = i.value.trim();
-  const ok = /instagram\.com\/(reel|p)\//i.test(url);
-  $('#err-reel').style.display = ok ? 'none' : 'block';
+$('#btn-drive').addEventListener('click', async () => {
+  const i = $('#in-drive'), drive = i.value.trim();
+  const ok = /^https?:\/\/(drive|docs)\.google\.com\//i.test(drive) || /^https?:\/\/photos\.app\.goo\.gl\//i.test(drive);
+  $('#err-drive').style.display = ok ? 'none' : 'block';
   if (!ok) return;
-  const b = $('#btn-reel'); b.disabled = true; b.textContent = 'Verificando…';
-  try { D = (await api('reel', {url})).creadora; pintarEstado(); }
-  catch { b.disabled = false; b.textContent = 'Enviar'; }
+  const b = $('#btn-drive'); b.disabled = true; b.textContent = 'Enviando…';
+  try { D = (await api('entregar', {drive})).creadora; b.disabled = false; pintarEstado(); }
+  catch { b.disabled = false; b.textContent = 'Entregar'; alert('No se pudo enviar. Fijate el link y probá de nuevo.'); }
 });
 
 function copiarCodigo(){
@@ -994,10 +999,13 @@ const FLUJO = [
   ['aprobada',  '<svg viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.8\" stroke-linecap=\"round\" stroke-linejoin=\"round\"><path d="M4 12.5l5.5 5.5L20 7"/></svg>','Te aceptamos',        'Tus datos ya están cargados.'],
   ['enviado',   '<svg viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.8\" stroke-linecap=\"round\" stroke-linejoin=\"round\"><path d="M3 7.5l9-4 9 4-9 4z"/><path d="M3 7.5v9l9 4 9-4v-9"/><path d="M12 11.5v9"/></svg>','Kit despachado',      'Va en camino a tu casa.'],
   ['recibido',  '<svg viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.8\" stroke-linecap=\"round\" stroke-linejoin=\"round\"><path d="M3.5 11L12 4l8.5 7"/><path d="M5.5 9.7V19a1 1 0 0 0 1 1h11a1 1 0 0 0 1-1V9.7"/></svg>','Te llegó',            'Arrancaron tus 7 días.'],
-  ['publicado', '<svg viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.8\" stroke-linecap=\"round\" stroke-linejoin=\"round\"><rect x="3" y="6" width="18" height="13" rx="2.5"/><path d="M10 10.5l5 3-5 3z"/></svg>','Publicaste tu collab','La estamos revisando.'],
+  ['entregado', '<svg viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.8\" stroke-linecap=\"round\" stroke-linejoin=\"round\"><rect x="3" y="6" width="18" height="13" rx="2.5"/><path d="M10 10.5l5 3-5 3z"/></svg>','Entregaste tu video','Lo estamos revisando.'],
+  ['publicado', '<svg viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.8\" stroke-linecap=\"round\" stroke-linejoin=\"round\"><rect x="3" y="6" width="18" height="13" rx="2.5"/><path d="M10 10.5l5 3-5 3z"/></svg>','Publicado en @miluz.arg','Aceptá la invitación de colaboración.'],
   ['cumplida',  '<svg viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.8\" stroke-linecap=\"round\" stroke-linejoin=\"round\"><path d="M12 2.8l2.7 5.9 6.4.7-4.8 4.4 1.3 6.4L12 17l-5.6 3.2 1.3-6.4L2.9 9.4l6.4-.7z"/></svg>','Listo',               'Collab aprobada y nivel actualizado.']
 ];
-const ORDEN = ['briefing_ok','aprobada','enviado','recibido','publicado','cumplida'];
+const ORDEN = ['briefing_ok','aprobada','enviado','recibido','entregado','publicado','cumplida'];
+// 'cambios' es una vuelta atrás dentro de la entrega: para el recorrido vale como 'recibido'
+const ORDEN_DE = e => ORDEN.indexOf(e === 'cambios' ? 'recibido' : e);
 
 function cabecera(){
   const n = (D && D.nombre) ? String(D.nombre).split(' ')[0] : '';
@@ -1054,7 +1062,7 @@ function pintarPlata(){
 function pintarEstado(){
   cabecera();
   pintarConSusColores();
-  const e = D.estado, pos = ORDEN.indexOf(e);
+  const e = D.estado, pos = ORDEN_DE(e);
 
   $('#pasos').innerHTML = FLUJO.map(p => {
     const hecho = pos > ORDEN.indexOf(p[0]);
@@ -1072,7 +1080,9 @@ function pintarEstado(){
     recibido:   ['Te quedan',
                  (dias === 1 ? 'Te queda<br>un día' : 'Te quedan<br>' + (dias!==null?dias:'—') + ' días'),
                  'Tu kit ya llegó. Grabá tranquila.','En curso'],
-    publicado:  ['Tu collab','Recibimos<br>tu reel','Lo estamos verificando.','Revisando'],
+    entregado:  ['Tu entrega','Recibimos<br>tu video','Lo estamos revisando. Te avisamos por Instagram cuando lo subamos.','En revisión'],
+    cambios:    ['Tu entrega','Te pedimos<br>un ajuste', (D.cambiosMotivo || 'Fijate el mensaje que te mandamos.') + ' Cuando lo tengas, volvé a pegar el link acá abajo.','Ajustes'],
+    publicado:  ['Tu collab','¡Ya está<br>publicado!','Aceptá la invitación de colaboración en Instagram y resubilo a tus historias.','Publicado'],
     cumplida:   ['Tu collab','¡Listo!','Ya podés pedir tu próximo kit.','Completada'],
     vencida:    ['Tu plazo','Se venció','Escribinos por Instagram si querés otra oportunidad.','Vencida']
   }[e] || ['Tu estado','—','','En curso'];
@@ -1091,7 +1101,7 @@ function pintarEstado(){
   /* próxima meta: la razón para volver */
   const nv = D.nivel || 1;
   const faltan = Math.max(0, 3 - (D.cumplidas || (nv >= 2 ? 1 : 0)));
-  const hayMeta = nv < 3 && ['recibido','enviado','publicado','cumplida','briefing_ok','aprobada'].includes(e);
+  const hayMeta = nv < 3 && ['recibido','entregado','cambios','enviado','publicado','cumplida','briefing_ok','aprobada'].includes(e);
   $('#bloque-meta').classList.toggle('oculto', !hayMeta);
   if (hayMeta){
     $('#meta-tit').textContent = faltan === 1
@@ -1109,7 +1119,12 @@ function pintarEstado(){
   $('#hero-badge').textContent = cab[3];
 
   $('#bloque-llego').classList.toggle('oculto', e !== 'enviado');
-  $('#bloque-subir').classList.toggle('oculto', e !== 'recibido');
+  $('#bloque-subir').classList.toggle('oculto', !['recibido','cambios','entregado'].includes(e));
+  if (['recibido','cambios','entregado'].includes(e)){
+    $('#subir-tit').textContent = e === 'entregado' ? '¿Cambiaste el video?' : (e === 'cambios' ? 'Volvé a entregar' : 'Entregá tu contenido');
+    $('#btn-drive').textContent = e === 'entregado' ? 'Actualizar link' : 'Entregar';
+    if (D.entrega && D.entrega.drive && !$('#in-drive').value) $('#in-drive').value = D.entrega.drive;
+  }
   pintarPlata();
 
   const cod = D.codigo || '';
@@ -1178,7 +1193,7 @@ function barraDemo(){
   } catch { if (DEMO){ precargar(); traerBorrador(); } ver(DEMO ? 'v-ficha' : 'v-error'); }
 })();
 
-const APP_VERSION = '2026-09-05-b';
+const APP_VERSION = '2026-09-05-c';
 </script>
 </body>
 </html>
