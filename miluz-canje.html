@@ -664,12 +664,10 @@ const TONOS = [
 ];
 
 const REFERENCIAS = [
-  {t:'"Salí del semi"', u:'https://www.tiktok.com/@cosmefulanitaaaa0/video/7251722336116772102',
-   n:'Recuperar las uñas después del semipermanente. El ángulo que más nos sirve.'},
-  {t:'"No me pagan por decir esto"', u:'https://www.tiktok.com/@lovelilysbelly/video/7531156170136915230',
-   n:'Testimonio espontáneo, con el antes y el después. El que mejor convierte.'},
-  {t:'"Se lo recomendé a 25 personas"', u:'https://www.tiktok.com/@lovelilysbelly/video/7661318618541477150',
-   n:'Prueba social pura: no explica el producto, cuenta a quiénes se lo pasó.'}
+  {t:'Referencia 1', u:'https://www.instagram.com/reel/DUssRC1kUou/', n:'Mirá cómo abre y cómo muestra las uñas en primer plano.'},
+  {t:'Referencia 2', u:'https://www.instagram.com/reel/DU60yjwjZVz/', n:'La aplicación paso a paso, sin vueltas.'},
+  {t:'Referencia 3', u:'https://www.instagram.com/reel/DUoGhmCiSCO/', n:'Antes y después bien claro.'},
+  {t:'Referencia 4', u:'https://www.instagram.com/reel/DUvhDapDoIn/', n:'Testimonio hablado a cámara.'}
 ];
 
 const PROVINCIAS = ['Buenos Aires','CABA','Catamarca','Chaco','Chubut','Córdoba','Corrientes','Entre Ríos','Formosa','Jujuy','La Pampa','La Rioja','Mendoza','Misiones','Neuquén','Río Negro','Salta','San Juan','San Luis','Santa Cruz','Santa Fe','Santiago del Estero','Tierra del Fuego','Tucumán'];
@@ -689,6 +687,14 @@ const BRIEFING = `
   <li>Sin marca de agua de TikTok.</li>
   <li>Audio original o en tendencia.</li>
 </ul>
+<h3>El gancho: obligatorio</h3>
+<p>Los primeros 2 segundos deciden todo. Tu video tiene que <b style="color:var(--tx)">abrir sí o sí con uno de estos tres ganchos</b>, dicho a cámara o en texto grande:</p>
+<ul class="limpia">
+  <li><span class="si">1</span> "¿Tenés las uñas frágiles y quebradizas?"</li>
+  <li><span class="si">2</span> "Estaba cansada de partirme las uñas con cualquier cosa"</li>
+  <li><span class="si">3</span> "Probé el tratamiento viral de TikTok para reparar uñas y pasó esto:"</li>
+</ul>
+<p>Podés cambiar una palabra para que suene a vos, pero la idea tiene que ser esa. Un video sin uno de estos ganchos no se aprueba.</p>
 <h3>Lo que NO se puede decir</h3>
 <ul class="limpia">
   <li><span class="no">Nunca</span> le digas "esmalte" ni "un fortalecedor más" al Fénix. Es un <b style="color:var(--tx)">dermorreparador ungueal</b>.</li>
@@ -706,7 +712,7 @@ const BRIEFING = `
 <h3>El plazo</h3>
 <p>Tenés <b style="color:var(--tx)">7 días desde que el kit llega a tu casa</b>. Avisanos en la app cuando lo recibas.</p>
 <h3>Mirá estos antes de grabar</h3>
-<p>Cuatro reels que ya funcionaron. Copiá la estructura, no el contenido.</p>
+<p>Cuatro reels de Mi Luz que ya funcionaron. Copiá la estructura, no el contenido.</p>
 <div id="refs"></div>`;
 
 let D = null;
@@ -1172,7 +1178,7 @@ function barraDemo(){
   } catch { if (DEMO){ precargar(); traerBorrador(); } ver(DEMO ? 'v-ficha' : 'v-error'); }
 })();
 
-const APP_VERSION = '2026-09-05-a';
+const APP_VERSION = '2026-09-05-b';
 </script>
 </body>
 </html>
