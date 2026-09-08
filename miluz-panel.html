@@ -605,7 +605,7 @@ async function cargar(){
     id: f.id, seguidores: f.seguidores ?? null, posts90: f.posts90 ?? null, vistas: f.vistas ?? null,
     motivo: f.motivo || null, unas: f.unas || null, manychatId: f.manychatId || null,
     avisadaEn: f.avisadaEn || null, avisadaManual: !!f.avisadaManual, decididaEn: f.decididaEn || null,
-    tel: f.tel || null,
+    tel: f.tel || null, referidaPor: f.referidaPor || null, referidasCumplidas: f.referidasCumplidas || 0,
     views: f.views, ventas: f.ventas, monto: f.facturado, bono: f.bono,
   }));
 
@@ -1267,7 +1267,7 @@ function pintarCreadoras(){
         const [et,cl] = ETIQUETA[c.estado] || [c.estado,''];
         return `<tr>
           <td><b>${c.nom}</b><span class="n2"><a href="https://instagram.com/${c.ig}" target="_blank" rel="noopener" class="verreel">@${c.ig}</a>${c.reel ? ` · <a href="${c.reel}" target="_blank" rel="noopener" class="verreel">ver reel</a>` : ''}</span></td>
-          <td><span class="pill ${cl}">${et}</span>${c.motivo?`<span class="n2" title="Motivo del filtro automático">${MOTIVO[c.motivo]||c.motivo}</span>`:''}${c.bono?'<span class="pill ok" style="margin-left:4px">bono</span>':''}${c.pideHumana?'<span class="pill no" style="margin-left:4px" title="Tocó “Hablar con alguien” en el bot">pide hablar</span>':''}${c.quiereOtro?'<span class="pill" style="margin-left:4px">quiere otro kit</span>':''}</td><td class="dmacc">${c.estado==='invitada'&&c.id ? (c.avisadaEn
+          <td><span class="pill ${cl}">${et}</span>${c.motivo?`<span class="n2" title="Motivo del filtro automático">${MOTIVO[c.motivo]||c.motivo}</span>`:''}${c.bono?'<span class="pill ok" style="margin-left:4px">bono</span>':''}${c.pideHumana?'<span class="pill no" style="margin-left:4px" title="Tocó “Hablar con alguien” en el bot">pide hablar</span>':''}${c.quiereOtro?'<span class="pill" style="margin-left:4px">quiere otro kit</span>':''}${c.referidaPor?`<span class="pill" style="margin-left:4px" title="Entró con el link de @${c.referidaPor}">ref @${c.referidaPor}</span>`:''}${c.referidasCumplidas?`<span class="pill ok" style="margin-left:4px" title="Referidas que cumplieron su primera collab">${c.referidasCumplidas} referida${c.referidasCumplidas>1?'s':''} ✓</span>`:''}</td><td class="dmacc">${c.estado==='invitada'&&c.id ? (c.avisadaEn
             ? `<span class="pill ok" title="${c.avisadaManual?'Se le mandó el link a mano':'El DM de aceptación salió solo'}">${c.avisadaManual?'a mano ✓':'DM ✓'}</span><button class="mini copiar" data-id="${c.id}" data-nom="${(c.nom||'').replace(/"/g,'')}">copiar</button>`
             : `<span class="pill no" title="No le llegó el DM automático: hace más de 24 h que no interactúa con el bot">sin DM</span><button class="mini copiar" data-id="${c.id}" data-nom="${(c.nom||'').replace(/"/g,'')}" title="Copia el mensaje completo con su link para pegarlo por Instagram">copiar</button>${c.tel?`<a class="mini" target="_blank" href="${waLink(c.tel, c.nom, LINK_APP(c.id))}" title="Abre WhatsApp con el mensaje armado">WhatsApp</a>`:''}<button class="mini yamande" data-id="${c.id}" title="Marcar que ya se lo mandaste">listo</button>`)
           : (['ficha_completa','briefing_ok'].includes(c.estado)&&c.id ? `<button class="mini copiar" data-id="${c.id}" data-nom="${(c.nom||'').replace(/"/g,'')}">copiar</button>` : '')}</td>
@@ -1403,7 +1403,7 @@ function pintarTodo(){
     pintarTodo();
   }
 })();
-const APP_VERSION = '2026-09-05-i';
+const APP_VERSION = '2026-09-05-j';
 </script>
 </body>
 </html>

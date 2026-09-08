@@ -198,6 +198,7 @@ const R = { fotos: [] };
 /* Si llegó desde el DM de ManyChat, el link trae su id (?mc=...).
    Con eso el backend puede escribirle SIEMPRE, sin ventana de 24 h. */
 R.manychatId = new URLSearchParams(location.search).get('mc') || null;
+R.ref = (new URLSearchParams(location.search).get('ref') || '').replace(/^@/, '').trim().toLowerCase() || null;   // referida por
 let i = 0;                 // pantalla actual
 let idAplicante = null;    // lo devuelve el backend al registrar el @usuario
 
@@ -316,7 +317,7 @@ function achicar(file, lado = 900, calidad = .82){
 function registrarIg(ig){
   fetch(API, {
     method:'POST', headers:{'Content-Type':'application/json'},
-    body: JSON.stringify({ accion:'registrar', marca:MARCA, ig })
+    body: JSON.stringify({ accion:'registrar', marca:MARCA, ig, ref: R.ref })
   })
   .then(r => r.json())
   .then(d => { if (d && d.id) idAplicante = d.id; })
@@ -540,7 +541,7 @@ async function enviar(){
     const r = await fetch(API, {
       method:'POST', headers:{'Content-Type':'application/json'},
       body: JSON.stringify({
-        accion:'aplicar', marca:MARCA, id:idAplicante,
+        accion:'aplicar', marca:MARCA, id:idAplicante, ref: R.ref,
         manychatId: R.manychatId,
         datos:{
           ig:R.ig, nombre:R.nombre, tel:R.tel, email:R.email, provincia:R.provincia,
@@ -558,7 +559,7 @@ async function enviar(){
 }
 
 pintar();
-const APP_VERSION = '2026-08-26-a';
+const APP_VERSION = '2026-09-05-a';
 </script>
 </body>
 </html>
