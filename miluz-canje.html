@@ -682,17 +682,19 @@ const BRIEFING = `
 <p>La aplicación en primer plano: cobertura total en una sola pasada, secado al aire, sin cabina y sin torno. Es el video de deseo puro y el que más se guarda.</p>
 <h3>Reglas técnicas</h3>
 <ul class="limpia">
-  <li>Vertical, mínimo 15 segundos.</li>
+  <li>Vertical, <b style="color:var(--tx)">mínimo 35 segundos</b>.</li>
+  <li><b style="color:var(--tx)">Mostrando tu cara</b>: no sirve un video solo de manos.</li>
   <li>Buena luz sobre las manos. Si podés, natural.</li>
   <li>Sin marca de agua de TikTok.</li>
   <li>Audio original o en tendencia.</li>
 </ul>
 <h3>El gancho: obligatorio</h3>
-<p>Los primeros 2 segundos deciden todo. Tu video tiene que <b style="color:var(--tx)">abrir sí o sí con uno de estos tres ganchos</b>, dicho a cámara o en texto grande:</p>
+<p>Los primeros 2 segundos deciden todo. Tu video tiene que <b style="color:var(--tx)">abrir sí o sí con uno de estos cuatro ganchos</b>, dicho a cámara o en texto grande:</p>
 <ul class="limpia">
   <li><span class="si">1</span> "¿Tenés las uñas frágiles y quebradizas?"</li>
   <li><span class="si">2</span> "Estaba cansada de partirme las uñas con cualquier cosa"</li>
   <li><span class="si">3</span> "Probé el tratamiento viral de TikTok para reparar uñas y pasó esto:"</li>
+  <li><span class="si">4</span> "Mis uñas pasaron de esto a esto en 15 días gracias al tratamiento viral de TikTok"</li>
 </ul>
 <p>Podés cambiar una palabra para que suene a vos, pero la idea tiene que ser esa. Un video sin uno de estos ganchos no se aprueba.</p>
 <h3>Lo que NO se puede decir</h3>
@@ -1101,7 +1103,7 @@ function pintarEstado(){
   /* próxima meta: la razón para volver */
   const nv = D.nivel || 1;
   const faltan = Math.max(0, 3 - (D.cumplidas || (nv >= 2 ? 1 : 0)));
-  const hayMeta = nv < 3 && ['recibido','entregado','cambios','enviado','publicado','cumplida','briefing_ok','aprobada'].includes(e);
+  const hayMeta = false;   // todas son embajadoras: no hay escalera de niveles que mostrar
   $('#bloque-meta').classList.toggle('oculto', !hayMeta);
   if (hayMeta){
     $('#meta-tit').textContent = faltan === 1
@@ -1193,7 +1195,7 @@ function barraDemo(){
   } catch { if (DEMO){ precargar(); traerBorrador(); } ver(DEMO ? 'v-ficha' : 'v-error'); }
 })();
 
-const APP_VERSION = '2026-09-05-c';
+const APP_VERSION = '2026-09-05-d';
 </script>
 </body>
 </html>
