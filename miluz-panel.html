@@ -504,7 +504,7 @@ td.dmacc .pill{margin-right:2px;vertical-align:middle}
   <!-- ══ ENTREGAS ══ -->
   <section id="t-entregas" class="oculto">
     <h1>Entregas</h1>
-    <p class="sub">Collabs publicadas esperando tu aprobación. La verificación de la etiqueta y las views ya la hizo el sistema.</p>
+    <p class="sub">Los videos que mandaron por Drive: revisalos, subilos como collab desde @miluz.arg y pegá el link del reel. Después el sistema verifica solo que acepten la invitación.</p>
     <div id="lista-entregas"></div>
   </section>
 
@@ -589,7 +589,9 @@ async function cargar(){
   ENVIOS_desde(env);
 
   ENTREGAS = ent.fichas.map(f => ({
-    id: f.id, nom: (f.datos && f.datos.nombre) || f.ig, ig: f.ig,
+    id: f.id, nom: f.nombre || (f.datos && f.datos.nombre) || f.ig, ig: f.ig,
+    estado: f.estado, drive: (f.entrega && f.entrega.drive) || '', motivo: f.cambiosMotivo || '',
+    entregadoEn: f.entregadoEn || (f.entrega && f.entrega.en) || 0, codigo: f.codigo || '',
     url: (f.reel && f.reel.url) || '#',
     views: (f.reel && f.reel.views) || 0,
     collab: !!(f.reel && f.reel.collab),
@@ -914,31 +916,66 @@ $('#btn-desp').onclick = () => {
 
 /* ── entregas ── */
 function pintarEntregas(){
-  const ok = ENTREGAS.filter(e => e.collab && e.views >= 1000);
-  const rev = ENTREGAS.filter(e => !(e.collab && e.views >= 1000));
+  const porRevisar = ENTREGAS.filter(e => e.estado === 'entregado');
+  const enAjuste   = ENTREGAS.filter(e => e.estado === 'cambios');
+  const publicadas = ENTREGAS.filter(e => e.estado === 'publicado');
+  const ok  = publicadas.filter(e => e.collab && e.views >= 1000);
+  const rev = publicadas.filter(e => !(e.collab && e.views >= 1000));
 
   $('#lista-entregas').innerHTML = !ENTREGAS.length
     ? `<div class="vacio"><div class="big">✓</div>
        <b class="serif" style="font-size:1.2rem">Nada pendiente</b></div>`
     : `
+    ${porRevisar.length ? `<p class="n2" style="margin:6px 0 10px;font-weight:600;color:var(--tinta2)">
+       ${porRevisar.length} para revisar y subir</p>` + porRevisar.map(e => tarjetaDrive(e)).join('') : ''}
+
+    ${enAjuste.length ? `<p class="n2" style="margin:22px 0 10px;font-weight:600;color:var(--tinta2)">
+       ${enAjuste.length} esperando que manden el ajuste</p>` + enAjuste.map(e => tarjetaDrive(e)).join('') : ''}
+
     ${ok.length ? `
-      <div class="lote">
+      <div class="lote" style="margin-top:22px">
         <div>
-          <b>${ok.length} verificadas y sin problemas</b>
-          <span>MiLuz está como colaboradora y superan las 1.000 views. No hace falta que las mires una por una.</span>
+          <b>${ok.length} publicadas, aceptaron la collab y superan las 1.000 views</b>
+          <span>No hace falta que las mires una por una.</span>
         </div>
         <button class="bsec pri" onclick="aprobarLote()">Aprobar las ${ok.length}</button>
       </div>` : ''}
 
-    ${rev.length ? `<p class="n2" style="margin:18px 0 10px;font-weight:600;color:var(--tinta2)">
-       ${rev.length} necesitan que decidas</p>` : ''}
-
+    ${rev.length ? `<p class="n2" style="margin:22px 0 10px;font-weight:600;color:var(--tinta2)">
+       ${rev.length} publicadas que necesitan que decidas</p>` : ''}
     ${rev.map(e => tarjetaEntrega(e, true)).join('')}
 
     ${ok.length ? `<p class="n2" style="margin:22px 0 10px;font-weight:600;color:var(--tinta2)">
        Las verificadas, por si querés mirarlas</p>` +
        ok.map(e => tarjetaEntrega(e, false)).join('') : ''}`;
   contar();
+}
+
+function tarjetaDrive(e){
+  const ix = ENTREGAS.indexOf(e);
+  const hace = e.entregadoEn ? Math.max(0, Math.round((Date.now() - e.entregadoEn) / 864e5)) : null;
+  return `
+    <div class="entrega">
+      <div class="prev">
+        <a href="${e.drive || '#'}" target="_blank" rel="noopener">📁<span>Abrir Drive</span></a>
+      </div>
+      <div class="cuerpo">
+        <h3>${e.nom} <span class="hand">@${e.ig}</span></h3>
+        <div class="pills">
+          <span class="pill ${e.estado === 'cambios' ? 'esp' : ''}">${e.estado === 'cambios' ? 'Le pedimos un ajuste' : 'Video entregado'}</span>
+          ${hace !== null ? `<span class="pill">${hace === 0 ? 'hoy' : 'hace ' + hace + ' d'}</span>` : ''}
+          ${e.codigo ? `<span class="pill">código ${e.codigo}</span>` : ''}
+          <span class="pill">${e.nro===1?'primera collab':`collab n° ${e.nro}`}</span>
+        </div>
+        ${e.estado === 'cambios' ? `<div class="aviso med"><b>Le pedimos:</b> ${e.motivo || '—'}</div>`
+          : `<div class="aviso med"><b>Qué hacer:</b> abrí la carpeta, fijate que el video abra con uno de los 3 ganchos y nombre el código. Si está bien, subilo desde @miluz.arg como collab (Etiquetar personas → Invitar colaborador → @${e.ig}) y pegá acá el link del reel.</div>`}
+        <div class="acc">
+          <button class="b duda" onclick="pedirCambios(${ix})">Pedir cambios</button>
+          <button class="b no" onclick="resolverEntrega(${ix},0)">Rechazar</button>
+          <button class="b ok" onclick="marcarPublicado(${ix})">Ya lo publiqué → pegar link</button>
+        </div>
+      </div>
+    </div>`;
 }
 
 function tarjetaEntrega(e, revisar){
@@ -948,14 +985,14 @@ function tarjetaEntrega(e, revisar){
 
   const aviso = sinCollab
     ? `<div class="aviso urg">
-         <b>Le falta etiquetar a MiLuz como colaboradora.</b>
-         El reel está publicado pero no aparece en el perfil de la marca, así que no cuenta.
-         Antes de rechazar conviene pedírselo: se arregla en diez segundos desde su teléfono.
+         <b>Todavía no aceptó la invitación de colaboración.</b>
+         El reel está en el perfil de la marca pero no en el de ella, así que no cuenta todavía.
+         Pedíselo: le llega el paso a paso por Instagram.
        </div>`
     : pocasViews
     ? `<div class="aviso med">
          <b>Quedó abajo de las 1.000 views.</b>
-         Cumplió con lo pactado igual — el trato es publicar, no viralizar. Aprobala salvo que el video esté mal hecho.
+         Cumplió con lo pactado igual — el trato es entregar el video, no viralizar. Aprobala salvo que el video esté mal hecho.
        </div>` : '';
 
   return `
@@ -966,14 +1003,13 @@ function tarjetaEntrega(e, revisar){
       <div class="cuerpo">
         <h3>${e.nom} <span class="hand">@${e.ig}</span></h3>
         <div class="pills">
-          <span class="pill ${e.collab?'ok':'no'}">${e.collab?'✓ Collab verificada':'✕ Sin etiqueta de collab'}</span>
+          <span class="pill ${e.collab?'ok':'no'}">${e.collab?'✓ Aceptó la collab':'✕ No aceptó la collab aún'}</span>
           <span class="pill ${pocasViews?'esp':'ok'}">${e.views.toLocaleString('es-AR')} views</span>
-          <span class="pill">día ${e.dias} de 7</span>
           <span class="pill">${e.nro===1?'primera collab':`collab n° ${e.nro}`}</span>
         </div>
         ${aviso}
         <div class="acc">
-          ${sinCollab ? `<button class="b duda" onclick="pedirCollab(${ix})">Pedirle que la agregue</button>` : ''}
+          ${sinCollab ? `<button class="b duda" onclick="pedirCollab(${ix})">Pedirle que acepte</button>` : ''}
           <button class="b no" onclick="resolverEntrega(${ix},0)">Rechazar</button>
           <button class="b ok" onclick="resolverEntrega(${ix},1)">Aprobar</button>
         </div>
@@ -982,17 +1018,30 @@ function tarjetaEntrega(e, revisar){
 }
 
 window.aprobarLote = () => {
-  const limpias = ENTREGAS.filter(e => e.collab && e.views >= 1000);
+  const limpias = ENTREGAS.filter(e => e.estado === 'publicado' && e.collab && e.views >= 1000);
   if (!DEMO) limpias.forEach(e =>
     api('resolver', { id: e.id, decision: 'aprobar' }).catch(() => {}));
-  ENTREGAS = ENTREGAS.filter(e => !(e.collab && e.views >= 1000));
+  ENTREGAS = ENTREGAS.filter(e => !(e.estado === 'publicado' && e.collab && e.views >= 1000));
   pintarEntregas();
 };
 window.pedirCollab = ix => {
-  /* PENDIENTE: dispara el mensaje automático por WhatsApp con el instructivo */
   if (!DEMO) api('resolver', { id: ENTREGAS[ix].id, decision: 'pedir_collab' }).catch(() => {});
-  alert('Le mandamos el mensaje con el paso a paso para agregar la etiqueta.\nQueda esperando y vuelve a aparecer cuando la agregue.');
-  ENTREGAS.splice(ix,1); pintarEntregas();
+  alert('Le mandamos por Instagram el paso a paso para aceptar la invitación.\nSigue acá hasta que la acepte (el sistema lo verifica solo).');
+};
+window.pedirCambios = ix => {
+  const motivo = prompt('¿Qué tiene que cambiar? (le llega tal cual por Instagram)\nEj: "Arrancá con uno de los 3 ganchos" / "No se ve el código" / "Grabalo con luz natural"');
+  if (motivo === null) return;
+  if (!DEMO) api('resolver', { id: ENTREGAS[ix].id, decision: 'cambios', motivo }).catch(() => alert('No se pudo enviar. Reintentá.'));
+  ENTREGAS[ix].estado = 'cambios'; ENTREGAS[ix].motivo = motivo; pintarEntregas();
+};
+window.marcarPublicado = ix => {
+  const url = prompt('Pegá el link del reel que subiste desde @miluz.arg (instagram.com/reel/...):');
+  if (!url) return;
+  if (!/instagram\.com\/(reel|p)\//i.test(url)) { alert('Ese link no parece de un reel de Instagram.'); return; }
+  const e = ENTREGAS[ix]; e.estado = 'publicado'; e.url = url; e.collab = false; e.views = 0; pintarEntregas();
+  if (!DEMO) api('resolver', { id: e.id, decision: 'publicar', url }).then(r => {
+    if (r && typeof r.collab !== 'undefined'){ e.collab = !!r.collab; e.views = r.views || 0; pintarEntregas(); }
+  }).catch(() => alert('No se pudo guardar el link. Reintentá.'));
 };
 window.resolverEntrega = (ix, ok) => {
   if (!DEMO) api('resolver', { id: ENTREGAS[ix].id, decision: ok ? 'aprobar' : 'rechazar' }).catch(() => {});
@@ -1354,7 +1403,7 @@ function pintarTodo(){
     pintarTodo();
   }
 })();
-const APP_VERSION = '2026-09-05-g';
+const APP_VERSION = '2026-09-05-h';
 </script>
 </body>
 </html>
