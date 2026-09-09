@@ -555,7 +555,7 @@ function ENVIOS_desde(env){
     dir: f.calle ? `${f.calle}${f.piso ? ', ' + f.piso : ''}` : '—',
     loc: [f.localidad || (f.datos && f.datos.localidad), f.provincia || (f.datos && f.datos.provincia)].filter(Boolean).join(' · ') || '—',
     cp: f.cp || '—',
-    dni: f.dni || '—', tel: f.tel || (f.datos && f.datos.tel) || '',
+    dni: f.dni || '—', tel: f.tel || (f.datos && f.datos.tel) || '', email: f.email || (f.datos && f.datos.email) || '',
     avisoDespachoEn: f.avisoDespachoEn || null,
     tonos: (f.tonos || (f.datos && f.datos.tonos) || []).map(t => NOMBRE_TONO[t] || t).join(' · '),
     estado: f.estado === 'enviado' ? 'despachado' : 'listo',
@@ -874,7 +874,7 @@ function pintarEnvios(){
       <tbody>${ENVIOS.map((e,ix) => `
         <tr>
           <td>${e.estado === 'listo' ? `<input type="checkbox" class="sel" data-i="${ix}">` : ''}</td>
-          <td><b>${e.nom}</b><span class="n2">@${e.ig}</span></td>
+          <td><b>${e.nom}</b><span class="n2">@${e.ig}</span>${e.email?`<span class="n2">${e.email}</span>`:''}${e.tel?`<span class="n2">${e.tel}</span>`:''}</td>
           <td>${e.dir}<span class="n2">${e.loc} · CP ${e.cp}</span></td>
           <td>${e.tonos}</td>
           <td><span class="pill ${e.estado === 'despachado' ? 'ok' : 'esp'}">
@@ -889,9 +889,9 @@ function pintarEnvios(){
 }
 
 $('#btn-csv').onclick = () => {
-  const filas = [['Nombre','DNI','Telefono','Instagram','Direccion','Localidad','CP','Colores']]
+  const filas = [['Nombre','DNI','Telefono','Email','Instagram','Direccion','Localidad','CP','Colores']]
     .concat(ENVIOS.filter(e => e.estado === 'listo')
-      .map(e => [e.nom, e.dni, e.tel, '@'+e.ig, e.dir, e.loc, e.cp, e.tonos]));
+      .map(e => [e.nom, e.dni, e.tel, e.email, '@'+e.ig, e.dir, e.loc, e.cp, e.tonos]));
   const csv = filas.map(f => f.map(c => `"${String(c).replace(/"/g,'""')}"`).join(',')).join('\n');
   const a = document.createElement('a');
   a.href = URL.createObjectURL(new Blob(['﻿'+csv], {type:'text/csv;charset=utf-8'}));
@@ -1403,7 +1403,7 @@ function pintarTodo(){
     pintarTodo();
   }
 })();
-const APP_VERSION = '2026-09-05-j';
+const APP_VERSION = '2026-09-09-a';
 </script>
 </body>
 </html>
