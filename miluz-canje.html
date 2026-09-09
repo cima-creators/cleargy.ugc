@@ -546,6 +546,18 @@ body.condemo .wrap{padding-bottom:84px}
       <small id="r-nota" style="margin-top:12px"></small>
     </div>
 
+    <div class="card" id="bloque-tiktok">
+      <h2>Subilo también a TikTok</h2>
+      <small style="margin-bottom:14px">El mismo video, en tu cuenta de TikTok. <b style="color:var(--tx)">Esas views se suman a las del reel</b> para el bono viral y el podio. Pegá el link cuando lo subas.</small>
+      <div id="tt-hecho" class="oculto" style="margin-bottom:10px"><small>Tu TikTok: <a id="tt-link" target="_blank" rel="noopener" style="color:var(--tx)">ver</a> · <b id="tt-views">—</b> views</small></div>
+      <label>
+        <span class="lb">Link de tu TikTok</span>
+        <input id="in-tiktok" inputmode="url" placeholder="tiktok.com/@tuusuario/video/...">
+        <span class="err" id="err-tiktok">Pegá un link de TikTok válido</span>
+      </label>
+      <button class="btn" id="btn-tiktok">Sumar mis views</button>
+    </div>
+
     <!-- bonos -->
     <div class="card" id="bloque-bonos">
       <h2>Tus bonos</h2>
@@ -729,6 +741,7 @@ const BRIEFING = `
 </div>
 <h3>Cuando lo subamos</h3>
 <p>Te va a llegar una <b style="color:var(--tx)">invitación de colaboración</b> en Instagram (Notificaciones → "te invitó a colaborar"). <span class="si">Aceptala</span>: así el reel aparece también en tu perfil y cuenta como tu collab. Y <b style="color:var(--tx)">resubilo a tus historias</b> ese mismo día.</p>
+<p><b style="color:var(--tx)">Subilo también a tu TikTok.</b> El mismo video, en tu cuenta. Después pegá el link en tu app: las views de TikTok <b style="color:var(--tx)">se suman a las del reel</b> para el bono viral y el podio del mes.</p>
 <h3>Tu código de descuento</h3>
 <p>Nombralo en el video y dejalo fijado en los comentarios. Tus seguidoras compran con descuento y vos ganás comisión por cada venta.</p>
 <h3>El plazo</h3>
@@ -934,6 +947,15 @@ $('#btn-llego').addEventListener('click', async () => {
   catch { b.disabled = false; b.textContent = 'Sí, ya me llegó'; }
 });
 
+$('#btn-tiktok').addEventListener('click', async () => {
+  const i = $('#in-tiktok'), url = i.value.trim();
+  const ok = /^https?:\/\/(www\.|vm\.|vt\.)?tiktok\.com\//i.test(url);
+  $('#err-tiktok').style.display = ok ? 'none' : 'block';
+  if (!ok) return;
+  const b = $('#btn-tiktok'); b.disabled = true; b.textContent = 'Midiendo…';
+  try { D = (await api('tiktok', {url})).creadora; i.value = ''; b.disabled = false; pintarEstado(); }
+  catch { b.disabled = false; b.textContent = 'Sumar mis views'; alert('No se pudo guardar. Fijate el link y probá de nuevo.'); }
+});
 $('#btn-drive').addEventListener('click', async () => {
   const i = $('#in-drive'), drive = i.value.trim();
   const ok = /^https?:\/\/(drive|docs)\.google\.com\//i.test(drive) || /^https?:\/\/photos\.app\.goo\.gl\//i.test(drive);
@@ -1041,7 +1063,9 @@ const numero = n => Math.round(n).toLocaleString('es-AR');
 function pintarPlata(){
   const B = CONFIG.bonos;
   const publicado = ['publicado','cumplida'].includes(D.estado);
-  const views  = (D.reel && D.reel.views) || 0;
+  const viewsIg = (D.reel && D.reel.views) || 0;
+  const viewsTt = (D.tiktok && D.tiktok.views) || 0;
+  const views  = (typeof D.views === 'number' ? D.views : viewsIg + viewsTt);
   const ventas = D.ventas || 0;
   const facturado = D.facturado || 0;
   const comision = Math.round(facturado * B.comision / 100);
@@ -1052,15 +1076,21 @@ function pintarPlata(){
     $('#r-ventas').textContent  = numero(ventas);
     $('#r-comision').textContent = comision ? pesos(comision) : '$0';
     $('#r-nota').textContent = views
-      ? 'Se actualiza solo cada 24 horas.'
+      ? (viewsTt ? `Reel ${numero(viewsIg)} + TikTok ${numero(viewsTt)}. Se actualiza solo cada 24 horas.` : 'Se actualiza solo cada 24 horas.')
       : 'Todavía estamos midiendo tu reel. En unas horas aparece.';
+  }
+  $('#bloque-tiktok').classList.toggle('oculto', !publicado);
+  if (publicado){
+    const tt = D.tiktok && D.tiktok.url;
+    $('#tt-hecho').classList.toggle('oculto', !tt);
+    if (tt){ $('#tt-link').href = D.tiktok.url; $('#tt-views').textContent = viewsTt ? numero(viewsTt) : (D.tiktok.medidoEn ? '0' : 'midiendo…'); $('#btn-tiktok').textContent = 'Cambiar link'; }
   }
 
   // bono viral: barra de progreso hacia el umbral
   const ganoViral = views >= B.viralViews;
   $('#bono-viral').classList.toggle('ganado', ganoViral);
   $('#bono-viral-monto').textContent = pesos(B.viralMonto);
-  $('#bono-viral-cond').textContent = `Si tu reel pasa las ${numero(B.viralViews)} views.`;
+  $('#bono-viral-cond').textContent = `Si tu reel + tu TikTok pasan las ${numero(B.viralViews)} views.`;
   $('#bono-viral-barra').style.width = Math.min(100, views / B.viralViews * 100) + '%';
   $('#bono-viral-txt').textContent = !publicado
     ? `Se mide sobre tu reel cuando lo publiquemos.`
@@ -1226,7 +1256,7 @@ function barraDemo(){
   } catch { if (DEMO){ precargar(); traerBorrador(); } ver(DEMO ? 'v-ficha' : 'v-error'); }
 })();
 
-const APP_VERSION = '2026-09-08-b';
+const APP_VERSION = '2026-09-09-a';
 </script>
 </body>
 </html>

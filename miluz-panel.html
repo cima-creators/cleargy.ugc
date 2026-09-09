@@ -593,7 +593,8 @@ async function cargar(){
     estado: f.estado, drive: (f.entrega && f.entrega.drive) || '', motivo: f.cambiosMotivo || '',
     entregadoEn: f.entregadoEn || (f.entrega && f.entrega.en) || 0, codigo: f.codigo || '',
     url: (f.reel && f.reel.url) || '#',
-    views: (f.reel && f.reel.views) || 0,
+    views: ((f.reel && f.reel.views) || 0) + ((f.tiktok && f.tiktok.views) || 0),
+    viewsTt: (f.tiktok && f.tiktok.views) || 0, tiktok: (f.tiktok && f.tiktok.url) || '',
     collab: !!(f.reel && f.reel.collab),
     dias: f.recibidoEn && f.publicadoEn ? Math.max(1, Math.ceil((f.publicadoEn - f.recibidoEn) / 864e5)) : 0,
     nro: (f.cumplidas || 0) + 1,
@@ -1004,7 +1005,7 @@ function tarjetaEntrega(e, revisar){
         <h3>${e.nom} <span class="hand">@${e.ig}</span></h3>
         <div class="pills">
           <span class="pill ${e.collab?'ok':'no'}">${e.collab?'✓ Aceptó la collab':'✕ No aceptó la collab aún'}</span>
-          <span class="pill ${pocasViews?'esp':'ok'}">${e.views.toLocaleString('es-AR')} views</span>
+          <span class="pill ${pocasViews?'esp':'ok'}" title="${e.viewsTt?'Reel + TikTok':'Reel'}">${e.views.toLocaleString('es-AR')} views${e.viewsTt?` (TT ${e.viewsTt.toLocaleString('es-AR')})`:''}</span>${e.tiktok?`<a class="pill" href="${e.tiktok}" target="_blank" rel="noopener" style="text-decoration:none">ver TikTok</a>`:''}
           <span class="pill">${e.nro===1?'primera collab':`collab n° ${e.nro}`}</span>
         </div>
         ${aviso}
@@ -1403,7 +1404,7 @@ function pintarTodo(){
     pintarTodo();
   }
 })();
-const APP_VERSION = '2026-09-09-a';
+const APP_VERSION = '2026-09-09-b';
 </script>
 </body>
 </html>
