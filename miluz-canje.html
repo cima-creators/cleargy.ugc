@@ -667,6 +667,12 @@ const TONOS = [   // Luz (11/9): solo estos cuatro
   {id:'rojo-love',     nom:'Rojo love',     hex:'#B3122B'},
   {id:'pasion',        nom:'Pasión',        hex:'#C41E4A'},
 ];
+// Las fichas anteriores al 12/9 eligieron de esta paleta: solo para mostrar su color.
+const TONOS_VIEJOS = [
+  {id:'via-lactea',hex:'#F0E7DE'},{id:'bco-perlado',hex:'#EDE4D9'},{id:'blanco',hex:'#F7F5F2'},{id:'arena',hex:'#D8C2A4'},
+  {id:'rosa-palo',hex:'#E3BFBC'},{id:'rosa-old',hex:'#C08A8C'},{id:'chocolate',hex:'#4A2C20'},{id:'tomate',hex:'#D6432F'},
+  {id:'rubi',hex:'#8E1F3D'},{id:'negro',hex:'#1A1718'},
+];
 
 const REFERENCIAS = [
   {t:'Referencia 1', u:'https://www.instagram.com/reel/DUssRC1kUou/', n:'Mirá cómo abre y cómo muestra las uñas en primer plano.'},
@@ -1011,7 +1017,7 @@ function seguro(hex, fallback){
 function pintarConSusColores(){
   const ids = (D && D.tonos) || [];
   if (ids.length < 2) return;                       // sin colores: queda el de marca
-  const hex = id => (TONOS.find(t => t.id === id) || {}).hex;
+  const hex = id => (TONOS.concat(TONOS_VIEJOS).find(t => t.id === id) || {}).hex;
   const a = seguro(hex(ids[0]), '#D97E73');
   const b = seguro(hex(ids[1]), '#9E5A86');
   document.documentElement.style.setProperty('--grad', `linear-gradient(135deg, ${a} 0%, ${b} 100%)`);
@@ -1246,7 +1252,7 @@ function barraDemo(){
   } catch { if (DEMO){ precargar(); traerBorrador(); } ver(DEMO ? 'v-ficha' : 'v-error'); }
 })();
 
-const APP_VERSION = '2026-09-12-a';
+const APP_VERSION = '2026-09-12-b';
 </script>
 </body>
 </html>
