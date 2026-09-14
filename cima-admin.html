@@ -1248,7 +1248,12 @@ function nav(el){
   if(v==="comprobantes"){renderComprobantes();}
 }
 
-function getCampaignDay(){const s=data.campaignStart||BRAND.defaultCampaignStart||null;if(!s)return 0;const[sy,sm,sd]=s.split("-").map(Number);const start=new Date(sy,sm-1,sd);const now=new Date();const d=Math.floor((now-start)/(1000*60*60*24))+1;return Math.min(Math.max(d,1),30);}
+function getCampaignDay(){
+  // Misma regla que las otras apps: día 1 manual de la marca > fecha fijada en Configuración > primer video.
+  // Sin nada de eso la campaña no arrancó (día 0), no se cuenta desde la fecha de alta.
+  const _primer=((data&&data.videos)||[]).filter(v=>v.date).reduce((a,v)=>(!a||v.date<a)?v.date:a,null);
+  const s=BRAND.diaUno||data.campaignStart||(_primer?argDate(_primer):null);
+  if(!s)return 0;const[sy,sm,sd]=s.split("-").map(Number);const start=new Date(sy,sm-1,sd);const now=new Date();const d=Math.floor((now-start)/(1000*60*60*24))+1;return Math.min(Math.max(d,1),30);}
 function fmtV(v){if(!v)return"0";if(v>=1000000)return(v/1000000).toFixed(1)+"M";if(v>=1000)return(v/1000).toFixed(0)+"K";return v.toString();}
 function fmtP(n){return"$"+Math.round(n).toLocaleString("es-AR");}
 function getWeek(day){return Math.ceil(day/7);}
@@ -2218,7 +2223,8 @@ function loadConfig(){
   }
 }
 function getCampaignDayDynamic(){
-  const start = data.campaignStart ? new Date(data.campaignStart) : new Date(2026,4,25);
+  const _s = BRAND.diaUno || data.campaignStart;
+  const start = _s ? new Date(_s) : new Date(2026,4,25);
   const now = new Date();
   const diff = Math.floor((now - start)/(1000*60*60*24))+1;
   return Math.min(Math.max(diff,1),30);
@@ -2979,7 +2985,7 @@ loadConfig();
 <!-- Auto-actualización: GitHub Pages cachea el HTML y los celulares lo retienen mucho más.
      Esto compara la versión publicada con la que está corriendo y refresca sola. -->
 <script>
-const APP_VERSION = '2026-09-14-b';
+const APP_VERSION = '2026-09-14-c';
 (function(){
   var CLAVE='cima_ver_reload';
   function hayAlguienEscribiendo(){
