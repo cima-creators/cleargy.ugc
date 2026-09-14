@@ -838,7 +838,7 @@ const BRAND_CONFIGS = {
   },
   purewall: {
     goal:100, // objetivo total de la campaña
-    name:'PureWall', logoText:'PUREWALL', collection:'purewall', defaultCampaignStart:'2026-09-01', dailyVideos:2, videoGoal:50, no100k:true, noRacha:true, salary:375000, minVideos:50,
+    name:'PureWall', logoText:'PUREWALL', collection:'purewall', diaUno:'2026-09-14', defaultCampaignStart:'2026-09-01', dailyVideos:2, videoGoal:50, no100k:true, noRacha:true, salary:375000, minVideos:50,
     logoImg:'data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="320" height="104"><rect width="320" height="104" rx="12" fill="%23000000"/><text x="160" y="66" font-family="Arial Black,Arial,sans-serif" font-size="40" font-weight="900" text-anchor="middle" font-style="italic" letter-spacing="-1"><tspan fill="%232E8BE0">PURE</tspan><tspan fill="%23E03428">WALL</tspan></text></svg>',
     adminPass:'purewall-admin-2025', adminPass2:'purewall-2025', adminPass3:'dani-2026', adminPass4:'abril-2026',
     accent:'#1B6FC4', accentLight:'#3E92E0', bg:'#f2f6fa', surface2:'#e7eef6', border:'#cfdcea',
@@ -1066,6 +1066,7 @@ const ADMIN_PHONE = "5491123538064";
 const PHONES = Object.fromEntries(Object.entries(BRAND.creators).map(([k,v])=>[k,v.phone||'']));
 // Inicio de campaña por creadora: 1) fecha de SU PRIMER video, 2) fecha configurada a mano, 3) inicio de marca
 function campaignStartFor(c){
+  if(BRAND.diaUno) return BRAND.diaUno;
   const vids = ((data&&data.videos)||[]).filter(v=>v.creator===c && v.date);
   if(vids.length){
     const min = vids.reduce((a,v)=>v.date<a?v.date:a, vids[0].date);
@@ -2261,7 +2262,8 @@ function renderFinanzas(){
 
     // Quincenas: pagos cada 15 días (Q1 = días 1-15, meta 75 videos; Q2 = días 16-30)
     const startMs = new Date(campaignStartFor(c)+"T00:00:00").getTime();
-    const diaDe = fecha => Math.floor((new Date(fecha).getTime()-startMs)/86400000)+1;
+    // Math.max(1,…): un video subido antes del día 1 manual cuenta en la primera quincena
+    const diaDe = fecha => Math.max(1, Math.floor((new Date(fecha).getTime()-startMs)/86400000)+1);
     const quincena = q => {
       const d0=(q-1)*15+1, d1=q*15;
       const qv = myAprob.filter(v=>v.date && diaDe(v.date)>=d0 && diaDe(v.date)<=d1).length;
@@ -2977,7 +2979,7 @@ loadConfig();
 <!-- Auto-actualización: GitHub Pages cachea el HTML y los celulares lo retienen mucho más.
      Esto compara la versión publicada con la que está corriendo y refresca sola. -->
 <script>
-const APP_VERSION = '2026-09-14-a';
+const APP_VERSION = '2026-09-14-b';
 (function(){
   var CLAVE='cima_ver_reload';
   function hayAlguienEscribiendo(){
