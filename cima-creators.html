@@ -839,7 +839,7 @@ const BRAND_CONFIGS = {
     border:'#e0e0de', muted2:'#b3b3af',
     name:'Paperblank', logoText:'PAPERBLANK', defaultCampaignStart:'2026-09-01', sub:'Creators Hub',
     logoImg:'data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="320" height="110"><rect width="320" height="110" rx="12" fill="%23000000"/><circle cx="56" cy="55" r="31" fill="none" stroke="%23EFEDE4" stroke-width="6" stroke-linecap="round" stroke-dasharray="150 45" transform="rotate(118 56 55)"/><path d="M50 86 h12 l-6 11 z" fill="%23EFEDE4"/><text x="56" y="76" font-family="Georgia,serif" font-size="60" font-weight="700" fill="%23EFEDE4" text-anchor="middle">P</text><text x="108" y="65" font-family="Georgia,serif" font-size="25" fill="%23EFEDE4" letter-spacing="1">Paperblank</text></svg>',
-    collection:'paperblank', no100k:true, noRacha:true, bgDark:'#dcdcda',
+    collection:'paperblank', driveObligatorio:true, no100k:true, noRacha:true, bgDark:'#dcdcda',
     cats:['Review / testimonio','Rutina / uso','Antes y después','Beneficios','Trend / challenge','Otro'],
     accent:'#23262A', accentLight:'#4E545C', bg:'#f5f5f4', surface2:'#ececeb', surface3:'#e2e2e0',
     text:'#1e2023', muted:'#767a80', shadow:'35,38,42',
@@ -1074,6 +1074,12 @@ document.addEventListener('DOMContentLoaded',function(){
     // Toda marca con redes: la creadora elige si el video va publicado o es crudo para la marca
     const tc = document.getElementById('up-tipo-card'); if(tc) tc.style.display = 'block';
     setTipoEntrega('publicado');
+  }
+  if(BRAND.driveObligatorio && !BRAND.driveOnly){
+    const _d=document.getElementById('up-drive');
+    const _g=_d&&_d.closest?_d.closest('.fgroup'):null;
+    if(_g){ const _l=_g.querySelector('.flabel');
+      if(_l) _l.innerHTML='🎬 Link del video original (Drive) <span style="color:var(--accent2)">*</span>'; }
   }
   if(BRAND.driveOnly){
     document.documentElement.classList.add('sin-redes');
@@ -1738,7 +1744,9 @@ function submitVideo(){
   let linkFb = BRAND.facebook ? document.getElementById("up-link-fb").value.trim() : "";
   if(linkFb && !linkFb.startsWith('http')) linkFb = 'https://' + linkFb;
   const _crudo = esCrudo();
-  if(_crudo && !driveVal){document.getElementById("up-err").style.display="block";document.getElementById("up-err").textContent="Pegá el link de Drive del video.";return;}
+  // driveObligatorio: la marca necesita el archivo original, no alcanza con el link de redes
+  if((_crudo || BRAND.driveObligatorio) && !driveVal){document.getElementById("up-err").style.display="block";document.getElementById("up-err").textContent="Falta el link de Drive. La marca necesita el archivo original del video.";return;}
+  if(driveVal && !/drive\.google\.com/i.test(driveVal)){document.getElementById("up-err").style.display="block";document.getElementById("up-err").textContent="El link de Drive no parece válido — tiene que contener drive.google.com.";return;}
   // Subir sin links de redes exige justificar por qué
   const _notaVal = document.getElementById("up-notes").value.trim();
   if(_crudo && !BRAND.driveOnly && _notaVal.length < 5){
@@ -2492,7 +2500,7 @@ loadData();
 <!-- Auto-actualización: GitHub Pages cachea el HTML y los celulares lo retienen mucho más.
      Esto compara la versión publicada con la que está corriendo y refresca sola. -->
 <script>
-const APP_VERSION = '2026-09-15-b';
+const APP_VERSION = '2026-09-17-a';
 (function(){
   var CLAVE='cima_ver_reload';
   function hayAlguienEscribiendo(){

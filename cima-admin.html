@@ -824,7 +824,7 @@ const BRAND_CONFIGS = {
   },
   paperblank: {
     goal:300, // objetivo total de la campaña
-    name:'Paperblank', logoText:'PAPERBLANK', collection:'paperblank', defaultCampaignStart:'2026-09-01', dailyVideos:3, videoGoal:75, no100k:true, noRacha:true, salary:500000, minVideos:75,
+    name:'Paperblank', logoText:'PAPERBLANK', collection:'paperblank', driveObligatorio:true, defaultCampaignStart:'2026-09-01', dailyVideos:3, videoGoal:75, no100k:true, noRacha:true, salary:500000, minVideos:75,
     logoImg:'data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="320" height="110"><rect width="320" height="110" rx="12" fill="%23000000"/><circle cx="56" cy="55" r="31" fill="none" stroke="%23EFEDE4" stroke-width="6" stroke-linecap="round" stroke-dasharray="150 45" transform="rotate(118 56 55)"/><path d="M50 86 h12 l-6 11 z" fill="%23EFEDE4"/><text x="56" y="76" font-family="Georgia,serif" font-size="60" font-weight="700" fill="%23EFEDE4" text-anchor="middle">P</text><text x="108" y="65" font-family="Georgia,serif" font-size="25" fill="%23EFEDE4" letter-spacing="1">Paperblank</text></svg>',
     adminPass:'paperblank-admin-2025', adminPass2:'paperblank-2025', adminPass3:'dani-2026', adminPass4:'abril-2026',
     accent:'#23262A', accentLight:'#4E545C', bg:'#f5f5f4', surface2:'#ececeb', border:'#e0e0de',
@@ -1421,6 +1421,10 @@ function videoRow(v, compact=false){
   const metricsStr = (_igv||_ttv)
     ? [_igv?("📸 "+fmtV(_igv)):"", _ttv?("🎵 "+fmtV(_ttv)):""].filter(Boolean).join(" + ") + ((_igv&&_ttv)?(" = "+fmtV(_igv+_ttv)):"")
     : (v.views?fmtV(v.views)+" views":"—");
+  // Sin link de Drive la marca no puede bajar el original: se marca para que salte a la vista
+  const sinDrive = !v.driveLink
+    ? `<span style="padding:2px 8px;border-radius:20px;font-size:9px;font-family:'Poppins';font-weight:600;border:1px solid rgba(193,97,60,.35);color:#B0512F;background:rgba(193,97,60,.1);" title="Falta el link de Drive">⚠ sin Drive</span>`
+    : "";
   const crudoTag = v.crudo
     ? `<span style="padding:2px 8px;border-radius:20px;font-size:9px;font-family:'Poppins';font-weight:700;border:1px solid rgba(176,123,46,.35);color:#b45309;background:rgba(176,123,46,.1);">🎬 CRUDO</span>`
     : "";
@@ -1433,7 +1437,7 @@ function videoRow(v, compact=false){
   const fbBtn = v.linkFb
     ? `<a href="${escUrl(v.linkFb)}" target="_blank" style="padding:2px 8px;border-radius:20px;font-size:9px;font-family:'Poppins';cursor:pointer;border:1px solid var(--border2);color:var(--muted);background:none;text-decoration:none;">👥 FB</a>`
     : "";
-  const copyBtn = (crudoTag||igBtn||ttBtn||fbBtn) ? [crudoTag,igBtn,ttBtn,fbBtn].filter(Boolean).join(" ") : `<button onclick="copyLink('${v.id}',event)" style="padding:2px 8px;border-radius:20px;font-size:9px;font-family:'Poppins';cursor:pointer;border:1px solid var(--border2);color:var(--muted);background:none;">📋 Copiar</button>`;
+  const copyBtn = (sinDrive||crudoTag||igBtn||ttBtn||fbBtn) ? [sinDrive,crudoTag,igBtn,ttBtn,fbBtn].filter(Boolean).join(" ") : `<button onclick="copyLink('${v.id}',event)" style="padding:2px 8px;border-radius:20px;font-size:9px;font-family:'Poppins';cursor:pointer;border:1px solid var(--border2);color:var(--muted);background:none;">📋 Copiar</button>`;
   const startStr = campaignStartFor(v.creator);
   const calcDay = v.date ? Math.max(1,Math.floor((new Date(v.date)-new Date(startStr))/(86400000))+1) : (v.day||1);
   return`<tr>
@@ -2985,7 +2989,7 @@ loadConfig();
 <!-- Auto-actualización: GitHub Pages cachea el HTML y los celulares lo retienen mucho más.
      Esto compara la versión publicada con la que está corriendo y refresca sola. -->
 <script>
-const APP_VERSION = '2026-09-15-b';
+const APP_VERSION = '2026-09-17-a';
 (function(){
   var CLAVE='cima_ver_reload';
   function hayAlguienEscribiendo(){
