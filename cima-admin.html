@@ -848,6 +848,20 @@ const BRAND_CONFIGS = {
       creadora2:{name:'Ale',avatar:'AL',color:'#E03428',phone:''},
     }
   },
+  cleanpack: {
+    goal:240, // objetivo total de la campaña
+    name:'Cleanpack', logoText:'CLEANPACK', collection:'cleanpack', defaultCampaignStart:'2026-09-18', dailyVideos:2, videoGoal:60, no100k:true, noRacha:true, salary:400000, minVideos:60,
+    logoImg:'data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="320" height="96"><rect width="320" height="96" rx="12" fill="%23FFFFFF"/><text x="160" y="60" font-family="Helvetica,Arial,sans-serif" font-size="38" font-weight="700" text-anchor="middle" letter-spacing="-1"><tspan fill="%230F9AA8">Clean</tspan><tspan fill="%23123C44">pack</tspan></text></svg>',
+    adminPass:'cleanpack-admin-2026', adminPass2:'cleanpack-2026', adminPass3:'dani-2026', adminPass4:'abril-2026',
+    accent:'#0F9AA8', accentLight:'#3FBCC7', bg:'#f1f8f9', surface2:'#e4f0f2', border:'#cfe4e7',
+    text:'#0e2f34', muted:'#5f8086', shadow:'15,154,168', loginBg:'linear-gradient(135deg,#f1f8f9 0%,#e4f0f2 50%,#c6dee2 100%)',
+    creators:{
+      creadora1:{name:'Juani',avatar:'JU',color:'#0F9AA8',phone:''},
+      creadora2:{name:'Cati',avatar:'CA',color:'#3FBCC7',phone:''},
+      creadora3:{name:'Constanza',avatar:'CO',color:'#0B7885',phone:''},
+      creadora4:{name:'Fabi',avatar:'FA',color:'#66CCD6',phone:''},
+    }
+  },
   menlab: {
     goal:200, // objetivo total de la campaña (4 creadores × 50/mes)
     name:'MenLab', logoText:'MENLAB', collection:'menlab', defaultCampaignStart:'2026-09-08', dailyVideos:2, videoGoal:50, no100k:true, noRacha:true, salary:370000, minVideos:50,
@@ -2989,7 +3003,7 @@ loadConfig();
 <!-- Auto-actualización: GitHub Pages cachea el HTML y los celulares lo retienen mucho más.
      Esto compara la versión publicada con la que está corriendo y refresca sola. -->
 <script>
-const APP_VERSION = '2026-09-17-a';
+const APP_VERSION = '2026-09-18-a';
 (function(){
   var CLAVE='cima_ver_reload';
   function hayAlguienEscribiendo(){
