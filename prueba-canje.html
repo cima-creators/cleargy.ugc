@@ -121,6 +121,7 @@ small{color:var(--tx3);font-size:.8rem;line-height:1.45;display:block}
 /* ── accesos circulares ── */
 .accesos{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:14px}
 /* si el grupo todavía no existe, quedan 3 y no tienen que dejar hueco */
+.accesos.dos{grid-template-columns:repeat(2,1fr)}
 .accesos.tres{grid-template-columns:repeat(3,1fr)}
 .accesos.cuatro{grid-template-columns:repeat(4,1fr)}
 .accesos.cinco{grid-template-columns:repeat(5,1fr);gap:7px}
@@ -1228,6 +1229,7 @@ $('#btn-ref').addEventListener('click', async () => {
 function ajustarAccesos(){
   const grilla = document.querySelector('.accesos');
   const cuantos = [...document.querySelectorAll('.acceso')].filter(a => a.style.display !== 'none').length;
+  grilla?.classList.toggle('dos',   cuantos === 2);
   grilla?.classList.toggle('tres',  cuantos === 3);
   grilla?.classList.toggle('cuatro',cuantos === 4);
   grilla?.classList.toggle('cinco', cuantos === 5);

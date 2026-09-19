@@ -818,15 +818,24 @@ $('#plegar').onclick = () => document.body.classList.toggle('plegado');
 $('#abrir').onclick = () => document.body.classList.add('cajon');
 $('#velo').onclick  = () => document.body.classList.remove('cajon');
 
+/* los contadores de solapas que el rol no ve no existen en el DOM */
+const setN = (id, v) => { const el = document.getElementById(id); if (el) el.textContent = v; };
 const contar = () => {
-  $('#n-adm').textContent = APLICANTES.length - i;
-  $('#n-env').textContent = ENVIOS.filter(e => e.estado === 'listo').length;
-  $('#n-ent').textContent = ENTREGAS.length;
+  setN('n-adm', APLICANTES.length - i);
+  setN('n-env', ENVIOS.filter(e => e.estado === 'listo').length);
+  setN('n-ent', ENTREGAS.length);
 };
 
-/* etiqueta legible de una respuesta del formulario de la marca */
-const etiquetaResp = v => (CFG && CFG.formulario && CFG.formulario.etiquetas && CFG.formulario.etiquetas[v]) || v;
+/* etiqueta legible de una respuesta del formulario de la marca: el texto
+   de la opción elegida (ops de la pregunta) o el mapa `etiquetas` */
 const preguntasMarca = () => (CFG && CFG.formulario && CFG.formulario.preguntas) || [];
+function etiquetaResp(v, campo){
+  if (!v) return v;
+  const p = campo && preguntasMarca().find(x => x.campo === campo);
+  const op = p && (p.ops || []).find(o => o[0] === v);
+  if (op) return op[1];
+  return (CFG && CFG.formulario && CFG.formulario.etiquetas && CFG.formulario.etiquetas[v]) || v;
+}
 const descartaMarca = () => (CFG && CFG.formulario && CFG.formulario.descarta) || null;
 
 /* ── admisión ── */
@@ -875,7 +884,8 @@ function pintarFicha(){
     `<div class="chk ${ok?'si':'no'}"><b>${ok?'':'✕ '}${val}</b><span>${lb}</span></div>`;
 
   const fotosCfg = CFG && CFG.formulario && CFG.formulario.fotos;
-  const respuestas = preguntasMarca().map(p => `${p.corto.toLowerCase()} ${etiquetaResp((a.datos || {})[p.campo] || '—')}`).join(' · ');
+  const respuestas = preguntasMarca().filter(p => (a.datos || {})[p.campo]).map(p =>
+    (desc && p.campo === desc.campo) ? `${p.corto.toLowerCase()} ${etiquetaResp(a.datos[p.campo], p.campo).toLowerCase()}` : `${p.corto}: ${etiquetaResp(a.datos[p.campo], p.campo)}`).join(' · ');
   const motivos = ((CFG && CFG.formulario && CFG.formulario.motivosRechazo) || [
     ['canje','Cuenta de canje puro — más de la mitad son colabos'], ['comprados','Seguidores comprados'],
     ['contenido','Contenido incompatible con la marca'], ['metricas','No llega a las métricas']]);
@@ -1231,6 +1241,7 @@ function pintarResumen(){
         vas en ${num(Math.round(viewsPorCollab))}. Y ojo: el costo se paga por kit
         <b>enviado</b>, no por collab recibida, así que si el cumplimiento cae 10 puntos
         este número sube sin que gastes un peso más.</p>`
+      : listo ? `<p class="linea">Todavía no hay collabs publicadas este mes: el costo por collab aparece con la primera.</p>`
       : `<p class="linea">Falta cargar el costo del kit o el tipo de cambio en
          <b>economia</b> de la marca (MARCAS.${MARCA}.economia en canje.js).</p>`}
     </div>
@@ -1365,7 +1376,7 @@ function pintarCreadoras(){
   // la columna "Uñas" de Mi Luz es, en general, la respuesta que descarta (o la primera pregunta)
   const desc = descartaMarca();
   const pregCol = preguntasMarca().find(p => desc && p.campo === desc.campo) || preguntasMarca()[0] || null;
-  const respCol = c => pregCol ? etiquetaResp((c.respuestas && c.respuestas[pregCol.campo]) || (pregCol.campo === 'unas' ? c.unas : null) || '—') : '—';
+  const respCol = c => pregCol ? (etiquetaResp((c.respuestas && c.respuestas[pregCol.campo]) || (pregCol.campo === 'unas' ? c.unas : null), pregCol.campo) || '—') : '—';
   const conTienda = !!(CFG && CFG.tienda);
 
   $('#tabla-creadoras').innerHTML = !lista.length
@@ -1417,7 +1428,7 @@ function pintarCreadoras(){
     if (c === ordenCre) ascCre = !ascCre; else { ordenCre = c; ascCre = (c === 'nom'); }
     pintarCreadoras();
   });
-  $('#n-cre').textContent = CREADORAS.length;
+  setN('n-cre', CREADORAS.length);
 }
 
 $('#buscar').addEventListener('input', pintarCreadoras);
@@ -1490,7 +1501,7 @@ function pintarPagos(){
         <td class="num"><b>${pesos(tot.s)}</b></td><td></td>
       </tr></tfoot>
     </table>`;
-  $('#n-pag').textContent = deben.length;
+  setN('n-pag', deben.length);
 }
 
 window.pagarSaldo = ig => {
