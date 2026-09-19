@@ -3,19 +3,23 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover,maximum-scale=1">
-<meta name="theme-color" content="#FBF7F2">
+<meta name="theme-color" id="theme-color" content="#F7F6F4">
 <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
-<title>MiLuz · Sumate como creadora</title>
+<title>Sumate como creadora</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap">
 <style>
 :root{
-  --bg:#FBF7F2; --bg2:#F4EDE4; --sup:#FFFFFF; --sup2:#F6EFE6;
+  /* escala neutra compartida; el acento, el degradé y el fondo los pone
+     la marca (estilo en la config del backend) al cargar */
+  --bg:#F7F6F4; --bg2:#F4EDE4; --sup:#FFFFFF; --sup2:#F6EFE6;
   --linea:#EBE0D2; --linea2:#DFD1BE;
   --tx:#2A231D; --tx2:#6B5E51; --tx3:#9C8D7C;
-  --rosa:#C4636F; --ok:#4F8C63; --no:#C0524C;
-  --grad:linear-gradient(135deg,#D97E73 0%,#C4636F 48%,#9E5A86 100%);
+  --rosa:#7A7A7A; --ok:#4F8C63; --no:#C0524C;
+  --grad:linear-gradient(135deg,#9A9A9A 0%,#7A7A7A 48%,#5E5E5E 100%);
+  --tinte1:rgba(0,0,0,0); --tinte2:rgba(0,0,0,0);
+  --acento-rgb:122,122,122;
 }
 *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
 html{touch-action:manipulation;-webkit-text-size-adjust:100%}
@@ -25,14 +29,14 @@ body{
   font-family:Manrope,-apple-system,system-ui,sans-serif;
   font-size:16px;line-height:1.5;letter-spacing:-.01em;-webkit-font-smoothing:antialiased;
   background-image:
-    radial-gradient(880px 400px at 10% -10%, rgba(217,126,115,.13), transparent 62%),
-    radial-gradient(720px 360px at 95% 2%, rgba(158,90,134,.09), transparent 60%);
+    radial-gradient(880px 400px at 10% -10%, var(--tinte1), transparent 62%),
+    radial-gradient(720px 360px at 95% 2%, var(--tinte2), transparent 60%);
   background-attachment:fixed;
   display:flex;flex-direction:column;min-height:100dvh;
 }
 
 /* ── progreso ── */
-.top{position:sticky;top:0;z-index:10;background:rgba(251,247,242,.92);backdrop-filter:blur(12px)}
+.top{position:sticky;top:0;z-index:10;background:color-mix(in srgb, var(--bg) 92%, transparent);backdrop-filter:blur(12px)}
 .barra{height:3px;background:var(--linea)}
 .barra i{display:block;height:100%;background:var(--grad);width:0;transition:width .35s cubic-bezier(.4,0,.2,1)}
 .top .fila{
@@ -69,7 +73,7 @@ main{flex:1;display:flex;align-items:center;justify-content:center;padding:24px 
   background:var(--sup);border:1.5px solid var(--linea);border-radius:15px;outline:none
 }
 .campo::placeholder{color:var(--tx3)}
-.campo:focus{border-color:var(--rosa);box-shadow:0 0 0 4px rgba(196,99,111,.13)}
+.campo:focus{border-color:var(--rosa);box-shadow:0 0 0 4px rgba(var(--acento-rgb),.13)}
 .conArroba{position:relative}
 .conArroba span{position:absolute;left:18px;top:50%;transform:translateY(-50%);color:var(--tx3);font-size:17px;pointer-events:none}
 .conArroba .campo{padding-left:36px}
@@ -89,7 +93,7 @@ main{flex:1;display:flex;align-items:center;justify-content:center;padding:24px 
 }
 .op .et{flex:1;font-size:1rem;font-weight:600}
 .op .et small{display:block;font-weight:400;font-size:.85rem;color:var(--tx3);margin-top:2px}
-.op:has(input:checked){border-color:var(--rosa);background:#FDF6F5}
+.op:has(input:checked){border-color:var(--rosa);background:color-mix(in srgb, var(--rosa) 6%, var(--sup))}
 .op:has(input:checked) .tec{background:var(--grad);color:#fff}
 
 /* ── fotos ── */
@@ -118,12 +122,13 @@ main{flex:1;display:flex;align-items:center;justify-content:center;padding:24px 
 }
 .tip b{color:var(--tx)}
 
-/* ── colores ── */
+/* ── opciones a elegir (colores) ── */
 .tonos{display:grid;grid-template-columns:repeat(4,1fr);gap:12px}
 .tono{cursor:pointer;text-align:center}
 .tono input{display:none}
 .tono .sw{aspect-ratio:1;border-radius:50%;border:2px solid var(--linea);display:block;position:relative;transition:transform .13s}
-.tono input:checked+.sw{border-color:var(--rosa);transform:scale(1.09);box-shadow:0 0 0 3px rgba(196,99,111,.2)}
+.tono .sw.txt{display:grid;place-items:center;background:var(--bg2);font-weight:800;color:var(--tx2);font-size:.95rem}
+.tono input:checked+.sw{border-color:var(--rosa);transform:scale(1.09);box-shadow:0 0 0 3px rgba(var(--acento-rgb),.2)}
 .tono input:checked+.sw::after{content:"✓";position:absolute;inset:0;display:grid;place-items:center;color:#fff;font-weight:800;text-shadow:0 1px 4px rgba(0,0,0,.55)}
 .tono .nm{font-size:.68rem;color:var(--tx3);margin-top:6px;display:block;line-height:1.2}
 .tono.off{opacity:.28;pointer-events:none}
@@ -132,7 +137,7 @@ main{flex:1;display:flex;align-items:center;justify-content:center;padding:24px 
 .btn{
   display:block;width:100%;margin-top:22px;padding:17px;border:0;border-radius:15px;
   background:var(--grad);color:#fff;font:inherit;font-weight:700;font-size:1.02rem;cursor:pointer;
-  box-shadow:0 10px 22px -10px rgba(196,99,111,.55)
+  box-shadow:0 10px 22px -10px rgba(var(--acento-rgb),.55)
 }
 .btn:disabled{background:var(--sup2);color:var(--tx3);box-shadow:none;cursor:default}
 .err{color:var(--no);font-size:.85rem;margin-top:10px;display:none}
@@ -153,6 +158,11 @@ main{flex:1;display:flex;align-items:center;justify-content:center;padding:24px 
   display:inline-block;padding:7px 15px;border-radius:99px;background:var(--bg2);
   border:1px solid var(--linea);font-size:.82rem;font-weight:700;color:var(--tx2);margin-bottom:18px
 }
+.spinner{
+  width:26px;height:26px;border:2.5px solid var(--sup2);border-top-color:var(--rosa);
+  border-radius:50%;animation:g .7s linear infinite;margin:70px auto
+}
+@keyframes g{to{transform:rotate(360deg)}}
 </style>
 </head>
 <body>
@@ -163,121 +173,130 @@ main{flex:1;display:flex;align-items:center;justify-content:center;padding:24px 
     <button class="volver" id="volver" hidden aria-label="Volver">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 18l-6-6 6-6"/></svg>
     </button>
-    <span class="marca">MiLuz</span>
+    <span class="marca" id="marca-nombre"></span>
     <span class="cuenta" id="cuenta"></span>
   </div>
 </div>
 
-<main id="main"></main>
+<main id="main"><div class="spinner"></div></main>
 
 <script>
 /* ═══════════════════════════════════════════════════════════════
-   MiLuz · Aplicación de creadoras
+   Aplicación de creadoras · multi-marca
    Una pregunta por pantalla. El @usuario va PRIMERO a propósito:
    apenas lo tenemos, se dispara la verificación por atrás mientras
    ella sigue completando, así no hay ninguna espera al final.
+
+   TODO lo de la marca (nombre, kit, preguntas, opciones, colores)
+   viene de la acción `config` del backend según ?marca= (default
+   miluz, para no romper los links que ya circulan).
    ═══════════════════════════════════════════════════════════════ */
 
 const API = 'https://us-central1-cleargy-creators.cloudfunctions.net/canje';
-const MARCA = 'miluz';
+const QS = new URLSearchParams(location.search);
+const MARCA = (QS.get('marca') || 'miluz').toLowerCase().replace(/[^a-z0-9_-]/g, '') || 'miluz';
+let CFG = null;   // la config pública de la marca
 
-const TONOS = [   // Luz (11/9): solo estos cuatro
-  {id:'rosa-crepe',nom:'Rosa crepé',hex:'#D99BA0'},     {id:'marron-canela',nom:'Marrón canela',hex:'#9C6141'},
-  {id:'rojo-love',nom:'Rojo love',hex:'#B3122B'},       {id:'pasion',nom:'Pasión',hex:'#C41E4A'},
-];
+/* ── config de la marca: cacheada por marca en sessionStorage ── */
+async function cargarConfig(){
+  const k = 'canje_cfg_' + MARCA;
+  try {
+    const c = JSON.parse(sessionStorage.getItem(k) || 'null');
+    if (c && c.cfg && Date.now() - c.t < 10 * 60e3) return c.cfg;
+  } catch {}
+  const r = await fetch(API, { method:'POST', headers:{'Content-Type':'application/json'},
+    body: JSON.stringify({ accion:'config', marca:MARCA }) });
+  const d = await r.json();
+  if (!d || !d.ok) throw new Error('config');
+  try { sessionStorage.setItem(k, JSON.stringify({ t: Date.now(), cfg: d.marca })); } catch {}
+  return d.marca;
+}
 
-const PROVINCIAS = ['Buenos Aires','CABA','Catamarca','Chaco','Chubut','Córdoba','Corrientes','Entre Ríos','Formosa','Jujuy','La Pampa','La Rioja','Mendoza','Misiones','Neuquén','Río Negro','Salta','San Juan','San Luis','Santa Cruz','Santa Fe','Santiago del Estero','Tierra del Fuego','Tucumán'];
+/* ── estilo de la marca → variables CSS ── */
+function rgbDe(hex){
+  const m = /^#?([\da-f]{6})$/i.exec(String(hex || '').trim());
+  if (!m) return null;
+  const n = parseInt(m[1], 16);
+  return [n >> 16 & 255, n >> 8 & 255, n & 255];
+}
+function aplicarEstilo(e){
+  if (!e) return;
+  const r = document.documentElement.style;
+  const g = e.gradiente && e.gradiente.length ? e.gradiente : [e.acento, e.acento];
+  if (e.fondo){ r.setProperty('--bg', e.fondo); document.getElementById('theme-color').setAttribute('content', e.fondo); }
+  if (e.acento){ r.setProperty('--rosa', e.acento); const c = rgbDe(e.acento); if (c) r.setProperty('--acento-rgb', c.join(',')); }
+  r.setProperty('--grad', g.length >= 3
+    ? `linear-gradient(135deg,${g[0]} 0%,${g[1]} 48%,${g[2]} 100%)`
+    : `linear-gradient(135deg,${g[0]} 0%,${g[g.length-1]} 100%)`);
+  const t1 = rgbDe(g[0]), t2 = rgbDe(g[g.length-1]);
+  if (t1) r.setProperty('--tinte1', `rgba(${t1.join(',')},.13)`);
+  if (t2) r.setProperty('--tinte2', `rgba(${t2.join(',')},.09)`);
+  Object.entries(e.vars || {}).forEach(([k, v]) => r.setProperty('--' + k, v));
+}
 
 /* ── lo que vamos juntando ── */
 const R = { fotos: [] };
 /* Si llegó desde el DM de ManyChat, el link trae su id (?mc=...).
    Con eso el backend puede escribirle SIEMPRE, sin ventana de 24 h. */
-R.manychatId = new URLSearchParams(location.search).get('mc') || null;
-R.ref = (new URLSearchParams(location.search).get('ref') || '').replace(/^@/, '').trim().toLowerCase() || null;   // referida por
+R.manychatId = QS.get('mc') || null;
+R.ref = (QS.get('ref') || '').replace(/^@/, '').trim().toLowerCase() || null;   // referida por
 let i = 0;                 // pantalla actual
 let idAplicante = null;    // lo devuelve el backend al registrar el @usuario
+let PASOS = [];
 
-/* ── definición del cuestionario ────────────────────────────────
+/* ── definición del cuestionario, armada desde la config de la marca ──
    Cada paso: pregunta, ayuda, cómo se renderiza y cómo se valida. */
-const PASOS = [
+function armarPasos(){
+  const F = CFG.formulario || {};
+  const preguntas = (F.preguntas || []).map(p => ({ tipo:'opciones', campo:p.campo, q:p.q, a:p.a, ops:p.ops }));
+  const antes = preguntas.filter((p, n) => (F.preguntas[n].pos || 'antes') === 'antes');
+  const despues = preguntas.filter((p, n) => (F.preguntas[n].pos || 'antes') !== 'antes');
 
-  { tipo:'portada' },
+  PASOS = [
+    { tipo:'portada' },
 
-  { tipo:'texto', campo:'ig', arroba:true,
-    q:'¿Cuál es tu Instagram?',
-    a:'Lo primero, porque mientras completás el resto vamos mirando tu perfil.',
-    ph:'tu.usuario', teclado:'text',
-    valida: v => v.replace(/[^a-z0-9._]/gi,'').length >= 2 || 'Escribí tu usuario, sin el @' },
+    { tipo:'texto', campo:'ig', arroba:true,
+      q:'¿Cuál es tu Instagram?',
+      a:'Lo primero, porque mientras completás el resto vamos mirando tu perfil.',
+      ph:'tu.usuario', teclado:'text',
+      valida: v => v.replace(/[^a-z0-9._]/gi,'').length >= 2 || 'Escribí tu usuario, sin el @' },
 
-  { tipo:'opciones', campo:'unas',
-    q:'¿Cómo tenés las uñas?',
-    a:'El producto es esmalte y tratamiento: sobre uñas esculpidas o soft gel no se puede usar.',
-    ops:[
-      ['naturales','Naturales','Son mis uñas, sin nada puesto encima'],
-      ['esculpidas','Esculpidas o acrílicas','Con extensión de acrílico o gel'],
-      ['softgel','Soft gel o capping','Con una capa de gel encima de la uña']
-    ] },
+    ...antes,
 
-  { tipo:'opciones', campo:'estado',
-    q:'¿Y cómo están hoy?',
-    a:'Contestá lo que sea cierto. Hay lugar para los dos casos.',
-    ops:[
-      ['largas','Sanas y largas','Puedo mostrarlas así como están'],
-      ['cortas','Sanas pero cortas','Prolijas, pero las llevo cortitas'],
-      ['debiles','Débiles o quebradizas','Se me descaman o se rompen']
-    ] },
+    ...(F.fotos ? [{ tipo:'fotos', q:F.fotos.q, a:F.fotos.a, tip:F.fotos.tip, error:F.fotos.error }] : []),
 
-  { tipo:'fotos',
-    q:'Mostranos tus manos',
-    a:'Es el requisito que más miramos. <b>Una foto alcanza; dos es mejor.</b> Con luz natural y las uñas a la vista.' },
+    { tipo:'texto', campo:'nombre',
+      q:'¿Cómo te llamás?',
+      a:'Nombre y apellido, como figura en tu documento.',
+      ph:'Nombre y apellido', teclado:'text', auto:'name',
+      valida: v => v.trim().split(/\s+/).length >= 2 || 'Poné nombre y apellido' },
 
-  { tipo:'texto', campo:'nombre',
-    q:'¿Cómo te llamás?',
-    a:'Nombre y apellido, como figura en tu documento.',
-    ph:'Nombre y apellido', teclado:'text', auto:'name',
-    valida: v => v.trim().split(/\s+/).length >= 2 || 'Poné nombre y apellido' },
+    { tipo:'texto', campo:'tel',
+      q:'¿Tu WhatsApp?',
+      a:'Es por donde te avisamos si quedás. Con código de área, sin el 15.',
+      ph:'11 5555 5555', teclado:'tel',
+      valida: v => v.replace(/\D/g,'').length >= 8 || 'Revisá el número' },
 
-  { tipo:'texto', campo:'tel',
-    q:'¿Tu WhatsApp?',
-    a:'Es por donde te avisamos si quedás. Con código de área, sin el 15.',
-    ph:'11 5555 5555', teclado:'tel',
-    valida: v => v.replace(/\D/g,'').length >= 8 || 'Revisá el número' },
+    { tipo:'texto', campo:'email',
+      q:'¿Y tu mail?',
+      a:'Por si el WhatsApp falla.',
+      ph:'vos@mail.com', teclado:'email', auto:'email',
+      valida: v => /^\S+@\S+\.\S+$/.test(v.trim()) || 'Revisá el mail' },
 
-  { tipo:'texto', campo:'email',
-    q:'¿Y tu mail?',
-    a:'Por si el WhatsApp falla.',
-    ph:'vos@mail.com', teclado:'email', auto:'email',
-    valida: v => /^\S+@\S+\.\S+$/.test(v.trim()) || 'Revisá el mail' },
+    { tipo:'select', campo:'provincia',
+      q:'¿De qué provincia sos?',
+      a:'Mandamos a todo el país.',
+      ops: CFG.provincias || [] },
 
-  { tipo:'select', campo:'provincia',
-    q:'¿De qué provincia sos?',
-    a:'Mandamos a todo el país.',
-    ops: PROVINCIAS },
+    ...despues,
 
-  { tipo:'opciones', campo:'semi',
-    q:'¿Usás o usaste semipermanente?',
-    a:'No es para descartarte — al contrario, tu historia le interesa mucho a la marca.',
-    ops:[
-      ['ahora','Sí, ahora mismo','Me lo hago seguido'],
-      ['antes','Usaba, ya no','Lo dejé hace un tiempo'],
-      ['nunca','Nunca me hice','Siempre uñas naturales']
-    ] },
+    ...(CFG.elegir > 0 ? [{ tipo:'colores', q:CFG.eleccion.titulo, a:CFG.eleccion.ayuda }] : []),
 
-  { tipo:'opciones', campo:'rubro',
-    q:'¿Trabajás con uñas?',
-    a:'Las manicuristas tienen su propio programa, con otro briefing.',
-    ops:[
-      ['no','No, hago contenido nomás',''],
-      ['manicurista','Sí, soy manicurista',''],
-      ['aprendiendo','Estoy aprendiendo','']
-    ] },
-
-  { tipo:'colores',
-    q:'Si quedás, ¿qué dos colores querés?',
-    a:'Van en tu kit junto con el Tratamiento Fénix.' },
-
-  { tipo:'cierre' }
-];
+    { tipo:'cierre' }
+  ];
+  // el último paso antes del cierre es el que envía
+  PASOS[PASOS.length - 2].ultimo = true;
+}
 
 const $ = s => document.querySelector(s);
 const main = $('#main');
@@ -337,19 +356,18 @@ function pintar(){
   if (foco) setTimeout(() => foco.focus({preventScroll:true}), 120);
 }
 
+const botonSig = p => `<button class="btn" data-sig>${p.ultimo ? 'Enviar mi aplicación' : 'Seguir'}</button>`;
+
 function plantilla(p){
+  const F = CFG.formulario || {};
   if (p.tipo === 'portada') return `
     <div class="centro">
-      <span class="chip">Buscamos 200 creadoras por mes</span>
-      <h1 class="hero-t">Te mandamos el kit.<br>Vos hacés un video.</h1>
-      <p class="ayuda">Tratamiento Fénix y dos esmaltes Ultra Efecto Gel, sin costo. A cambio,
-      un reel en colaboración con MiLuz.</p>
+      ${F.chip ? `<span class="chip">${F.chip}</span>` : ''}
+      <h1 class="hero-t">${F.titulo || 'Te mandamos el kit.<br>Vos hacés un video.'}</h1>
+      <p class="ayuda">${F.intro || `${CFG.kit}, sin costo. A cambio, un reel en colaboración con ${CFG.nombre}.`}</p>
     </div>
     <div class="reqs">
-      ${['Uñas naturales, sin esculpidas ni soft gel',
-         'Cuenta pública con al menos 1.000 seguidores',
-         'Que publiques seguido: 10 posts en los últimos 3 meses',
-         'Vivir en Argentina'].map(t => `
+      ${(F.requisitos || []).map(t => `
         <div class="req">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 12.5l5.5 5.5L20 7"/></svg>
           <span>${t}</span>
@@ -364,7 +382,7 @@ function plantilla(p){
       ? `<div class="conArroba"><span>@</span><input class="campo" id="c" type="text" inputmode="${p.teclado}" placeholder="${p.ph}" autocomplete="off" autocapitalize="none" spellcheck="false" value="${R[p.campo]||''}"></div>`
       : `<input class="campo" id="c" type="${p.teclado==='email'?'email':p.teclado==='tel'?'tel':'text'}" inputmode="${p.teclado}" placeholder="${p.ph}" autocomplete="${p.auto||'off'}" value="${R[p.campo]||''}">`}
     <p class="err" id="e"></p>
-    <button class="btn" data-sig>Seguir</button>`;
+    ${botonSig(p)}`;
 
   if (p.tipo === 'opciones') return `
     <h2 class="pregunta">${p.q}</h2>
@@ -377,7 +395,8 @@ function plantilla(p){
           <span class="et">${t}${s?`<small>${s}</small>`:''}</span>
         </label>`).join('')}
     </div>
-    <p class="err" id="e"></p>`;
+    <p class="err" id="e"></p>
+    ${p.ultimo ? botonSig(p) : ''}`;
 
   if (p.tipo === 'select') return `
     <h2 class="pregunta">${p.q}</h2>
@@ -387,7 +406,7 @@ function plantilla(p){
       ${p.ops.map(o => `<option ${R.provincia===o?'selected':''}>${o}</option>`).join('')}
     </select>
     <p class="err" id="e"></p>
-    <button class="btn" data-sig>Seguir</button>`;
+    ${botonSig(p)}`;
 
   if (p.tipo === 'fotos') return `
     <h2 class="pregunta">${p.q}</h2>
@@ -405,26 +424,23 @@ function plantilla(p){
           <button type="button" class="quitar" aria-label="Quitar">✕</button>
         </label>`).join('')}
     </div>
-    <div class="tip">
-      <b>Que se vean bien:</b> la mano abierta, con luz de ventana y sin filtros.
-      Si tenés esmalte puesto, mejor así como está — no hace falta que te lo saques.
-    </div>
+    ${p.tip ? `<div class="tip">${p.tip}</div>` : ''}
     <p class="err" id="e"></p>
-    <button class="btn" data-sig>Seguir</button>`;
+    ${botonSig(p)}`;
 
   if (p.tipo === 'colores') return `
     <h2 class="pregunta">${p.q}</h2>
     <p class="ayuda">${p.a}</p>
     <div class="tonos" id="tonos">
-      ${TONOS.map(t => `
+      ${CFG.opciones.map(t => `
         <label class="tono">
           <input type="checkbox" value="${t.id}" ${(R.tonos||[]).includes(t.id)?'checked':''}>
-          <span class="sw" style="background:${t.hex}"></span>
+          ${t.hex ? `<span class="sw" style="background:${t.hex}"></span>` : `<span class="sw txt">${t.nom.slice(0,2)}</span>`}
           <span class="nm">${t.nom}</span>
         </label>`).join('')}
     </div>
     <p class="err" id="e"></p>
-    <button class="btn" data-sig>Enviar mi aplicación</button>`;
+    ${botonSig(p)}`;
 
   if (p.tipo === 'cierre') return `
     <div class="centro">
@@ -436,7 +452,13 @@ function plantilla(p){
       Si quedás, te escribimos por WhatsApp en los próximos días con el link para
       completar tus datos de envío.</p>
       <p class="ayuda" style="margin-bottom:0">Mientras tanto, seguinos en
-      <b>@miluz.arg</b> — ahí publicamos las collabs de las chicas.</p>
+      <b>@${CFG.cuentaIg}</b> — ahí publicamos las collabs de las chicas.</p>
+    </div>`;
+
+  if (p.tipo === 'error') return `
+    <div class="centro">
+      <h2 class="pregunta">No pudimos cargar la marca</h2>
+      <p class="ayuda">Revisá tu conexión y volvé a abrir el link.</p>
     </div>`;
 
   return '';
@@ -456,7 +478,7 @@ function conectar(p, d){
   if (p.tipo === 'opciones'){
     // elegir avanza sola: es lo que hace que se sienta rápido
     d.querySelectorAll('input[name=o]').forEach(r =>
-      r.addEventListener('change', () => { R[p.campo] = r.value; setTimeout(avanzar, 220); }));
+      r.addEventListener('change', () => { R[p.campo] = r.value; if (!p.ultimo) setTimeout(avanzar, 220); }));
   }
 
   if (p.tipo === 'fotos'){
@@ -481,7 +503,7 @@ function conectar(p, d){
     d.querySelector('#tonos').addEventListener('change', () => {
       const sel = [...d.querySelectorAll('#tonos input:checked')];
       d.querySelectorAll('.tono').forEach(l =>
-        l.classList.toggle('off', sel.length >= 2 && !l.querySelector('input').checked));
+        l.classList.toggle('off', sel.length >= CFG.elegir && !l.querySelector('input').checked));
       R.tonos = sel.map(c => c.value);
     });
   }
@@ -514,14 +536,14 @@ async function avanzar(){
   if (p.tipo === 'opciones' && !R[p.campo]){ mostrarError('Elegí una opción'); return; }
 
   if (p.tipo === 'fotos' && !R.fotos.filter(Boolean).length){
-    mostrarError('Necesitamos al menos una foto de tus manos'); return;
+    mostrarError(p.error || 'Necesitamos al menos una foto'); return;
   }
 
-  if (p.tipo === 'colores'){
-    if ((R.tonos || []).length !== 2){ mostrarError('Elegí exactamente dos'); return; }
-    await enviar();
-    return;
+  if (p.tipo === 'colores' && (R.tonos || []).length !== CFG.elegir){
+    mostrarError((CFG.eleccion && CFG.eleccion.error) || `Elegí exactamente ${CFG.elegir}`); return;
   }
+
+  if (p.ultimo){ await enviar(); return; }
 
   i++; pintar();
 }
@@ -532,16 +554,15 @@ $('#volver').onclick = () => { if (i > 0){ i--; pintar(); } };
 async function enviar(){
   const btn = document.querySelector('[data-sig]');
   btn.disabled = true; btn.textContent = 'Enviando…';
+  const datos = { ig:R.ig, nombre:R.nombre, tel:R.tel, email:R.email, provincia:R.provincia, tonos:R.tonos || [] };
+  ((CFG.formulario && CFG.formulario.preguntas) || []).forEach(p => { datos[p.campo] = R[p.campo]; });
   try {
     const r = await fetch(API, {
       method:'POST', headers:{'Content-Type':'application/json'},
       body: JSON.stringify({
         accion:'aplicar', marca:MARCA, id:idAplicante, ref: R.ref,
         manychatId: R.manychatId,
-        datos:{
-          ig:R.ig, nombre:R.nombre, tel:R.tel, email:R.email, provincia:R.provincia,
-          unas:R.unas, estado:R.estado, semi:R.semi, rubro:R.rubro, tonos:R.tonos
-        },
+        datos,
         fotos: R.fotos.filter(Boolean)
       })
     });
@@ -553,8 +574,20 @@ async function enviar(){
   }
 }
 
-pintar();
-const APP_VERSION = '2026-09-12-a';
+(async function init(){
+  try { CFG = await cargarConfig(); }
+  catch {
+    main.innerHTML = '';
+    const d = document.createElement('div'); d.className = 'paso on'; d.innerHTML = plantilla({ tipo:'error' }); main.appendChild(d);
+    return;
+  }
+  aplicarEstilo(CFG.estilo);
+  document.title = `${CFG.nombre} · Sumate como creadora`;
+  $('#marca-nombre').textContent = (CFG.estilo && CFG.estilo.logoTexto) || CFG.nombre;
+  armarPasos();
+  pintar();
+})();
+const APP_VERSION = '2026-09-19-a';
 </script>
 </body>
 </html>

@@ -3,18 +3,19 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover,maximum-scale=1">
-<meta name="theme-color" content="#FBF7F2">
+<meta name="theme-color" id="theme-color" content="#F7F6F4">
 <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
 <meta http-equiv="Pragma" content="no-cache">
 <meta http-equiv="Expires" content="0">
-<title>MiLuz · Creadoras</title>
+<title>Creadoras</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap">
 <style>
 :root{
-  /* claro y cálido, la paleta de MiLuz — el estilo viene de las formas */
-  --bg:#FBF7F2;
+  /* escala neutra compartida; el acento, el degradé y el fondo los pone
+     la marca (estilo en la config del backend) al cargar */
+  --bg:#F7F6F4;
   --bg2:#F4EDE4;
   --sup:#FFFFFF;
   --sup2:#F6EFE6;
@@ -23,11 +24,13 @@
   --tx:#2A231D;
   --tx2:#6B5E51;
   --tx3:#9C8D7C;
-  --rosa:#C4636F;
+  --rosa:#7A7A7A;
+  --acento-rgb:122,122,122;
+  --tinte1:rgba(0,0,0,0); --tinte2:rgba(0,0,0,0);
   --ok:#4F8C63;
   --alerta:#C08A2E;
   --no:#C0524C;
-  --grad:linear-gradient(135deg,#D97E73 0%,#C4636F 48%,#9E5A86 100%);
+  --grad:linear-gradient(135deg,#9A9A9A 0%,#7A7A7A 48%,#5E5E5E 100%);
   --r:22px;
 }
 *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
@@ -39,8 +42,8 @@ body{
   font-size:15px;line-height:1.5;letter-spacing:-.01em;
   -webkit-font-smoothing:antialiased;
   background-image:
-    radial-gradient(880px 400px at 10% -10%, rgba(217,126,115,.13), transparent 62%),
-    radial-gradient(720px 360px at 95% 2%, rgba(158,90,134,.09), transparent 60%);
+    radial-gradient(880px 400px at 10% -10%, var(--tinte1), transparent 62%),
+    radial-gradient(720px 360px at 95% 2%, var(--tinte2), transparent 60%);
   background-attachment:fixed;
 }
 .wrap{max-width:460px;margin:0 auto;padding:0 18px 40px}
@@ -76,7 +79,7 @@ small{color:var(--tx3);font-size:.8rem;line-height:1.45;display:block}
 /* ── tarjeta estrella con degradé ── */
 .hero{
   background:var(--grad);color:#fff;border-radius:24px;padding:24px;margin-bottom:14px;
-  position:relative;overflow:hidden;box-shadow:0 16px 34px -16px rgba(196,99,111,.45)
+  position:relative;overflow:hidden;box-shadow:0 16px 34px -16px rgba(var(--acento-rgb),.45)
 }
 .hero::after{
   content:"";position:absolute;right:-52px;top:-52px;width:190px;height:190px;
@@ -112,12 +115,13 @@ small{color:var(--tx3);font-size:.8rem;line-height:1.45;display:block}
 .meta-tx b{display:block;font-size:.88rem;font-weight:700}
 .meta-tx small{margin-top:1px}
 .puntos{display:flex;gap:4px;flex:0 0 auto}
-.puntos i{width:9px;height:9px;border-radius:50%;background:#EFDCDE;display:block}
+.puntos i{width:9px;height:9px;border-radius:50%;background:var(--bg2);display:block}
 .puntos i.on{background:var(--rosa)}
 
 /* ── accesos circulares ── */
 .accesos{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:14px}
 /* si el grupo todavía no existe, quedan 3 y no tienen que dejar hueco */
+.accesos.dos{grid-template-columns:repeat(2,1fr)}
 .accesos.tres{grid-template-columns:repeat(3,1fr)}
 .accesos.cuatro{grid-template-columns:repeat(4,1fr)}
 .accesos.cinco{grid-template-columns:repeat(5,1fr);gap:7px}
@@ -159,7 +163,7 @@ input,select{
   background:var(--bg2);border:1px solid var(--linea);border-radius:14px;outline:none;
 }
 input::placeholder{color:var(--tx3)}
-input:focus,select:focus{border-color:var(--rosa);background:var(--sup);box-shadow:0 0 0 3px rgba(196,99,111,.12)}
+input:focus,select:focus{border-color:var(--rosa);background:var(--sup);box-shadow:0 0 0 3px rgba(var(--acento-rgb),.12)}
 select{appearance:none;background-image:linear-gradient(45deg,transparent 50%,var(--tx3) 50%),linear-gradient(135deg,var(--tx3) 50%,transparent 50%);background-position:calc(100% - 19px) 22px,calc(100% - 14px) 22px;background-size:5px 5px;background-repeat:no-repeat}
 .row{display:grid;grid-template-columns:1fr 1fr;gap:10px}
 .err{color:var(--no);font-size:.76rem;margin-top:6px;display:none}
@@ -182,7 +186,7 @@ label.malo .err{display:block}
   display:block;width:100%;padding:16px;border:0;border-radius:15px;
   background:var(--grad);color:#fff;font:inherit;font-weight:700;font-size:1rem;
   cursor:pointer;text-align:center;text-decoration:none;letter-spacing:-.01em;
-  box-shadow:0 10px 22px -10px rgba(196,99,111,.55)
+  box-shadow:0 10px 22px -10px rgba(var(--acento-rgb),.55)
 }
 .btn:disabled{background:var(--sup2);color:var(--tx3);box-shadow:none;cursor:default}
 .btn.sec{background:var(--sup2);color:var(--tx);box-shadow:none;border:1px solid var(--linea)}
@@ -214,7 +218,8 @@ dialog.pop::backdrop{background:rgba(42,35,29,.45)}
   aspect-ratio:1;border-radius:50%;border:2px solid var(--linea);display:block;
   position:relative;transition:transform .13s,border-color .13s
 }
-.tono input:checked + .sw{border-color:var(--rosa);transform:scale(1.09);box-shadow:0 0 0 3px rgba(196,99,111,.2)}
+.tono input:checked + .sw{border-color:var(--rosa);transform:scale(1.09);box-shadow:0 0 0 3px rgba(var(--acento-rgb),.2)}
+.tono .sw.txt{display:grid;place-items:center;background:var(--bg2);font-weight:800;color:var(--tx2);font-size:.95rem}
 .tono input:checked + .sw::after{
   content:"✓";position:absolute;inset:0;display:grid;place-items:center;
   color:#fff;font-size:1.05rem;font-weight:800;text-shadow:0 1px 4px rgba(0,0,0,.6)
@@ -273,7 +278,7 @@ dialog.pop::backdrop{background:rgba(42,35,29,.45)}
 /* ── varios ── */
 .chip{
   display:inline-block;padding:6px 13px;border-radius:99px;font-size:.72rem;font-weight:700;
-  letter-spacing:.05em;text-transform:uppercase;background:rgba(196,99,111,.12);color:var(--rosa)
+  letter-spacing:.05em;text-transform:uppercase;background:rgba(var(--acento-rgb),.12);color:var(--rosa)
 }
 .oculto{display:none!important}
 .centro{text-align:center}
@@ -302,7 +307,7 @@ ul.limpia li{margin-bottom:.5rem;font-size:.88rem;color:var(--tx2)}
 
 #demonav{
   position:fixed;left:0;right:0;bottom:0;z-index:99;
-  background:rgba(251,247,242,.92);backdrop-filter:blur(16px);border-top:1px solid var(--linea2);
+  background:color-mix(in srgb, var(--bg) 92%, transparent);backdrop-filter:blur(16px);border-top:1px solid var(--linea2);
   padding:9px 10px calc(9px + env(safe-area-inset-bottom));
   display:flex;gap:6px;overflow-x:auto;justify-content:flex-start
 }
@@ -321,10 +326,10 @@ body.condemo .wrap{padding-bottom:84px}
 <div class="wrap">
 
   <div class="head">
-    <div class="av" id="av">MI</div>
+    <div class="av" id="av"></div>
     <div class="hi">
       <span id="saludo">Hola</span>
-      <b id="quien">MiLuz · Creadoras</b>
+      <b id="quien">Creadoras</b>
     </div>
   </div>
 
@@ -433,8 +438,8 @@ body.condemo .wrap{padding-bottom:84px}
       </div>
 
       <div class="paso oculto" data-paso="3">
-      <div class="card">
-        <small style="margin-bottom:14px">Tu kit lleva el Tratamiento Fénix más dos esmaltes Ultra Efecto Gel.</small>
+      <div class="card" id="card-tonos">
+        <small style="margin-bottom:14px" id="kit-nota"></small>
         <div class="tonos" id="tonos"></div>
         <span class="err" id="err-tonos">Elegí exactamente dos</span>
       </div>
@@ -442,7 +447,7 @@ body.condemo .wrap{padding-bottom:84px}
       <div class="card sutil">
         <label class="check">
           <input type="checkbox" name="terminos" required>
-          <span>Autorizo a MiLuz a usar el contenido que publique en su perfil y en su publicidad. Confirmo que tengo <b style="color:var(--tx)">uñas naturales</b> y que los datos son correctos.</span>
+          <span id="terminos-txt"></span>
         </label>
         <span class="err" id="err-terminos" style="margin-top:-8px">Necesitamos tu confirmación</span>
         <div class="par">
@@ -515,7 +520,7 @@ body.condemo .wrap{padding-bottom:84px}
     <!-- ya me llegó -->
     <div class="card" id="bloque-llego">
       <h2>¿Ya te llegó el kit?</h2>
-      <small style="margin-bottom:14px">Tocá acá cuando lo tengas en la mano. Ahí arrancan tus 7 días — no antes, así el correo no te come el plazo.</small>
+      <small style="margin-bottom:14px" id="llego-txt">Tocá acá cuando lo tengas en la mano. Ahí arrancan tus días — no antes, así el correo no te come el plazo.</small>
       <button class="btn" id="btn-llego">Sí, ya me llegó</button>
     </div>
 
@@ -526,7 +531,7 @@ body.condemo .wrap{padding-bottom:84px}
 
     <div class="card" id="bloque-subir">
       <h2 id="subir-tit">Entregá tu contenido</h2>
-      <small style="margin-bottom:14px">Subí a una carpeta de Google Drive <b style="color:var(--tx)">el video y las 5 fotos del proceso</b>, compartila con "Cualquier persona con el enlace" y pegá el link acá. El reel lo subimos nosotras como collab desde @miluz.arg.</small>
+      <small style="margin-bottom:14px" id="subir-txt"></small>
       <label>
         <span class="lb">Link de la carpeta de Drive</span>
         <input id="in-drive" inputmode="url" placeholder="drive.google.com/drive/folders/...">
@@ -623,7 +628,7 @@ body.condemo .wrap{padding-bottom:84px}
 
     <div class="card sutil">
       <h2>¿Dudas?</h2>
-      <small>Preguntá en el grupo, es lo más rápido. La llamada es todos los jueves a las 16. También podés escribirnos a <b style="color:var(--tx)" id="ig-handle">@miluz.arg</b>.</small>
+      <small id="dudas-txt"></small>
     </div>
   </section>
 
@@ -646,105 +651,106 @@ body.condemo .wrap{padding-bottom:84px}
 
 <script>
 const API = 'https://us-central1-cleargy-creators.cloudfunctions.net/canje';
-const DEMO = new URLSearchParams(location.search).has('demo') || location.protocol === 'data:';
+const QS = new URLSearchParams(location.search);
+const DEMO = QS.has('demo') || location.protocol === 'data:';
+/* Multi-marca: ?marca=<slug>. Default miluz para no romper los links ya
+   enviados (miluz-canje.html?t=...). TODO lo de la marca viene de `config`. */
+const MARCA = (QS.get('marca') || 'miluz').toLowerCase().replace(/[^a-z0-9_-]/g, '') || 'miluz';
+let CFG = null;
 
-const CONFIG = {
-  ig: '@miluz.arg',
-  tienda: 'https://miluzcosmetic.com',
-  grupoWpp: 'https://chat.whatsapp.com/KaIwuKwWFu87F175JekJjb',   // comunidad · el acceso se esconde solo si queda vacío
-  llamada: { dia:'Jueves', hora:'16:00', link:'https://meet.google.com/vxk-vvwq-efo' },
-  bonos: {
-    viralViews: 10000,      // views que disparan el bono viral
-    viralMonto: 25000,      // ARS
-    podio:     [150000, 100000, 50000],   // 1°, 2° y 3° del mes
-    comision:  15           // % sobre las ventas con su código
-  }
-};
+/* ── config de la marca: cacheada por marca en sessionStorage ── */
+async function cargarConfig(){
+  const k = 'canje_cfg_' + MARCA;
+  try {
+    const c = JSON.parse(sessionStorage.getItem(k) || 'null');
+    if (c && c.cfg && Date.now() - c.t < 10 * 60e3) return c.cfg;
+  } catch {}
+  const r = await fetch(API, { method:'POST', headers:{'Content-Type':'application/json'},
+    body: JSON.stringify({ accion:'config', marca:MARCA }) });
+  const d = await r.json();
+  if (!d || !d.ok) throw new Error('config');
+  try { sessionStorage.setItem(k, JSON.stringify({ t: Date.now(), cfg: d.marca })); } catch {}
+  return d.marca;
+}
 
-const TONOS = [   // Luz (11/9): solo estos cuatro
-  {id:'rosa-crepe',    nom:'Rosa crepé',    hex:'#D99BA0'},
-  {id:'marron-canela', nom:'Marrón canela', hex:'#9C6141'},
-  {id:'rojo-love',     nom:'Rojo love',     hex:'#B3122B'},
-  {id:'pasion',        nom:'Pasión',        hex:'#C41E4A'},
-];
-// Las fichas anteriores al 12/9 eligieron de esta paleta: solo para mostrar su color.
-const TONOS_VIEJOS = [
-  {id:'via-lactea',hex:'#F0E7DE'},{id:'bco-perlado',hex:'#EDE4D9'},{id:'blanco',hex:'#F7F5F2'},{id:'arena',hex:'#D8C2A4'},
-  {id:'rosa-palo',hex:'#E3BFBC'},{id:'rosa-old',hex:'#C08A8C'},{id:'chocolate',hex:'#4A2C20'},{id:'tomate',hex:'#D6432F'},
-  {id:'rubi',hex:'#8E1F3D'},{id:'negro',hex:'#1A1718'},
-];
+/* ── estilo de la marca → variables CSS ── */
+function rgbDe(hex){
+  const m = /^#?([\da-f]{6})$/i.exec(String(hex || '').trim());
+  if (!m) return null;
+  const n = parseInt(m[1], 16);
+  return [n >> 16 & 255, n >> 8 & 255, n & 255];
+}
+function aplicarEstilo(e){
+  if (!e) return;
+  const r = document.documentElement.style;
+  const g = e.gradiente && e.gradiente.length ? e.gradiente : [e.acento, e.acento];
+  if (e.fondo){ r.setProperty('--bg', e.fondo); document.getElementById('theme-color').setAttribute('content', e.fondo); }
+  if (e.acento){ r.setProperty('--rosa', e.acento); const c = rgbDe(e.acento); if (c) r.setProperty('--acento-rgb', c.join(',')); }
+  r.setProperty('--grad', g.length >= 3
+    ? `linear-gradient(135deg,${g[0]} 0%,${g[1]} 48%,${g[2]} 100%)`
+    : `linear-gradient(135deg,${g[0]} 0%,${g[g.length-1]} 100%)`);
+  const t1 = rgbDe(g[0]), t2 = rgbDe(g[g.length-1]);
+  if (t1) r.setProperty('--tinte1', `rgba(${t1.join(',')},.13)`);
+  if (t2) r.setProperty('--tinte2', `rgba(${t2.join(',')},.09)`);
+  Object.entries(e.vars || {}).forEach(([k, v]) => r.setProperty('--' + k, v));
+}
 
-const REFERENCIAS = [
-  {t:'Referencia 1', u:'https://www.instagram.com/reel/DUssRC1kUou/', n:'Mirá cómo abre y cómo muestra las uñas en primer plano.'},
-  {t:'Referencia 2', u:'https://www.instagram.com/reel/DU60yjwjZVz/', n:'La aplicación paso a paso, sin vueltas.'},
-  {t:'Referencia 3', u:'https://www.instagram.com/reel/DUoGhmCiSCO/', n:'Antes y después bien claro.'},
-  {t:'Referencia 4', u:'https://www.instagram.com/reel/DUvhDapDoIn/', n:'Testimonio hablado a cámara.'}
-];
+/* Las opciones vigentes (ex tonos) y las viejas, para pintar la app de
+   las fichas que eligieron antes de que se recortara la lista. */
+const opcionesTodas = () => (CFG.opciones || []).concat(CFG.opcionesViejas || []);
 
-const PROVINCIAS = ['Buenos Aires','CABA','Catamarca','Chaco','Chubut','Córdoba','Corrientes','Entre Ríos','Formosa','Jujuy','La Pampa','La Rioja','Mendoza','Misiones','Neuquén','Río Negro','Salta','San Juan','San Luis','Santa Cruz','Santa Fe','Santiago del Estero','Tierra del Fuego','Tucumán'];
-
-const BRIEFING = `
-<h3>Antes que nada</h3>
-<p><b style="color:var(--tx)">Consultá en el grupo antes de aplicarte el color</b> si tenés dudas. Un mensaje antes te ahorra un video que no sirve.</p>
-<h3>Qué vende MiLuz de verdad</h3>
-<p>No vendemos uñas lindas: vendemos dejar de esconder las manos. Muchas clientas llegan con las uñas arruinadas del semipermanente y con vergüenza de mostrarlas. Tu video le habla a ella.</p>
-<p>La frase que ordena todo: <b style="color:var(--tx)">primero se repara, después se embellece</b>.</p>
-<h3>El formato que mejor funciona</h3>
-<p>La aplicación en primer plano: cobertura total en una sola pasada, secado al aire, sin cabina y sin torno. Es el video de deseo puro y el que más se guarda.</p>
-<h3>Reglas técnicas</h3>
-<ul class="limpia">
-  <li>Vertical, <b style="color:var(--tx)">mínimo 35 segundos</b>.</li>
-  <li><b style="color:var(--tx)">Mostrando tu cara</b>: no sirve un video solo de manos.</li>
-  <li>Buena luz sobre las manos. Si podés, natural.</li>
-  <li>Sin marca de agua de TikTok.</li>
-  <li>Audio original o en tendencia.</li>
-</ul>
-<h3>El gancho: obligatorio</h3>
-<p>Los primeros 2 segundos deciden todo. Tu video tiene que <b style="color:var(--tx)">abrir sí o sí con uno de estos cuatro ganchos</b>, dicho a cámara o en texto grande:</p>
-<ul class="limpia">
-  <li><span class="si">1</span> "¿Tenés las uñas frágiles y quebradizas?"</li>
-  <li><span class="si">2</span> "Estaba cansada de partirme las uñas con cualquier cosa"</li>
-  <li><span class="si">3</span> "Probé el tratamiento viral de TikTok para reparar uñas y pasó esto:"</li>
-  <li><span class="si">4</span> "Mis uñas pasaron de esto a esto en 15 días gracias al tratamiento viral de TikTok"</li>
-</ul>
-<p>Podés cambiar una palabra para que suene a vos, pero la idea tiene que ser esa. Un video sin uno de estos ganchos no se aprueba.</p>
-<h3>Lo que NO se puede decir</h3>
-<ul class="limpia">
-  <li><span class="no">Nunca</span> le digas "esmalte" ni "un fortalecedor más" al Fénix. Es un <b style="color:var(--tx)">dermorreparador ungueal</b>.</li>
-  <li><span class="no">Nunca</span> menciones el color antes que la reparación.</li>
-  <li><span class="no">Nunca</span> hables mal de las manicuristas. Son parte de nuestro público.</li>
-  <li>No uses <b style="color:var(--tx)">nutre</b>, <b style="color:var(--tx)">hidrata</b> ni <b style="color:var(--tx)">revitaliza</b>.</li>
-  <li>Nada de "el único que funciona" ni promesas absolutas.</li>
-</ul>
-<h3>Cómo entregar</h3>
-<p>Vos <b style="color:var(--tx)">no publicás el reel</b>: nos mandás el video y lo subimos nosotras desde @miluz.arg como collab con vos.</p>
-<ul class="limpia">
-  <li><span class="si">1</span> Creá una carpeta en Google Drive con <b style="color:var(--tx)">el video</b> y <b style="color:var(--tx)">5 fotos del proceso</b> (las uñas antes, aplicando, el resultado).</li>
-  <li><span class="si">2</span> Compartila con <b style="color:var(--tx)">"Cualquier persona con el enlace"</b>.</li>
-  <li><span class="si">3</span> Pegá el link en tu app, en "Entregá tu contenido".</li>
-</ul>
-<h3>Las 5 fotos: qué buscamos</h3>
-<p>No son selfies ni fotos de catálogo: son fotos <b style="color:var(--tx)">del momento</b>, con luz natural. Mezclá estos tres tipos:</p>
-<ul class="limpia">
-  <li><span class="si">01</span> <b style="color:var(--tx)">Escena</b> — vos usando el producto en tu lugar (la mesa, la ventana, el bata). Da contexto y muestra el momento.</li>
-  <li><span class="si">02</span> <b style="color:var(--tx)">Gesto</b> — la acción de cerca: el pincel llegando a la uña, las manos apoyadas. Sin forzar la postura.</li>
-  <li><span class="si">03</span> <b style="color:var(--tx)">Detalle</b> — el producto solo, bien de cerca: el frasco, la gota, la textura. Hace visible la materia.</li>
-</ul>
-<div class="fotos3">
-  <figure><img src="img/miluz-foto-escena.jpg" alt="Escena" loading="lazy"><figcaption><b>01 · Escena</b><span>Da contexto y muestra el momento.</span></figcaption></figure>
-  <figure><img src="img/miluz-foto-gesto.jpg" alt="Gesto" loading="lazy"><figcaption><b>02 · Gesto</b><span>Acerca la acción sin forzar la postura.</span></figcaption></figure>
-  <figure><img src="img/miluz-foto-detalle.jpg" alt="Detalle" loading="lazy"><figcaption><b>03 · Detalle</b><span>Hace visible la materia.</span></figcaption></figure>
-</div>
-<h3>Cuando lo subamos</h3>
-<p>Te va a llegar una <b style="color:var(--tx)">invitación de colaboración</b> en Instagram (Notificaciones → "te invitó a colaborar"). <span class="si">Aceptala</span>: así el reel aparece también en tu perfil y cuenta como tu collab. Y <b style="color:var(--tx)">resubilo a tus historias</b> ese mismo día.</p>
-<p><b style="color:var(--tx)">Subilo también a tu TikTok.</b> El mismo video, en tu cuenta. Después pegá el link en tu app: las views de TikTok <b style="color:var(--tx)">se suman a las del reel</b> para el bono viral y el podio del mes.</p>
-<h3>Tu código de descuento</h3>
-<p>Nombralo en el video y dejalo fijado en los comentarios. Tus seguidoras compran con descuento y vos ganás comisión por cada venta.</p>
-<h3>El plazo</h3>
-<p>Tenés <b style="color:var(--tx)">7 días desde que el kit llega a tu casa</b> para mandarnos el video. Avisanos en la app cuando lo recibas.</p>
-<h3>Mirá estos antes de grabar</h3>
-<p>Cuatro reels de Mi Luz que ya funcionaron. Copiá la estructura, no el contenido.</p>
-<div id="refs"></div>`;
+/* ── briefing armado desde la config ── */
+const B = t => `<b style="color:var(--tx)">${t}</b>`;
+function armarBriefing(){
+  const br = CFG.briefing || {};
+  const nFotos = br.fotosProceso || 5;
+  const conCodigo = !!CFG.tienda;
+  const secciones = [];
+  (br.intro || []).forEach(s => secciones.push(`<h3>${s.t}</h3>${s.html}`));
+  if ((CFG.reglas || []).length) secciones.push(`<h3>Reglas técnicas</h3><ul class="limpia">${CFG.reglas.map(r => `<li>${r}</li>`).join('')}</ul>`);
+  if ((CFG.ganchos || []).length) secciones.push(
+    `<h3>El gancho: obligatorio</h3>
+     <p>Los primeros 2 segundos deciden todo. Tu video tiene que ${B(`abrir sí o sí con uno de estos ${['','','dos','tres','cuatro','cinco','seis'][CFG.ganchos.length] || CFG.ganchos.length} ganchos`)}, dicho a cámara o en texto grande:</p>
+     <ul class="limpia">${CFG.ganchos.map((g, n) => `<li><span class="si">${n+1}</span> "${g}"</li>`).join('')}</ul>
+     <p>Podés cambiar una palabra para que suene a vos, pero la idea tiene que ser esa. Un video sin uno de estos ganchos no se aprueba.</p>`);
+  if ((CFG.noDecir || []).length) secciones.push(`<h3>Lo que NO se puede decir</h3><ul class="limpia">${CFG.noDecir.map(r => `<li>${r}</li>`).join('')}</ul>`);
+  secciones.push(
+    `<h3>Cómo entregar</h3>
+     <p>Vos ${B('no publicás el reel')}: nos mandás el video y lo subimos nosotras desde @${CFG.cuentaIg} como collab con vos.</p>
+     <ul class="limpia">
+       <li><span class="si">1</span> Creá una carpeta en Google Drive con ${B('el video')} y ${B(`${nFotos} fotos del proceso`)} (el antes, aplicando, el resultado).</li>
+       <li><span class="si">2</span> Compartila con ${B('"Cualquier persona con el enlace"')}.</li>
+       <li><span class="si">3</span> Pegá el link en tu app, en "Entregá tu contenido".</li>
+     </ul>
+     <h3>Las ${nFotos} fotos: qué buscamos</h3>
+     <p>No son selfies ni fotos de catálogo: son fotos ${B('del momento')}, con luz natural. Mezclá estos tres tipos:</p>
+     <ul class="limpia">
+       <li><span class="si">01</span> ${B('Escena')} — vos usando el producto en tu lugar (la mesa, la ventana, el bata). Da contexto y muestra el momento.</li>
+       <li><span class="si">02</span> ${B('Gesto')} — la acción de cerca: el pincel llegando a la uña, las manos apoyadas. Sin forzar la postura.</li>
+       <li><span class="si">03</span> ${B('Detalle')} — el producto solo, bien de cerca: el frasco, la gota, la textura. Hace visible la materia.</li>
+     </ul>` +
+    ((CFG.fotos || []).length >= 3 ? `
+     <div class="fotos3">
+       <figure><img src="${CFG.fotos[0]}" alt="Escena" loading="lazy"><figcaption><b>01 · Escena</b><span>Da contexto y muestra el momento.</span></figcaption></figure>
+       <figure><img src="${CFG.fotos[1]}" alt="Gesto" loading="lazy"><figcaption><b>02 · Gesto</b><span>Acerca la acción sin forzar la postura.</span></figcaption></figure>
+       <figure><img src="${CFG.fotos[2]}" alt="Detalle" loading="lazy"><figcaption><b>03 · Detalle</b><span>Hace visible la materia.</span></figcaption></figure>
+     </div>` : '') +
+    `<h3>Cuando lo subamos</h3>
+     <p>Te va a llegar una ${B('invitación de colaboración')} en Instagram (Notificaciones → "te invitó a colaborar"). <span class="si">Aceptala</span>: así el reel aparece también en tu perfil y cuenta como tu collab. Y ${B('resubilo a tus historias')} ese mismo día.</p>
+     <p>${B('Subilo también a tu TikTok.')} El mismo video, en tu cuenta. Después pegá el link en tu app: las views de TikTok ${B('se suman a las del reel')} para el bono viral y el podio del mes.</p>` +
+    (conCodigo ? `<h3>Tu código de descuento</h3>
+     <p>Nombralo en el video y dejalo fijado en los comentarios. Tus seguidoras compran con descuento y vos ganás comisión por cada venta.</p>` : '') +
+    `<h3>El plazo</h3>
+     <p>Tenés ${B(`${CFG.diasParaPublicar} días desde que el kit llega a tu casa`)} para mandarnos el video. Avisanos en la app cuando lo recibas.</p>`);
+  if ((CFG.referencias || []).length) secciones.push(
+    `<h3>Mirá estos antes de grabar</h3>
+     <p>Reels de ${CFG.nombre} que ya funcionaron. Copiá la estructura, no el contenido.</p>
+     <div id="refs">${CFG.referencias.map(r => `
+       <a class="ref" href="${r.u}" target="_blank" rel="noopener">
+         <span class="play">▶</span>
+         <span><b>${r.t}</b><small>${r.n}</small></span></a>`).join('')}</div>`);
+  return secciones.join('\n');
+}
 
 let D = null;
 const $ = s => document.querySelector(s);
@@ -753,13 +759,13 @@ const ver = id => {
     $('#'+v).classList.toggle('oculto', v !== id));
   window.scrollTo(0,0);
 };
-const TOKEN = new URLSearchParams(location.search).get('t');
+const TOKEN = QS.get('t');
 
 async function api(accion, datos){
   if (DEMO) return demo(accion, datos);
   const r = await fetch(API, {
     method:'POST', headers:{'Content-Type':'application/json'},
-    body: JSON.stringify({ accion, token: TOKEN, ...datos })
+    body: JSON.stringify({ accion, marca: MARCA, token: TOKEN, ...datos })
   });
   if (!r.ok) throw new Error('http '+r.status);
   return r.json();
@@ -767,22 +773,22 @@ async function api(accion, datos){
 
 let _mem = null;
 const _ls = {
-  leer(){ try { return JSON.parse(localStorage.getItem('miluz_demo')||'null'); } catch { return _mem; } },
-  guardar(v){ _mem = v; try { localStorage.setItem('miluz_demo', JSON.stringify(v)); } catch {} }
+  leer(){ try { return JSON.parse(localStorage.getItem(MARCA + '_demo')||'null'); } catch { return _mem; } },
+  guardar(v){ _mem = v; try { localStorage.setItem(MARCA + '_demo', JSON.stringify(v)); } catch {} }
 };
 function demo(accion, datos){
   const g = _ls.leer() || {
     estado:'invitada', ig:'sofi.deco', nivel:1,
     nombre:'Sofía Pérez', tel:'11 5555 1234', email:'sofi@mail.com',
-    provincia:'Córdoba', tonos:['rubi','rosa-palo']
+    provincia:'Córdoba', tonos: opcionesTodas().slice(-2).map(t => t.id)
   };
   if (accion === 'ficha'){ Object.assign(g, datos.ficha, {estado:'ficha_completa'}); }
   if (accion === 'briefing'){ g.estado = 'briefing_ok'; }
-  if (accion === 'llego'){ g.estado = 'recibido'; g.deadline = Date.now()+7*864e5; }
+  if (accion === 'llego'){ g.estado = 'recibido'; g.deadline = Date.now()+CFG.diasParaPublicar*864e5; }
   if (accion === 'reel'){ g.estado = 'publicado'; g.reel = datos.url; }
   if (accion === 'avanzar'){
     g.estado = datos.a;
-    g.codigo = 'SOFI10';
+    g.codigo = CFG.tienda ? 'SOFI10' : null;
     if (datos.a === 'recibido') g.deadline = Date.now()+5*864e5;
     if (datos.a === 'cumplida') g.nivel = 2;
     if (['publicado','cumplida'].includes(datos.a)){
@@ -794,23 +800,27 @@ function demo(accion, datos){
   return Promise.resolve({ok:true, creadora:g});
 }
 
+const ELEGIR = () => CFG.elegir || 0;
 function pintarTonos(){
-  $('#tonos').innerHTML = TONOS.map(t => `
+  if (!ELEGIR()){ $('#card-tonos').classList.add('oculto'); return; }
+  $('#kit-nota').innerHTML = (CFG.eleccion && CFG.eleccion.nota) || '';
+  $('#err-tonos').textContent = (CFG.eleccion && CFG.eleccion.error) || `Elegí exactamente ${ELEGIR()}`;
+  $('#tonos').innerHTML = CFG.opciones.map(t => `
     <label class="tono">
       <input type="checkbox" name="tono" value="${t.id}">
-      <span class="sw" style="background:${t.hex}"></span>
+      ${t.hex ? `<span class="sw" style="background:${t.hex}"></span>` : `<span class="sw txt">${t.nom.slice(0,2)}</span>`}
       <span class="nm">${t.nom}</span>
     </label>`).join('');
   $('#tonos').addEventListener('change', () => {
     const sel = [...document.querySelectorAll('input[name=tono]:checked')];
     document.querySelectorAll('.tono').forEach(l =>
-      l.classList.toggle('off', sel.length >= 2 && !l.querySelector('input').checked));
-    if (sel.length === 2) $('#err-tonos').style.display = 'none';
+      l.classList.toggle('off', sel.length >= ELEGIR() && !l.querySelector('input').checked));
+    if (sel.length === ELEGIR()) $('#err-tonos').style.display = 'none';
   });
 }
 function pintarProvincias(){
   const s = document.querySelector('select[name=provincia]');
-  PROVINCIAS.forEach(p => s.insertAdjacentHTML('beforeend', `<option>${p}</option>`));
+  (CFG.provincias || []).forEach(p => s.insertAdjacentHTML('beforeend', `<option>${p}</option>`));
 }
 
 /* Lo que ya cargó en la landing viene del backend: se precarga y se
@@ -823,7 +833,7 @@ function precargar(){
       const c = document.querySelector(`#form-ficha [name="${campo}"]`);
       if (c && !c.value) c.value = valor;
     });
-  if (Array.isArray(D.tonos) && D.tonos.length === 2){
+  if (ELEGIR() && Array.isArray(D.tonos) && D.tonos.length === ELEGIR()){
     D.tonos.forEach(id => {
       const c = document.querySelector(`#tonos input[value="${id}"]`);
       if (c) c.checked = true;
@@ -847,9 +857,11 @@ function validar(f){
     c.closest('label').classList.toggle('malo', malo);
     if (malo) ok = false;
   });
-  const tonos = [...document.querySelectorAll('input[name=tono]:checked')];
-  $('#err-tonos').style.display = tonos.length === 2 ? 'none' : 'block';
-  if (tonos.length !== 2) ok = false;
+  if (ELEGIR()){
+    const tonos = [...document.querySelectorAll('input[name=tono]:checked')];
+    $('#err-tonos').style.display = tonos.length === ELEGIR() ? 'none' : 'block';
+    if (tonos.length !== ELEGIR()) ok = false;
+  }
   const t = f.querySelector('[name=terminos]');
   $('#err-terminos').style.display = t.checked ? 'none' : 'block';
   if (!t.checked) ok = false;
@@ -861,7 +873,7 @@ let PASO = 1;
 const TITULOS = {
   1: ['Tus datos',              'Empezamos por lo básico.'],
   2: ['¿A dónde te lo mandamos?','Para que el kit llegue bien.'],
-  3: ['Elegí tus dos colores',   'La parte linda.']
+  3: ['Último paso',             'Confirmá y armamos tu kit.']
 };
 function irAPaso(n){
   PASO = n;
@@ -896,15 +908,16 @@ document.querySelectorAll('[data-ir]').forEach(b => b.addEventListener('click', 
 }));
 
 /* lo que ya cargó no se pierde si cierra la app */
+const K_BORRADOR = () => MARCA + '_borrador';
 function guardarBorrador(){
   try {
     const d = Object.fromEntries(new FormData($('#form-ficha')).entries());
-    localStorage.setItem('miluz_borrador', JSON.stringify({paso: PASO, d}));
+    localStorage.setItem(K_BORRADOR(), JSON.stringify({paso: PASO, d}));
   } catch {}
 }
 function traerBorrador(){
   try {
-    const b = JSON.parse(localStorage.getItem('miluz_borrador') || 'null');
+    const b = JSON.parse(localStorage.getItem(K_BORRADOR()) || 'null');
     if (!b) return;
     Object.entries(b.d).forEach(([k,v]) => {
       const c = document.querySelector(`#form-ficha [name="${k}"]`);
@@ -924,7 +937,7 @@ $('#form-ficha').addEventListener('submit', async e => {
   delete ficha.tono;
   try {
     D = (await api('ficha', {ficha})).creadora;
-    try { localStorage.removeItem('miluz_borrador'); } catch {}
+    try { localStorage.removeItem(K_BORRADOR()); } catch {}
     cabecera(); ver('v-brief');
   }
   catch { b.disabled = false; b.textContent = 'Guardar y seguir'; alert('No pudimos guardar. Probá de nuevo.'); }
@@ -1017,9 +1030,11 @@ function seguro(hex, fallback){
 function pintarConSusColores(){
   const ids = (D && D.tonos) || [];
   if (ids.length < 2) return;                       // sin colores: queda el de marca
-  const hex = id => (TONOS.concat(TONOS_VIEJOS).find(t => t.id === id) || {}).hex;
-  const a = seguro(hex(ids[0]), '#D97E73');
-  const b = seguro(hex(ids[1]), '#9E5A86');
+  const hex = id => (opcionesTodas().find(t => t.id === id) || {}).hex;
+  if (!hex(ids[0]) || !hex(ids[1])) return;         // opciones sin color: queda el de marca
+  const g = (CFG.estilo && CFG.estilo.gradiente) || [];
+  const a = seguro(hex(ids[0]), g[0] || CFG.estilo.acento);
+  const b = seguro(hex(ids[1]), g[g.length-1] || CFG.estilo.acento);
   document.documentElement.style.setProperty('--grad', `linear-gradient(135deg, ${a} 0%, ${b} 100%)`);
   document.documentElement.style.setProperty('--rosa', a);
 }
@@ -1030,13 +1045,15 @@ const NIVELES = {
   3:['Embajadora','Kit completo todos los meses y los lanzamientos antes que nadie.'],
   4:['Staff CIMA','Sos candidata a creadora paga de la red.']
 };
-const FLUJO = [
-  ['aprobada',  '<svg viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.8\" stroke-linecap=\"round\" stroke-linejoin=\"round\"><path d="M4 12.5l5.5 5.5L20 7"/></svg>','Te aceptamos',        'Tus datos ya están cargados.'],
-  ['enviado',   '<svg viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.8\" stroke-linecap=\"round\" stroke-linejoin=\"round\"><path d="M3 7.5l9-4 9 4-9 4z"/><path d="M3 7.5v9l9 4 9-4v-9"/><path d="M12 11.5v9"/></svg>','Kit despachado',      'Va en camino a tu casa.'],
-  ['recibido',  '<svg viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.8\" stroke-linecap=\"round\" stroke-linejoin=\"round\"><path d="M3.5 11L12 4l8.5 7"/><path d="M5.5 9.7V19a1 1 0 0 0 1 1h11a1 1 0 0 0 1-1V9.7"/></svg>','Te llegó',            'Arrancaron tus 7 días.'],
-  ['entregado', '<svg viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.8\" stroke-linecap=\"round\" stroke-linejoin=\"round\"><rect x="3" y="6" width="18" height="13" rx="2.5"/><path d="M10 10.5l5 3-5 3z"/></svg>','Entregaste tu video','Lo estamos revisando.'],
-  ['publicado', '<svg viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.8\" stroke-linecap=\"round\" stroke-linejoin=\"round\"><rect x="3" y="6" width="18" height="13" rx="2.5"/><path d="M10 10.5l5 3-5 3z"/></svg>','Publicado en @miluz.arg','Aceptá la invitación de colaboración.'],
-  ['cumplida',  '<svg viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.8\" stroke-linecap=\"round\" stroke-linejoin=\"round\"><path d="M12 2.8l2.7 5.9 6.4.7-4.8 4.4 1.3 6.4L12 17l-5.6 3.2 1.3-6.4L2.9 9.4l6.4-.7z"/></svg>','Listo',               'Collab aprobada y nivel actualizado.']
+const SVG_OK = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 12.5l5.5 5.5L20 7"/></svg>';
+const SVG_VIDEO = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="6" width="18" height="13" rx="2.5"/><path d="M10 10.5l5 3-5 3z"/></svg>';
+const FLUJO = () => [
+  ['aprobada',  SVG_OK,'Te aceptamos',        'Tus datos ya están cargados.'],
+  ['enviado',   '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 7.5l9-4 9 4-9 4z"/><path d="M3 7.5v9l9 4 9-4v-9"/><path d="M12 11.5v9"/></svg>','Kit despachado',      'Va en camino a tu casa.'],
+  ['recibido',  '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3.5 11L12 4l8.5 7"/><path d="M5.5 9.7V19a1 1 0 0 0 1 1h11a1 1 0 0 0 1-1V9.7"/></svg>','Te llegó',            `Arrancaron tus ${CFG.diasParaPublicar} días.`],
+  ['entregado', SVG_VIDEO,'Entregaste tu video','Lo estamos revisando.'],
+  ['publicado', SVG_VIDEO,`Publicado en @${CFG.cuentaIg}`,'Aceptá la invitación de colaboración.'],
+  ['cumplida',  '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2.8l2.7 5.9 6.4.7-4.8 4.4 1.3 6.4L12 17l-5.6 3.2 1.3-6.4L2.9 9.4l6.4-.7z"/></svg>','Listo',               'Collab aprobada y nivel actualizado.']
 ];
 const ORDEN = ['briefing_ok','aprobada','enviado','recibido','entregado','publicado','cumplida'];
 // 'cambios' es una vuelta atrás dentro de la entrega: para el recorrido vale como 'recibido'
@@ -1057,7 +1074,7 @@ const numero = n => Math.round(n).toLocaleString('es-AR');
 /* Lo que ganó y lo que puede ganar. Aparece recién cuando publicó:
    antes no hay nada que mostrar y una tarjeta en cero desmotiva. */
 function pintarPlata(){
-  const B = CONFIG.bonos;
+  const B = CFG.plata;
   const publicado = ['publicado','cumplida'].includes(D.estado);
   const viewsIg = (D.reel && D.reel.views) || 0;
   const viewsTt = (D.tiktok && D.tiktok.views) || 0;
@@ -1100,18 +1117,21 @@ function pintarPlata(){
     : 'Las tres collabs con más views del mes cobran premio.';
 
   $('#bono-comision-pct').textContent = B.comision + '%';
+  // sin tienda no hay código ni comisión por ventas: se esconde el bono
+  $('#bono-comision-pct').closest('.bono').classList.toggle('oculto', !CFG.tienda);
 }
 
 function pintarEstado(){
   cabecera();
   pintarConSusColores();
   const e = D.estado, pos = ORDEN_DE(e);
+  const total = CFG.diasParaPublicar;
 
-  $('#pasos').innerHTML = FLUJO.map(p => {
+  $('#pasos').innerHTML = FLUJO().map(p => {
     const hecho = pos > ORDEN.indexOf(p[0]);
     const activo = e === p[0];
     return `<div class="fila ${hecho?'hecho':(activo?'activo':'pend')}">
-      <span class="cua">${hecho ? '<svg viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.8\" stroke-linecap=\"round\" stroke-linejoin=\"round\"><path d="M4 12.5l5.5 5.5L20 7"/></svg>' : p[1]}</span>
+      <span class="cua">${hecho ? SVG_OK : p[1]}</span>
       <span class="tx"><b>${p[2]}</b><small>${p[3]}</small></span></div>`;
   }).join('');
 
@@ -1134,7 +1154,7 @@ function pintarEstado(){
   const conAnillo = (e === 'recibido' && dias !== null);
   $('#hero').classList.toggle('con-anillo', conAnillo);
   if (conAnillo){
-    const total = 7, hechos = Math.min(total, Math.max(0, total - dias));
+    const hechos = Math.min(total, Math.max(0, total - dias));
     const largo = 2 * Math.PI * 55;
     $('#anillo-arco').setAttribute('stroke-dashoffset', String(largo * hechos / total));
     $('#anillo-num').textContent = dias;
@@ -1176,32 +1196,44 @@ function pintarEstado(){
   if (cod){
     $('#codigo-txt').textContent = cod;
     // mismo identificador que el código: una sola atribución para los dos caminos
-    const url = `${CONFIG.tienda}/?utm_source=ig&utm_medium=creadora&utm_campaign=${cod.toLowerCase()}`;
+    const url = `${CFG.tienda}/?utm_source=ig&utm_medium=creadora&utm_campaign=${cod.toLowerCase()}`;
     $('#link-url').textContent = url.replace(/^https?:\/\//, '');
     $('#link-url').dataset.url = url;
   }
+  ajustarAccesos();
 
   pintarReferidas();
 }
 
 function linkReferida(){
   return (D.referidas && D.referidas.link) ||
-    ('https://cima-creators.github.io/cleargy.ugc/miluz-aplicar.html?ref=' + encodeURIComponent(D.ig || ''));
+    (CFG.landing + (CFG.landing.includes('?') ? '&' : '?') + 'ref=' + encodeURIComponent(D.ig || ''));
 }
 function pintarReferidas(){
-  const r = D.referidas || { aplicaron: 0, cumplieron: 0, ganado: 0, monto: 10000 };
-  $('#rf-monto').textContent = pesos(r.monto || 10000);
+  const r = D.referidas || { aplicaron: 0, cumplieron: 0, ganado: 0, monto: CFG.plata.referida || 0 };
+  $('#rf-monto').textContent = pesos(r.monto || CFG.plata.referida || 0);
   $('#rf-apl').textContent = r.aplicaron || 0;
   $('#rf-cum').textContent = r.cumplieron || 0;
   $('#rf-gan').textContent = pesos(r.ganado || 0);
+  $('#bloque-ref').classList.toggle('oculto', !(CFG.plata.referida > 0));
 }
 $('#btn-ref').addEventListener('click', async () => {
   const link = linkReferida();
-  const texto = `Sumate al equipo de creadoras de MiLuz 💅 Te regalan el kit y ganás bonos por views y ventas. Aplicá con mi link: ${link}`;
+  const texto = `Sumate al equipo de creadoras de ${CFG.nombre} ✨ Te regalan el kit y ganás bonos por views y ventas. Aplicá con mi link: ${link}`;
   if (navigator.share) { try { await navigator.share({ text: texto }); return; } catch {} }
   try { await navigator.clipboard.writeText(texto); $('#rf-ok').style.display = 'block'; setTimeout(() => $('#rf-ok').style.display = 'none', 2500); }
   catch { window.open('https://wa.me/?text=' + encodeURIComponent(texto), '_blank'); }
 });
+
+/* la grilla de accesos se acomoda a cuántos quedaron visibles */
+function ajustarAccesos(){
+  const grilla = document.querySelector('.accesos');
+  const cuantos = [...document.querySelectorAll('.acceso')].filter(a => a.style.display !== 'none').length;
+  grilla?.classList.toggle('dos',   cuantos === 2);
+  grilla?.classList.toggle('tres',  cuantos === 3);
+  grilla?.classList.toggle('cuatro',cuantos === 4);
+  grilla?.classList.toggle('cinco', cuantos === 5);
+}
 
 function barraDemo(){
   const irA = a => api('avanzar',{a}).then(r => { D = r.creadora; pintarEstado(); ver('v-estado'); });
@@ -1219,26 +1251,41 @@ function barraDemo(){
   document.body.classList.add('condemo');
 }
 
+/* ── textos fijos de la marca en el markup ── */
+function pintarMarca(){
+  const est = CFG.estilo || {};
+  document.title = `${CFG.nombre} · Creadoras`;
+  $('#quien').textContent = `${CFG.nombre} · Creadoras`;
+  $('#av').textContent = est.iniciales || CFG.nombre.slice(0,2).toUpperCase();
+  $('#terminos-txt').innerHTML = (CFG.formulario && CFG.formulario.terminos) || `Autorizo a ${CFG.nombre} a usar el contenido que publique en su perfil y en su publicidad. Confirmo que los datos son correctos.`;
+  $('#llego-txt').textContent = `Tocá acá cuando lo tengas en la mano. Ahí arrancan tus ${CFG.diasParaPublicar} días — no antes, así el correo no te come el plazo.`;
+  const nFotos = (CFG.briefing && CFG.briefing.fotosProceso) || 5;
+  $('#subir-txt').innerHTML = `Subí a una carpeta de Google Drive <b style="color:var(--tx)">el video y las ${nFotos} fotos del proceso</b>, compartila con "Cualquier persona con el enlace" y pegá el link acá. El reel lo subimos nosotras como collab desde @${CFG.cuentaIg}.`;
+  const ll = CFG.llamada;
+  $('#dudas-txt').innerHTML = (CFG.grupo ? 'Preguntá en el grupo, es lo más rápido. ' : '') +
+    (ll ? `La llamada es todos los ${String(ll.dia).toLowerCase()} a las ${ll.hora}. ` : '') +
+    `También podés escribirnos a <b style="color:var(--tx)" id="ig-handle">@${CFG.cuentaIg}</b>.`;
+  if (ELEGIR()){ TITULOS[3] = [CFG.eleccion.tituloFicha || 'Elegí tus opciones', CFG.eleccion.subFicha || '']; }
+}
+
 (async function init(){
+  try { CFG = await cargarConfig(); }
+  catch { $('#v-error .card h2').textContent = 'No pudimos cargar la marca'; ver('v-error'); return; }
+  aplicarEstilo(CFG.estilo);
+  pintarMarca();
   pintarTonos(); pintarProvincias();
-  $('#brief-cuerpo').innerHTML = BRIEFING;
-  $('#refs').innerHTML = REFERENCIAS.map(r => `
-    <a class="ref" href="${r.u}" target="_blank" rel="noopener">
-      <span class="play">▶</span>
-      <span><b>${r.t}</b><small>${r.n}</small></span></a>`).join('');
-  if (CONFIG.grupoWpp) $('#a-grupo').href = CONFIG.grupoWpp;
+  $('#brief-cuerpo').innerHTML = armarBriefing();
+  if (CFG.grupo) $('#a-grupo').href = CFG.grupo;
   else $('#a-grupo').style.display = 'none';
-  const grilla = document.querySelector('.accesos');
-  const cuantos = [...document.querySelectorAll('.acceso')].filter(a => a.style.display !== 'none').length;
-  grilla?.classList.toggle('tres',  cuantos === 3);
-  grilla?.classList.toggle('cuatro',cuantos === 4);
-  grilla?.classList.toggle('cinco', cuantos === 5);
-  $('#ll-entrar').href = CONFIG.llamada.link;
-  $('#ll-dia').textContent = CONFIG.llamada.dia;
-  $('#ll-hora').textContent = CONFIG.llamada.hora;
-  $('#a-llamada').addEventListener('click', () => $('#pop-llamada').showModal());
+  if (CFG.llamada && CFG.llamada.link){
+    $('#ll-entrar').href = CFG.llamada.link;
+    $('#ll-dia').textContent = CFG.llamada.dia;
+    $('#ll-hora').textContent = CFG.llamada.hora;
+    $('#a-llamada').addEventListener('click', () => $('#pop-llamada').showModal());
+  } else $('#a-llamada').style.display = 'none';
+  if (!CFG.tienda) $('#a-codigo').style.display = 'none';
+  ajustarAccesos();
   $('#ll-cerrar').addEventListener('click', () => $('#pop-llamada').close());
-  $('#ig-handle').textContent = CONFIG.ig;
 
   if (DEMO) barraDemo();
   if (!TOKEN && !DEMO){ ver('v-error'); return; }
@@ -1252,7 +1299,7 @@ function barraDemo(){
   } catch { if (DEMO){ precargar(); traerBorrador(); } ver(DEMO ? 'v-ficha' : 'v-error'); }
 })();
 
-const APP_VERSION = '2026-09-12-b';
+const APP_VERSION = '2026-09-19-a';
 </script>
 </body>
 </html>

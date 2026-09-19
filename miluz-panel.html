@@ -4,30 +4,32 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
-<title>MiLuz · Panel</title>
+<title>Panel</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap">
 <style>
 :root{
-  /* mismos tokens que la app de creadoras */
-  --crema:#FBF7F2; --arena:#F4EDE4; --beige:#F6EFE6; --linea:#EBE0D2; --linea2:#DFD1BE;
+  /* escala neutra compartida con la app; el acento, el degradé y el fondo
+     los pone la marca (estilo en la config del backend) al cargar */
+  --crema:#F7F6F4; --arena:#F4EDE4; --beige:#F6EFE6; --linea:#EBE0D2; --linea2:#DFD1BE;
   --topo:#9C8D7C; --tinta:#2A231D; --tinta2:#6B5E51;
-  --acento:#C4636F; --acento-suave:#FBF1F2;
+  --acento:#7A7A7A; --acento-suave:#F0F0EE; --acento-rgb:122,122,122;
   --ok:#4F8C63; --ok-suave:#EAF2EC; --no:#C0524C; --no-suave:#FAEDEB;
   --duda:#C08A2E; --duda-suave:#FAF1E2;
-  --grad:linear-gradient(135deg,#D97E73 0%,#C4636F 48%,#9E5A86 100%);
+  --grad:linear-gradient(135deg,#9A9A9A 0%,#7A7A7A 48%,#5E5E5E 100%);
+  --tinte1:rgba(0,0,0,0); --tinte2:rgba(0,0,0,0);
   --sombra:0 1px 2px rgba(42,35,29,.04);
 }
 *{box-sizing:border-box}
-.verreel{color:#C4636F;text-decoration:none;font-weight:600}
+.verreel{color:var(--acento);text-decoration:none;font-weight:600}
 .verreel:hover{text-decoration:underline}
 html{touch-action:manipulation;-webkit-text-size-adjust:100%}
 body{
   margin:0;background:var(--crema);color:var(--tinta);
   background-image:
-    radial-gradient(880px 400px at 10% -10%, rgba(217,126,115,.10), transparent 62%),
-    radial-gradient(720px 360px at 95% 2%, rgba(158,90,134,.07), transparent 60%);
+    radial-gradient(880px 400px at 10% -10%, var(--tinte1), transparent 62%),
+    radial-gradient(720px 360px at 95% 2%, var(--tinte2), transparent 60%);
   background-attachment:fixed;
   font-family:Manrope,-apple-system,system-ui,sans-serif;font-size:15px;line-height:1.5;letter-spacing:-.01em;
 }
@@ -138,7 +140,7 @@ h1{font-size:1.5rem;font-weight:800;letter-spacing:-.03em;margin:0 0 4px}
 .perfil .id span{display:block;font-size:.78rem;color:var(--topo);margin-top:1px}
 .perfil .ir{
   flex:0 0 auto;font-size:.76rem;font-weight:600;color:var(--acento);
-  border:1px solid #E6CFC8;background:var(--acento-suave);
+  border:1px solid color-mix(in srgb, var(--acento) 30%, #fff);background:var(--acento-suave);
   padding:7px 12px;border-radius:12px;white-space:nowrap
 }
 .perfil:hover .ir{background:var(--acento);color:#fff;border-color:var(--acento)}
@@ -238,7 +240,7 @@ td .n2{color:var(--topo);font-size:.78rem;display:block;margin-top:2px}
 
 .estrella{
   background:var(--grad);color:#fff;border-radius:18px;padding:14px 18px;margin-bottom:10px;
-  box-shadow:0 8px 20px -12px rgba(196,99,111,.5);position:relative;overflow:hidden;
+  box-shadow:0 8px 20px -12px rgba(var(--acento-rgb),.5);position:relative;overflow:hidden;
   display:flex;align-items:baseline;gap:14px
 }
 .estrella::after{content:"";position:absolute;right:-70px;top:-90px;width:190px;height:190px;border-radius:50%;background:rgba(255,255,255,.09)}
@@ -292,7 +294,7 @@ td .n2{color:var(--topo);font-size:.78rem;display:block;margin-top:2px}
   flex:1;min-width:180px;padding:10px 15px;font:inherit;font-size:.88rem;color:var(--tinta);
   background:#fff;border:1px solid var(--linea);border-radius:13px;outline:none
 }
-.buscar:focus{border-color:var(--acento);box-shadow:0 0 0 3px rgba(196,99,111,.12)}
+.buscar:focus{border-color:var(--acento);box-shadow:0 0 0 3px rgba(var(--acento-rgb),.12)}
 th.orden{cursor:pointer;user-select:none;white-space:nowrap}
 th.orden:hover{color:var(--acento)}
 th.orden.activo{color:var(--acento)}
@@ -419,6 +421,12 @@ td.dmacc .mini{display:inline-block;margin:0 0 0 6px;padding:4px 9px;border-radi
 td.dmacc .mini:hover{background:var(--beige,#f3ede6)}
 td.dmacc .pill{margin-right:2px;vertical-align:middle}
 .fcre.activo{background:var(--tx,#111);color:#fff;border-color:var(--tx,#111)} .fcre .n{margin-left:4px;font-weight:700}
+dialog.dlg{border:0;border-radius:18px;padding:0;max-width:560px;width:calc(100% - 32px);background:#fff;color:var(--tinta);box-shadow:0 24px 60px -18px rgba(42,35,29,.4)}
+dialog.dlg::backdrop{background:rgba(42,35,29,.45)}
+dialog.dlg .cuerpo{padding:22px}
+dialog.dlg h2{margin:0 0 4px;font-size:1.2rem}
+dialog.dlg textarea{width:100%;min-height:180px;font:inherit;font-size:.85rem;padding:12px;border:1px solid var(--linea);border-radius:12px;resize:vertical;margin:12px 0}
+dialog.dlg .fila{display:flex;gap:8px;justify-content:flex-end;flex-wrap:wrap}
 </style>
 </head>
 <body>
@@ -429,7 +437,7 @@ td.dmacc .pill{margin-right:2px;vertical-align:middle}
 <div class="velo" id="velo"></div>
 
 <nav class="lat" id="lat">
-  <div class="marca"><i>ML</i><span>MiLuz</span></div>
+  <div class="marca"><i id="marca-ini"></i><span id="marca-nombre"></span></div>
   <button data-t="resumen" class="on"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M3 13h6V3H3zM15 21h6V11h-6zM3 21h6v-5H3zM15 7h6V3h-6z"/></svg><span class="et">Resumen</span></button>
   <button data-t="admision"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M19 8v6M22 11h-6"/></svg><span class="et">Admisión</span><span class="n" id="n-adm">0</span></button>
   <button data-t="envios"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M3 7.5l9-4 9 4-9 4z"/><path d="M3 7.5v9l9 4 9-4v-9"/><path d="M12 11.5v9"/></svg><span class="et">Envíos</span><span class="n" id="n-env">0</span></button>
@@ -488,6 +496,7 @@ td.dmacc .pill{margin-right:2px;vertical-align:middle}
     <div class="barrasup">
       <input class="buscar" id="buscar" type="search" placeholder="Buscar…" autocomplete="off">
       <button class="bsec" id="btn-csv-cre">Exportar</button>
+      <button class="bsec" id="btn-importar" hidden>Importar aprobadas</button>
     </div>
     <div class="barrasup" id="filtro-cre" style="gap:6px;flex-wrap:wrap">
       <button class="bsec fcre activo" data-f="todas">Todas</button>
@@ -504,24 +513,42 @@ td.dmacc .pill{margin-right:2px;vertical-align:middle}
   <!-- ══ ENTREGAS ══ -->
   <section id="t-entregas" class="oculto">
     <h1>Entregas</h1>
-    <p class="sub">Los videos que mandaron por Drive: revisalos, subilos como collab desde @miluz.arg y pegá el link del reel. Después el sistema verifica solo que acepten la invitación.</p>
+    <p class="sub" id="entregas-sub">Los videos que mandaron por Drive: revisalos, subilos como collab desde la cuenta de la marca y pegá el link del reel. Después el sistema verifica solo que acepten la invitación.</p>
     <div id="lista-entregas"></div>
   </section>
 
 </main>
 
+<dialog class="dlg" id="dlg-importar">
+  <div class="cuerpo">
+    <h2>Importar creadoras ya aprobadas</h2>
+    <p class="n2" style="margin:0">Una por línea: <code>ig,nombre,tel,email,provincia</code> (con o sin encabezado; también sirve separado por punto y coma o tab). Entran directo como <b>aceptadas, falta la ficha</b> y se les manda el link de su app.</p>
+    <textarea id="imp-txt" placeholder="ig,nombre,tel,email,provincia&#10;sofi.deco,Sofía Pérez,1155551234,sofi@mail.com,Córdoba"></textarea>
+    <div id="imp-res" class="n2" style="margin:0 0 10px;white-space:pre-wrap"></div>
+    <div class="fila">
+      <button class="bsec" id="imp-cerrar">Cerrar</button>
+      <button class="bsec" id="imp-copiar" hidden>Copiar links</button>
+      <button class="bsec pri" id="imp-ok">Importar</button>
+    </div>
+  </div>
+</dialog>
+
 <script>
 /* ═══════════════════════════════════════════════════════
-   MiLuz · Panel del ejército de creadoras
-   Datos de ejemplo hasta que exista la Cloud Function.
+   Panel del ejército de creadoras · multi-marca
+   ?marca=<slug> (default miluz). TODO lo de la marca (nombre,
+   opciones, economía, filtro, textos) viene de la acción `config`.
    ═══════════════════════════════════════════════════════ */
 
 /* ═══ CONEXIÓN AL BACKEND ═══
    Sin ?demo=1 el panel habla con la Cloud Function real. La clave se
    pide una vez y queda en sessionStorage. Con ?demo=1, datos de ejemplo. */
 const API = 'https://us-central1-cleargy-creators.cloudfunctions.net/canje';
-const MARCA = 'miluz';
-const DEMO = new URLSearchParams(location.search).has('demo') || location.protocol === 'data:';
+const QS = new URLSearchParams(location.search);
+const MARCA = (QS.get('marca') || 'miluz').toLowerCase().replace(/[^a-z0-9_-]/g, '') || 'miluz';
+const DEMO = QS.has('demo') || location.protocol === 'data:';
+let CFG = null;
+let ROL = null;
 /* sessionStorage puede no existir (preview, webviews raros): nunca debe
    voltear el script entero */
 const _ss = {
@@ -529,7 +556,9 @@ const _ss = {
   set(k,v){ try { sessionStorage.setItem(k,v); } catch {} },
   del(k){ try { sessionStorage.removeItem(k); } catch {} },
 };
-let CLAVE = _ss.get('canje_clave') || '';
+// la clave de Mi Luz sigue en `canje_clave` (las sesiones abiertas no se pierden)
+const K_CLAVE = 'canje_clave' + (MARCA === 'miluz' ? '' : '_' + MARCA);
+let CLAVE = _ss.get(K_CLAVE) || '';
 
 async function api(accion, extra = {}){
   const r = await fetch(API, {
@@ -541,16 +570,63 @@ async function api(accion, extra = {}){
   return r.json();
 }
 
-const NOMBRE_TONO = {
-  'via-lactea':'Vía láctea','bco-perlado':'Bco perlado','blanco':'Blanco','arena':'Arena',
-  'rosa-palo':'Rosa palo','rosa-crepe':'Rosa crepé','rosa-old':'Rosa old',
-  'marron-canela':'Marrón canela','chocolate':'Chocolate','tomate':'Tomate',
-  'rojo-love':'Rojo love','pasion':'Pasión','rubi':'Rubí','negro':'Negro'
-};
+/* ── config de la marca: cacheada por marca en sessionStorage ── */
+async function cargarConfig(){
+  const k = 'canje_cfg_' + MARCA;
+  try {
+    const c = JSON.parse(sessionStorage.getItem(k) || 'null');
+    if (c && c.cfg && Date.now() - c.t < 10 * 60e3) return c.cfg;
+  } catch {}
+  const r = await fetch(API, { method:'POST', headers:{'Content-Type':'application/json'},
+    body: JSON.stringify({ accion:'config', marca:MARCA }) });
+  const d = await r.json();
+  if (!d || !d.ok) throw new Error('config');
+  try { sessionStorage.setItem(k, JSON.stringify({ t: Date.now(), cfg: d.marca })); } catch {}
+  return d.marca;
+}
+function rgbDe(hex){
+  const m = /^#?([\da-f]{6})$/i.exec(String(hex || '').trim());
+  if (!m) return null;
+  const n = parseInt(m[1], 16);
+  return [n >> 16 & 255, n >> 8 & 255, n & 255];
+}
+function aplicarEstilo(e){
+  if (!e) return;
+  const r = document.documentElement.style;
+  const g = e.gradiente && e.gradiente.length ? e.gradiente : [e.acento, e.acento];
+  if (e.fondo) r.setProperty('--crema', e.fondo);
+  if (e.acento){ r.setProperty('--acento', e.acento); const c = rgbDe(e.acento); if (c) r.setProperty('--acento-rgb', c.join(',')); }
+  if (e.acentoClaro) r.setProperty('--acento-suave', e.acentoClaro);
+  r.setProperty('--grad', g.length >= 3
+    ? `linear-gradient(135deg,${g[0]} 0%,${g[1]} 48%,${g[2]} 100%)`
+    : `linear-gradient(135deg,${g[0]} 0%,${g[g.length-1]} 100%)`);
+  const t1 = rgbDe(g[0]), t2 = rgbDe(g[g.length-1]);
+  if (t1) r.setProperty('--tinte1', `rgba(${t1.join(',')},.10)`);
+  if (t2) r.setProperty('--tinte2', `rgba(${t2.join(',')},.07)`);
+  Object.entries(e.vars || {}).forEach(([k, v]) => r.setProperty('--' + k, v));
+}
+
+/* nombre de cada opción (tono) por id: vigentes + viejas, porque las
+   fichas anteriores al recorte de la lista siguen con las viejas */
+const NOMBRE_TONO = {};
+function pintarMarca(){
+  const est = CFG.estilo || {};
+  document.title = `${CFG.nombre} · Panel`;
+  $('#marca-ini').textContent = est.iniciales || CFG.nombre.slice(0,2).toUpperCase();
+  $('#marca-nombre').textContent = est.logoTexto || CFG.nombre;
+  $('#entregas-sub').textContent = `Los videos que mandaron por Drive: revisalos, subilos como collab desde @${CFG.cuentaIg} y pegá el link del reel. Después el sistema verifica solo que acepten la invitación.`;
+  (CFG.opciones || []).concat(CFG.opcionesViejas || []).forEach(t => { NOMBRE_TONO[t.id] = t.nom; });
+  Object.assign(FILTRO, CFG.filtro || {});
+  Object.assign(ECONOMIA, CFG.economia || {}, {
+    bonoViral: CFG.plata.viralMonto, bonoUmbral: CFG.plata.viralViews, comision: CFG.plata.comision,
+  });
+  const F = CFG.formulario || {};
+  if (F.descarta && F.descarta.texto) MOTIVO[F.descarta.motivo || F.descarta.campo] = F.descarta.texto;
+}
 
 function ENVIOS_desde(env){
   ENVIOS = env.fichas.map(f => ({
-    id: f.id, nom: (f.datos && f.datos.nombre) || f.ig, ig: f.ig,
+    id: f.id, nom: (f.datos && f.datos.nombre) || f.nombre || f.ig, ig: f.ig,
     // La ficha (2do form) guarda la dirección arriba del todo; `datos` es la aplicación inicial.
     dir: f.calle ? `${f.calle}${f.piso ? ', ' + f.piso : ''}` : '—',
     loc: [f.localidad || (f.datos && f.datos.localidad), f.provincia || (f.datos && f.datos.provincia)].filter(Boolean).join(' · ') || '—',
@@ -562,17 +638,28 @@ function ENVIOS_desde(env){
   }));
 }
 
+/* Qué ve cada rol. admin y equipo ven todo; el cliente (marca) no ve
+   plata, pagos ni envíos; logística solo envíos. */
+const SOLAPAS = {
+  admin:  ['resumen','admision','envios','entregas','creadoras','pagos'],
+  equipo: ['resumen','admision','envios','entregas','creadoras','pagos'],
+  marca:  ['admision','entregas','creadoras'],
+  envios: ['envios'],
+};
+const puede = t => (SOLAPAS[ROL] || SOLAPAS.equipo).includes(t);
+
 /* Trae todo del backend y lo vuelca en las mismas estructuras que
    usan las pantallas — así el render no distingue demo de real. */
 async function cargar(){
+  const pedir = (t, accion) => puede(t) ? api(accion) : Promise.resolve(null);
   const [rs, cola, env, ent, todas, pl] = await Promise.all([
-    api('resumen'), api('cola'), api('envios'), api('entregas'), api('todas'), api('plata')
+    pedir('resumen','resumen'), pedir('admision','cola'), pedir('envios','envios'),
+    pedir('entregas','entregas'), pedir('creadoras','todas'), pedir('pagos','plata')
   ]);
 
-  Object.assign(MES, rs.mes);
-  RANKING.length = 0; RANKING.push(...rs.ranking);
+  if (rs){ Object.assign(MES, rs.mes); RANKING.length = 0; RANKING.push(...rs.ranking); }
 
-  APLICANTES = cola.fichas.map(f => ({
+  APLICANTES = !cola ? [] : cola.fichas.map(f => ({
     id: f.id, ig: f.ig,
     nom: (f.datos && f.datos.nombre) || '—',
     prov: (f.datos && f.datos.provincia) || f.provincia || '—',
@@ -580,15 +667,16 @@ async function cargar(){
     posts90: (f.metricas && f.metricas.posts90) ?? 0,
     views: (f.metricas && f.metricas.views) ?? 0,
     reels: (f.metricas && f.metricas.reels) ?? 0,
-    unas: (f.datos && f.datos.unas) || '—',
+    datos: f.datos || {},
     motivo: f.motivo || null, score: f.score || 0,
+    sinFotos: !(f.fotos && f.fotos.length),
     f: foto('Cargando foto…', '#EFE3D6'),
   }));
   total = APLICANTES.length; i = 0;
 
-  ENVIOS_desde(env);
+  if (env) ENVIOS_desde(env); else ENVIOS = [];
 
-  ENTREGAS = ent.fichas.map(f => ({
+  ENTREGAS = !ent ? [] : ent.fichas.map(f => ({
     id: f.id, nom: f.nombre || (f.datos && f.datos.nombre) || f.ig, ig: f.ig,
     estado: f.estado, drive: (f.entrega && f.entrega.drive) || '', motivo: f.cambiosMotivo || '',
     entregadoEn: f.entregadoEn || (f.entrega && f.entrega.en) || 0, codigo: f.codigo || '',
@@ -600,17 +688,18 @@ async function cargar(){
     nro: (f.cumplidas || 0) + 1,
   }));
 
-  CREADORAS = todas.fichas.map(f => ({
+  CREADORAS = !todas ? [] : todas.fichas.map(f => ({
     nom: f.nombre || f.ig, ig: f.ig, estado: f.estado, nivel: f.nivel,
     pideHumana: f.pideHumana || null, quiereOtro: f.quiereOtro || null,
     id: f.id, seguidores: f.seguidores ?? null, posts90: f.posts90 ?? null, vistas: f.vistas ?? null,
-    motivo: f.motivo || null, unas: f.unas || null, manychatId: f.manychatId || null,
+    motivo: f.motivo || null, unas: f.unas || null, respuestas: f.respuestas || {}, importada: !!f.importada,
+    manychatId: f.manychatId || null,
     avisadaEn: f.avisadaEn || null, avisadaManual: !!f.avisadaManual, decididaEn: f.decididaEn || null,
     tel: f.tel || null, referidaPor: f.referidaPor || null, referidasCumplidas: f.referidasCumplidas || 0,
-    views: f.views, ventas: f.ventas, monto: f.facturado, bono: f.bono,
+    views: f.views || 0, ventas: f.ventas || 0, monto: f.facturado || 0, bono: f.bono, reel: f.reel || null,
   }));
 
-  PLATA = pl.fichas.map(f => ({
+  PLATA = !pl ? [] : pl.fichas.map(f => ({
     id: f.id, nom: f.nombre || f.ig, ig: f.ig,
     ganado: f.ganado, pagado: f.pagado, viral: f.viral,
   }));
@@ -635,12 +724,12 @@ const foto = (t,c) => 'data:image/svg+xml;utf8,' + encodeURIComponent(
    </svg>`);
 
 let APLICANTES = [
-  {ig:'sofi.deco', reels:7,      nom:'Sofía',    prov:'Córdoba',      seguidores:3400, posts90:14,  views:2100, unas:'naturales', f:foto('Manos de Sofía','#EFE3D6')},
-  {ig:'juli.encasa', reels:9,    nom:'Julieta',  prov:'Buenos Aires', seguidores:8900, posts90:31, views:5400, unas:'naturales', f:foto('Manos de Julieta','#F0E6DC')},
-  {ig:'caro.beauty', reels:5,    nom:'Carolina', prov:'Santa Fe',     seguidores:1200, posts90:6,  views:1800, unas:'naturales', f:foto('Manos de Carolina','#EDE2D4')},
-  {ig:'flor.nails', reels:8,     nom:'Florencia',prov:'Mendoza',      seguidores:5600, posts90:22, views:420,  unas:'naturales', f:foto('Manos de Florencia','#F1E7DA')},
-  {ig:'agus.lifestyle', reels:6, nom:'Agustina', prov:'CABA',         seguidores:52000,posts90:11, views:1900, unas:'naturales', f:foto('Manos de Agustina','#EEE4D8')},
-  {ig:'vale.makeup', reels:4,    nom:'Valentina',prov:'Tucumán',      seguidores:2300, posts90:9,  views:3100, unas:'esculpidas',f:foto('Manos de Valentina','#F0E5D9')}
+  {ig:'sofi.deco', reels:7,      nom:'Sofía',    prov:'Córdoba',      seguidores:3400, posts90:14,  views:2100, datos:{unas:'naturales'}, f:foto('Manos de Sofía','#EFE3D6')},
+  {ig:'juli.encasa', reels:9,    nom:'Julieta',  prov:'Buenos Aires', seguidores:8900, posts90:31, views:5400, datos:{unas:'naturales'}, f:foto('Manos de Julieta','#F0E6DC')},
+  {ig:'caro.beauty', reels:5,    nom:'Carolina', prov:'Santa Fe',     seguidores:1200, posts90:6,  views:1800, datos:{unas:'naturales'}, f:foto('Manos de Carolina','#EDE2D4')},
+  {ig:'flor.nails', reels:8,     nom:'Florencia',prov:'Mendoza',      seguidores:5600, posts90:22, views:420,  datos:{unas:'naturales'}, f:foto('Manos de Florencia','#F1E7DA')},
+  {ig:'agus.lifestyle', reels:6, nom:'Agustina', prov:'CABA',         seguidores:52000,posts90:11, views:1900, datos:{unas:'naturales'}, f:foto('Manos de Agustina','#EEE4D8')},
+  {ig:'vale.makeup', reels:4,    nom:'Valentina',prov:'Tucumán',      seguidores:2300, posts90:9,  views:3100, datos:{unas:'esculpidas'},f:foto('Manos de Valentina','#F0E5D9')}
 ];
 
 let ENVIOS = [
@@ -656,16 +745,16 @@ let ENTREGAS = [
   {nom:'Tamara Ledesma',ig:'tami.led', url:'https://instagram.com/reel/jkl012', views:640,   collab:true,  dias:7, nro:1}
 ];
 
-/* ═══ ECONOMÍA — lo único que hay que editar del dashboard ═══ */
+/* ═══ ECONOMÍA — viene de la config de la marca (MARCAS[marca].economia) ═══ */
 const ECONOMIA = {
   pautaMes:   1000,    // USD por mes de pauta de reclutamiento
-  envio:     11000,    // ARS por envío — dato de Nacho, 26/8
-  producto:   6000,    // ARS, el kit a costo — dato de Nacho, 26/8
-  dolar:      1400,    // ARS por USD — AJUSTAR cuando se mueva
+  envio:     11000,    // ARS por envío
+  producto:   6000,    // ARS, el kit a costo
+  dolar:      1400,    // ARS por USD
   cpmMeta:    7.19,    // USD por mil impresiones que paga la marca en Meta
   bonoViral: 25000,    // ARS por reel que pasa el umbral
   bonoUmbral:10000,    // views que lo disparan
-  comision:     15,    // % sobre ventas con su código (se paga de la venta)    // USD por mil impresiones que paga la marca en Meta — dato 26/8
+  comision:     15,    // % sobre ventas con su código (se paga de la venta)
   metaMes:     200     // collabs por mes
 };
 
@@ -718,21 +807,36 @@ const $ = s => document.querySelector(s);
 
 /* ── navegación entre pestañas ── */
 const VISTAS = ['resumen','admision','envios','entregas','creadoras','pagos'];
-document.querySelectorAll('.lat button[data-t]').forEach(b => b.onclick = () => {
-  document.querySelectorAll('.lat button[data-t]').forEach(x => x.classList.toggle('on', x === b));
-  VISTAS.forEach(t => $('#t-'+t).classList.toggle('oculto', t !== b.dataset.t));
+function irA(t){
+  document.querySelectorAll('.lat button[data-t]').forEach(x => x.classList.toggle('on', x.dataset.t === t));
+  VISTAS.forEach(v => $('#t-'+v).classList.toggle('oculto', v !== t));
   document.body.classList.remove('cajon');
   window.scrollTo(0,0);
-});
+}
+document.querySelectorAll('.lat button[data-t]').forEach(b => b.onclick = () => irA(b.dataset.t));
 $('#plegar').onclick = () => document.body.classList.toggle('plegado');
 $('#abrir').onclick = () => document.body.classList.add('cajon');
 $('#velo').onclick  = () => document.body.classList.remove('cajon');
 
+/* los contadores de solapas que el rol no ve no existen en el DOM */
+const setN = (id, v) => { const el = document.getElementById(id); if (el) el.textContent = v; };
 const contar = () => {
-  $('#n-adm').textContent = APLICANTES.length - i;
-  $('#n-env').textContent = ENVIOS.filter(e => e.estado === 'listo').length;
-  $('#n-ent').textContent = ENTREGAS.length;
+  setN('n-adm', APLICANTES.length - i);
+  setN('n-env', ENVIOS.filter(e => e.estado === 'listo').length);
+  setN('n-ent', ENTREGAS.length);
 };
+
+/* etiqueta legible de una respuesta del formulario de la marca: el texto
+   de la opción elegida (ops de la pregunta) o el mapa `etiquetas` */
+const preguntasMarca = () => (CFG && CFG.formulario && CFG.formulario.preguntas) || [];
+function etiquetaResp(v, campo){
+  if (!v) return v;
+  const p = campo && preguntasMarca().find(x => x.campo === campo);
+  const op = p && (p.ops || []).find(o => o[0] === v);
+  if (op) return op[1];
+  return (CFG && CFG.formulario && CFG.formulario.etiquetas && CFG.formulario.etiquetas[v]) || v;
+}
+const descartaMarca = () => (CFG && CFG.formulario && CFG.formulario.descarta) || null;
 
 /* ── admisión ── */
 function pintarFicha(){
@@ -757,7 +861,8 @@ function pintarFicha(){
   /* views promedio menores al 10% de los seguidores = sospecha de compra */
   const inflada = a.views < a.seguidores * 0.10;
   const pasaTodo = cs.seguidores && cs.posts && cs.views;
-  const esculpidas = a.unas !== 'naturales';
+  const desc = descartaMarca();
+  const descartable = !!(desc && a.datos && a.datos[desc.campo] && a.datos[desc.campo] !== desc.salvo);
 
   const pocosReels = a.reels < FILTRO.reelsMinimos;
 
@@ -766,11 +871,11 @@ function pintarFicha(){
     v = 'No se pudo medir el perfil (¿usuario mal escrito o cuenta borrada?). Miralo a mano en Instagram antes de decidir.';
     vc = 'duda';
   }
-  else if (pocosReels && !esculpidas){
+  else if (pocosReels && !descartable){
     v = `Solo se pudieron medir ${a.reels} reels de sus últimos 18 posts. No alcanza para juzgar el promedio — mirá la cuenta a mano.`;
     vc = 'duda';
   }
-  else if (esculpidas){ v = 'Declaró uñas esculpidas o soft gel — no sirve para el producto.'; vc = 'no'; }
+  else if (descartable){ v = desc.veredicto || 'No cumple el requisito del producto.'; vc = 'no'; }
   else if (!pasaTodo){ v = 'No llega al piso de métricas.'; vc = 'no'; }
   else if (inflada){ v = `Ojo: ${a.views.toLocaleString('es-AR')} views promedio con ${a.seguidores.toLocaleString('es-AR')} seguidores. Puede tener seguidores comprados.`; vc = 'duda'; }
   else { v = 'Pasa el filtro automático. Mirá la foto y decidí.'; vc = 'si'; }
@@ -778,15 +883,22 @@ function pintarFicha(){
   const chip = (ok, val, lb) =>
     `<div class="chk ${ok?'si':'no'}"><b>${ok?'':'✕ '}${val}</b><span>${lb}</span></div>`;
 
+  const fotosCfg = CFG && CFG.formulario && CFG.formulario.fotos;
+  const respuestas = preguntasMarca().filter(p => (a.datos || {})[p.campo]).map(p =>
+    (desc && p.campo === desc.campo) ? `${p.corto.toLowerCase()} ${etiquetaResp(a.datos[p.campo], p.campo).toLowerCase()}` : `${p.corto}: ${etiquetaResp(a.datos[p.campo], p.campo)}`).join(' · ');
+  const motivos = ((CFG && CFG.formulario && CFG.formulario.motivosRechazo) || [
+    ['canje','Cuenta de canje puro — más de la mitad son colabos'], ['comprados','Seguidores comprados'],
+    ['contenido','Contenido incompatible con la marca'], ['metricas','No llega a las métricas']]);
+
   $('#ficha-cont').innerHTML = `
     <div class="ficha">
-      <div class="foto"><span class="tag">UÑAS</span><img src="${a.f}" alt="Manos de ${a.nom}"></div>
+      ${fotosCfg ? `<div class="foto"><span class="tag">${fotosCfg.etiqueta || 'FOTO'}</span><img src="${a.f}" alt="${fotosCfg.alt || 'Foto de'} ${a.nom}"></div>` : ''}
       <div class="datos">
         <a class="perfil" href="https://instagram.com/${a.ig}" target="_blank" rel="noopener">
           <span class="av"><i>${a.nom.slice(0,2).toUpperCase()}</i></span>
           <span class="id">
             <b>@${a.ig}</b>
-            <span>${a.nom} · ${a.prov} · uñas ${a.unas}</span>
+            <span>${a.nom} · ${a.prov}${respuestas ? ' · ' + respuestas : ''}</span>
           </span>
           <span class="ir">Ver perfil ↗</span>
         </a>
@@ -807,18 +919,15 @@ function pintarFicha(){
 
         <div class="motivos" id="motivos">
           <p>¿Por qué la rechazás?</p>
-          <button data-m="unas">Uñas no aptas — esculpidas, cortas o quebradas</button>
-          <button data-m="canje">Cuenta de canje puro — más de la mitad son colabos</button>
-          <button data-m="comprados">Seguidores comprados</button>
-          <button data-m="contenido">Contenido incompatible con la marca</button>
-          <button data-m="metricas">No llega a las métricas</button>
+          ${motivos.map(([k, t]) => `<button data-m="${k}">${t}</button>`).join('')}
         </div>
       </div>
     </div>`;
+  if (!fotosCfg) document.querySelector('.ficha').style.gridTemplateColumns = '1fr';
 
-  // en modo real, la foto se pide recién acá (URL firmada de 15 min,
-  // y la apertura queda auditada en el backend)
-  if (!DEMO && a.id && !a.fotoReal){
+  // en modo real, la foto se pide recién acá (viaja embebida y la
+  // apertura queda auditada en el backend)
+  if (!DEMO && a.id && !a.fotoReal && fotosCfg){
     api('fotos', { id: a.id }).then(r => {
       a.fotoReal = true;
       if (r.urls && r.urls[0]){ a.f = r.urls[0];
@@ -836,8 +945,6 @@ function pintarFicha(){
 }
 
 function decidir(qué, motivo){
-  /* PENDIENTE: acá va la llamada a la Cloud Function.
-     Al aceptar, el backend crea el token y dispara el link mágico por DM. */
   const ficha = APLICANTES[i];
   if (!DEMO && ficha.id){
     const mapa = { aceptada:'aceptar', despues:'despues', rechazada:'rechazar' };
@@ -866,18 +973,19 @@ function decidir(qué, motivo){
 
 /* ── envíos ── */
 function pintarEnvios(){
+  const conOpciones = !!(CFG && CFG.elegir);
   $('#tabla-envios').innerHTML = `
     <table>
       <thead><tr>
         <th style="width:34px"></th><th>Creadora</th><th>Dirección</th>
-        <th>Colores</th><th>Estado</th><th>Aviso</th>
+        ${conOpciones ? '<th>Colores</th>' : ''}<th>Estado</th><th>Aviso</th>
       </tr></thead>
       <tbody>${ENVIOS.map((e,ix) => `
         <tr>
           <td>${e.estado === 'listo' ? `<input type="checkbox" class="sel" data-i="${ix}">` : ''}</td>
           <td><b>${e.nom}</b><span class="n2">@${e.ig}</span>${e.email?`<span class="n2">${e.email}</span>`:''}${e.tel?`<span class="n2">${e.tel}</span>`:''}</td>
           <td>${e.dir}<span class="n2">${e.loc} · CP ${e.cp}</span></td>
-          <td>${e.tonos}</td>
+          ${conOpciones ? `<td>${e.tonos}</td>` : ''}
           <td><span class="pill ${e.estado === 'despachado' ? 'ok' : 'esp'}">
             ${e.estado === 'despachado' ? 'Despachado' : 'Para enviar'}</span></td>
           <td class="dmacc">${e.estado !== 'despachado' ? '' : (e.avisoDespachoEn
@@ -889,14 +997,17 @@ function pintarEnvios(){
   contar();
 }
 
-$('#btn-csv').onclick = () => {
-  const filas = [['Nombre','DNI','Telefono','Email','Instagram','Direccion','Localidad','CP','Colores']]
-    .concat(ENVIOS.filter(e => e.estado === 'listo')
-      .map(e => [e.nom, e.dni, e.tel, e.email, '@'+e.ig, e.dir, e.loc, e.cp, e.tonos]));
-  const csv = filas.map(f => f.map(c => `"${String(c).replace(/"/g,'""')}"`).join(',')).join('\n');
+function bajarCsv(nombre, filas){
+  const csv = filas.map(f => f.map(c => `"${String(c ?? '').replace(/"/g,'""')}"`).join(',')).join('\n');
   const a = document.createElement('a');
   a.href = URL.createObjectURL(new Blob(['﻿'+csv], {type:'text/csv;charset=utf-8'}));
-  a.download = 'miluz-envios.csv'; a.click();
+  a.download = `${MARCA}-${nombre}.csv`; a.click();
+}
+
+$('#btn-csv').onclick = () => {
+  bajarCsv('envios', [['Nombre','DNI','Telefono','Email','Instagram','Direccion','Localidad','CP','Colores']]
+    .concat(ENVIOS.filter(e => e.estado === 'listo')
+      .map(e => [e.nom, e.dni, e.tel, e.email, '@'+e.ig, e.dir, e.loc, e.cp, e.tonos])));
 };
 
 $('#btn-desp').onclick = () => {
@@ -955,6 +1066,8 @@ function pintarEntregas(){
 function tarjetaDrive(e){
   const ix = ENTREGAS.indexOf(e);
   const hace = e.entregadoEn ? Math.max(0, Math.round((Date.now() - e.entregadoEn) / 864e5)) : null;
+  const nG = (CFG && CFG.ganchos || []).length;
+  const queMirar = `abrí la carpeta, fijate que el video ${nG ? `abra con uno de los ${nG} ganchos, ` : ''}dure 35 segundos o más, muestre la cara${CFG && CFG.tienda ? ' y nombre el código' : ''}.`;
   return `
     <div class="entrega">
       <div class="prev">
@@ -969,7 +1082,7 @@ function tarjetaDrive(e){
           <span class="pill">${e.nro===1?'primera collab':`collab n° ${e.nro}`}</span>
         </div>
         ${e.estado === 'cambios' ? `<div class="aviso med"><b>Le pedimos:</b> ${e.motivo || '—'}</div>`
-          : `<div class="aviso med"><b>Qué hacer:</b> abrí la carpeta, fijate que el video abra con uno de los 4 ganchos, dure 35 segundos o más, muestre la cara y nombre el código. Si está bien, subilo desde @miluz.arg como collab (Etiquetar personas → Invitar colaborador → @${e.ig}) y pegá acá el link del reel.</div>`}
+          : `<div class="aviso med"><b>Qué hacer:</b> ${queMirar} Si está bien, subilo desde @${CFG.cuentaIg} como collab (Etiquetar personas → Invitar colaborador → @${e.ig}) y pegá acá el link del reel.</div>`}
         <div class="acc">
           <button class="b duda" onclick="pedirCambios(${ix})">Pedir cambios</button>
           <button class="b no" onclick="resolverEntrega(${ix},0)">Rechazar</button>
@@ -1030,13 +1143,14 @@ window.pedirCollab = ix => {
   alert('Le mandamos por Instagram el paso a paso para aceptar la invitación.\nSigue acá hasta que la acepte (el sistema lo verifica solo).');
 };
 window.pedirCambios = ix => {
-  const motivo = prompt('¿Qué tiene que cambiar? (le llega tal cual por Instagram)\nEj: "Arrancá con uno de los 4 ganchos" / "No se ve el código" / "Grabalo con luz natural"');
+  const nG = (CFG && CFG.ganchos || []).length;
+  const motivo = prompt(`¿Qué tiene que cambiar? (le llega tal cual por Instagram)\nEj: "Arrancá con uno de los ${nG || 'ganchos'} ganchos" / "No se ve el código" / "Grabalo con luz natural"`);
   if (motivo === null) return;
   if (!DEMO) api('resolver', { id: ENTREGAS[ix].id, decision: 'cambios', motivo }).catch(() => alert('No se pudo enviar. Reintentá.'));
   ENTREGAS[ix].estado = 'cambios'; ENTREGAS[ix].motivo = motivo; pintarEntregas();
 };
 window.marcarPublicado = ix => {
-  const url = prompt('Pegá el link del reel que subiste desde @miluz.arg (instagram.com/reel/...):');
+  const url = prompt(`Pegá el link del reel que subiste desde @${CFG.cuentaIg} (instagram.com/reel/...):`);
   if (!url) return;
   if (!/instagram\.com\/(reel|p)\//i.test(url)) { alert('Ese link no parece de un reel de Instagram.'); return; }
   const e = ENTREGAS[ix]; e.estado = 'publicado'; e.url = url; e.collab = false; e.views = 0; pintarEntregas();
@@ -1077,19 +1191,20 @@ function pintarResumen(){
     ? (costoTotal / e.dolar) / e.cpmMeta * 1000 / m.publicadas : null;
   const viewsPorCollab = m.publicadas ? m.views / m.publicadas : 0;
   const gana = cpmUsd !== null && cpmUsd < e.cpmMeta;
+  const nombreMes = DEMO ? m.nombre : (() => { const d = new Date(); const n = d.toLocaleDateString('es-AR', { month:'long', year:'numeric' }); return n.charAt(0).toUpperCase() + n.slice(1); })();
 
   $('#t-resumen').innerHTML = `
     <h1>Resumen</h1>
-    <p class="sub">${m.nombre} · el mes va por la mitad</p>
+    <p class="sub">${nombreMes}</p>
 
     <div class="kpis">
       <div class="kpi">
         <b>${num(m.publicadas)}</b><span>collabs publicadas</span>
-        <i>meta ${num(e.metaMes)} · ${Math.round(m.publicadas / e.metaMes * 100)}%</i>
-        <span class="mini"><u style="width:${Math.min(100, m.publicadas / e.metaMes * 100)}%"></u></span>
+        <i>meta ${num(e.metaMes)} · ${e.metaMes ? Math.round(m.publicadas / e.metaMes * 100) : 0}%</i>
+        <span class="mini"><u style="width:${e.metaMes ? Math.min(100, m.publicadas / e.metaMes * 100) : 0}%"></u></span>
       </div>
       <div class="kpi"><b>${(m.views / 1e6).toFixed(2)}M</b><span>views generadas</span>
-        <i>${num(Math.round(m.views / m.publicadas))} por collab</i></div>
+        <i>${m.publicadas ? num(Math.round(m.views / m.publicadas)) : 0} por collab</i></div>
       <div class="kpi"><b>${cumplimiento}%</b><span>cumplimiento</span>
         <i>${num(m.publicadas)} de ${num(m.recibidos)} que recibieron</i></div>
       <div class="kpi"><b>${num(m.ventas)}</b><span>ventas con código</span>
@@ -1126,8 +1241,9 @@ function pintarResumen(){
         vas en ${num(Math.round(viewsPorCollab))}. Y ojo: el costo se paga por kit
         <b>enviado</b>, no por collab recibida, así que si el cumplimiento cae 10 puntos
         este número sube sin que gastes un peso más.</p>`
+      : listo ? `<p class="linea">Todavía no hay collabs publicadas este mes: el costo por collab aparece con la primera.</p>`
       : `<p class="linea">Falta cargar el costo del kit o el tipo de cambio en
-         <b>ECONOMIA</b>, arriba del archivo.</p>`}
+         <b>economia</b> de la marca (MARCAS.${MARCA}.economia en canje.js).</p>`}
     </div>
 
     <div class="bloque">
@@ -1141,7 +1257,7 @@ function pintarResumen(){
       <div class="alerta info"><b>${m.enTransito}</b> kits en camino</div>
     </div>
 
-    <div class="bloque">
+    ${CFG && CFG.tienda ? `<div class="bloque">
       <h2>Comisiones a pagar</h2>
       <p class="n2">${e.comision}% de lo que vendió cada una con su código. Se liquida a fin de mes.</p>
       ${RANKING.map(r => `
@@ -1151,7 +1267,7 @@ function pintarResumen(){
           <span class="num"><b>${pesos(Math.round(r.monto * e.comision / 100))}</b><span>de ${pesos(r.monto)}</span></span>
         </div>`).join('')}
       <div class="total"><span>Total del mes</span><b>${pesos(comisiones)}</b></div>
-    </div>
+    </div>` : ''}
 
     <div class="bloque">
       <h2>Podio del mes</h2>
@@ -1166,32 +1282,33 @@ function pintarResumen(){
 }
 
 /* ── WhatsApp: link con el mensaje armado (números argentinos) ── */
-const LINK_APP = id => 'https://cima-creators.github.io/cleargy.ugc/miluz-canje.html?t=' + id;
+const LINK_APP = id => CFG.app + (CFG.app.includes('?') ? '&' : '?') + 't=' + id;
 function mensajeAceptada(nombre, link){
   const n = (nombre || '').trim().split(' ')[0];
-  return `¡Hola${n ? ' ' + n : ''}! 💛 Te escribimos de MiLuz: ¡quedaste aprobada para el equipo de creadoras! 🎉\n\n` +
-    `Para armarte el kit necesitamos que completes tus datos (dirección y los tonos que querés). Son 2 minutos, entrá acá:\n${link}\n\n` +
+  const queDatos = CFG.elegir ? 'dirección y los tonos que querés' : 'dirección';
+  return `¡Hola${n ? ' ' + n : ''}! 💛 Te escribimos de ${CFG.nombre}: ¡quedaste aprobada para el equipo de creadoras! 🎉\n\n` +
+    `Para armarte el kit necesitamos que completes tus datos (${queDatos}). Son 2 minutos, entrá acá:\n${link}\n\n` +
     `Cualquier duda, respondé este mensaje.`;
 }
 function mensajeDespachado(nombre){
   const n = (nombre || '').trim().split(' ')[0];
-  return `¡Hola${n ? ' ' + n : ''}! 💛 Te escribimos de MiLuz: ¡tu kit ya salió! 📦 Llega en 3 a 5 días.\n\n` +
-    `Apenas lo tengas en la mano, entrá a tu app y tocá "Lo recibí" (o respondé LLEGÓ por Instagram): ahí arrancan tus 7 días para publicar. ` +
+  return `¡Hola${n ? ' ' + n : ''}! 💛 Te escribimos de ${CFG.nombre}: ¡tu kit ya salió! 📦 Llega en ${CFG.diasEnvio} días.\n\n` +
+    `Apenas lo tengas en la mano, entrá a tu app y tocá "Lo recibí" (o respondé LLEGÓ por Instagram): ahí arrancan tus ${CFG.diasParaPublicar} días para publicar. ` +
     `Cualquier duda, respondé este mensaje.`;
 }
-function waLinkTexto(tel, texto){
+function telWa(tel){
   let d = String(tel || '').replace(/\D/g, '');
   if (!d) return null;
   if (d.startsWith('549')) {} else if (d.startsWith('54')) d = '549' + d.slice(2);
   else { if (d.startsWith('0')) d = d.slice(1); d = d.replace(/^(\d{2,4})15/, '$1'); d = '549' + d; }
-  return `https://wa.me/${d}?text=${encodeURIComponent(texto)}`;
+  return d;
+}
+function waLinkTexto(tel, texto){
+  const d = telWa(tel);
+  return d ? `https://wa.me/${d}?text=${encodeURIComponent(texto)}` : null;
 }
 function waLink(tel, nombre, link){
-  let d = String(tel || '').replace(/\D/g, '');
-  if (!d) return null;
-  if (d.startsWith('549')) {} else if (d.startsWith('54')) d = '549' + d.slice(2);
-  else { if (d.startsWith('0')) d = d.slice(1); d = d.replace(/^(\d{2,4})15/, '$1'); d = '549' + d; }
-  return `https://wa.me/${d}?text=${encodeURIComponent(mensajeAceptada(nombre, link))}`;
+  return waLinkTexto(tel, mensajeAceptada(nombre, link));
 }
 
 /* ── creadoras ── */
@@ -1202,9 +1319,10 @@ const ETIQUETA = {
   iniciada:['No terminó de aplicar',''], enviada:['Aplicó · midiendo',''], en_cola:['En cola',''],
   revisar:['A revisar','esp'], por_revisar:['A revisar','esp'],
   descartada:['Descartada por filtro','no'], rechazada:['Rechazada','no'],
+  entregado:['Video entregado','esp'], cambios:['Ajuste pedido','esp'],
 };
 const MOTIVO = {
-  unas:'uñas no naturales', privada:'cuenta privada', pocos_seguidores:'menos de 1.000 seguidores',
+  unas:'no apta para el producto', privada:'cuenta privada', pocos_seguidores:'menos de 1.000 seguidores',
   poco_activa:'menos de 10 posts en 90 días', poco_activa_pero_llega:'postea poco pero llega bien',
   pocos_reels:'menos de 3 reels medidos', pocas_views:'menos de 1.000 views por reel',
   sin_datos:'Apify no pudo medir', posible_inflada:'views muy bajas para sus seguidores', tel_repetido:'teléfono repetido',
@@ -1255,39 +1373,42 @@ function pintarCreadoras(){
     `<th class="${cls} orden ${ordenCre===campo?'activo':''}" data-o="${campo}">${txt}${
       ordenCre===campo ? (ascCre?' ↑':' ↓') : ''}</th>`;
 
+  // la columna "Uñas" de Mi Luz es, en general, la respuesta que descarta (o la primera pregunta)
+  const desc = descartaMarca();
+  const pregCol = preguntasMarca().find(p => desc && p.campo === desc.campo) || preguntasMarca()[0] || null;
+  const respCol = c => pregCol ? (etiquetaResp((c.respuestas && c.respuestas[pregCol.campo]) || (pregCol.campo === 'unas' ? c.unas : null), pregCol.campo) || '—') : '—';
+  const conTienda = !!(CFG && CFG.tienda);
+
   $('#tabla-creadoras').innerHTML = !lista.length
     ? `<div class="vacio"><div class="big">🔍</div><b class="serif" style="font-size:1.1rem">Ninguna coincide</b></div>`
     : `<table>
       <thead><tr>
         ${th('nom','Creadora')}${th('estado','Estado')}<th>DM</th>
         ${th('seguidores','Seguidores','num')}${th('posts90','Posts 90d','num')}${th('vistas','Views/reel','num')}
-        ${th('unas','Uñas')}${th('views','Views collab','num')}${th('ventas','Ventas','num')}
-        ${th('monto','Comisión','num')}
+        ${pregCol ? `<th>${pregCol.corto}</th>` : ''}${th('views','Views collab','num')}${conTienda ? th('ventas','Ventas','num') + th('monto','Comisión','num') : ''}
       </tr></thead>
       <tbody>${lista.map(c => {
         const [et,cl] = ETIQUETA[c.estado] || [c.estado,''];
         return `<tr>
           <td><b>${c.nom}</b><span class="n2"><a href="https://instagram.com/${c.ig}" target="_blank" rel="noopener" class="verreel">@${c.ig}</a>${c.reel ? ` · <a href="${c.reel}" target="_blank" rel="noopener" class="verreel">ver reel</a>` : ''}</span></td>
-          <td><span class="pill ${cl}">${et}</span>${c.motivo?`<span class="n2" title="Motivo del filtro automático">${MOTIVO[c.motivo]||c.motivo}</span>`:''}${c.bono?'<span class="pill ok" style="margin-left:4px">bono</span>':''}${c.pideHumana?'<span class="pill no" style="margin-left:4px" title="Tocó “Hablar con alguien” en el bot">pide hablar</span>':''}${c.quiereOtro?'<span class="pill" style="margin-left:4px">quiere otro kit</span>':''}${c.referidaPor?`<span class="pill" style="margin-left:4px" title="Entró con el link de @${c.referidaPor}">ref @${c.referidaPor}</span>`:''}${c.referidasCumplidas?`<span class="pill ok" style="margin-left:4px" title="Referidas que cumplieron su primera collab">${c.referidasCumplidas} referida${c.referidasCumplidas>1?'s':''} ✓</span>`:''}</td><td class="dmacc">${c.estado==='invitada'&&c.id ? (c.avisadaEn
+          <td><span class="pill ${cl}">${et}</span>${c.motivo?`<span class="n2" title="Motivo del filtro automático">${MOTIVO[c.motivo]||c.motivo}</span>`:''}${c.importada?'<span class="pill" style="margin-left:4px" title="Entró por importación, sin pasar por la landing">importada</span>':''}${c.bono?'<span class="pill ok" style="margin-left:4px">bono</span>':''}${c.pideHumana?'<span class="pill no" style="margin-left:4px" title="Tocó “Hablar con alguien” en el bot">pide hablar</span>':''}${c.quiereOtro?'<span class="pill" style="margin-left:4px">quiere otro kit</span>':''}${c.referidaPor?`<span class="pill" style="margin-left:4px" title="Entró con el link de @${c.referidaPor}">ref @${c.referidaPor}</span>`:''}${c.referidasCumplidas?`<span class="pill ok" style="margin-left:4px" title="Referidas que cumplieron su primera collab">${c.referidasCumplidas} referida${c.referidasCumplidas>1?'s':''} ✓</span>`:''}</td><td class="dmacc">${c.estado==='invitada'&&c.id ? (c.avisadaEn
             ? `<span class="pill ok" title="${c.avisadaManual?'Se le mandó el link a mano':'El DM de aceptación salió solo'}">${c.avisadaManual?'a mano ✓':'DM ✓'}</span><button class="mini copiar" data-id="${c.id}" data-nom="${(c.nom||'').replace(/"/g,'')}">copiar</button>`
             : `<span class="pill no" title="No le llegó el DM automático: hace más de 24 h que no interactúa con el bot">sin DM</span><button class="mini copiar" data-id="${c.id}" data-nom="${(c.nom||'').replace(/"/g,'')}" title="Copia el mensaje completo con su link para pegarlo por Instagram">copiar</button>${c.tel?`<a class="mini" target="_blank" href="${waLink(c.tel, c.nom, LINK_APP(c.id))}" title="Abre WhatsApp con el mensaje armado">WhatsApp</a>`:''}<button class="mini yamande" data-id="${c.id}" title="Marcar que ya se lo mandaste">listo</button>`)
           : (['ficha_completa','briefing_ok'].includes(c.estado)&&c.id ? `<button class="mini copiar" data-id="${c.id}" data-nom="${(c.nom||'').replace(/"/g,'')}">copiar</button>` : '')}</td>
           <td class="num">${c.seguidores!=null ? c.seguidores.toLocaleString('es-AR') : '—'}</td>
           <td class="num">${c.posts90!=null ? c.posts90 : '—'}</td>
           <td class="num">${c.vistas!=null ? c.vistas.toLocaleString('es-AR') : '—'}</td>
-          <td>${c.unas ? ({naturales:'Naturales',esculpidas:'Esculpidas',semi:'Semi',otras:'Otras'}[c.unas]||c.unas) : '—'}</td>
+          ${pregCol ? `<td>${respCol(c)}</td>` : ''}
           <td class="num">${c.views ? c.views.toLocaleString('es-AR') : '—'}</td>
-          <td class="num">${c.ventas || '—'}</td>
-          <td class="num">${c.monto ? pesos(com(c)) : '—'}</td>
+          ${conTienda ? `<td class="num">${c.ventas || '—'}</td><td class="num">${c.monto ? pesos(com(c)) : '—'}</td>` : ''}
         </tr>`;}).join('')}
       </tbody>
       <tfoot><tr>
         <td><b>${lista.length} creadoras</b></td>
         <td>${tot.bonos} con bono</td><td></td>
-        <td></td><td></td><td></td><td></td>
+        <td></td><td></td><td></td>${pregCol ? '<td></td>' : ''}
         <td class="num"><b>${tot.views.toLocaleString('es-AR')}</b></td>
-        <td class="num"><b>${tot.ventas}</b></td>
-        <td class="num"><b>${pesos(tot.com)}</b></td>
+        ${conTienda ? `<td class="num"><b>${tot.ventas}</b></td><td class="num"><b>${pesos(tot.com)}</b></td>` : ''}
       </tr></tfoot>
     </table>`;
 
@@ -1307,18 +1428,46 @@ function pintarCreadoras(){
     if (c === ordenCre) ascCre = !ascCre; else { ordenCre = c; ascCre = (c === 'nom'); }
     pintarCreadoras();
   });
-  $('#n-cre').textContent = CREADORAS.length;
+  setN('n-cre', CREADORAS.length);
 }
 
 $('#buscar').addEventListener('input', pintarCreadoras);
 $('#btn-csv-cre').onclick = () => {
   const com = e => Math.round(e.monto * ECONOMIA.comision / 100);
-  const filas = [['Nombre','Instagram','Estado','Views','Ventas','Comision','Nivel','Reel']]
-    .concat(CREADORAS.map(c => [c.nom,'@'+c.ig,c.estado,c.views,c.ventas,com(c),c.nivel,c.reel||'']));
-  const csv = filas.map(f => f.map(x => `"${String(x).replace(/"/g,'""')}"`).join(',')).join('\n');
-  const a = document.createElement('a');
-  a.href = URL.createObjectURL(new Blob(['\ufeff'+csv], {type:'text/csv;charset=utf-8'}));
-  a.download = 'miluz-creadoras.csv'; a.click();
+  bajarCsv('creadoras', [['Nombre','Instagram','Estado','Views','Ventas','Comision','Nivel','Reel']]
+    .concat(CREADORAS.map(c => [c.nom,'@'+c.ig,c.estado,c.views,c.ventas,com(c),c.nivel,c.reel||''])));
+};
+
+/* ── importar creadoras ya aprobadas (solo admin) ── */
+function parsearImport(txt){
+  const lineas = String(txt || '').split(/\r?\n/).map(l => l.trim()).filter(Boolean);
+  const out = [];
+  lineas.forEach((l, n) => {
+    const partes = l.split(/\t|;|,/).map(p => p.trim().replace(/^"|"$/g, ''));
+    if (n === 0 && /^@?ig$|instagram|usuario/i.test(partes[0] || '')) return;   // encabezado
+    const [ig, nombre, tel, email, provincia] = partes;
+    if (!ig) return;
+    out.push({ ig, nombre: nombre || '', tel: tel || '', email: email || '', provincia: provincia || '' });
+  });
+  return out;
+}
+$('#btn-importar').onclick = () => { $('#imp-res').textContent = ''; $('#imp-copiar').hidden = true; $('#dlg-importar').showModal(); };
+$('#imp-cerrar').onclick = () => $('#dlg-importar').close();
+$('#imp-ok').onclick = async () => {
+  const creadoras = parsearImport($('#imp-txt').value);
+  if (!creadoras.length){ alert('No encontré ninguna línea con @.'); return; }
+  if (!confirm(`¿Importar ${creadoras.length} creadora${creadoras.length > 1 ? 's' : ''} como aceptadas (falta la ficha)?`)) return;
+  const b = $('#imp-ok'); b.disabled = true; b.textContent = 'Importando…';
+  try {
+    const r = await api('importar', { creadoras });
+    const lineas = (r.links || []).map(l => `@${l.ig} → ${l.link}`);
+    $('#imp-res').textContent = `Creadas ${r.creadas} · ya existían ${r.existentes}${r.invalidas ? ` · inválidas ${r.invalidas}` : ''}.\n` +
+      `Mandale a cada una su link (WhatsApp o DM):\n` + lineas.join('\n');
+    $('#imp-copiar').hidden = !lineas.length;
+    $('#imp-copiar').onclick = () => navigator.clipboard.writeText(lineas.join('\n')).then(() => { $('#imp-copiar').textContent = 'copiado ✓'; });
+    try { const todas = await api('todas'); CREADORAS = todas.fichas.map(f => ({ ...f, nom: f.nombre || f.ig, monto: f.facturado || 0, views: f.views || 0, ventas: f.ventas || 0, respuestas: f.respuestas || {} })); pintarCreadoras(); } catch {}
+  } catch (e) { alert('No se pudo importar: ' + e.message); }
+  b.disabled = false; b.textContent = 'Importar';
 };
 
 function pintarPagos(){
@@ -1352,7 +1501,7 @@ function pintarPagos(){
         <td class="num"><b>${pesos(tot.s)}</b></td><td></td>
       </tr></tfoot>
     </table>`;
-  $('#n-pag').textContent = deben.length;
+  setN('n-pag', deben.length);
 }
 
 window.pagarSaldo = ig => {
@@ -1370,41 +1519,48 @@ window.pagarSaldo = ig => {
 };
 
 $('#btn-csv-pag').onclick = () => {
-  const filas = [['Creadora','Instagram','Ganado','Pagado','Saldo']]
-    .concat(PLATA.map(c => [c.nom,'@'+c.ig,c.ganado,c.pagado,c.ganado-c.pagado]));
-  const csv = filas.map(f => f.map(x => `"${String(x).replace(/"/g,'""')}"`).join(',')).join('\n');
-  const el = document.createElement('a');
-  el.href = URL.createObjectURL(new Blob(['\ufeff'+csv], {type:'text/csv;charset=utf-8'}));
-  el.download = 'miluz-pagos.csv'; el.click();
+  bajarCsv('pagos', [['Creadora','Instagram','Ganado','Pagado','Saldo']]
+    .concat(PLATA.map(c => [c.nom,'@'+c.ig,c.ganado,c.pagado,c.ganado-c.pagado])));
 };
 
 function pintarTodo(){
-  pintarResumen(); pintarFicha(); pintarEnvios(); pintarEntregas(); pintarCreadoras(); pintarPagos();
+  if (puede('resumen')) pintarResumen();
+  if (puede('admision')) pintarFicha();
+  if (puede('envios')) pintarEnvios();
+  if (puede('entregas')) pintarEntregas();
+  if (puede('creadoras')) pintarCreadoras();
+  if (puede('pagos')) pintarPagos();
+}
+
+/* esconde las solapas que el rol no puede ver y abre la primera permitida */
+function aplicarRol(){
+  const solapas = SOLAPAS[ROL] || SOLAPAS.equipo;
+  document.querySelectorAll('.lat button[data-t]').forEach(b => { if (!solapas.includes(b.dataset.t)) b.remove(); });
+  $('#btn-importar').hidden = ROL !== 'admin';
+  irA(solapas[0]);
 }
 
 (async function iniciar(){
-  if (DEMO){ pintarTodo(); return; }
+  try { CFG = await cargarConfig(); }
+  catch { alert('No se pudo cargar la configuración de la marca "' + MARCA + '".'); return; }
+  aplicarEstilo(CFG.estilo);
+  pintarMarca();
+  if (DEMO){ ROL = 'equipo'; aplicarRol(); pintarTodo(); return; }
   if (!CLAVE){
     CLAVE = (prompt('Clave del panel:') || '').trim();
-    _ss.set('canje_clave', CLAVE);
+    _ss.set(K_CLAVE, CLAVE);
   }
-  if (CLAVE === 'miluz-envios-2026'){
-    // logistica: solo Envios
-    document.querySelectorAll('.lat button[data-t]').forEach(b => { if (b.dataset.t !== 'envios') b.remove(); });
-    VISTAS.forEach(t => $('#t-'+t).classList.toggle('oculto', t !== 'envios'));
-    try { const env = await api('envios'); ENVIOS_desde(env); pintarEnvios(); }
-    catch (e) { _ss.del('canje_clave'); alert('Clave incorrecta o sin permiso.'); location.reload(); }
-    return;
-  }
+  try { ROL = (await api('rol')).rol; }
+  catch (e) { _ss.del(K_CLAVE); alert('Clave incorrecta o sin permiso.'); location.reload(); return; }
+  aplicarRol();
   try { await cargar(); pintarTodo(); }
   catch (e) {
-    _ss.del('canje_clave');
-    if (String(e.message) === 'clave'){ alert('Clave incorrecta.'); location.reload(); return; }
+    if (String(e.message) === 'clave'){ _ss.del(K_CLAVE); alert('Clave incorrecta.'); location.reload(); return; }
     alert('No se pudo conectar con el sistema. Se muestran datos de EJEMPLO.');
     pintarTodo();
   }
 })();
-const APP_VERSION = '2026-09-09-b';
+const APP_VERSION = '2026-09-19-a';
 </script>
 </body>
 </html>
