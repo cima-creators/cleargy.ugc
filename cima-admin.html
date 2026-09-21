@@ -1246,7 +1246,7 @@ function enterAdmin(){
 }
 
 function doAdminLogin(){
-  const inputPass=document.getElementById("a-pass").value;
+  const inputPass=document.getElementById("a-pass").value.trim().toLowerCase();  // el celu pone mayúscula o espacio al final
   if(inputPass===ADMIN_PASS){ window.adminRole='superadmin'; window.adminUser='N'; enterAdmin(); }
   else if(inputPass===ADMIN_PASS2){ window.adminRole='brand'; window.adminUser='M'; enterAdmin(); }
   else if(ADMIN_PASS3 && inputPass===ADMIN_PASS3){ window.adminRole='superadmin'; window.adminUser='D'; enterAdmin(); }
@@ -3018,7 +3018,7 @@ loadConfig();
 <!-- Auto-actualización: GitHub Pages cachea el HTML y los celulares lo retienen mucho más.
      Esto compara la versión publicada con la que está corriendo y refresca sola. -->
 <script>
-const APP_VERSION = '2026-09-21-g';
+const APP_VERSION = '2026-09-21-h';
 (function(){
   var CLAVE='cima_ver_reload';
   function hayAlguienEscribiendo(){
