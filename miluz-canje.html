@@ -956,7 +956,9 @@ $('#form-ficha').addEventListener('submit', async e => {
 
 $('#chk-brief').addEventListener('change', e => $('#btn-brief').disabled = !e.target.checked);
 $('#btn-brief').addEventListener('click', async () => {
-  const b = $('#btn-brief'); b.disabled = true; b.textContent = 'Confirmando…';
+  const b = $('#btn-brief');
+  if (b.dataset.volver){ pintarEstado(); ver('v-estado'); return; }
+  b.disabled = true; b.textContent = 'Confirmando…';
   try { D = (await api('briefing', {})).creadora; pintarEstado(); ver('v-estado'); }
   catch { b.disabled = false; b.textContent = 'Confirmar y activar mi envío'; }
 });
@@ -1017,7 +1019,17 @@ function copiarCodigo(){
 }
 $('#codigo').addEventListener('click', copiarCodigo);
 $('#a-codigo').addEventListener('click', () => $('#bloque-codigo').scrollIntoView({behavior:'smooth',block:'center'}));
-$('#a-brief').addEventListener('click', () => ver('v-brief'));
+$('#a-brief').addEventListener('click', () => { modoBriefing(); ver('v-brief'); });
+// Releer el briefing más adelante no vuelve a "confirmar": el botón solo aparece
+// la primera vez (ficha completa, antes del envío). Después, solo "Volver".
+function modoBriefing(){
+  const primera = !D || D.estado === 'ficha_completa';
+  const chk = $('#chk-brief'), btn = $('#btn-brief');
+  const wrap = chk && chk.closest('label');
+  if (wrap) wrap.classList.toggle('oculto', !primera);
+  if (!primera){ btn.textContent = 'Volver a mi app'; btn.disabled = false; btn.dataset.volver = '1'; }
+  else { btn.textContent = 'Confirmar y activar mi envío'; btn.disabled = !chk.checked; delete btn.dataset.volver; }
+}
 function copiar(texto, boton, textoOk){
   const fin = () => { boton.classList.add('ok'); const a = boton.textContent;
     boton.textContent = textoOk; setTimeout(() => { boton.classList.remove('ok'); boton.textContent = a; }, 1800); };
@@ -1327,12 +1339,12 @@ function pintarMarca(){
     if (!r.ok){ ver('v-error'); return; }
     D = r.creadora; cabecera();
     if (D.estado === 'invitada'){ precargar(); traerBorrador(); ver('v-ficha'); }
-    else if (D.estado === 'ficha_completa') ver('v-brief');
+    else if (D.estado === 'ficha_completa'){ modoBriefing(); ver('v-brief'); }
     else { pintarEstado(); ver('v-estado'); }
   } catch { if (DEMO){ precargar(); traerBorrador(); } ver(DEMO ? 'v-ficha' : 'v-error'); }
 })();
 
-const APP_VERSION = '2026-09-23-d';
+const APP_VERSION = '2026-09-23-e';
 </script>
 </body>
 </html>
