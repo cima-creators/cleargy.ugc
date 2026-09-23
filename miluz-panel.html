@@ -1017,13 +1017,20 @@ $('#btn-desp').onclick = () => {
   if (!DEMO){
     const ids = sel.map(ix => ENVIOS[ix].id).filter(Boolean);
     api('despachar', { ids }).then(r => {
+      const hechas = new Set((r && r.resultados || []).map(x => x.id));
+      // Solo marcamos las que el servidor despachó de verdad: una ficha que ya
+      // avanzó (recibido, entregado…) se saltea y no vuelve atrás.
+      sel.forEach(ix => { if (hechas.has(ENVIOS[ix].id)) ENVIOS[ix].estado = 'despachado'; });
       (r && r.resultados || []).forEach(x => { const e = ENVIOS.find(v => v.id === x.id); if (e) e.avisoDespachoEn = x.enviado ? Date.now() : null; });
+      const saltadas = ids.length - hechas.size;
       const sinDm = (r && r.resultados || []).filter(x => !x.enviado).length;
       pintarEnvios();
-      if (sinDm) alert(`Despachadas ${r.cuantas}. A ${sinDm} no les llegó el DM "tu kit salió" (hace más de 24 h que no escriben al bot): usá el botón WhatsApp de cada fila para avisarles.`);
+      let msg = `Despachadas ${hechas.size}.`;
+      if (saltadas) msg += ` ${saltadas} no se marcaron porque ya habían avanzado (recibieron o entregaron): recargá la solapa para ver la lista al día.`;
+      if (sinDm) msg += ` A ${sinDm} no les llegó el DM "tu kit salió" (hace más de 24 h que no escriben al bot): usá el botón WhatsApp de cada fila.`;
+      if (saltadas || sinDm) alert(msg);
     }).catch(() => alert('No se pudo marcar el despacho. Reintentá.'));
-  }
-  sel.forEach(ix => ENVIOS[ix].estado = 'despachado');
+  } else { sel.forEach(ix => ENVIOS[ix].estado = 'despachado'); }
   pintarEnvios();
 };
 
@@ -1561,7 +1568,7 @@ function aplicarRol(){
     pintarTodo();
   }
 })();
-const APP_VERSION = '2026-09-22-a';
+const APP_VERSION = '2026-09-23-c';
 </script>
 </body>
 </html>
