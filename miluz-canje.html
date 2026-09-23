@@ -341,9 +341,14 @@ body.condemo .wrap{padding-bottom:84px}
 
   <!-- ══ LINK INVÁLIDO ══ -->
   <section id="v-error" class="oculto">
-    <div class="card centro">
-      <h2>Este link no es válido</h2>
-      <small>Puede que haya vencido o que se haya copiado incompleto. Escribinos por Instagram y te mandamos uno nuevo.</small>
+    <div class="card">
+      <h2>Entrá a tu app</h2>
+      <small style="margin-bottom:14px">No hay usuario ni contraseña: entrás con tu @ de Instagram y el celular con el que aplicaste, y te llevamos a tu link personal.</small>
+      <label><span class="lb">Tu @ de Instagram</span><input id="en-ig" autocapitalize="none" autocomplete="off" placeholder="@tuusuario"></label>
+      <label><span class="lb">Tu celular</span><input id="en-tel" inputmode="tel" placeholder="11 2345 6789"></label>
+      <span class="err" id="en-err"></span>
+      <button class="btn" id="btn-entrar">Entrar</button>
+      <small style="margin-top:12px">Si aplicaste y todavía no te aprobamos, no vas a poder entrar: te avisamos por mensaje cuando estés adentro.</small>
     </div>
   </section>
 
@@ -534,8 +539,8 @@ body.condemo .wrap{padding-bottom:84px}
       <small style="margin-bottom:14px" id="subir-txt"></small>
       <label>
         <span class="lb">Link de la carpeta de Drive</span>
-        <input id="in-drive" inputmode="url" placeholder="drive.google.com/drive/folders/...">
-        <span class="err" id="err-drive">Pegá un link de Google Drive válido (y fijate que esté compartido)</span>
+        <input id="in-drive" inputmode="url" placeholder="Link de Drive, iCloud, WeTransfer…">
+        <span class="err" id="err-drive">Pegá el link de la carpeta compartida (Drive, iCloud, WeTransfer, Dropbox). No sirve un link de Instagram o TikTok.</span>
       </label>
       <button class="btn" id="btn-drive">Entregar</button>
     </div>
@@ -965,9 +970,28 @@ $('#btn-tiktok').addEventListener('click', async () => {
   try { D = (await api('tiktok', {url})).creadora; i.value = ''; b.disabled = false; pintarEstado(); }
   catch { b.disabled = false; b.textContent = 'Sumar mis views'; alert('No se pudo guardar. Fijate el link y probá de nuevo.'); }
 });
+function armarEntrar(){
+  const err = m => { const e = $('#en-err'); e.textContent = m; e.style.display = m ? 'block' : 'none'; };
+  $('#btn-entrar').addEventListener('click', async () => {
+    const ig = $('#en-ig').value.trim().replace(/^@/, '').toLowerCase(), tel = $('#en-tel').value.trim();
+    if (!ig || tel.replace(/\D/g, '').length < 6){ err('Completá tu @ y tu celular.'); return; }
+    const b = $('#btn-entrar'); b.disabled = true; b.textContent = 'Buscando…'; err('');
+    try {
+      const r = await fetch(API, { method:'POST', headers:{'Content-Type':'application/json'},
+        body: JSON.stringify({ accion:'entrar', marca:MARCA, ig, tel }) }).then(x => x.json());
+      if (r.token){ location.href = r.link || (location.pathname + '?' + (MARCA !== 'miluz' ? 'marca=' + MARCA + '&' : '') + 't=' + r.token); return; }
+      if (r.pendiente) err('Tu aplicación todavía está en revisión. Te avisamos por mensaje cuando estés adentro.');
+      else if (r.rechazada) err('Esa aplicación no quedó seleccionada esta vez. Abrimos cupos todos los meses.');
+      else if (r.error === 'tel') err('Ese celular no coincide con el que cargaste al aplicar. Probá con el otro número o escribinos por Instagram.');
+      else err('No encontramos ese @ entre las aplicaciones. Fijate que esté bien escrito.');
+    } catch { err('No se pudo conectar. Probá de nuevo.'); }
+    b.disabled = false; b.textContent = 'Entrar';
+  });
+}
+
 $('#btn-drive').addEventListener('click', async () => {
   const i = $('#in-drive'), drive = i.value.trim();
-  const ok = /^https?:\/\/(drive|docs)\.google\.com\//i.test(drive) || /^https?:\/\/photos\.app\.goo\.gl\//i.test(drive);
+  const ok = /^https?:\/\/\S+\.\S+/i.test(drive) && !/instagram\.com|tiktok\.com/i.test(drive);
   $('#err-drive').style.display = ok ? 'none' : 'block';
   if (!ok) return;
   const b = $('#btn-drive'); b.disabled = true; b.textContent = 'Enviando…';
@@ -1182,8 +1206,8 @@ function pintarEstado(){
   $('#hero-badge').textContent = cab[3];
 
   $('#bloque-llego').classList.toggle('oculto', e !== 'enviado');
-  $('#bloque-subir').classList.toggle('oculto', !['recibido','cambios','entregado'].includes(e));
-  if (['recibido','cambios','entregado'].includes(e)){
+  $('#bloque-subir').classList.toggle('oculto', !['enviado','recibido','cambios','entregado'].includes(e));
+  if (['enviado','recibido','cambios','entregado'].includes(e)){
     $('#subir-tit').textContent = e === 'entregado' ? '¿Cambiaste el video?' : (e === 'cambios' ? 'Volvé a entregar' : 'Entregá tu contenido');
     $('#btn-drive').textContent = e === 'entregado' ? 'Actualizar link' : 'Entregar';
     if (D.entrega && D.entrega.drive && !$('#in-drive').value) $('#in-drive').value = D.entrega.drive;
@@ -1288,7 +1312,7 @@ function pintarMarca(){
   $('#ll-cerrar').addEventListener('click', () => $('#pop-llamada').close());
 
   if (DEMO) barraDemo();
-  if (!TOKEN && !DEMO){ ver('v-error'); return; }
+  if (!TOKEN && !DEMO){ ver('v-error'); armarEntrar(); return; }
   try {
     const r = await api('estado', {});
     if (!r.ok){ ver('v-error'); return; }
@@ -1299,7 +1323,7 @@ function pintarMarca(){
   } catch { if (DEMO){ precargar(); traerBorrador(); } ver(DEMO ? 'v-ficha' : 'v-error'); }
 })();
 
-const APP_VERSION = '2026-09-19-a';
+const APP_VERSION = '2026-09-23-a';
 </script>
 </body>
 </html>
