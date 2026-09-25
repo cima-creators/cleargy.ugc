@@ -760,7 +760,7 @@ function armarBriefing(){
        <figure><img src="${CFG.fotos[2]}" alt="Detalle" loading="lazy"><figcaption><b>03 · Detalle</b><span>Hace visible la materia.</span></figcaption></figure>
      </div>` : '') +
     (nCrudos ? `<h3>Los ${nCrudos} videos crudos</h3>
-     <p>Clips ${B('de 3 a 5 segundos')}, sin editar, sin texto ni música: los usamos para armar más piezas. ${br.crudosNota || ''}</p>
+     <p>Clips ${B('de 3 a 5 segundos')}, sin editar, sin texto ni música: los usamos para armar más piezas. ${br.crudosNota || ''}${br.crudosEjemplo ? ` <a href="${br.crudosEjemplo}" target="_blank" rel="noopener">Ver la carpeta de ejemplo →</a>` : ''}</p>
      ${(br.crudosLista || []).length ? `<ul class="limpia">${br.crudosLista.map((c, n) => `<li><span class="si">${n+1}</span> ${c}</li>`).join('')}</ul>` : ''}` : '') +
     `<h3>Cuando lo subamos</h3>
      <p>Te va a llegar una ${B('invitación de colaboración')} en Instagram (Notificaciones → "te invitó a colaborar"). <span class="si">Aceptala</span>: así el reel aparece también en tu perfil y cuenta como tu collab. Y ${B('resubilo a tus historias')} ese mismo día.</p>
@@ -1361,7 +1361,7 @@ function pintarMarca(){
   } catch { if (DEMO){ precargar(); traerBorrador(); } ver(DEMO ? 'v-ficha' : 'v-error'); }
 })();
 
-const APP_VERSION = '2026-09-25-b';
+const APP_VERSION = '2026-09-25-c';
 </script>
 </body>
 </html>
