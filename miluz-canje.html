@@ -886,7 +886,7 @@ const ver = id => {
 const TOKEN = QS.get('t');
 // Soporte de la app (CIMA, la agencia): por si algo de la app no funciona. Es el mismo para todas las marcas.
 const SOPORTE_WA = '5491170823624';
-const soporteLink = (motivo) => 'https://wa.me/' + SOPORTE_WA + '?text=' + encodeURIComponent(`Hola, soy creadora de ${(CFG && CFG.nombre) || 'la marca'}${D && D.ig ? ' (@' + D.ig + ')' : ''}. ${motivo || 'Tengo un problema con la app:'} `);
+const soporteLink = (motivo) => 'https://wa.me/' + SOPORTE_WA + '?text=' + encodeURIComponent(`Hola! Vengo de la app de collabs de ${(CFG && CFG.nombre) || 'la marca'}${D && D.ig ? ' (soy @' + D.ig + ')' : ''}. Necesito ayuda con: ${motivo || ''}`);
 
 async function api(accion, datos){
   if (DEMO) return demo(accion, datos);
@@ -1505,7 +1505,7 @@ function pintarMarca(){
   $('#dudas-txt').innerHTML = (CFG.grupo ? 'Preguntá en el grupo, es lo más rápido. ' : '') +
     (ll ? `La llamada es todos los ${String(ll.dia).toLowerCase()} a las ${ll.hora}. ` : '') +
     `También podés escribirnos a <a href="${igUrl}" target="_blank" rel="noopener" style="color:var(--tx);font-weight:700" id="ig-handle">@${CFG.cuentaIg}</a>.` +
-    `<br><br><b>¿Algo de la app no funciona?</b> Escribile al soporte de la app: <a href="${soporteLink('Tengo un problema con la app:')}" target="_blank" rel="noopener">WhatsApp +54 9 11 7082-3624</a>.`;
+    `<br><br><b>¿Algo de la app no funciona?</b> Escribile al soporte de la app: <a href="${soporteLink('')}" target="_blank" rel="noopener">WhatsApp +54 9 11 7082-3624</a>.`;
   if (ELEGIR()){ TITULOS[3] = [CFG.eleccion.tituloFicha || 'Elegí tus opciones', CFG.eleccion.subFicha || '']; }
   if (est.logoTamano === 'grande') document.body.classList.add('logo-grande');
 }
@@ -1530,7 +1530,7 @@ function pintarMarca(){
   $('#ll-cerrar').addEventListener('click', () => $('#pop-llamada').close());
 
   if (DEMO) barraDemo();
-  if (!TOKEN && !DEMO){ ver('v-error'); armarEntrar(); const se = $('#soporte-entrar'); if (se) se.href = soporteLink('No puedo entrar a mi app:'); return; }
+  if (!TOKEN && !DEMO){ ver('v-error'); armarEntrar(); const se = $('#soporte-entrar'); if (se) se.href = soporteLink('no puedo entrar a mi app. '); return; }
   try {
     const r = await api('estado', {});
     if (!r.ok){ ver('v-error'); return; }
@@ -1544,7 +1544,7 @@ function pintarMarca(){
   } catch { if (DEMO){ precargar(); traerBorrador(); } ver(DEMO ? 'v-ficha' : 'v-error'); }
 })();
 
-const APP_VERSION = '2026-09-26-d';
+const APP_VERSION = '2026-09-26-e';
 </script>
 </body>
 </html>
