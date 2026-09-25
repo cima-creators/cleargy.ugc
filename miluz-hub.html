@@ -129,8 +129,8 @@ const APPS = [
   {id:'creativos', titulo:'Guiones y creativos', icono:'video', url:DRIVE_GUIONES, stats:true,
    bajada:'Los guiones de cada día y los videos de las creadoras.',
    nota:'La grilla por día y campaña llega cuando estén los nombres de las 5 campañas.'},
-  {id:'stock', titulo:'Stock', icono:'caja', url:'',
-   bajada:'Qué hay, qué falta y qué hay que reponer.'},
+  {id:'stock', titulo:'Stock', icono:'caja', url:'https://claude.ai/artifact/CiapLLo7qVU4pgy7YXjX3q',
+   bajada:'Stock Madre: qué hay, qué falta y qué hay que reponer.'},
   {id:'reclamos', titulo:'Reclamos', icono:'alerta', url:'',
    bajada:'Los reclamos de clientas en un solo lugar: quién, qué pasó y en qué quedó.'},
 ];
@@ -258,7 +258,7 @@ if(sessionStorage.getItem(K)) arrancar();
 
 <!-- Auto-actualización: GitHub Pages cachea el HTML y los celulares lo retienen mucho más. -->
 <script>
-const APP_VERSION = '2026-09-25-b';
+const APP_VERSION = '2026-09-25-c';
 (function(){
   var CLAVE='miluz_hub_ver';
   function chequear(){
