@@ -1393,7 +1393,7 @@ function pintarEstado(){
       ? ['Tu collab','Recibimos<br>tus links', (D.reel && D.reel.collab === false ? `En el reel no aparece @${CFG.cuentaIg} etiquetada: editalo y etiquetala. ` : '') + 'Lo estamos revisando. Resubilo a tus historias.' + (D.videos === 'dos' && !(D.entregas && D.entregas[1]) ? ' Cuando tengas el segundo video, cargalo abajo.' : ''),'En revisión']
       : ['Tu collab','¡Ya está<br>publicado!','Aceptá la invitación de colaboración en Instagram y resubilo a tus historias.','Publicado'],
     cumplida:   ['Tu collab','¡Listo!','Ya podés pedir tu próximo kit.','Completada'],
-    vencida:    ['Tu plazo','Se venció','Escribinos por Instagram si querés otra oportunidad.','Vencida']
+    vencida:    ['Tu plazo','Se te pasó<br>el plazo', CREADORA_PUBLICA() ? 'El kit ya lo tenés: publicá hoy y cargá tus links acá abajo. Sin video no podemos mandarte más kits.' : 'El kit ya lo tenés: entregá tu video hoy acá abajo. Sin video no podemos mandarte más kits.','Atrasada']
   }[e] || ['Tu estado','—','','En curso'];
 
   /* anillo: solo cuando hay plazo corriendo */
@@ -1429,13 +1429,14 @@ function pintarEstado(){
 
   $('#bloque-llego').classList.toggle('oculto', e !== 'enviado');
   // cuando publica la creadora, el bloque sigue abierto en `publicado` (ajustar links, cargar el 2º video)
-  const conSubir = CREADORA_PUBLICA() ? ['enviado','recibido','cambios','entregado','publicado'] : ['enviado','recibido','cambios','entregado'];
+  // `vencida` sigue pudiendo entregar: el plazo la apura, no la deja afuera
+  const conSubir = CREADORA_PUBLICA() ? ['enviado','recibido','cambios','entregado','publicado','vencida'] : ['enviado','recibido','cambios','entregado','vencida'];
   $('#bloque-subir').classList.toggle('oculto', !conSubir.includes(e));
   if (conSubir.includes(e)){
     if (CREADORA_PUBLICA()){
       const dos = D.videos === 'dos';
       const falta2 = dos && !(D.entregas && D.entregas[1] && D.entregas[1].drive);
-      $('#subir-tit').textContent = e === 'cambios' ? 'Volvé a cargar los links' : (e === 'publicado' ? (falta2 ? 'Cargá tu segundo video' : '¿Cambiaste algo?') : 'Publicá y cargá tus links');
+      $('#subir-tit').textContent = e === 'vencida' ? 'Publicá hoy y cargá tus links' : e === 'cambios' ? 'Volvé a cargar los links' : (e === 'publicado' ? (falta2 ? 'Cargá tu segundo video' : '¿Cambiaste algo?') : 'Publicá y cargá tus links');
       $('#segm-videos').classList.toggle('oculto', !dos);
       if (dos){
         $('#segm-k1').textContent = nombreKit(D.kit); $('#segm-k2').textContent = nombreKit(D.kit2);
@@ -1445,7 +1446,7 @@ function pintarEstado(){
       $('#lab-ig').classList.remove('oculto'); $('#lab-tt').classList.remove('oculto');
       precargarEntrega();
     } else {
-      $('#subir-tit').textContent = e === 'entregado' ? '¿Cambiaste el video?' : (e === 'cambios' ? 'Volvé a entregar' : 'Entregá tu contenido');
+      $('#subir-tit').textContent = e === 'entregado' ? '¿Cambiaste el video?' : (e === 'cambios' ? 'Volvé a entregar' : (e === 'vencida' ? 'Entregá hoy' : 'Entregá tu contenido'));
       $('#btn-drive').textContent = e === 'entregado' ? 'Actualizar link' : 'Entregar';
       if (D.entrega && D.entrega.drive && !$('#in-drive').value) $('#in-drive').value = D.entrega.drive;
     }
@@ -1572,7 +1573,7 @@ function pintarMarca(){
   } catch { if (DEMO){ precargar(); traerBorrador(); } ver(DEMO ? 'v-ficha' : 'v-error'); }
 })();
 
-const APP_VERSION = '2026-09-26-g';
+const APP_VERSION = '2026-09-26-h';
 </script>
 </body>
 </html>

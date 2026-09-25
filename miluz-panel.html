@@ -1381,7 +1381,7 @@ function pintarResumen(){
       <p class="n2">Ordenado por urgencia.</p>
       ${(() => { const n = (CREADORAS||[]).filter(c => c.estado === 'invitada' && !c.avisadaEn).length; return n ? `<div class="alerta urg"><b>${n}</b> aceptadas sin DM automático — mandarles el link a mano (Creadoras → “Mandar link a mano”)</div>` : ''; })()}
       ${(() => { const n = (CREADORAS||[]).filter(c => c.pideHumana).length; return n ? `<div class="alerta urg"><b>${n}</b> pidieron hablar con alguien desde el bot — escribirles hoy por Instagram (están marcadas en Creadoras)</div>` : ''; })()}
-      ${m.vencidas ? `<div class="alerta urg"><b>${m.vencidas}</b> vencidas sin publicar — dar de baja</div>` : ''}
+      ${m.vencidas ? `<div class="alerta urg"><b>${m.vencidas}</b> atrasadas: se les pasó el plazo y todavía no entregaron (pueden entregar igual) — apurarlas</div>` : ''}
       ${m.sinRecibir ? `<div class="alerta urg"><b>${m.sinRecibir}</b> despachadas hace más de 10 días y nunca confirmaron que llegó — revisar con el correo</div>` : ''}
       ${m.vencenEn2Dias ? `<div class="alerta med"><b>${m.vencenEn2Dias}</b> vencen en 2 días — el recordatorio ya salió solo</div>` : ''}
       <div class="alerta info"><b>${m.enTransito}</b> kits en camino</div>
@@ -1702,7 +1702,7 @@ function aplicarRol(){
     pintarTodo();
   }
 })();
-const APP_VERSION = '2026-09-26-b';
+const APP_VERSION = '2026-09-26-c';
 </script>
 </body>
 </html>
