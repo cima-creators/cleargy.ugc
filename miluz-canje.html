@@ -337,6 +337,8 @@ ul.limpia li{margin-bottom:.5rem;font-size:.88rem;color:var(--tx2)}
 #demonav button:hover{background:var(--rosa);color:#fff;border-color:var(--rosa)}
 #demonav .lbl{color:var(--tx3);font-size:.62rem;letter-spacing:.12em;text-transform:uppercase;align-self:center;padding:0 6px}
 body.condemo .wrap{padding-bottom:84px}
+.refs{display:flex;flex-direction:column;gap:8px}
+.kit-h{margin-top:22px;padding-top:16px;border-top:2px solid var(--linea)}
 .angulos{display:flex;flex-direction:column;gap:10px;margin:10px 0 6px}
 .angulo{background:var(--sup2,rgba(0,0,0,.035));border:1px solid var(--linea);border-radius:14px;padding:12px 14px}
 .angulo>b{display:block;font-size:.9rem;margin-bottom:6px;color:var(--rosa)}
@@ -766,6 +768,40 @@ function briefKit(){
 }
 function pintarBriefing(){ $('#brief-cuerpo').innerHTML = armarBriefing(); }
 
+/* Ángulos como tarjetas "se ve / se lee / decís" (o texto suelto si son strings). */
+function seccionGanchos(ganchos, br){
+  if (!ganchos.length) return '';
+  return `<h3>Los primeros 3 segundos</h3>
+     <p>${B('Lo que se ve + lo que se lee + lo que se escucha')} tienen que contar la misma historia desde el primer segundo, aunque esté sin sonido. No arranques simplemente hablando a cámara.</p>
+     <p>Elegí ${B('un ángulo')} que se parezca a tu experiencia y abrí con él. En cada uno tenés las tres cosas: qué se ve, qué se lee en pantalla y qué decís.</p>
+     <div class="angulos">${ganchos.map((g, n) => typeof g === 'string'
+       ? `<div class="angulo"><b>${n+1} · Ángulo</b><div class="l"><span>💬</span>${g}</div></div>`
+       : `<div class="angulo"><b>${n+1} · ${g.t}</b>
+            <div class="l"><span>🎬</span><i>Se ve</i>${g.ve}</div>
+            <div class="l"><span>📝</span><i>Se lee</i>«${g.lee}»</div>
+            <div class="l"><span>🗣️</span><i>Decís</i>«${g.dice}»</div></div>`).join('')}</div>
+     <p>Podés cambiar palabras para que suene a vos, pero la idea tiene que ser esa. Un video que no abre así no se aprueba.${br.ganchosDoc ? ` <a href="${br.ganchosDoc}" target="_blank" rel="noopener">Ver todos los ángulos con ejemplos →</a>` : ''}</p>`;
+}
+function seccionReferencias(referencias){
+  if (!referencias.length) return '';
+  return `<h3>Mirá estos antes de grabar</h3>
+     <p>Videos de ${CFG.nombre} que ya funcionaron. Copiá la estructura, no el contenido.</p>
+     <div class="refs">${referencias.map(r => `
+       <a class="ref" href="${r.u}" target="_blank" rel="noopener">
+         <span class="play">▶</span>
+         <span><b>${r.t}</b><small>${r.n}</small></span></a>`).join('')}</div>`;
+}
+/* Con dos kits, el briefing del segundo va completo después del primero. */
+function seccionesKit(kitId, numero, br){
+  const bk = (CFG.briefingPorKit || {})[kitId]; if (!bk) return [];
+  const k = kitInfo(kitId) || { nom: kitId };
+  const out = [`<h3 class="kit-h">${numero === 2 ? 'Tu segundo kit' : (D && D.kit2 ? 'Tu primer kit' : 'Tu kit')}: ${k.nom}</h3><p>${k.desc ? k.desc + '. ' : ''}${numero === 2 ? 'Este es el briefing de tu segundo video.' : 'Este briefing es el de tu kit.'}</p>`];
+  (bk.intro || []).forEach(x => out.push(`<h3>${x.t}</h3>${x.html}`));
+  out.push(seccionGanchos(bk.ganchos || [], br));
+  out.push(seccionReferencias(bk.referencias || []));
+  return out;
+}
+
 /* ── briefing armado desde la config ── */
 const B = t => `<b style="color:var(--tx)">${t}</b>`;
 function armarBriefing(){
@@ -778,24 +814,16 @@ function armarBriefing(){
   const ganchos = (bk && bk.ganchos && bk.ganchos.length) ? bk.ganchos : (CFG.ganchos || []);
   const referencias = (bk && bk.referencias && bk.referencias.length) ? bk.referencias : (CFG.referencias || []);
   const secciones = [];
+  const dosKits = !!(bk && CFG.kitPorRespuesta && D && D.kit2 && CFG.briefingPorKit && CFG.briefingPorKit[D.kit2]);
   if (bk && CFG.kitPorRespuesta){
-    const k = kitInfo(kitActual());
-    const k2 = D && D.kit2 ? kitInfo(D.kit2) : null;
-    secciones.push(`<h3>Tu kit: ${k ? k.nom : '—'}</h3><p>${k && k.desc ? k.desc + '. ' : ''}Este briefing es el de tu kit.${k2 ? ` Como hacés dos videos, el segundo es con ${B(k2.nom)}: abrí este mismo briefing desde tu app cuando lo tengas.` : ''}</p>`);
+    seccionesKit(kitActual(), 1, br).forEach(x => secciones.push(x));
+  } else {
+    intro.forEach(x => secciones.push(`<h3>${x.t}</h3>${x.html}`));
   }
-  intro.forEach(s => secciones.push(`<h3>${s.t}</h3>${s.html}`));
+
   if ((CFG.reglas || []).length) secciones.push(`<h3>Reglas técnicas</h3><ul class="limpia">${CFG.reglas.map(r => `<li>${r}</li>`).join('')}</ul>`);
-  if (ganchos.length) secciones.push(
-    `<h3>Los primeros 3 segundos</h3>
-     <p>${B('Lo que se ve + lo que se lee + lo que se escucha')} tienen que contar la misma historia desde el primer segundo, aunque esté sin sonido. No arranques simplemente hablando a cámara.</p>
-     <p>Elegí ${B('un ángulo')} que se parezca a tu experiencia y abrí con él. En cada uno tenés las tres cosas: qué se ve, qué se lee en pantalla y qué decís.</p>
-     <div class="angulos">${ganchos.map((g, n) => typeof g === 'string'
-       ? `<div class="angulo"><b>${n+1} · Ángulo</b><div class="l"><span>💬</span>${g}</div></div>`
-       : `<div class="angulo"><b>${n+1} · ${g.t}</b>
-            <div class="l"><span>🎬</span><i>Se ve</i>${g.ve}</div>
-            <div class="l"><span>📝</span><i>Se lee</i>«${g.lee}»</div>
-            <div class="l"><span>🗣️</span><i>Decís</i>«${g.dice}»</div></div>`).join('')}</div>
-     <p>Podés cambiar palabras para que suene a vos, pero la idea tiene que ser esa. Un video que no abre así no se aprueba.${br.ganchosDoc ? ` <a href="${br.ganchosDoc}" target="_blank" rel="noopener">Ver todos los ángulos con ejemplos →</a>` : ''}</p>`);
+  if (!(bk && CFG.kitPorRespuesta)) secciones.push(seccionGanchos(ganchos, br));
+  if (dosKits) seccionesKit(D.kit2, 2, br).forEach(x => secciones.push(x));
   if ((CFG.noDecir || []).length) secciones.push(`<h3>Lo que NO se puede decir</h3><ul class="limpia">${CFG.noDecir.map(r => `<li>${r}</li>`).join('')}</ul>`);
   // qué fotos: el texto propio de la marca (fotosProcesoNota) reemplaza el bloque Escena/Gesto/Detalle
   const fotosBloque = br.fotosProcesoNota
@@ -843,13 +871,7 @@ function armarBriefing(){
      <p>Nombralo en el video y dejalo fijado en los comentarios. Tus seguidoras compran con descuento y vos ganás comisión por cada venta.</p>` : '') +
     `<h3>El plazo</h3>
      <p>Tenés ${B(`${CFG.diasParaPublicar} días desde que el kit llega a tu casa`)} para ${CREADORA_PUBLICA() ? 'publicar y cargar los links' : 'mandarnos el video'}. Avisanos en la app cuando lo recibas.</p>`);
-  if (referencias.length) secciones.push(
-    `<h3>Mirá estos antes de grabar</h3>
-     <p>Videos de ${CFG.nombre} que ya funcionaron. Copiá la estructura, no el contenido.</p>
-     <div id="refs">${referencias.map(r => `
-       <a class="ref" href="${r.u}" target="_blank" rel="noopener">
-         <span class="play">▶</span>
-         <span><b>${r.t}</b><small>${r.n}</small></span></a>`).join('')}</div>`);
+  if (!(bk && CFG.kitPorRespuesta)) secciones.push(seccionReferencias(referencias));
   if (br.docCompleto) secciones.push(`<h3>¿Querés leer más?</h3><p>Esto es lo esencial. Si querés entender la marca a fondo (qué transmite, a quién le habla, cómo explicar cada producto): <a href="${br.docCompleto}" target="_blank" rel="noopener">guía completa de ${CFG.nombre} →</a></p>`);
   return secciones.join('\n');
 }
@@ -1522,7 +1544,7 @@ function pintarMarca(){
   } catch { if (DEMO){ precargar(); traerBorrador(); } ver(DEMO ? 'v-ficha' : 'v-error'); }
 })();
 
-const APP_VERSION = '2026-09-26-c';
+const APP_VERSION = '2026-09-26-d';
 </script>
 </body>
 </html>
