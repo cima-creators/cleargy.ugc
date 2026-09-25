@@ -1,0 +1,270 @@
+<!DOCTYPE html>
+<html lang="es"><head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+<meta http-equiv="Pragma" content="no-cache"><meta http-equiv="Expires" content="0">
+<title>Mi Luz — Inicio</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap">
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --crema:#FBF7F2; --arena:#F4EDE4; --linea:#EBE0D2; --linea2:#DFD1BE;
+  --tinta:#2A231D; --tinta2:#6B5E51; --topo:#9C8D7C;
+  --acento:#C4636F; --acento-suave:#FBF1F2;
+  --grad:linear-gradient(135deg,#D97E73 0%,#C4636F 48%,#9E5A86 100%);
+  --ok:#4F8C63; --ok-suave:#EAF2EC; --duda:#C08A2E; --duda-suave:#FAF1E2; --no:#C0524C; --no-suave:#FAEDEB;
+  --sombra:0 1px 2px rgba(42,35,29,.04);
+}
+html{touch-action:manipulation;-webkit-text-size-adjust:100%}
+body{background:var(--crema);color:var(--tinta);font-family:Manrope,-apple-system,system-ui,sans-serif;
+  font-size:15px;line-height:1.5;letter-spacing:-.01em;-webkit-font-smoothing:antialiased;
+  padding:max(20px,env(safe-area-inset-top)) 16px calc(30px + env(safe-area-inset-bottom))}
+.wrap{max-width:880px;margin:0 auto}
+
+/* ── clave ── */
+.clave{max-width:360px;margin:12vh auto;background:#fff;border:1px solid var(--linea);border-radius:24px;padding:28px 24px;box-shadow:var(--sombra)}
+.clave .marca{display:flex;align-items:center;gap:10px;font-weight:800;font-size:1.1rem;letter-spacing:-.03em;margin-bottom:14px}
+.marca i{flex:0 0 30px;height:30px;border-radius:10px;background:var(--grad);display:grid;place-items:center;color:#fff;font-size:.74rem;font-weight:800;font-style:normal}
+.clave p{color:var(--tinta2);font-size:13.5px;margin-bottom:16px}
+input[type=password]{width:100%;padding:13px 15px;border:1px solid var(--linea);background:var(--arena);border-radius:14px;
+  font:inherit;font-size:15px;color:var(--tinta);outline:none;margin-bottom:10px}
+input[type=password]:focus{border-color:var(--linea2)}
+.btn{width:100%;background:var(--grad);color:#fff;border:0;border-radius:14px;padding:13px;font:inherit;font-weight:700;cursor:pointer}
+.btn:hover{opacity:.92}
+.err{color:var(--no);font-size:13px;margin-bottom:8px;display:none}
+
+/* ── cabecera ── */
+.hd{display:flex;align-items:center;justify-content:space-between;gap:12px;margin:2px 2px 18px}
+.hd .marca{font-size:1.15rem}
+.hd .hola{font-size:12.5px;color:var(--tinta2);font-weight:500}
+.salir{background:none;border:0;color:var(--topo);font:inherit;font-size:12.5px;cursor:pointer;padding:6px}
+.salir:hover{color:var(--tinta)}
+
+/* ── portada ── */
+.hero{background:var(--grad);color:#fff;border-radius:24px;padding:22px 24px;position:relative;overflow:hidden;margin-bottom:16px}
+.hero .blob{position:absolute;width:230px;height:230px;border-radius:50%;background:rgba(255,255,255,.08);right:-80px;bottom:-100px}
+.hero h1{font-size:22px;font-weight:800;letter-spacing:-.03em;line-height:1.2;position:relative}
+.hero p{font-size:13.5px;line-height:1.5;opacity:.92;margin-top:7px;position:relative;max-width:46ch}
+.avisos{display:flex;flex-wrap:wrap;gap:7px;margin-top:14px;position:relative}
+.aviso{background:rgba(255,255,255,.18);border-radius:99px;padding:5px 12px;font-size:12.5px;font-weight:600}
+.aviso.calma{background:rgba(255,255,255,.14);font-weight:500}
+
+/* ── tarjetas ── */
+.grid{display:grid;grid-template-columns:1fr;gap:12px}
+@media(min-width:700px){.grid{grid-template-columns:1fr 1fr}}
+.app{display:flex;gap:14px;align-items:flex-start;background:#fff;border:1px solid var(--linea);border-radius:22px;
+  padding:18px;color:inherit;text-decoration:none;box-shadow:var(--sombra);transition:border-color .18s,transform .18s}
+.app:hover{border-color:var(--linea2);transform:translateY(-1px)}
+.app .ico{width:44px;height:44px;border-radius:14px;background:var(--acento-suave);display:grid;place-items:center;flex-shrink:0}
+.app .ico svg{width:22px;height:22px;stroke:var(--acento);fill:none;stroke-width:1.7;stroke-linecap:round;stroke-linejoin:round}
+.cuerpo{min-width:0;flex:1}
+.app b{display:block;font-size:16.5px;font-weight:800;letter-spacing:-.02em}
+.app p{font-size:12.5px;color:var(--tinta2);line-height:1.45;margin-top:3px}
+.datos{display:flex;flex-wrap:wrap;gap:6px;margin-top:10px}
+.dato{font-size:11.5px;font-weight:700;background:var(--arena);color:var(--tinta2);border-radius:99px;padding:4px 10px;white-space:nowrap}
+.dato.ok{background:var(--ok-suave);color:var(--ok)}
+.dato.duda{background:var(--duda-suave);color:var(--duda)}
+.dato.no{background:var(--no-suave);color:var(--no)}
+.dato.cargando{background:transparent;color:var(--topo);font-weight:500;padding-left:0}
+.ir{font-size:12.5px;font-weight:700;color:var(--acento);margin-top:10px;display:inline-block}
+.app.pronto{border-style:dashed;background:transparent;box-shadow:none;cursor:default}
+.app.pronto:hover{transform:none;border-color:var(--linea)}
+.app.pronto .ico{background:transparent;border:1px dashed var(--linea2)}
+.app.pronto .ico svg{stroke:var(--topo)}
+.app.pronto b{color:var(--tinta2)}
+.pronto-pill{font-size:11px;font-weight:700;background:var(--arena);color:var(--topo);border-radius:99px;padding:4px 10px;display:inline-block;margin-top:10px}
+.nota{font-size:11.5px;color:var(--topo);margin-top:8px;line-height:1.45}
+.foot{font-size:12px;color:var(--topo);line-height:1.55;margin-top:18px;padding:0 4px}
+</style></head><body>
+
+<div class="clave" id="clave">
+  <div class="marca"><i>ML</i>MiLuz</div>
+  <p>Tu pantalla de inicio. Entrá con la misma clave del panel de collabs.</p>
+  <div class="err" id="err">Esa clave no es</div>
+  <input type="password" id="pass" placeholder="Clave" autocapitalize="none" autocomplete="off" onkeydown="if(event.key==='Enter')entrar()">
+  <button class="btn" onclick="entrar()">Entrar</button>
+</div>
+
+<div class="wrap" id="app" style="display:none">
+  <div class="hd">
+    <div>
+      <div class="marca"><i>ML</i>MiLuz</div>
+      <div class="hola">Hola, Luz</div>
+    </div>
+    <button class="salir" onclick="salir()">salir</button>
+  </div>
+  <div class="hero">
+    <span class="blob"></span>
+    <h1>Todo tu programa en un lugar</h1>
+    <p>Desde acá entrás a cada app. Lo que tocás se abre en otra pestaña, así no perdés esta pantalla.</p>
+    <div class="avisos" id="avisos"></div>
+  </div>
+  <div class="grid" id="grid"></div>
+  <div class="foot">Guardala en la pantalla de inicio del celular y te queda como una app más. Los números se leen en vivo del panel.</div>
+</div>
+
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
+import { getFirestore, initializeFirestore, collection, query, where, getCountFromServer } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+import { getAuth, signInAnonymously } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
+
+const API   = 'https://us-central1-cleargy-creators.cloudfunctions.net/canje';
+const MARCA = 'miluz';
+const K     = 'miluz_hub_clave';
+const UGC   = 'https://cima-creators.github.io/cleargy.ugc/';
+const DRIVE_GUIONES = 'https://drive.google.com/drive/folders/1KaSTXB660NpdOgXg5dqJUpxi4oLH2gbg';
+const ADS   = 'https://adsmanager.facebook.com/adsmanager/manage/campaigns?act=1549273329532687';
+
+// Las tarjetas, en el orden del spec (mi-luz/docs/2026-09-25-hub-luz.md).
+// url vacía = todavía no existe: sale en gris, sin link.
+const APPS = [
+  {id:'collabs', titulo:'Collabs', icono:'gente', url:UGC+'miluz-panel.html', stats:true,
+   bajada:'Las creadoras que reciben producto: a quién le llegó el kit, quién ya entregó y cómo rindió cada video.'},
+  {id:'ads', titulo:'Anuncios', icono:'megafono', url:ADS,
+   bajada:'Tus campañas en el administrador de anuncios.',
+   nota:'Para manejarlas hablando, eso va por tu Claude conectado a Meta, no por acá.'},
+  {id:'creativos', titulo:'Guiones y creativos', icono:'video', url:DRIVE_GUIONES, stats:true,
+   bajada:'Los guiones de cada día y los videos de las creadoras.',
+   nota:'La grilla por día y campaña llega cuando estén los nombres de las 5 campañas.'},
+  {id:'stock', titulo:'Stock', icono:'caja', url:'',
+   bajada:'Qué hay, qué falta y qué hay que reponer.'},
+  {id:'reclamos', titulo:'Reclamos', icono:'alerta', url:'',
+   bajada:'Los reclamos de clientas en un solo lugar: quién, qué pasó y en qué quedó.'},
+];
+
+const ICONOS = {
+  gente:'<path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75"/>',
+  megafono:'<path d="M3 11v2a1 1 0 0 0 1 1h3l6 4V6L7 10H4a1 1 0 0 0-1 1z"/><path d="M17.5 8.5a5 5 0 0 1 0 7"/>',
+  video:'<rect x="2" y="5" width="20" height="14" rx="3"/><path d="M10 9.5l5 2.5-5 2.5z"/>',
+  caja:'<path d="M21 8v11a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1V8"/><rect x="2" y="4" width="20" height="4" rx="1"/><path d="M10 12h4"/>',
+  alerta:'<path d="M10.3 3.9 1.9 18a2 2 0 0 0 1.7 3h16.8a2 2 0 0 0 1.7-3L13.7 3.9a2 2 0 0 0-3.4 0z"/><path d="M12 9v4M12 17h.01"/>',
+};
+
+const $ = s => document.querySelector(s);
+const pintarGrid = () => { $('#grid').innerHTML = APPS.map(tarjeta).join(''); };
+function tarjeta(a){
+  const ico = `<span class="ico"><svg viewBox="0 0 24 24">${ICONOS[a.icono]||''}</svg></span>`;
+  const cuerpo = `<div class="cuerpo"><b>${a.titulo}</b><p>${a.bajada}</p>`+
+    (a.stats?`<div class="datos" id="datos-${a.id}"><span class="dato cargando">buscando los números…</span></div>`:'')+
+    (a.nota?`<div class="nota">${a.nota}</div>`:'');
+  return a.url
+    ? `<a class="app" href="${a.url}" target="_blank" rel="noopener">${ico}${cuerpo}<span class="ir">Abrir →</span></div></a>`
+    : `<div class="app pronto">${ico}${cuerpo}<span class="pronto-pill">en camino</span></div></div>`;
+}
+
+async function canje(accion, extra={}){
+  const r = await fetch(API,{method:'POST',headers:{'Content-Type':'application/json'},
+    body:JSON.stringify({accion, marca:MARCA, ...extra})});
+  let j={}; try{ j=await r.json(); }catch(e){}
+  return {status:r.status, ...j};
+}
+
+window.entrar = async function(){
+  const v = ($('#pass').value||'').trim().toLowerCase();
+  if(!v) return;
+  const r = await canje('rol',{clave:v});
+  if(!r.ok){ $('#err').style.display='block'; return; }
+  sessionStorage.setItem(K, v);
+  arrancar();
+};
+window.salir = function(){ sessionStorage.removeItem(K); location.reload(); };
+
+function arrancar(){
+  $('#clave').style.display='none';
+  $('#app').style.display='block';
+  pintarGrid();
+  cargarNumeros();
+}
+
+// ── Números en vivo ──
+const fmtV = n => { n=n||0; return n>=1e6?(n/1e6).toFixed(1)+'M':n>=1000?Math.round(n/1000)+'K':String(n); };
+const hoyART = () => new Date().toLocaleDateString('sv',{timeZone:'America/Argentina/Buenos_Aires'});
+
+async function cargarNumeros(){
+  const clave = sessionStorage.getItem(K);
+  const avisos = $('#avisos');
+  avisos.innerHTML = '<span class="aviso calma">mirando cómo viene todo…</span>';
+
+  const cajas = {};
+  APPS.forEach(a=>{ const el=document.getElementById('datos-'+a.id); if(el) cajas[a.id]=el; });
+
+  const alertas = [];
+  try{
+    const [res, cola, ent] = await Promise.all([
+      canje('resumen',{clave}), canje('cola',{clave}), canje('entregas',{clave}),
+    ]);
+    const m = res.mes || {};
+    const porAprobar = (cola.fichas||[]).length;
+    const sinRevisar = (ent.fichas||[]).filter(f=>f.estado==='entregado').length;
+    const chips = [];
+    chips.push(`<span class="dato">${m.publicadas||0} collabs este mes</span>`);
+    if(m.views) chips.push(`<span class="dato">${fmtV(m.views)} views</span>`);
+    if(m.enTransito) chips.push(`<span class="dato">${m.enTransito} kits en camino</span>`);
+    if(porAprobar) chips.push(`<span class="dato duda">${porAprobar} para aprobar</span>`);
+    if(sinRevisar) chips.push(`<span class="dato duda">${sinRevisar} entregas sin revisar</span>`);
+    if(!porAprobar && !sinRevisar) chips.push(`<span class="dato ok">nada esperando</span>`);
+    if(cajas.collabs) cajas.collabs.innerHTML = chips.join('');
+    if(porAprobar) alertas.push(`${porAprobar} creadora${porAprobar>1?'s':''} para aprobar`);
+    if(sinRevisar) alertas.push(`${sinRevisar} entrega${sinRevisar>1?'s':''} sin revisar`);
+    if(m.vencenEn2Dias) alertas.push(`${m.vencenEn2Dias} vencen en 2 días`);
+    if(m.sinRecibir) alertas.push(`${m.sinRecibir} kits sin confirmar hace 10 días`);
+  }catch(e){
+    console.error(e);
+    if(cajas.collabs) cajas.collabs.innerHTML = '<span class="dato cargando">no se pudieron leer los números</span>';
+  }
+
+  // Creativos: los videos que cargaron las creadoras
+  try{
+    const app = initializeApp({apiKey:"AIzaSyCTv4DiRCpbCpGYP6E86TPHlkPvaAZTN3g",authDomain:"cleargy-creators.firebaseapp.com",projectId:"cleargy-creators",storageBucket:"cleargy-creators.firebasestorage.app",messagingSenderId:"313543582398",appId:"1:313543582398:web:99fe78991adeea2e7cb4ef"});
+    let db; try{ db=initializeFirestore(app,{experimentalAutoDetectLongPolling:true}); }catch(e){ db=getFirestore(app); }
+    await signInAnonymously(getAuth(app));
+    const col = collection(db, MARCA+'_videos');
+    const desdeMes = hoyART().slice(0,8)+'01';
+    const [todos, rech, mes] = await Promise.all([
+      getCountFromServer(col),
+      getCountFromServer(query(col, where('status','==','rejected'))),
+      getCountFromServer(query(col, where('date','>=',desdeMes))),
+    ]);
+    const total = todos.data().count - rech.data().count;   // los rechazados no cuentan, igual que en el panel
+    if(cajas.creativos) cajas.creativos.innerHTML =
+      `<span class="dato">${total.toLocaleString('es-AR')} videos</span><span class="dato">${mes.data().count.toLocaleString('es-AR')} este mes</span>`;
+  }catch(e){
+    console.error(e);
+    if(cajas.creativos) cajas.creativos.innerHTML = '<span class="dato cargando">no se pudieron leer los videos</span>';
+  }
+
+  avisos.innerHTML = alertas.length
+    ? alertas.map(t=>`<span class="aviso">${t}</span>`).join('')
+    : '<span class="aviso calma">Nada esperando tu respuesta 👌</span>';
+}
+
+if(sessionStorage.getItem(K)) arrancar();
+</script>
+
+<!-- Auto-actualización: GitHub Pages cachea el HTML y los celulares lo retienen mucho más. -->
+<script>
+const APP_VERSION = '2026-09-25-a';
+(function(){
+  var CLAVE='miluz_hub_ver';
+  function chequear(){
+    if(!navigator.onLine) return;
+    fetch(location.pathname+'?cb='+Date.now(), {cache:'no-store'})
+      .then(function(r){ return r.ok?r.text():null; })
+      .then(function(t){
+        if(!t) return;
+        var m=t.match(/APP_VERSION\s*=\s*'([^']+)'/);
+        if(!m || m[1]===APP_VERSION) return;
+        if(document.activeElement && document.activeElement.tagName==='INPUT') return;
+        if(sessionStorage.getItem(CLAVE)===m[1]) return;   // ya recargamos por esta versión
+        sessionStorage.setItem(CLAVE, m[1]);
+        location.reload();
+      })
+      .catch(function(){});
+  }
+  setTimeout(chequear, 1500);
+  document.addEventListener('visibilitychange', function(){ if(!document.hidden) chequear(); });
+})();
+</script>
+</body></html>
