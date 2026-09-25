@@ -324,6 +324,12 @@ ul.limpia li{margin-bottom:.5rem;font-size:.88rem;color:var(--tx2)}
 #demonav button:hover{background:var(--rosa);color:#fff;border-color:var(--rosa)}
 #demonav .lbl{color:var(--tx3);font-size:.62rem;letter-spacing:.12em;text-transform:uppercase;align-self:center;padding:0 6px}
 body.condemo .wrap{padding-bottom:84px}
+.angulos{display:flex;flex-direction:column;gap:10px;margin:10px 0 6px}
+.angulo{background:var(--sup2,rgba(0,0,0,.035));border:1px solid var(--linea);border-radius:14px;padding:12px 14px}
+.angulo>b{display:block;font-size:.9rem;margin-bottom:6px;color:var(--rosa)}
+.angulo .l{display:grid;grid-template-columns:22px 52px 1fr;gap:6px;align-items:start;font-size:.84rem;line-height:1.35;color:var(--tx);padding:3px 0}
+.angulo .l span{font-size:.95rem;line-height:1.2}
+.angulo .l i{font-style:normal;font-weight:700;font-size:.72rem;letter-spacing:.04em;text-transform:uppercase;color:var(--tx3);padding-top:2px}
 .fotos3{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin:12px 0 4px}.fotos3 figure{margin:0}.fotos3 img{width:100%;aspect-ratio:1.22;object-fit:cover;border-radius:12px;display:block}.fotos3 figcaption{margin-top:6px;font-size:.72rem;line-height:1.3;color:var(--tx2,#6b6b6b)}.fotos3 figcaption b{display:block;color:var(--tx);font-size:.74rem}@media(max-width:420px){.fotos3{grid-template-columns:1fr 1fr 1fr;gap:6px}}
 </style>
 </head>
@@ -723,8 +729,13 @@ function armarBriefing(){
   if ((CFG.ganchos || []).length) secciones.push(
     `<h3>Los primeros 3 segundos</h3>
      <p>${B('Lo que se ve + lo que se lee + lo que se escucha')} tienen que contar la misma historia desde el primer segundo, aunque esté sin sonido. No arranques simplemente hablando a cámara.</p>
-     <p>Elegí ${B('un ángulo')} que se parezca a tu experiencia y abrí con él:</p>
-     <ul class="limpia">${CFG.ganchos.map((g, n) => `<li><span class="si">${n+1}</span> ${g}</li>`).join('')}</ul>
+     <p>Elegí ${B('un ángulo')} que se parezca a tu experiencia y abrí con él. En cada uno tenés las tres cosas: qué se ve, qué se lee en pantalla y qué decís.</p>
+     <div class="angulos">${CFG.ganchos.map((g, n) => typeof g === 'string'
+       ? `<div class="angulo"><b>${n+1} · Ángulo</b><div class="l"><span>💬</span>${g}</div></div>`
+       : `<div class="angulo"><b>${n+1} · ${g.t}</b>
+            <div class="l"><span>🎬</span><i>Se ve</i>${g.ve}</div>
+            <div class="l"><span>📝</span><i>Se lee</i>«${g.lee}»</div>
+            <div class="l"><span>🗣️</span><i>Decís</i>«${g.dice}»</div></div>`).join('')}</div>
      <p>Podés cambiar palabras para que suene a vos, pero la idea tiene que ser esa. Un video que no abre así no se aprueba.${br.ganchosDoc ? ` <a href="${br.ganchosDoc}" target="_blank" rel="noopener">Ver todos los ángulos con ejemplos →</a>` : ''}</p>`);
   if ((CFG.noDecir || []).length) secciones.push(`<h3>Lo que NO se puede decir</h3><ul class="limpia">${CFG.noDecir.map(r => `<li>${r}</li>`).join('')}</ul>`);
   secciones.push(
@@ -1350,7 +1361,7 @@ function pintarMarca(){
   } catch { if (DEMO){ precargar(); traerBorrador(); } ver(DEMO ? 'v-ficha' : 'v-error'); }
 })();
 
-const APP_VERSION = '2026-09-25-a';
+const APP_VERSION = '2026-09-25-b';
 </script>
 </body>
 </html>
