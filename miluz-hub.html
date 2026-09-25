@@ -25,7 +25,8 @@ body{background:var(--crema);color:var(--tinta);font-family:Manrope,-apple-syste
 
 /* ── clave ── */
 .clave{max-width:360px;margin:12vh auto;background:#fff;border:1px solid var(--linea);border-radius:24px;padding:28px 24px;box-shadow:var(--sombra)}
-.clave .marca{display:flex;align-items:center;gap:10px;font-weight:800;font-size:1.1rem;letter-spacing:-.03em;margin-bottom:14px}
+.marca{display:flex;align-items:center;gap:10px;font-weight:800;font-size:1.1rem;letter-spacing:-.03em}
+.clave .marca{margin-bottom:14px}
 .marca i{flex:0 0 30px;height:30px;border-radius:10px;background:var(--grad);display:grid;place-items:center;color:#fff;font-size:.74rem;font-weight:800;font-style:normal}
 .clave p{color:var(--tinta2);font-size:13.5px;margin-bottom:16px}
 input[type=password]{width:100%;padding:13px 15px;border:1px solid var(--linea);background:var(--arena);border-radius:14px;
@@ -170,6 +171,14 @@ window.entrar = async function(){
   arrancar();
 };
 window.salir = function(){ sessionStorage.removeItem(K); location.reload(); };
+// La clave dejó de servir (la cambiaron o venció): mejor volver a pedirla que mostrar ceros
+function salirPorClave(){
+  sessionStorage.removeItem(K);
+  $('#app').style.display='none';
+  $('#clave').style.display='block';
+  $('#err').textContent='Esa clave ya no abre el panel. Probá de nuevo.';
+  $('#err').style.display='block';
+}
 
 function arrancar(){
   $('#clave').style.display='none';
@@ -195,6 +204,10 @@ async function cargarNumeros(){
     const [res, cola, ent] = await Promise.all([
       canje('resumen',{clave}), canje('cola',{clave}), canje('entregas',{clave}),
     ]);
+    if(!res.ok || !cola.ok || !ent.ok){
+      if([res,cola,ent].some(r=>r.status===403)){ salirPorClave(); return; }
+      throw new Error('el panel no respondió');
+    }
     const m = res.mes || {};
     const porAprobar = (cola.fichas||[]).length;
     const sinRevisar = (ent.fichas||[]).filter(f=>f.estado==='entregado').length;
@@ -245,7 +258,7 @@ if(sessionStorage.getItem(K)) arrancar();
 
 <!-- Auto-actualización: GitHub Pages cachea el HTML y los celulares lo retienen mucho más. -->
 <script>
-const APP_VERSION = '2026-09-25-a';
+const APP_VERSION = '2026-09-25-b';
 (function(){
   var CLAVE='miluz_hub_ver';
   function chequear(){
