@@ -45,6 +45,8 @@ body{
 }
 .top .marca{font-weight:800;font-size:1.25rem;letter-spacing:-.03em;background:var(--grad);-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent}
 body.logo-grande .top .marca{font-size:1.55rem}
+.top .marca .logo-img{height:26px;width:auto;display:block}
+body.logo-grande .top .marca .logo-img{height:34px}
 .op.off{opacity:.45;cursor:default;background:var(--sup2)}
 .op.off .et{text-decoration:line-through}
 .op .cupo{flex:0 0 auto;font-size:.68rem;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--no);background:var(--sup);border:1px solid var(--linea);border-radius:99px;padding:3px 8px}
@@ -697,12 +699,13 @@ async function enviar(){
   }
   aplicarEstilo(CFG.estilo);
   document.title = `${CFG.nombre} · Sumate como creadora`;
-  $('#marca-nombre').textContent = (CFG.estilo && CFG.estilo.logoTexto) || CFG.nombre;
+  if (CFG.estilo && CFG.estilo.logoImg) $('#marca-nombre').innerHTML = `<img src="${CFG.estilo.logoImg}" alt="${CFG.nombre}" class="logo-img">`;
+  else $('#marca-nombre').textContent = (CFG.estilo && CFG.estilo.logoTexto) || CFG.nombre;
   if (CFG.estilo && CFG.estilo.logoTamano === 'grande') document.body.classList.add('logo-grande');
   armarPasos();
   pintar();
 })();
-const APP_VERSION = '2026-09-26-b';
+const APP_VERSION = '2026-09-26-c';
 </script>
 </body>
 </html>

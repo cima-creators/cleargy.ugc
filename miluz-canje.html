@@ -339,6 +339,7 @@ ul.limpia li{margin-bottom:.5rem;font-size:.88rem;color:var(--tx2)}
 body.condemo .wrap{padding-bottom:84px}
 .refs{display:flex;flex-direction:column;gap:8px}
 .kit-h{margin-top:22px;padding-top:16px;border-top:2px solid var(--linea)}
+.logo-bar{display:flex;justify-content:center;padding:6px 0 14px}.logo-bar img{height:30px;width:auto}
 .angulos{display:flex;flex-direction:column;gap:10px;margin:10px 0 6px}
 .angulo{background:var(--sup2,rgba(0,0,0,.035));border:1px solid var(--linea);border-radius:14px;padding:12px 14px}
 .angulo>b{display:block;font-size:.9rem;margin-bottom:6px;color:var(--rosa)}
@@ -352,6 +353,7 @@ body.condemo .wrap{padding-bottom:84px}
 
 <div class="wrap">
 
+  <div class="logo-bar oculto" id="logo-bar"></div>
   <div class="head">
     <div class="av" id="av"></div>
     <div class="hi">
@@ -1508,6 +1510,7 @@ function pintarMarca(){
     `<br><br><b>¿Algo de la app no funciona?</b> Escribile al soporte de la app: <a href="${soporteLink('')}" target="_blank" rel="noopener">WhatsApp +54 9 11 7082-3624</a>.`;
   if (ELEGIR()){ TITULOS[3] = [CFG.eleccion.tituloFicha || 'Elegí tus opciones', CFG.eleccion.subFicha || '']; }
   if (est.logoTamano === 'grande') document.body.classList.add('logo-grande');
+  if (est.logoImg){ const lb = $('#logo-bar'); lb.innerHTML = `<img src="${est.logoImg}" alt="${CFG.nombre}">`; lb.classList.remove('oculto'); }
 }
 
 (async function init(){
@@ -1544,7 +1547,7 @@ function pintarMarca(){
   } catch { if (DEMO){ precargar(); traerBorrador(); } ver(DEMO ? 'v-ficha' : 'v-error'); }
 })();
 
-const APP_VERSION = '2026-09-26-e';
+const APP_VERSION = '2026-09-26-f';
 </script>
 </body>
 </html>
