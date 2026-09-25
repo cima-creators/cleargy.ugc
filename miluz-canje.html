@@ -715,21 +715,23 @@ const B = t => `<b style="color:var(--tx)">${t}</b>`;
 function armarBriefing(){
   const br = CFG.briefing || {};
   const nFotos = br.fotosProceso || 5;
+  const nCrudos = br.crudos || 0;
   const conCodigo = !!CFG.tienda;
   const secciones = [];
   (br.intro || []).forEach(s => secciones.push(`<h3>${s.t}</h3>${s.html}`));
   if ((CFG.reglas || []).length) secciones.push(`<h3>Reglas técnicas</h3><ul class="limpia">${CFG.reglas.map(r => `<li>${r}</li>`).join('')}</ul>`);
   if ((CFG.ganchos || []).length) secciones.push(
-    `<h3>El gancho: obligatorio</h3>
-     <p>Los primeros 2 segundos deciden todo. Tu video tiene que ${B(`abrir sí o sí con uno de estos ${['','','dos','tres','cuatro','cinco','seis'][CFG.ganchos.length] || CFG.ganchos.length} ganchos`)}, dicho a cámara o en texto grande:</p>
-     <ul class="limpia">${CFG.ganchos.map((g, n) => `<li><span class="si">${n+1}</span> "${g}"</li>`).join('')}</ul>
-     <p>Podés cambiar una palabra para que suene a vos, pero la idea tiene que ser esa. Un video sin uno de estos ganchos no se aprueba.</p>`);
+    `<h3>Los primeros 3 segundos</h3>
+     <p>${B('Lo que se ve + lo que se lee + lo que se escucha')} tienen que contar la misma historia desde el primer segundo, aunque esté sin sonido. No arranques simplemente hablando a cámara.</p>
+     <p>Elegí ${B('un ángulo')} que se parezca a tu experiencia y abrí con él:</p>
+     <ul class="limpia">${CFG.ganchos.map((g, n) => `<li><span class="si">${n+1}</span> ${g}</li>`).join('')}</ul>
+     <p>Podés cambiar palabras para que suene a vos, pero la idea tiene que ser esa. Un video que no abre así no se aprueba.${br.ganchosDoc ? ` <a href="${br.ganchosDoc}" target="_blank" rel="noopener">Ver todos los ángulos con ejemplos →</a>` : ''}</p>`);
   if ((CFG.noDecir || []).length) secciones.push(`<h3>Lo que NO se puede decir</h3><ul class="limpia">${CFG.noDecir.map(r => `<li>${r}</li>`).join('')}</ul>`);
   secciones.push(
     `<h3>Cómo entregar</h3>
      <p>Vos ${B('no publicás el reel')}: nos mandás el video y lo subimos nosotras desde @${CFG.cuentaIg} como collab con vos.</p>
      <ul class="limpia">
-       <li><span class="si">1</span> Creá una carpeta en Google Drive con ${B('el video')} y ${B(`${nFotos} fotos del proceso`)} (el antes, aplicando, el resultado).</li>
+       <li><span class="si">1</span> Creá una carpeta en Google Drive con ${B('el video')}, ${B(`${nFotos} fotos del proceso`)}${nCrudos ? ` y ${B(`${nCrudos} videos crudos`)}` : ''}.</li>
        <li><span class="si">2</span> Compartila con ${B('"Cualquier persona con el enlace"')}.</li>
        <li><span class="si">3</span> Pegá el link en tu app, en "Entregá tu contenido".</li>
      </ul>
@@ -746,9 +748,12 @@ function armarBriefing(){
        <figure><img src="${CFG.fotos[1]}" alt="Gesto" loading="lazy"><figcaption><b>02 · Gesto</b><span>Acerca la acción sin forzar la postura.</span></figcaption></figure>
        <figure><img src="${CFG.fotos[2]}" alt="Detalle" loading="lazy"><figcaption><b>03 · Detalle</b><span>Hace visible la materia.</span></figcaption></figure>
      </div>` : '') +
+    (nCrudos ? `<h3>Los ${nCrudos} videos crudos</h3>
+     <p>Clips ${B('de 3 a 5 segundos')}, sin editar, sin texto ni música: los usamos para armar más piezas. ${br.crudosNota || ''}</p>
+     ${(br.crudosLista || []).length ? `<ul class="limpia">${br.crudosLista.map((c, n) => `<li><span class="si">${n+1}</span> ${c}</li>`).join('')}</ul>` : ''}` : '') +
     `<h3>Cuando lo subamos</h3>
      <p>Te va a llegar una ${B('invitación de colaboración')} en Instagram (Notificaciones → "te invitó a colaborar"). <span class="si">Aceptala</span>: así el reel aparece también en tu perfil y cuenta como tu collab. Y ${B('resubilo a tus historias')} ese mismo día.</p>
-     <p>${B('Subilo también a tu TikTok.')} El mismo video, en tu cuenta. Después pegá el link en tu app: las views de TikTok ${B('se suman a las del reel')} para el bono viral y el podio del mes.</p>` +
+     <p>${B('Subilo también a tu TikTok.')} El mismo video, en tu cuenta. Después pegá el link en tu app: las views de TikTok ${B('se suman a las del reel')} para el bono viral y el podio del mes.${br.hashtag ? ` En TikTok arrobá a @${CFG.cuentaIg} y usá ${B(br.hashtag)}.` : ''}</p>` +
     (conCodigo ? `<h3>Tu código de descuento</h3>
      <p>Nombralo en el video y dejalo fijado en los comentarios. Tus seguidoras compran con descuento y vos ganás comisión por cada venta.</p>` : '') +
     `<h3>El plazo</h3>
@@ -760,6 +765,7 @@ function armarBriefing(){
        <a class="ref" href="${r.u}" target="_blank" rel="noopener">
          <span class="play">▶</span>
          <span><b>${r.t}</b><small>${r.n}</small></span></a>`).join('')}</div>`);
+  if (br.docCompleto) secciones.push(`<h3>¿Querés leer más?</h3><p>Esto es lo esencial. Si querés entender la marca a fondo (qué transmite, a quién le habla, cómo explicar cada producto): <a href="${br.docCompleto}" target="_blank" rel="noopener">guía completa de ${CFG.nombre} →</a></p>`);
   return secciones.join('\n');
 }
 
@@ -1305,7 +1311,7 @@ function pintarMarca(){
   $('#terminos-txt').innerHTML = (CFG.formulario && CFG.formulario.terminos) || `Autorizo a ${CFG.nombre} a usar el contenido que publique en su perfil y en su publicidad. Confirmo que los datos son correctos.`;
   $('#llego-txt').textContent = `Tocá acá cuando lo tengas en la mano. Ahí arrancan tus ${CFG.diasParaPublicar} días — no antes, así el correo no te come el plazo.`;
   const nFotos = (CFG.briefing && CFG.briefing.fotosProceso) || 5;
-  $('#subir-txt').innerHTML = `Subí a una carpeta de Google Drive <b style="color:var(--tx)">el video y las ${nFotos} fotos del proceso</b>, compartila con "Cualquier persona con el enlace" y pegá el link acá. El reel lo subimos nosotras como collab desde @${CFG.cuentaIg}.`;
+  $('#subir-txt').innerHTML = `Subí a una carpeta de Google Drive <b style="color:var(--tx)">el video, las ${nFotos} fotos del proceso${(CFG.briefing && CFG.briefing.crudos) ? ` y los ${CFG.briefing.crudos} videos crudos` : ''}</b>, compartila con "Cualquier persona con el enlace" y pegá el link acá. El reel lo subimos nosotras como collab desde @${CFG.cuentaIg}.`;
   const ll = CFG.llamada;
   $('#dudas-txt').innerHTML = (CFG.grupo ? 'Preguntá en el grupo, es lo más rápido. ' : '') +
     (ll ? `La llamada es todos los ${String(ll.dia).toLowerCase()} a las ${ll.hora}. ` : '') +
@@ -1344,7 +1350,7 @@ function pintarMarca(){
   } catch { if (DEMO){ precargar(); traerBorrador(); } ver(DEMO ? 'v-ficha' : 'v-error'); }
 })();
 
-const APP_VERSION = '2026-09-23-e';
+const APP_VERSION = '2026-09-25-a';
 </script>
 </body>
 </html>
