@@ -129,6 +129,9 @@ const APPS = [
   {id:'creativos', titulo:'Guiones y creativos', icono:'video', url:DRIVE_GUIONES, stats:true,
    bajada:'Los guiones de cada día y los videos de las creadoras.',
    nota:'La grilla por día y campaña llega cuando estén los nombres de las 5 campañas.'},
+  {id:'ganadores', titulo:'Videos ganadores', icono:'trofeo',
+   url:'https://claude.ai/artifact/WdigX5LMmM2kdFkqv2DG2i',
+   bajada:'El análisis de los creativos que mejor rindieron: qué gancho, qué formato y por qué funcionó.'},
   {id:'stock', titulo:'Stock', icono:'caja', url:'https://claude.ai/artifact/CiapLLo7qVU4pgy7YXjX3q',
    bajada:'Stock Madre: qué hay, qué falta y qué hay que reponer.'},
   {id:'reclamos', titulo:'Reclamos', icono:'alerta', url:'',
@@ -140,6 +143,7 @@ const ICONOS = {
   megafono:'<path d="M3 11v2a1 1 0 0 0 1 1h3l6 4V6L7 10H4a1 1 0 0 0-1 1z"/><path d="M17.5 8.5a5 5 0 0 1 0 7"/>',
   video:'<rect x="2" y="5" width="20" height="14" rx="3"/><path d="M10 9.5l5 2.5-5 2.5z"/>',
   caja:'<path d="M21 8v11a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1V8"/><rect x="2" y="4" width="20" height="4" rx="1"/><path d="M10 12h4"/>',
+  trofeo:'<path d="M8 21h8M12 17v4M7 4h10v5a5 5 0 0 1-10 0z"/><path d="M17 5h3v2a3 3 0 0 1-3 3M7 5H4v2a3 3 0 0 0 3 3"/>',
   alerta:'<path d="M10.3 3.9 1.9 18a2 2 0 0 0 1.7 3h16.8a2 2 0 0 0 1.7-3L13.7 3.9a2 2 0 0 0-3.4 0z"/><path d="M12 9v4M12 17h.01"/>',
 };
 
@@ -258,7 +262,7 @@ if(sessionStorage.getItem(K)) arrancar();
 
 <!-- Auto-actualización: GitHub Pages cachea el HTML y los celulares lo retienen mucho más. -->
 <script>
-const APP_VERSION = '2026-09-25-c';
+const APP_VERSION = '2026-09-25-d';
 (function(){
   var CLAVE='miluz_hub_ver';
   function chequear(){
