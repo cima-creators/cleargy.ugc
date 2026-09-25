@@ -444,6 +444,7 @@ dialog.dlg .fila{display:flex;gap:8px;justify-content:flex-end;flex-wrap:wrap}
   <button data-t="entregas"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="6" width="18" height="13" rx="2.5"/><path d="M10 10.5l5 3-5 3z"/></svg><span class="et">Entregas</span><span class="n" id="n-ent">0</span></button>
   <button data-t="creadoras"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9.5" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.9"/><path d="M16 3.1a4 4 0 0 1 0 7.8"/></svg><span class="et">Creadoras</span><span class="n" id="n-cre">0</span></button>
   <button data-t="pagos"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><rect x="2.5" y="6" width="19" height="12.5" rx="2.5"/><path d="M2.5 10h19"/><path d="M6 15h4"/></svg><span class="et">Pagos</span><span class="n" id="n-pag">0</span></button>
+  <button data-t="cupos" hidden><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M4 19V9M10 19V5M16 19v-8M22 19H2"/></svg><span class="et">Cupos</span></button>
   <button class="plegar" id="plegar">
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M15 18l-6-6 6-6"/></svg>
     <span class="et">Plegar</span>
@@ -515,6 +516,13 @@ dialog.dlg .fila{display:flex;gap:8px;justify-content:flex-end;flex-wrap:wrap}
     <h1>Entregas</h1>
     <p class="sub" id="entregas-sub">Los videos que mandaron por Drive: revisalos, subilos como collab desde la cuenta de la marca y pegá el link del reel. Después el sistema verifica solo que acepten la invitación.</p>
     <div id="lista-entregas"></div>
+  </section>
+
+  <!-- ══ CUPOS (solo marcas con cupos por kit / ángulo) ══ -->
+  <section id="t-cupos" class="oculto">
+    <h1>Cupos</h1>
+    <p class="sub">Cuántas aplicaron y cuántas están aprobadas por kit y por ángulo, contra el cupo de la tanda y el total del programa.</p>
+    <div id="cupos-cuerpo"></div>
   </section>
 
 </main>
@@ -615,8 +623,11 @@ function pintarMarca(){
   document.title = `${CFG.nombre} · Panel`;
   $('#marca-ini').textContent = est.iniciales || CFG.nombre.slice(0,2).toUpperCase();
   $('#marca-nombre').textContent = est.logoTexto || CFG.nombre;
-  $('#entregas-sub').textContent = `Los videos que mandaron por Drive: revisalos, subilos como collab desde @${CFG.cuentaIg} y pegá el link del reel. Después el sistema verifica solo que acepten la invitación.`;
+  $('#entregas-sub').textContent = CREADORA_PUBLICA()
+    ? `Cada creadora publica el video en su Instagram y su TikTok etiquetando a @${CFG.cuentaIg} y carga acá la carpeta de Drive y los dos links. Revisá el video y aprobá o pedí cambios.`
+    : `Los videos que mandaron por Drive: revisalos, subilos como collab desde @${CFG.cuentaIg} y pegá el link del reel. Después el sistema verifica solo que acepten la invitación.`;
   (CFG.opciones || []).concat(CFG.opcionesViejas || []).forEach(t => { NOMBRE_TONO[t.id] = t.nom; });
+  if (CFG.estilo && CFG.estilo.logoTamano === 'grande') $('#marca-nombre').style.fontSize = '1.25rem';
   Object.assign(FILTRO, CFG.filtro || {});
   Object.assign(ECONOMIA, CFG.economia || {}, {
     bonoViral: CFG.plata.viralMonto, bonoUmbral: CFG.plata.viralViews, comision: CFG.plata.comision,
@@ -634,20 +645,29 @@ function ENVIOS_desde(env){
     cp: f.cp || '—',
     dni: f.dni || '—', tel: f.tel || (f.datos && f.datos.tel) || '', email: f.email || (f.datos && f.datos.email) || '',
     avisoDespachoEn: f.avisoDespachoEn || null,
-    tonos: (f.tonos || (f.datos && f.datos.tonos) || []).map(t => NOMBRE_TONO[t] || t).join(' · '),
+    // kits (kitPorRespuesta, Valca): "Ceras + Capilar" · si no, los colores elegidos (Mi Luz)
+    tonos: CFG && CFG.kitPorRespuesta
+      ? nombresKits(f.kit || (f.datos && f.datos.kit), f.kit2 || (f.datos && f.datos.kit2))
+      : (f.tonos || (f.datos && f.datos.tonos) || []).map(t => NOMBRE_TONO[t] || t).join(' · '),
     estado: f.estado === 'enviado' ? 'despachado' : 'listo',
   }));
 }
+/* ── opt-in por marca (Valca) ── */
+const CREADORA_PUBLICA = () => !!(CFG && CFG.publica === 'creadora');
+const nombreKit = id => { const k = (CFG && CFG.opciones || []).find(o => o.id === id); return k ? k.nom : (id || ''); };
+const nombresKits = (k1, k2) => [k1, k2].filter(Boolean).map(nombreKit).join(' + ') || '—';
+const conCupos = () => !!(CFG && CFG.cupos);
 
 /* Qué ve cada rol. admin y equipo ven todo; el cliente (marca) no ve
-   plata, pagos ni envíos; logística solo envíos. */
+   plata, pagos ni envíos; logística solo envíos. "cupos" solo existe en
+   las marcas con cupos configurados (se quita en aplicarRol si no). */
 const SOLAPAS = {
-  admin:  ['resumen','admision','envios','entregas','creadoras','pagos'],
-  equipo: ['resumen','admision','envios','entregas','creadoras','pagos'],
-  marca:  ['admision','entregas','creadoras'],
+  admin:  ['resumen','admision','envios','entregas','creadoras','pagos','cupos'],
+  equipo: ['resumen','admision','envios','entregas','creadoras','pagos','cupos'],
+  marca:  ['admision','entregas','creadoras','cupos'],
   envios: ['envios'],
 };
-const puede = t => (SOLAPAS[ROL] || SOLAPAS.equipo).includes(t);
+const puede = t => (SOLAPAS[ROL] || SOLAPAS.equipo).includes(t) && (t !== 'cupos' || conCupos());
 
 /* Trae todo del backend y lo vuelca en las mismas estructuras que
    usan las pantallas — así el render no distingue demo de real. */
@@ -687,12 +707,17 @@ async function cargar(){
     collab: !!(f.reel && f.reel.collab),
     dias: f.recibidoEn && f.publicadoEn ? Math.max(1, Math.ceil((f.publicadoEn - f.recibidoEn) / 864e5)) : 0,
     nro: (f.cumplidas || 0) + 1,
+    // kits y segunda entrega (Valca)
+    kit: f.kit || (f.datos && f.datos.kit) || null, kit2: f.kit2 || (f.datos && f.datos.kit2) || null,
+    videos: f.videos || (f.datos && f.datos.videos) || null, entregas: Array.isArray(f.entregas) ? f.entregas : [],
+    tiktokUser: (f.datos && f.datos.tiktok) || null,
   }));
 
   CREADORAS = !todas ? [] : todas.fichas.map(f => ({
     nom: f.nombre || f.ig, ig: f.ig, estado: f.estado, nivel: f.nivel,
     pideHumana: f.pideHumana || null, quiereOtro: f.quiereOtro || null,
     id: f.id, seguidores: f.seguidores ?? null, posts90: f.posts90 ?? null, vistas: f.vistas ?? null,
+    kit: f.kit || null, kit2: f.kit2 || null, videos: f.videos || null,
     motivo: f.motivo || null, unas: f.unas || null, respuestas: f.respuestas || {}, importada: !!f.importada,
     manychatId: f.manychatId || null,
     avisadaEn: f.avisadaEn || null, avisadaManual: !!f.avisadaManual, decididaEn: f.decididaEn || null,
@@ -807,7 +832,7 @@ let i = 0, total = APLICANTES.length;
 const $ = s => document.querySelector(s);
 
 /* ── navegación entre pestañas ── */
-const VISTAS = ['resumen','admision','envios','entregas','creadoras','pagos'];
+const VISTAS = ['resumen','admision','envios','entregas','creadoras','pagos','cupos'];
 function irA(t){
   document.querySelectorAll('.lat button[data-t]').forEach(x => x.classList.toggle('on', x.dataset.t === t));
   VISTAS.forEach(v => $('#t-'+v).classList.toggle('oculto', v !== t));
@@ -830,14 +855,79 @@ const contar = () => {
 /* etiqueta legible de una respuesta del formulario de la marca: el texto
    de la opción elegida (ops de la pregunta) o el mapa `etiquetas` */
 const preguntasMarca = () => (CFG && CFG.formulario && CFG.formulario.preguntas) || [];
+const camposMarca = () => (CFG && CFG.formulario && CFG.formulario.campos) || [];
+/* todas las opciones de una pregunta: las planas o las encadenadas (opsPor) juntas */
+const opsTodas = p => p.opsPor ? Object.values(p.opsPor).flat() : (p.ops || []);
 function etiquetaResp(v, campo){
   if (!v) return v;
   const p = campo && preguntasMarca().find(x => x.campo === campo);
-  const op = p && (p.ops || []).find(o => o[0] === v);
+  const op = p && opsTodas(p).find(o => o[0] === v);
   if (op) return op[1];
   return (CFG && CFG.formulario && CFG.formulario.etiquetas && CFG.formulario.etiquetas[v]) || v;
 }
 const descartaMarca = () => (CFG && CFG.formulario && CFG.formulario.descarta) || null;
+/* `salvo` puede ser un valor o una lista (Valca) */
+const salvoOk = (s, v) => Array.isArray(s) ? s.includes(v) : v === s;
+
+/* ── cupos por kit y por ángulo (marcas con `cupos`) ── */
+function cupoDe(tipo, k){
+  const c = CFG && CFG.cupos; if (!c || !k) return { tanda: null, total: null };
+  const tanda = tipo === 'angulo' ? c.anguloTanda1 : c.tanda1;
+  const total = tipo === 'angulo' ? c.angulo : c.kit;
+  return { tanda: tanda && tanda[k] != null ? Number(tanda[k]) : null, total: total && total[k] != null ? Number(total[k]) : null };
+}
+const usadosDe = (tipo, k) => (CFG && CFG.cuposUsados && CFG.cuposUsados[tipo] && CFG.cuposUsados[tipo][k]) || { aplicaron: 0, aprobadas: 0 };
+/* "rutina 3/5" — aplicaron sobre el cupo de la tanda (o el total si no hay tanda) */
+function cupoTexto(tipo, k){
+  if (!conCupos() || !k) return '';
+  const c = cupoDe(tipo, k), u = usadosDe(tipo, k);
+  const tope = c.tanda != null ? c.tanda : c.total;
+  return tope == null ? '' : `${u.aplicaron}/${tope}`;
+}
+/* la pregunta cuyas opciones tienen cupo por ángulo (la que tiene tabla en cupos.angulo) */
+const preguntaAngulo = () => preguntasMarca().find(p => CFG.cupos && CFG.cupos.angulo && opsTodas(p).some(o => CFG.cupos.angulo[o[0]] != null)) || null;
+function bloqueCupos(){
+  if (!conCupos()) return '';
+  const c = CFG.cupos;
+  const fila = (tipo, k, nom, extra) => {
+    const q = cupoDe(tipo, k), u = usadosDe(tipo, k);
+    const tope = q.tanda != null ? q.tanda : q.total;
+    const pct = tope ? Math.min(100, Math.round(u.aplicaron / tope * 100)) : 0;
+    const lleno = tope != null && u.aplicaron >= tope;
+    return `<tr>
+      <td><b>${nom}</b>${extra ? `<span class="n2">${extra}</span>` : ''}</td>
+      <td class="num">${u.aplicaron}</td><td class="num">${u.aprobadas}</td>
+      <td class="num">${q.tanda != null ? q.tanda : '—'}</td><td class="num">${q.total != null ? q.total : '—'}</td>
+      <td style="min-width:120px"><span class="mini" style="display:block;height:6px;border-radius:99px;background:var(--beige);overflow:hidden"><u style="display:block;height:100%;width:${pct}%;background:${lleno ? 'var(--no)' : 'var(--acento)'}"></u></span>${lleno ? '<span class="pill no" style="margin-top:4px">cupo lleno</span>' : ''}</td>
+    </tr>`;
+  };
+  const cab = `<thead><tr><th>Kit</th><th class="num">Aplicaron</th><th class="num">Aprobadas</th><th class="num">Cupo tanda</th><th class="num">Cupo total</th><th>Avance</th></tr></thead>`;
+  const kits = (CFG.opciones || []).filter(o => c.kit && c.kit[o.id] != null).map(o => fila('kit', o.id, o.nom, o.desc || '')).join('');
+  const pA = preguntaAngulo();
+  const kpr = CFG.kitPorRespuesta;
+  let angulos = '';
+  if (pA && pA.opsPor){
+    angulos = Object.entries(pA.opsPor).map(([padre, ops]) => {
+      const kitDe = kpr && kpr.campo === pA.dependeDe ? nombreKit((kpr.mapa || {})[padre]) : etiquetaResp(padre, pA.dependeDe);
+      return `<tr><td colspan="6" style="background:var(--arena);font-weight:700">${kitDe || padre}</td></tr>` +
+        ops.map(o => fila('angulo', o[0], o[1], o[2] || '')).join('');
+    }).join('');
+  } else if (pA){
+    angulos = opsTodas(pA).map(o => fila('angulo', o[0], o[1], o[2] || '')).join('');
+  }
+  return `
+    <div class="bloque">
+      <h2>Cupos por kit</h2>
+      <p class="n2">Aplicaron = fichas que no fueron descartadas ni rechazadas (es lo que apaga la opción en el formulario). Aprobadas = ya pasaron la admisión. El 2º kit de las que hacen dos videos también cuenta.</p>
+      <table>${cab.replace('Kit', 'Kit')}<tbody>${kits || '<tr><td colspan="6">Sin cupos por kit.</td></tr>'}</tbody></table>
+    </div>
+    ${pA ? `<div class="bloque">
+      <h2>Cupos por ángulo</h2>
+      <p class="n2">${pA.q}</p>
+      <table>${cab.replace('<th>Kit</th>', '<th>Ángulo</th>')}<tbody>${angulos}</tbody></table>
+    </div>` : ''}`;
+}
+function pintarCupos(){ const el = $('#cupos-cuerpo'); if (el) el.innerHTML = bloqueCupos(); }
 
 /* ── admisión ── */
 function pintarFicha(){
@@ -863,7 +953,7 @@ function pintarFicha(){
   const inflada = a.views < a.seguidores * 0.10;
   const pasaTodo = cs.seguidores && cs.posts && cs.views;
   const desc = descartaMarca();
-  const descartable = !!(desc && a.datos && a.datos[desc.campo] && a.datos[desc.campo] !== desc.salvo);
+  const descartable = !!(desc && a.datos && a.datos[desc.campo] && (desc.salvo ? !salvoOk(desc.salvo, a.datos[desc.campo]) : (desc.valor != null && a.datos[desc.campo] === desc.valor)));
 
   const pocosReels = a.reels < FILTRO.reelsMinimos;
 
@@ -877,6 +967,7 @@ function pintarFicha(){
     vc = 'duda';
   }
   else if (descartable){ v = desc.veredicto || 'No cumple el requisito del producto.'; vc = 'no'; }
+  else if (a.motivo === 'cupo_lleno'){ v = 'Pasa el filtro, pero el ángulo o el kit que eligió ya llenó su cupo. Aceptala solo si querés pasarte del cupo.'; vc = 'duda'; }
   else if (!pasaTodo){ v = 'No llega al piso de métricas.'; vc = 'no'; }
   else if (inflada){ v = `Ojo: ${a.views.toLocaleString('es-AR')} views promedio con ${a.seguidores.toLocaleString('es-AR')} seguidores. Puede tener seguidores comprados.`; vc = 'duda'; }
   else { v = 'Pasa el filtro automático. Mirá la foto y decidí.'; vc = 'si'; }
@@ -885,8 +976,16 @@ function pintarFicha(){
     `<div class="chk ${ok?'si':'no'}"><b>${ok?'':'✕ '}${val}</b><span>${lb}</span></div>`;
 
   const fotosCfg = CFG && CFG.formulario && CFG.formulario.fotos;
-  const respuestas = preguntasMarca().filter(p => (a.datos || {})[p.campo]).map(p =>
-    (desc && p.campo === desc.campo) ? `${p.corto.toLowerCase()} ${etiquetaResp(a.datos[p.campo], p.campo).toLowerCase()}` : `${p.corto}: ${etiquetaResp(a.datos[p.campo], p.campo)}`).join(' · ');
+  const pAng = preguntaAngulo();
+  const respuestas = preguntasMarca().filter(p => (a.datos || {})[p.campo]).map(p => {
+    const et = etiquetaResp(a.datos[p.campo], p.campo);
+    const cupo = pAng && p.campo === pAng.campo ? cupoTexto('angulo', a.datos[p.campo]) : '';
+    return (desc && p.campo === desc.campo) ? `${p.corto.toLowerCase()} ${et.toLowerCase()}` : `${p.corto}: ${et}${cupo ? ` (cupo ${cupo})` : ''}`;
+  })
+    // campos de texto propios (Valca: TikTok) y el kit que salió del formulario
+    .concat(camposMarca().filter(c => (a.datos || {})[c.campo]).map(c => `${c.corto || c.campo}: ${c.arroba ? '@' : ''}${a.datos[c.campo]}`))
+    .concat(CFG && CFG.kitPorRespuesta && (a.datos || {}).kit ? [`Kit: ${nombresKits(a.datos.kit, a.datos.videos === 'dos' ? a.datos.kit2 : null)}${cupoTexto('kit', a.datos.kit) ? ` (cupo ${cupoTexto('kit', a.datos.kit)})` : ''}`] : [])
+    .join(' · ');
   const motivos = ((CFG && CFG.formulario && CFG.formulario.motivosRechazo) || [
     ['canje','Cuenta de canje puro — más de la mitad son colabos'], ['comprados','Seguidores comprados'],
     ['contenido','Contenido incompatible con la marca'], ['metricas','No llega a las métricas']]);
@@ -974,12 +1073,13 @@ function decidir(qué, motivo){
 
 /* ── envíos ── */
 function pintarEnvios(){
-  const conOpciones = !!(CFG && CFG.elegir);
+  const conOpciones = !!(CFG && (CFG.elegir || CFG.kitPorRespuesta));
+  const colOpciones = CFG && CFG.kitPorRespuesta ? 'Kit' : 'Colores';
   $('#tabla-envios').innerHTML = `
     <table>
       <thead><tr>
         <th style="width:34px"></th><th>Creadora</th><th>Dirección</th>
-        ${conOpciones ? '<th>Colores</th>' : ''}<th>Estado</th><th>Aviso</th>
+        ${conOpciones ? `<th>${colOpciones}</th>` : ''}<th>Estado</th><th>Aviso</th>
       </tr></thead>
       <tbody>${ENVIOS.map((e,ix) => `
         <tr>
@@ -1006,7 +1106,7 @@ function bajarCsv(nombre, filas){
 }
 
 $('#btn-csv').onclick = () => {
-  bajarCsv('envios', [['Nombre','DNI','Telefono','Email','Instagram','Direccion','Localidad','CP','Colores']]
+  bajarCsv('envios', [['Nombre','DNI','Telefono','Email','Instagram','Direccion','Localidad','CP', CFG && CFG.kitPorRespuesta ? 'Kit' : 'Colores']]
     .concat(ENVIOS.filter(e => e.estado === 'listo')
       .map(e => [e.nom, e.dni, e.tel, e.email, '@'+e.ig, e.dir, e.loc, e.cp, e.tonos])));
 };
@@ -1104,18 +1204,31 @@ function tarjetaEntrega(e, revisar){
   const ix = ENTREGAS.indexOf(e);
   const sinCollab = !e.collab;
   const pocasViews = e.views < 1000;
+  const ella = CREADORA_PUBLICA();   // publicó ella en su IG/TikTok etiquetando a la marca
 
   const aviso = sinCollab
-    ? `<div class="aviso urg">
+    ? (ella
+      ? `<div class="aviso urg">
+         <b>En el reel no aparece @${CFG.cuentaIg} etiquetada ni arrobada.</b>
+         Pedile que edite la publicación y etiquete a la marca (le llega el paso a paso). Si al abrirlo ves que sí está etiquetada, aprobala igual.
+       </div>`
+      : `<div class="aviso urg">
          <b>Todavía no aceptó la invitación de colaboración.</b>
          El reel está en el perfil de la marca pero no en el de ella, así que no cuenta todavía.
          Pedíselo: le llega el paso a paso por Instagram.
-       </div>`
+       </div>`)
     : pocasViews
     ? `<div class="aviso med">
          <b>Quedó abajo de las 1.000 views.</b>
          Cumplió con lo pactado igual — el trato es entregar el video, no viralizar. Aprobala salvo que el video esté mal hecho.
        </div>` : '';
+
+  // segunda entrega (dos videos): sus links, si ya la cargó
+  const e2 = ella && e.entregas && e.entregas[1];
+  const links2 = e2 ? `<div class="aviso med" style="background:var(--arena);color:var(--tinta2)"><b>Video 2${e2.kit ? ' · ' + nombreKit(e2.kit) : ''}</b>
+      <a class="verreel" href="${e2.drive}" target="_blank" rel="noopener">Drive</a> · <a class="verreel" href="${e2.reel && e2.reel.url || '#'}" target="_blank" rel="noopener">Reel</a>${e2.tiktok && e2.tiktok.url ? ` · <a class="verreel" href="${e2.tiktok.url}" target="_blank" rel="noopener">TikTok</a>` : ''}
+      · ${(((e2.reel && e2.reel.views) || 0) + ((e2.tiktok && e2.tiktok.views) || 0)).toLocaleString('es-AR')} views${e2.reel && e2.reel.collab === false ? ' · <span class="pill no">sin etiqueta</span>' : ''}</div>`
+    : (ella && e.videos === 'dos' ? `<div class="aviso med" style="background:var(--arena);color:var(--tinta2)"><b>Video 2${e.kit2 ? ' · ' + nombreKit(e.kit2) : ''}</b> todavía no lo cargó.</div>` : '');
 
   return `
     <div class="entrega">
@@ -1123,15 +1236,20 @@ function tarjetaEntrega(e, revisar){
         <a href="${e.url}" target="_blank" rel="noopener">▶<span>Ver el reel</span></a>
       </div>
       <div class="cuerpo">
-        <h3>${e.nom} <span class="hand">@${e.ig}</span></h3>
+        <h3>${e.nom} <span class="hand">@${e.ig}${e.tiktokUser ? ` · TikTok @${e.tiktokUser}` : ''}</span></h3>
         <div class="pills">
-          <span class="pill ${e.collab?'ok':'no'}">${e.collab?'✓ Aceptó la collab':'✕ No aceptó la collab aún'}</span>
+          <span class="pill ${e.collab?'ok':'no'}">${ella ? (e.collab ? '✓ Etiquetó a la marca' : '✕ Sin etiqueta a la marca') : (e.collab?'✓ Aceptó la collab':'✕ No aceptó la collab aún')}</span>
           <span class="pill ${pocasViews?'esp':'ok'}" title="${e.viewsTt?'Reel + TikTok':'Reel'}">${e.views.toLocaleString('es-AR')} views${e.viewsTt?` (TT ${e.viewsTt.toLocaleString('es-AR')})`:''}</span>${e.tiktok?`<a class="pill" href="${e.tiktok}" target="_blank" rel="noopener" style="text-decoration:none">ver TikTok</a>`:''}
+          ${ella && e.drive ? `<a class="pill" href="${e.drive}" target="_blank" rel="noopener" style="text-decoration:none">📁 Drive (video + fotos)</a>` : ''}
+          ${ella && e.kit ? `<span class="pill">kit ${nombresKits(e.kit, e.videos === 'dos' ? e.kit2 : null)}</span>` : ''}
+          ${e.codigo ? `<span class="pill">código ${e.codigo}</span>` : ''}
           <span class="pill">${e.nro===1?'primera collab':`collab n° ${e.nro}`}</span>
         </div>
         ${aviso}
+        ${links2}
         <div class="acc">
-          ${sinCollab ? `<button class="b duda" onclick="pedirCollab(${ix})">Pedirle que acepte</button>` : ''}
+          ${sinCollab ? `<button class="b duda" onclick="pedirCollab(${ix})">${ella ? 'Pedirle que etiquete' : 'Pedirle que acepte'}</button>` : ''}
+          ${ella ? `<button class="b duda" onclick="pedirCambios(${ix})">Pedir cambios</button>` : ''}
           <button class="b no" onclick="resolverEntrega(${ix},0)">Rechazar</button>
           <button class="b ok" onclick="resolverEntrega(${ix},1)">Aprobar</button>
         </div>
@@ -1148,7 +1266,9 @@ window.aprobarLote = () => {
 };
 window.pedirCollab = ix => {
   if (!DEMO) api('resolver', { id: ENTREGAS[ix].id, decision: 'pedir_collab' }).catch(() => {});
-  alert('Le mandamos por Instagram el paso a paso para aceptar la invitación.\nSigue acá hasta que la acepte (el sistema lo verifica solo).');
+  alert(CREADORA_PUBLICA()
+    ? 'Le mandamos el paso a paso para etiquetar a la marca en su publicación.\nSigue acá hasta que lo haga (el sistema lo vuelve a verificar cuando ella actualiza los links).'
+    : 'Le mandamos por Instagram el paso a paso para aceptar la invitación.\nSigue acá hasta que la acepte (el sistema lo verifica solo).');
 };
 window.pedirCambios = ix => {
   const nG = (CFG && CFG.ganchos || []).length;
@@ -1204,6 +1324,7 @@ function pintarResumen(){
   $('#t-resumen').innerHTML = `
     <h1>Resumen</h1>
     <p class="sub">${nombreMes}</p>
+    ${bloqueCupos()}
 
     <div class="kpis">
       <div class="kpi">
@@ -1386,6 +1507,12 @@ function pintarCreadoras(){
   const pregCol = preguntasMarca().find(p => desc && p.campo === desc.campo) || preguntasMarca()[0] || null;
   const respCol = c => pregCol ? (etiquetaResp((c.respuestas && c.respuestas[pregCol.campo]) || (pregCol.campo === 'unas' ? c.unas : null), pregCol.campo) || '—') : '—';
   const conTienda = !!(CFG && CFG.tienda);
+  // marcas con kit por respuesta y cupos (Valca): columnas Ángulo (con su cupo) y Kit
+  const pAng = preguntaAngulo();
+  const conKit = !!(CFG && CFG.kitPorRespuesta);
+  const angCol = c => { const v = c.respuestas && pAng && c.respuestas[pAng.campo]; if (!v) return '—'; const t = cupoTexto('angulo', v); return `${etiquetaResp(v, pAng.campo)}${t ? `<span class="n2">cupo ${t}</span>` : ''}`; };
+  const kitCol = c => c.kit ? `${nombresKits(c.kit, c.videos === 'dos' ? c.kit2 : null)}${c.videos === 'dos' ? '<span class="n2">2 videos</span>' : ''}` : '—';
+  const extraCols = (pAng ? 1 : 0) + (conKit ? 1 : 0);
 
   $('#tabla-creadoras').innerHTML = !lista.length
     ? `<div class="vacio"><div class="big">🔍</div><b class="serif" style="font-size:1.1rem">Ninguna coincide</b></div>`
@@ -1393,7 +1520,7 @@ function pintarCreadoras(){
       <thead><tr>
         ${th('nom','Creadora')}${th('estado','Estado')}<th>DM</th>
         ${th('seguidores','Seguidores','num')}${th('posts90','Posts 90d','num')}${th('vistas','Views/reel','num')}
-        ${pregCol ? `<th>${pregCol.corto}</th>` : ''}${th('views','Views collab','num')}${conTienda ? th('ventas','Ventas','num') + th('monto','Comisión','num') : ''}
+        ${pregCol ? `<th>${pregCol.corto}</th>` : ''}${pAng ? `<th>${pAng.corto || 'Ángulo'}</th>` : ''}${conKit ? '<th>Kit</th>' : ''}${th('views','Views collab','num')}${conTienda ? th('ventas','Ventas','num') + th('monto','Comisión','num') : ''}
       </tr></thead>
       <tbody>${lista.map(c => {
         const [et,cl] = ETIQUETA[c.estado] || [c.estado,''];
@@ -1406,7 +1533,7 @@ function pintarCreadoras(){
           <td class="num">${c.seguidores!=null ? c.seguidores.toLocaleString('es-AR') : '—'}</td>
           <td class="num">${c.posts90!=null ? c.posts90 : '—'}</td>
           <td class="num">${c.vistas!=null ? c.vistas.toLocaleString('es-AR') : '—'}</td>
-          ${pregCol ? `<td>${respCol(c)}</td>` : ''}
+          ${pregCol ? `<td>${respCol(c)}</td>` : ''}${pAng ? `<td>${angCol(c)}</td>` : ''}${conKit ? `<td>${kitCol(c)}</td>` : ''}
           <td class="num">${c.views ? c.views.toLocaleString('es-AR') : '—'}</td>
           ${conTienda ? `<td class="num">${c.ventas || '—'}</td><td class="num">${c.monto ? pesos(com(c)) : '—'}</td>` : ''}
         </tr>`;}).join('')}
@@ -1414,7 +1541,7 @@ function pintarCreadoras(){
       <tfoot><tr>
         <td><b>${lista.length} creadoras</b></td>
         <td>${tot.bonos} con bono</td><td></td>
-        <td></td><td></td><td></td>${pregCol ? '<td></td>' : ''}
+        <td></td><td></td><td></td>${pregCol ? '<td></td>' : ''}${'<td></td>'.repeat(extraCols)}
         <td class="num"><b>${tot.views.toLocaleString('es-AR')}</b></td>
         ${conTienda ? `<td class="num"><b>${tot.ventas}</b></td><td class="num"><b>${pesos(tot.com)}</b></td>` : ''}
       </tr></tfoot>
@@ -1442,8 +1569,13 @@ function pintarCreadoras(){
 $('#buscar').addEventListener('input', pintarCreadoras);
 $('#btn-csv-cre').onclick = () => {
   const com = e => Math.round(e.monto * ECONOMIA.comision / 100);
-  bajarCsv('creadoras', [['Nombre','Instagram','Estado','Views','Ventas','Comision','Nivel','Reel']]
-    .concat(CREADORAS.map(c => [c.nom,'@'+c.ig,c.estado,c.views,c.ventas,com(c),c.nivel,c.reel||''])));
+  const conKit = !!(CFG && CFG.kitPorRespuesta), pAng = preguntaAngulo();
+  const extraCab = (pAng ? [pAng.corto || 'Angulo'] : []).concat(conKit ? ['Kit', 'Videos'] : []).concat(camposMarca().map(c => c.corto || c.campo));
+  const extra = c => (pAng ? [etiquetaResp(c.respuestas && c.respuestas[pAng.campo], pAng.campo) || ''] : [])
+    .concat(conKit ? [nombresKits(c.kit, c.videos === 'dos' ? c.kit2 : null), c.videos || ''] : [])
+    .concat(camposMarca().map(x => (c.respuestas && c.respuestas[x.campo]) || ''));
+  bajarCsv('creadoras', [['Nombre','Instagram','Estado','Views','Ventas','Comision','Nivel','Reel', ...extraCab]]
+    .concat(CREADORAS.map(c => [c.nom,'@'+c.ig,c.estado,c.views,c.ventas,com(c),c.nivel,c.reel||'', ...extra(c)])));
 };
 
 /* ── importar creadoras ya aprobadas (solo admin) ── */
@@ -1538,12 +1670,13 @@ function pintarTodo(){
   if (puede('entregas')) pintarEntregas();
   if (puede('creadoras')) pintarCreadoras();
   if (puede('pagos')) pintarPagos();
+  if (puede('cupos')) pintarCupos();
 }
 
 /* esconde las solapas que el rol no puede ver y abre la primera permitida */
 function aplicarRol(){
-  const solapas = SOLAPAS[ROL] || SOLAPAS.equipo;
-  document.querySelectorAll('.lat button[data-t]').forEach(b => { if (!solapas.includes(b.dataset.t)) b.remove(); });
+  const solapas = (SOLAPAS[ROL] || SOLAPAS.equipo).filter(puede);
+  document.querySelectorAll('.lat button[data-t]').forEach(b => { if (!solapas.includes(b.dataset.t)) b.remove(); else b.hidden = false; });
   $('#btn-importar').hidden = ROL !== 'admin';
   irA(solapas[0]);
 }
@@ -1568,7 +1701,7 @@ function aplicarRol(){
     pintarTodo();
   }
 })();
-const APP_VERSION = '2026-09-23-c';
+const APP_VERSION = '2026-09-26-a';
 </script>
 </body>
 </html>

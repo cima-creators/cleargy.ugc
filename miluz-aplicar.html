@@ -43,7 +43,13 @@ body{
   max-width:520px;margin:0 auto;padding:12px 20px;
   display:flex;align-items:center;gap:12px
 }
-.top .marca{font-weight:800;font-size:.95rem;letter-spacing:-.02em}
+.top .marca{font-weight:800;font-size:1.25rem;letter-spacing:-.03em;background:var(--grad);-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent}
+body.logo-grande .top .marca{font-size:1.55rem}
+.op.off{opacity:.45;cursor:default;background:var(--sup2)}
+.op.off .et{text-decoration:line-through}
+.op .cupo{flex:0 0 auto;font-size:.68rem;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--no);background:var(--sup);border:1px solid var(--linea);border-radius:99px;padding:3px 8px}
+.kits{display:flex;flex-direction:column;gap:10px}
+.kits .op .sw{flex:0 0 30px;height:30px;border-radius:9px}
 .top .cuenta{margin-left:auto;font-size:.78rem;color:var(--tx3);font-variant-numeric:tabular-nums}
 .volver{
   border:0;background:none;padding:6px;margin:-6px 0 -6px -6px;cursor:pointer;
@@ -246,11 +252,64 @@ let PASOS = [];
 
 /* ── definición del cuestionario, armada desde la config de la marca ──
    Cada paso: pregunta, ayuda, cómo se renderiza y cómo se valida. */
+/* ── preguntas encadenadas y cupos (opt-in por marca; Valca) ──
+   `dependeDe` + `opsPor`: las opciones salen de opsPor[respuesta anterior].
+   `mostrarSi`: la pregunta aparece solo si la anterior vale eso.
+   `cupos` + `cuposUsados` (vienen en la config): una opción con el cupo
+   lleno se muestra apagada con "cupo completo". */
+const opsDe = p => (p.dependeDe && p.opsPor) ? (p.opsPor[R[p.dependeDe]] || []) : (p.ops || []);
+function cupoDe(tipo, k){
+  const c = CFG.cupos; if (!c || !k) return null;
+  const tanda = tipo === 'angulo' ? c.anguloTanda1 : c.tanda1;
+  const total = tipo === 'angulo' ? c.angulo : c.kit;
+  const v = (tanda && tanda[k] != null) ? tanda[k] : (total && total[k] != null ? total[k] : null);
+  return v == null ? null : Number(v);
+}
+function usados(tipo, k){ const u = CFG.cuposUsados; return (u && u[tipo] && u[tipo][k] && u[tipo][k].aplicaron) || 0; }
+/* ¿la opción `v` de la pregunta `p` tiene el cupo lleno? Se mira el cupo del
+   ángulo (campo con tabla en cupos) o el del kit al que lleva (kitPorRespuesta). */
+function cupoLleno(p, v){
+  if (!CFG.cupos) return false;
+  const c = cupoDe(p.campo, v);
+  if (c != null && usados(p.campo, v) >= c) return true;
+  const k = CFG.kitPorRespuesta;
+  if (k && p.campo === k.campo){
+    const kit = (k.mapa || {})[v], ck = cupoDe('kit', kit);
+    if (kit && ck != null && usados('kit', kit) >= ck) return true;
+  }
+  return false;
+}
+const kitLleno = id => { const c = cupoDe('kit', id); return c != null && usados('kit', id) >= c; };
+/* ¿este paso se muestra con lo que respondió hasta ahora? */
+function visible(p){
+  if (p.condicion && !p.condicion()) return false;
+  if (p.tipo === 'opciones' && p.dependeDe){
+    if (p.mostrarSi != null && R[p.dependeDe] !== p.mostrarSi) return false;
+    if (p.opsPor && !opsDe(p).length) return false;
+  }
+  return true;
+}
+const siguiente = n => { let k = n + 1; while (k < PASOS.length - 1 && !visible(PASOS[k])) k++; return k; };
+const anterior  = n => { let k = n - 1; while (k > 0 && !visible(PASOS[k])) k--; return k; };
+/* el último paso visible antes del cierre es el que envía */
+const esUltimo = n => siguiente(n) >= PASOS.length - 1;
+const visibles = () => PASOS.filter((p, n) => n > 0 && n < PASOS.length - 1 && visible(p));
+
 function armarPasos(){
   const F = CFG.formulario || {};
-  const preguntas = (F.preguntas || []).map(p => ({ tipo:'opciones', campo:p.campo, q:p.q, a:p.a, ops:p.ops }));
+  const preguntas = (F.preguntas || []).map(p => ({ tipo:'opciones', campo:p.campo, q:p.q, a:p.a, ops:p.ops,
+    dependeDe:p.dependeDe || null, opsPor:p.opsPor || null, mostrarSi:p.mostrarSi }));
   const antes = preguntas.filter((p, n) => (F.preguntas[n].pos || 'antes') === 'antes');
   const despues = preguntas.filter((p, n) => (F.preguntas[n].pos || 'antes') !== 'antes');
+  // campos de texto propios de la marca (Valca: usuario de TikTok)
+  const campos = (F.campos || []).map(c => ({ tipo:'texto', campo:c.campo, arroba:!!c.arroba, q:c.q, a:c.a || '',
+    ph:c.ph || '', teclado:c.teclado || 'text', pos:c.pos || 'antes',
+    valida: v => c.obligatorio ? (v.replace(/^@/, '').trim().length >= 2 || (c.error || 'Completá este dato')) : true }));
+  const camposAntes = campos.filter(c => c.pos === 'antes'), camposDespues = campos.filter(c => c.pos !== 'antes');
+  // elección a mano: los colores (Mi Luz) siempre; el 2º kit (kitPorRespuesta) solo si marcó dos videos
+  const elegirN = CFG.elegir > 0 ? CFG.elegir : (CFG.kitPorRespuesta ? (CFG.kit2Elegir || 1) : 0);
+  const eleccion = elegirN > 0 ? [{ tipo:'colores', q:CFG.eleccion.titulo, a:CFG.eleccion.ayuda, elegir: elegirN,
+    condicion: CFG.kitPorRespuesta ? () => R.videos === 'dos' : null }] : [];
 
   PASOS = [
     { tipo:'portada' },
@@ -261,6 +320,7 @@ function armarPasos(){
       ph:'tu.usuario', teclado:'text',
       valida: v => v.replace(/[^a-z0-9._]/gi,'').length >= 2 || 'Escribí tu usuario, sin el @' },
 
+    ...camposAntes,
     ...antes,
 
     ...(F.fotos ? [{ tipo:'fotos', q:F.fotos.q, a:F.fotos.a, tip:F.fotos.tip, error:F.fotos.error }] : []),
@@ -288,14 +348,13 @@ function armarPasos(){
       a:'Mandamos a todo el país.',
       ops: CFG.provincias || [] },
 
+    ...camposDespues,
     ...despues,
 
-    ...(CFG.elegir > 0 ? [{ tipo:'colores', q:CFG.eleccion.titulo, a:CFG.eleccion.ayuda }] : []),
+    ...eleccion,
 
     { tipo:'cierre' }
   ];
-  // el último paso antes del cierre es el que envía
-  PASOS[PASOS.length - 2].ultimo = true;
 }
 
 const $ = s => document.querySelector(s);
@@ -341,10 +400,13 @@ function registrarIg(ig){
 /* ── render ────────────────────────────────────────────────────*/
 function pintar(){
   const p = PASOS[i];
-  const total = PASOS.length - 1;
-  $('#barra').style.width = (i / total * 100) + '%';
+  p.ultimo = esUltimo(i);
+  const vis = visibles();
+  const total = vis.length + 1;
+  const pos = i === 0 ? 0 : (i >= PASOS.length - 1 ? total : vis.indexOf(p) + 1);
+  $('#barra').style.width = (pos / total * 100) + '%';
   $('#volver').hidden = i === 0 || i === PASOS.length - 1;
-  $('#cuenta').textContent = (i > 0 && i < PASOS.length - 1) ? `${i} de ${total - 1}` : '';
+  $('#cuenta').textContent = (i > 0 && i < PASOS.length - 1) ? `${pos} de ${vis.length}` : '';
 
   main.innerHTML = '';
   const d = document.createElement('div');
@@ -357,6 +419,7 @@ function pintar(){
 }
 
 const botonSig = p => `<button class="btn" data-sig>${p.ultimo ? 'Enviar mi aplicación' : 'Seguir'}</button>`;
+const igUrl = () => CFG.cuentaIgUrl || `https://www.instagram.com/${CFG.cuentaIg}/`;
 
 function plantilla(p){
   const F = CFG.formulario || {};
@@ -388,12 +451,13 @@ function plantilla(p){
     <h2 class="pregunta">${p.q}</h2>
     <p class="ayuda">${p.a}</p>
     <div class="ops">
-      ${p.ops.map(([v,t,s],n) => `
-        <label class="op">
-          <input type="radio" name="o" value="${v}" ${R[p.campo]===v?'checked':''}>
+      ${opsDe(p).map(([v,t,s],n) => { const lleno = cupoLleno(p, v); return `
+        <label class="op ${lleno ? 'off' : ''}">
+          <input type="radio" name="o" value="${v}" ${R[p.campo]===v?'checked':''} ${lleno ? 'disabled' : ''}>
           <span class="tec">${String.fromCharCode(65+n)}</span>
           <span class="et">${t}${s?`<small>${s}</small>`:''}</span>
-        </label>`).join('')}
+          ${lleno ? '<span class="cupo">cupo completo</span>' : ''}
+        </label>`; }).join('')}
     </div>
     <p class="err" id="e"></p>
     ${p.ultimo ? botonSig(p) : ''}`;
@@ -428,6 +492,22 @@ function plantilla(p){
     <p class="err" id="e"></p>
     ${botonSig(p)}`;
 
+  // kits (kitPorRespuesta): lista con nombre y descripción, no paleta de colores
+  if (p.tipo === 'colores' && CFG.kitPorRespuesta) return `
+    <h2 class="pregunta">${p.q}</h2>
+    <p class="ayuda">${p.a}</p>
+    <div class="ops kits" id="tonos">
+      ${CFG.opciones.map(t => { const lleno = kitLleno(t.id); return `
+        <label class="op ${lleno ? 'off' : ''}">
+          <input type="checkbox" value="${t.id}" ${(R.tonos||[]).includes(t.id)?'checked':''} ${lleno ? 'disabled' : ''}>
+          <span class="tec sw" style="${t.hex ? `background:${t.hex};color:#fff` : ''}">${t.nom.slice(0,1)}</span>
+          <span class="et">${t.nom}${t.desc?`<small>${t.desc}</small>`:''}</span>
+          ${lleno ? '<span class="cupo">cupo completo</span>' : ''}
+        </label>`; }).join('')}
+    </div>
+    <p class="err" id="e"></p>
+    ${botonSig(p)}`;
+
   if (p.tipo === 'colores') return `
     <h2 class="pregunta">${p.q}</h2>
     <p class="ayuda">${p.a}</p>
@@ -452,7 +532,7 @@ function plantilla(p){
       Si quedás, te escribimos por WhatsApp en los próximos días con el link para
       completar tus datos de envío.</p>
       <p class="ayuda" style="margin-bottom:0">Mientras tanto, seguinos en
-      <b>@${CFG.cuentaIg}</b> — ahí publicamos las collabs de las chicas.</p>
+      <a href="${igUrl()}" target="_blank" rel="noopener" style="color:var(--rosa);font-weight:700;text-decoration:none">@${CFG.cuentaIg}</a> — ahí publicamos las collabs de las chicas.</p>
     </div>`;
 
   if (p.tipo === 'error') return `
@@ -478,7 +558,14 @@ function conectar(p, d){
   if (p.tipo === 'opciones'){
     // elegir avanza sola: es lo que hace que se sienta rápido
     d.querySelectorAll('input[name=o]').forEach(r =>
-      r.addEventListener('change', () => { R[p.campo] = r.value; if (!p.ultimo) setTimeout(avanzar, 220); }));
+      r.addEventListener('change', () => {
+        R[p.campo] = r.value;
+        // si la respuesta cambia lo que viene después (pregunta encadenada, 2º kit),
+        // se recalcula si este es el último paso: puede haber aparecido uno nuevo
+        const ultimo = esUltimo(i);
+        if (!ultimo){ setTimeout(avanzar, 220); return; }
+        if (!p.ultimo){ p.ultimo = true; d.insertAdjacentHTML('beforeend', botonSig(p)); d.querySelector('[data-sig]').onclick = avanzar; }
+      }));
   }
 
   if (p.tipo === 'fotos'){
@@ -500,10 +587,14 @@ function conectar(p, d){
   }
 
   if (p.tipo === 'colores'){
+    const n = p.elegir || CFG.elegir;
     d.querySelector('#tonos').addEventListener('change', () => {
       const sel = [...d.querySelectorAll('#tonos input:checked')];
-      d.querySelectorAll('.tono').forEach(l =>
-        l.classList.toggle('off', sel.length >= CFG.elegir && !l.querySelector('input').checked));
+      d.querySelectorAll('#tonos .tono, #tonos .op').forEach(l => {
+        const inp = l.querySelector('input');
+        if (inp.disabled) return;   // cupo completo: queda apagada siempre
+        l.classList.toggle('off', sel.length >= n && !inp.checked);
+      });
       R.tonos = sel.map(c => c.value);
     });
   }
@@ -539,23 +630,27 @@ async function avanzar(){
     mostrarError(p.error || 'Necesitamos al menos una foto'); return;
   }
 
-  if (p.tipo === 'colores' && (R.tonos || []).length !== CFG.elegir){
-    mostrarError((CFG.eleccion && CFG.eleccion.error) || `Elegí exactamente ${CFG.elegir}`); return;
+  if (p.tipo === 'colores' && (R.tonos || []).length !== (p.elegir || CFG.elegir)){
+    mostrarError((CFG.eleccion && CFG.eleccion.error) || `Elegí exactamente ${p.elegir || CFG.elegir}`); return;
   }
 
-  if (p.ultimo){ await enviar(); return; }
+  if (esUltimo(i)){ await enviar(); return; }
 
-  i++; pintar();
+  i = siguiente(i); pintar();
 }
 
-$('#volver').onclick = () => { if (i > 0){ i--; pintar(); } };
+$('#volver').onclick = () => { if (i > 0){ i = anterior(i); pintar(); } };
 
 /* ── envío ─────────────────────────────────────────────────────*/
 async function enviar(){
   const btn = document.querySelector('[data-sig]');
   btn.disabled = true; btn.textContent = 'Enviando…';
-  const datos = { ig:R.ig, nombre:R.nombre, tel:R.tel, email:R.email, provincia:R.provincia, tonos:R.tonos || [] };
-  ((CFG.formulario && CFG.formulario.preguntas) || []).forEach(p => { datos[p.campo] = R[p.campo]; });
+  // el 2º kit (kitPorRespuesta) viaja en `tonos` solo si marcó dos videos
+  const tonos = (CFG.kitPorRespuesta && R.videos !== 'dos') ? [] : (R.tonos || []);
+  const datos = { ig:R.ig, nombre:R.nombre, tel:R.tel, email:R.email, provincia:R.provincia, tonos };
+  const F = CFG.formulario || {};
+  (F.preguntas || []).forEach(p => { datos[p.campo] = visible(PASOS.find(x => x.campo === p.campo) || {}) ? R[p.campo] : ''; });
+  (F.campos || []).forEach(c => { datos[c.campo] = R[c.campo] || ''; });
   try {
     const r = await fetch(API, {
       method:'POST', headers:{'Content-Type':'application/json'},
@@ -584,10 +679,11 @@ async function enviar(){
   aplicarEstilo(CFG.estilo);
   document.title = `${CFG.nombre} · Sumate como creadora`;
   $('#marca-nombre').textContent = (CFG.estilo && CFG.estilo.logoTexto) || CFG.nombre;
+  if (CFG.estilo && CFG.estilo.logoTamano === 'grande') document.body.classList.add('logo-grande');
   armarPasos();
   pintar();
 })();
-const APP_VERSION = '2026-09-19-a';
+const APP_VERSION = '2026-09-26-a';
 </script>
 </body>
 </html>

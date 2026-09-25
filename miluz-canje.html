@@ -57,12 +57,25 @@ small{color:var(--tx3);font-size:.8rem;line-height:1.45;display:block}
 /* ── encabezado ── */
 .head{display:flex;align-items:center;gap:13px;padding:24px 0 20px}
 .head .av{
-  width:44px;height:44px;border-radius:50%;flex:0 0 auto;
-  background:var(--grad);display:grid;place-items:center;font-weight:800;font-size:.9rem;color:#fff
+  width:54px;height:54px;border-radius:50%;flex:0 0 auto;
+  background:var(--grad);display:grid;place-items:center;font-weight:800;font-size:1.05rem;color:#fff;
+  box-shadow:0 8px 18px -8px rgba(var(--acento-rgb),.6)
 }
 .head .hi{flex:1;min-width:0}
 .head .hi span{display:block;color:var(--tx3);font-size:.82rem}
-.head .hi b{display:block;font-size:1.06rem;font-weight:700;letter-spacing:-.02em}
+.head .hi b{display:block;font-size:1.2rem;font-weight:800;letter-spacing:-.03em}
+body.logo-grande .head .av{width:64px;height:64px;font-size:1.25rem}
+body.logo-grande .head .hi b{font-size:1.4rem}
+/* entrega con dos videos: qué video está cargando */
+.segm{display:flex;gap:6px;margin:0 0 14px;background:var(--bg2);border:1px solid var(--linea);border-radius:13px;padding:4px}
+.segm button{flex:1;border:0;background:none;border-radius:10px;padding:9px 6px;font:inherit;font-size:.82rem;font-weight:700;color:var(--tx2);cursor:pointer}
+.segm button.on{background:var(--sup);color:var(--rosa);box-shadow:0 1px 3px rgba(42,35,29,.1)}
+.segm button small{display:block;font-size:.68rem;font-weight:600;color:var(--tx3)}
+.kitlista{display:flex;flex-direction:column;gap:8px;margin-top:4px}
+.kitlista div{display:flex;align-items:center;gap:11px;padding:11px 13px;border:1px solid var(--linea);border-radius:13px;background:var(--bg2)}
+.kitlista i{flex:0 0 30px;height:30px;border-radius:9px;display:grid;place-items:center;color:#fff;font-style:normal;font-weight:800}
+.kitlista b{display:block;font-size:.9rem}
+.kitlista small{font-size:.74rem}
 
 /* ── tarjetas ── */
 .card{
@@ -460,6 +473,12 @@ body.condemo .wrap{padding-bottom:84px}
         <div class="tonos" id="tonos"></div>
         <span class="err" id="err-tonos">Elegí exactamente dos</span>
       </div>
+      <!-- kit(s) que salieron del formulario (kitPorRespuesta): se muestran, no se eligen -->
+      <div class="card oculto" id="card-kits">
+        <h2 id="kits-tit">Tu kit</h2>
+        <small id="kits-nota"></small>
+        <div class="kitlista" id="kits-lista"></div>
+      </div>
 
       <div class="card sutil">
         <label class="check">
@@ -549,10 +568,26 @@ body.condemo .wrap{padding-bottom:84px}
     <div class="card" id="bloque-subir">
       <h2 id="subir-tit">Entregá tu contenido</h2>
       <small style="margin-bottom:14px" id="subir-txt"></small>
+      <!-- dos videos (Valca): cuál está cargando -->
+      <div class="segm oculto" id="segm-videos">
+        <button type="button" data-n="1" class="on">Video 1<small id="segm-k1"></small></button>
+        <button type="button" data-n="2">Video 2<small id="segm-k2"></small></button>
+      </div>
       <label>
         <span class="lb">Link de tu carpeta compartida</span>
         <input id="in-drive" inputmode="url" placeholder="Link de Drive, iCloud, WeTransfer…">
         <span class="err" id="err-drive">Pegá el link de la carpeta compartida (Drive, iCloud, WeTransfer, Dropbox). No sirve un link de Instagram o TikTok.</span>
+      </label>
+      <!-- publica:"creadora": ella publica y carga los links -->
+      <label class="oculto" id="lab-ig">
+        <span class="lb">Link de tu reel en Instagram</span>
+        <input id="in-ig" inputmode="url" placeholder="instagram.com/reel/...">
+        <span class="err" id="err-ig">Pegá el link del reel (instagram.com/reel/...)</span>
+      </label>
+      <label class="oculto" id="lab-tt">
+        <span class="lb">Link de tu TikTok</span>
+        <input id="in-tt" inputmode="url" placeholder="tiktok.com/@tuusuario/video/...">
+        <span class="err" id="err-tt">Pegá el link de tu TikTok (tiktok.com/...)</span>
       </label>
       <button class="btn" id="btn-drive">Entregar</button>
     </div>
@@ -716,6 +751,20 @@ function aplicarEstilo(e){
    las fichas que eligieron antes de que se recortara la lista. */
 const opcionesTodas = () => (CFG.opciones || []).concat(CFG.opcionesViejas || []);
 
+/* ── kits (kitPorRespuesta, Valca) ── */
+const CREADORA_PUBLICA = () => CFG.publica === 'creadora';
+const kitInfo = id => (CFG.opciones || []).find(o => o.id === id) || null;
+const nombreKit = id => (kitInfo(id) || {}).nom || id || '';
+/* el kit de la ficha; en demo (o antes de tener ficha) el primero */
+const kitActual = () => (D && D.kit) || (CFG.kitPorRespuesta && CFG.opciones && CFG.opciones[0] && CFG.opciones[0].id) || null;
+/* el bloque del briefing que corresponde al kit: intro / referencias / ganchos */
+function briefKit(){
+  const bk = CFG.briefingPorKit;
+  if (!bk) return null;
+  return bk[kitActual()] || bk[Object.keys(bk)[0]] || null;
+}
+function pintarBriefing(){ $('#brief-cuerpo').innerHTML = armarBriefing(); }
+
 /* ── briefing armado desde la config ── */
 const B = t => `<b style="color:var(--tx)">${t}</b>`;
 function armarBriefing(){
@@ -723,14 +772,23 @@ function armarBriefing(){
   const nFotos = br.fotosProceso || 5;
   const nCrudos = br.crudos || 0;
   const conCodigo = !!CFG.tienda;
+  const bk = briefKit();
+  const intro = (bk && bk.intro && bk.intro.length) ? bk.intro : (br.intro || []);
+  const ganchos = (bk && bk.ganchos && bk.ganchos.length) ? bk.ganchos : (CFG.ganchos || []);
+  const referencias = (bk && bk.referencias && bk.referencias.length) ? bk.referencias : (CFG.referencias || []);
   const secciones = [];
-  (br.intro || []).forEach(s => secciones.push(`<h3>${s.t}</h3>${s.html}`));
+  if (bk && CFG.kitPorRespuesta){
+    const k = kitInfo(kitActual());
+    const k2 = D && D.kit2 ? kitInfo(D.kit2) : null;
+    secciones.push(`<h3>Tu kit: ${k ? k.nom : '—'}</h3><p>${k && k.desc ? k.desc + '. ' : ''}Este briefing es el de tu kit.${k2 ? ` Como hacés dos videos, el segundo es con ${B(k2.nom)}: abrí este mismo briefing desde tu app cuando lo tengas.` : ''}</p>`);
+  }
+  intro.forEach(s => secciones.push(`<h3>${s.t}</h3>${s.html}`));
   if ((CFG.reglas || []).length) secciones.push(`<h3>Reglas técnicas</h3><ul class="limpia">${CFG.reglas.map(r => `<li>${r}</li>`).join('')}</ul>`);
-  if ((CFG.ganchos || []).length) secciones.push(
+  if (ganchos.length) secciones.push(
     `<h3>Los primeros 3 segundos</h3>
      <p>${B('Lo que se ve + lo que se lee + lo que se escucha')} tienen que contar la misma historia desde el primer segundo, aunque esté sin sonido. No arranques simplemente hablando a cámara.</p>
      <p>Elegí ${B('un ángulo')} que se parezca a tu experiencia y abrí con él. En cada uno tenés las tres cosas: qué se ve, qué se lee en pantalla y qué decís.</p>
-     <div class="angulos">${CFG.ganchos.map((g, n) => typeof g === 'string'
+     <div class="angulos">${ganchos.map((g, n) => typeof g === 'string'
        ? `<div class="angulo"><b>${n+1} · Ángulo</b><div class="l"><span>💬</span>${g}</div></div>`
        : `<div class="angulo"><b>${n+1} · ${g.t}</b>
             <div class="l"><span>🎬</span><i>Se ve</i>${g.ve}</div>
@@ -738,21 +796,38 @@ function armarBriefing(){
             <div class="l"><span>🗣️</span><i>Decís</i>«${g.dice}»</div></div>`).join('')}</div>
      <p>Podés cambiar palabras para que suene a vos, pero la idea tiene que ser esa. Un video que no abre así no se aprueba.${br.ganchosDoc ? ` <a href="${br.ganchosDoc}" target="_blank" rel="noopener">Ver todos los ángulos con ejemplos →</a>` : ''}</p>`);
   if ((CFG.noDecir || []).length) secciones.push(`<h3>Lo que NO se puede decir</h3><ul class="limpia">${CFG.noDecir.map(r => `<li>${r}</li>`).join('')}</ul>`);
-  secciones.push(
-    `<h3>Cómo entregar</h3>
-     <p>Vos ${B('no publicás el reel')}: nos mandás el video y lo subimos nosotras desde @${CFG.cuentaIg} como collab con vos.</p>
-     <ul class="limpia">
-       <li><span class="si">1</span> Creá una carpeta en Google Drive con ${B('el video')}, ${B(`${nFotos} fotos del proceso`)}${nCrudos ? ` y ${B(`${nCrudos} videos crudos`)}` : ''}.</li>
-       <li><span class="si">2</span> Compartila con ${B('"Cualquier persona con el enlace"')}.</li>
-       <li><span class="si">3</span> Pegá el link en tu app, en "Entregá tu contenido".</li>
-     </ul>
-     <h3>Las ${nFotos} fotos: qué buscamos</h3>
+  // qué fotos: el texto propio de la marca (fotosProcesoNota) reemplaza el bloque Escena/Gesto/Detalle
+  const fotosBloque = br.fotosProcesoNota
+    ? `<h3>Las ${nFotos} fotos</h3><p>${br.fotosProcesoNota}</p>`
+    : `<h3>Las ${nFotos} fotos: qué buscamos</h3>
      <p>No son selfies ni fotos de catálogo: son fotos ${B('del momento')}, con luz natural. Mezclá estos tres tipos:</p>
      <ul class="limpia">
        <li><span class="si">01</span> ${B('Escena')} — vos usando el producto en tu lugar (la mesa, la ventana, el bata). Da contexto y muestra el momento.</li>
        <li><span class="si">02</span> ${B('Gesto')} — la acción de cerca: el pincel llegando a la uña, las manos apoyadas. Sin forzar la postura.</li>
        <li><span class="si">03</span> ${B('Detalle')} — el producto solo, bien de cerca: el frasco, la gota, la textura. Hace visible la materia.</li>
-     </ul>` +
+     </ul>`;
+  const comoEntregar = CREADORA_PUBLICA()
+    ? `<h3>Cómo entregar</h3>
+     <p>${B('Vos publicás el video')} en tu Instagram y en tu TikTok, ${B(`etiquetando a @${CFG.cuentaIg}`)}${CFG.tiktok ? ` (en TikTok, @${CFG.tiktok})` : ''}. Después cargás todo en tu app.</p>
+     <ul class="limpia">
+       <li><span class="si">1</span> Creá una carpeta en Google Drive con ${B('el video')} y ${B(`las ${nFotos} fotos`)}${nCrudos ? ` y ${B(`${nCrudos} videos crudos`)}` : ''}, compartida con ${B('"Cualquier persona con el enlace"')}.</li>
+       <li><span class="si">2</span> Publicá el video en tu Instagram (reel) y en tu TikTok, etiquetando a @${CFG.cuentaIg}. Sin marca de agua.</li>
+       <li><span class="si">3</span> En tu app, en "Entregá tu contenido", pegá ${B('el link de la carpeta, el del reel y el del TikTok')}.${D && D.videos === 'dos' ? ' Con dos videos, cargás cada uno por separado (Video 1 / Video 2).' : ''}</li>
+     </ul>`
+    : `<h3>Cómo entregar</h3>
+     <p>Vos ${B('no publicás el reel')}: nos mandás el video y lo subimos nosotras desde @${CFG.cuentaIg} como collab con vos.</p>
+     <ul class="limpia">
+       <li><span class="si">1</span> Creá una carpeta en Google Drive con ${B('el video')}, ${B(`${nFotos} fotos del proceso`)}${nCrudos ? ` y ${B(`${nCrudos} videos crudos`)}` : ''}.</li>
+       <li><span class="si">2</span> Compartila con ${B('"Cualquier persona con el enlace"')}.</li>
+       <li><span class="si">3</span> Pegá el link en tu app, en "Entregá tu contenido".</li>
+     </ul>`;
+  const cuandoSuba = CREADORA_PUBLICA()
+    ? `<h3>Cuando lo publiques</h3>
+     <p>${B('Resubilo a tus historias')} ese mismo día. Las views de Instagram y de TikTok ${B('se suman')} para el bono viral y el podio del mes: por eso van los dos links.${br.hashtag ? ` Usá ${B(br.hashtag)}.` : ''}</p>`
+    : `<h3>Cuando lo subamos</h3>
+     <p>Te va a llegar una ${B('invitación de colaboración')} en Instagram (Notificaciones → "te invitó a colaborar"). <span class="si">Aceptala</span>: así el reel aparece también en tu perfil y cuenta como tu collab. Y ${B('resubilo a tus historias')} ese mismo día.</p>
+     <p>${B('Subilo también a tu TikTok.')} El mismo video, en tu cuenta. Después pegá el link en tu app: las views de TikTok ${B('se suman a las del reel')} para el bono viral y el podio del mes.${br.hashtag ? ` En TikTok arrobá a @${CFG.cuentaIg} y usá ${B(br.hashtag)}.` : ''}</p>`;
+  secciones.push(comoEntregar + fotosBloque +
     ((CFG.fotos || []).length >= 3 ? `
      <div class="fotos3">
        <figure><img src="${CFG.fotos[0]}" alt="Escena" loading="lazy"><figcaption><b>01 · Escena</b><span>Da contexto y muestra el momento.</span></figcaption></figure>
@@ -762,17 +837,15 @@ function armarBriefing(){
     (nCrudos ? `<h3>Los ${nCrudos} videos crudos</h3>
      <p>Clips ${B('de 3 a 5 segundos')}, sin editar, sin texto ni música: los usamos para armar más piezas. ${br.crudosNota || ''}${br.crudosEjemplo ? ` <a href="${br.crudosEjemplo}" target="_blank" rel="noopener">Ver la carpeta de ejemplo →</a>` : ''}</p>
      ${(br.crudosLista || []).length ? `<ul class="limpia">${br.crudosLista.map((c, n) => `<li><span class="si">${n+1}</span> ${c}</li>`).join('')}</ul>` : ''}` : '') +
-    `<h3>Cuando lo subamos</h3>
-     <p>Te va a llegar una ${B('invitación de colaboración')} en Instagram (Notificaciones → "te invitó a colaborar"). <span class="si">Aceptala</span>: así el reel aparece también en tu perfil y cuenta como tu collab. Y ${B('resubilo a tus historias')} ese mismo día.</p>
-     <p>${B('Subilo también a tu TikTok.')} El mismo video, en tu cuenta. Después pegá el link en tu app: las views de TikTok ${B('se suman a las del reel')} para el bono viral y el podio del mes.${br.hashtag ? ` En TikTok arrobá a @${CFG.cuentaIg} y usá ${B(br.hashtag)}.` : ''}</p>` +
+    cuandoSuba +
     (conCodigo ? `<h3>Tu código de descuento</h3>
      <p>Nombralo en el video y dejalo fijado en los comentarios. Tus seguidoras compran con descuento y vos ganás comisión por cada venta.</p>` : '') +
     `<h3>El plazo</h3>
-     <p>Tenés ${B(`${CFG.diasParaPublicar} días desde que el kit llega a tu casa`)} para mandarnos el video. Avisanos en la app cuando lo recibas.</p>`);
-  if ((CFG.referencias || []).length) secciones.push(
+     <p>Tenés ${B(`${CFG.diasParaPublicar} días desde que el kit llega a tu casa`)} para ${CREADORA_PUBLICA() ? 'publicar y cargar los links' : 'mandarnos el video'}. Avisanos en la app cuando lo recibas.</p>`);
+  if (referencias.length) secciones.push(
     `<h3>Mirá estos antes de grabar</h3>
-     <p>Reels de ${CFG.nombre} que ya funcionaron. Copiá la estructura, no el contenido.</p>
-     <div id="refs">${CFG.referencias.map(r => `
+     <p>Videos de ${CFG.nombre} que ya funcionaron. Copiá la estructura, no el contenido.</p>
+     <div id="refs">${referencias.map(r => `
        <a class="ref" href="${r.u}" target="_blank" rel="noopener">
          <span class="play">▶</span>
          <span><b>${r.t}</b><small>${r.n}</small></span></a>`).join('')}</div>`);
@@ -808,12 +881,23 @@ function demo(accion, datos){
   const g = _ls.leer() || {
     estado:'invitada', ig:'sofi.deco', nivel:1,
     nombre:'Sofía Pérez', tel:'11 5555 1234', email:'sofi@mail.com',
-    provincia:'Córdoba', tonos: opcionesTodas().slice(-2).map(t => t.id)
+    provincia:'Córdoba', tonos: CFG.kitPorRespuesta ? [] : opcionesTodas().slice(-2).map(t => t.id),
+    // marcas con kit por respuesta (Valca): el primer kit, dos videos, el segundo kit es el siguiente
+    ...(CFG.kitPorRespuesta ? { kit: CFG.opciones[0] && CFG.opciones[0].id, videos: 'dos', kit2: (CFG.opciones[1] || CFG.opciones[0] || {}).id } : {})
   };
   if (accion === 'ficha'){ Object.assign(g, datos.ficha, {estado:'ficha_completa'}); }
   if (accion === 'briefing'){ g.estado = 'briefing_ok'; }
   if (accion === 'llego'){ g.estado = 'recibido'; g.deadline = Date.now()+CFG.diasParaPublicar*864e5; }
   if (accion === 'reel'){ g.estado = 'publicado'; g.reel = datos.url; }
+  if (accion === 'entregar'){
+    if (CREADORA_PUBLICA()){
+      const n = datos.n === 2 ? 2 : 1;
+      g.entregas = g.entregas || [];
+      g.entregas[n-1] = { n, drive: datos.drive, reel: { url: datos.ig, collab: true, views: 0 }, tiktok: datos.tiktok ? { url: datos.tiktok, views: 0 } : null };
+      if (n === 1){ g.entrega = { drive: datos.drive }; g.reel = { url: datos.ig, collab: true, views: 0 }; g.tiktok = datos.tiktok ? { url: datos.tiktok, views: 0 } : null; }
+      if (g.estado !== 'publicado' && g.estado !== 'cumplida') g.estado = 'publicado';
+    } else { g.estado = 'entregado'; g.entrega = { drive: datos.drive }; }
+  }
   if (accion === 'avanzar'){
     g.estado = datos.a;
     g.codigo = CFG.tienda ? 'SOFI10' : null;
@@ -829,6 +913,17 @@ function demo(accion, datos){
 }
 
 const ELEGIR = () => CFG.elegir || 0;
+/* kits que salieron del formulario (kitPorRespuesta): se muestran en la ficha, no se eligen */
+function pintarKits(){
+  if (!CFG.kitPorRespuesta || !D) return;
+  const ids = [D.kit, D.videos === 'dos' ? D.kit2 : null].filter(Boolean);
+  if (!ids.length) return;
+  $('#card-kits').classList.remove('oculto');
+  $('#kits-tit').textContent = ids.length > 1 ? ((CFG.eleccion && CFG.eleccion.tituloFicha) || 'Tus kits') : 'Tu kit';
+  $('#kits-nota').innerHTML = ids.length > 1 ? ((CFG.eleccion && CFG.eleccion.nota) || 'Un kit por video.') : 'Salió de lo que contaste al aplicar.';
+  $('#kits-lista').innerHTML = ids.map((id, n) => { const k = kitInfo(id) || { nom: id }; return `
+    <div><i style="background:${k.hex || 'var(--rosa)'}">${n + 1}</i><span><b>${k.nom}</b>${k.desc ? `<small>${k.desc}</small>` : ''}</span></div>`; }).join('');
+}
 function pintarTonos(){
   if (!ELEGIR()){ $('#card-tonos').classList.add('oculto'); return; }
   $('#kit-nota').innerHTML = (CFG.eleccion && CFG.eleccion.nota) || '';
@@ -966,7 +1061,7 @@ $('#form-ficha').addEventListener('submit', async e => {
   try {
     D = (await api('ficha', {ficha})).creadora;
     try { localStorage.removeItem(K_BORRADOR()); } catch {}
-    cabecera(); ver('v-brief');
+    cabecera(); pintarBriefing(); modoBriefing(); ver('v-brief');
   }
   catch { b.disabled = false; b.textContent = 'Guardar y seguir'; alert('No pudimos guardar. Probá de nuevo.'); }
 });
@@ -1014,14 +1109,45 @@ function armarEntrar(){
   });
 }
 
+/* dos videos (Valca): qué entrega está cargando */
+let ENTREGA_N = 1;
+document.querySelectorAll('#segm-videos button').forEach(b => b.addEventListener('click', () => {
+  ENTREGA_N = +b.dataset.n;
+  document.querySelectorAll('#segm-videos button').forEach(x => x.classList.toggle('on', x === b));
+  precargarEntrega();
+}));
+function precargarEntrega(){
+  const e = (D && Array.isArray(D.entregas) && D.entregas[ENTREGA_N - 1]) || (ENTREGA_N === 1 ? { drive: D && D.entrega && D.entrega.drive, reel: D && D.reel, tiktok: D && D.tiktok } : null);
+  $('#in-drive').value = (e && e.drive) || '';
+  $('#in-ig').value = (e && e.reel && e.reel.url && e.reel.url !== '#') ? e.reel.url : '';
+  $('#in-tt').value = (e && e.tiktok && e.tiktok.url) || '';
+  const hecha = !!(e && e.drive);
+  $('#btn-drive').textContent = hecha ? 'Actualizar links' : (CREADORA_PUBLICA() ? 'Cargar mis links' : 'Entregar');
+}
+
 $('#btn-drive').addEventListener('click', async () => {
   const i = $('#in-drive'), drive = i.value.trim();
   const ok = /^https?:\/\/\S+\.\S+/i.test(drive) && !/instagram\.com|tiktok\.com/i.test(drive);
   $('#err-drive').style.display = ok ? 'none' : 'block';
   if (!ok) return;
+  const datos = { drive };
+  if (CREADORA_PUBLICA()){
+    // ella publica: además del Drive van el reel de Instagram y el TikTok
+    const ig = $('#in-ig').value.trim(), tt = $('#in-tt').value.trim();
+    const okIg = /instagram\.com\/(reel|p)\//i.test(ig);
+    const okTt = /^https?:\/\/(www\.|vm\.|vt\.)?tiktok\.com\//i.test(tt);
+    $('#err-ig').style.display = okIg ? 'none' : 'block';
+    $('#err-tt').style.display = okTt ? 'none' : 'block';
+    if (!okIg || !okTt) return;
+    Object.assign(datos, { ig, tiktok: tt, n: ENTREGA_N });
+  }
   const b = $('#btn-drive'); b.disabled = true; b.textContent = 'Enviando…';
-  try { D = (await api('entregar', {drive})).creadora; b.disabled = false; pintarEstado(); }
-  catch { b.disabled = false; b.textContent = 'Entregar'; alert('No se pudo enviar. Fijate el link y probá de nuevo.'); }
+  try {
+    const r = await api('entregar', datos);
+    D = r.creadora; b.disabled = false; pintarEstado();
+    if (CREADORA_PUBLICA() && r.collab === false) alert(`Recibimos tus links, pero en el reel no aparece @${CFG.cuentaIg} etiquetada. Editá la publicación y etiquetala, así cuenta.`);
+  }
+  catch { b.disabled = false; b.textContent = 'Entregar'; alert('No se pudo enviar. Fijate los links y probá de nuevo.'); }
 });
 
 function copiarCodigo(){
@@ -1111,8 +1237,11 @@ const FLUJO = () => [
   ['briefing_ok', '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 7h16M4 12h10M4 17h7"/></svg>','En la lista de envío','Estamos preparando tu kit.'],
   ['enviado',   '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 7.5l9-4 9 4-9 4z"/><path d="M3 7.5v9l9 4 9-4v-9"/><path d="M12 11.5v9"/></svg>','Kit despachado',      'Va en camino a tu casa.'],
   ['recibido',  '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3.5 11L12 4l8.5 7"/><path d="M5.5 9.7V19a1 1 0 0 0 1 1h11a1 1 0 0 0 1-1V9.7"/></svg>','Te llegó',            `Arrancaron tus ${CFG.diasParaPublicar} días.`],
-  ['entregado', SVG_VIDEO,'Entregaste tu video','Lo estamos revisando.'],
-  ['publicado', SVG_VIDEO,`Publicado en @${CFG.cuentaIg}`,'Aceptá la invitación de colaboración.'],
+  // cuando publica la creadora (Valca) no hay paso "entregado": publica y carga los links en uno
+  ...(CREADORA_PUBLICA() ? [] : [['entregado', SVG_VIDEO,'Entregaste tu video','Lo estamos revisando.']]),
+  CREADORA_PUBLICA()
+    ? ['publicado', SVG_VIDEO,'Publicaste y cargaste los links','Lo estamos revisando.']
+    : ['publicado', SVG_VIDEO,`Publicado en @${CFG.cuentaIg}`,'Aceptá la invitación de colaboración.'],
   ['cumplida',  '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2.8l2.7 5.9 6.4.7-4.8 4.4 1.3 6.4L12 17l-5.6 3.2 1.3-6.4L2.9 9.4l6.4-.7z"/></svg>','Listo',               'Collab aprobada y nivel actualizado.']
 ];
 const ORDEN = ['aprobada','briefing_ok','enviado','recibido','entregado','publicado','cumplida'];
@@ -1206,8 +1335,10 @@ function pintarEstado(){
                  (dias === 1 ? 'Te queda<br>un día' : 'Te quedan<br>' + (dias!==null?dias:'—') + ' días'),
                  'Tu kit ya llegó. Grabá tranquila.','En curso'],
     entregado:  ['Tu entrega','Recibimos<br>tu video','Lo estamos revisando. Te avisamos por Instagram cuando lo subamos.','En revisión'],
-    cambios:    ['Tu entrega','Te pedimos<br>un ajuste', (D.cambiosMotivo || 'Fijate el mensaje que te mandamos.') + ' Cuando lo tengas, volvé a pegar el link acá abajo.','Ajustes'],
-    publicado:  ['Tu collab','¡Ya está<br>publicado!','Aceptá la invitación de colaboración en Instagram y resubilo a tus historias.','Publicado'],
+    cambios:    ['Tu entrega','Te pedimos<br>un ajuste', (D.cambiosMotivo || 'Fijate el mensaje que te mandamos.') + (CREADORA_PUBLICA() ? ' Cuando lo tengas, volvé a cargar los links acá abajo.' : ' Cuando lo tengas, volvé a pegar el link acá abajo.'),'Ajustes'],
+    publicado:  CREADORA_PUBLICA()
+      ? ['Tu collab','Recibimos<br>tus links', (D.reel && D.reel.collab === false ? `En el reel no aparece @${CFG.cuentaIg} etiquetada: editalo y etiquetala. ` : '') + 'Lo estamos revisando. Resubilo a tus historias.' + (D.videos === 'dos' && !(D.entregas && D.entregas[1]) ? ' Cuando tengas el segundo video, cargalo abajo.' : ''),'En revisión']
+      : ['Tu collab','¡Ya está<br>publicado!','Aceptá la invitación de colaboración en Instagram y resubilo a tus historias.','Publicado'],
     cumplida:   ['Tu collab','¡Listo!','Ya podés pedir tu próximo kit.','Completada'],
     vencida:    ['Tu plazo','Se venció','Escribinos por Instagram si querés otra oportunidad.','Vencida']
   }[e] || ['Tu estado','—','','En curso'];
@@ -1244,13 +1375,31 @@ function pintarEstado(){
   $('#hero-badge').textContent = cab[3];
 
   $('#bloque-llego').classList.toggle('oculto', e !== 'enviado');
-  $('#bloque-subir').classList.toggle('oculto', !['enviado','recibido','cambios','entregado'].includes(e));
-  if (['enviado','recibido','cambios','entregado'].includes(e)){
-    $('#subir-tit').textContent = e === 'entregado' ? '¿Cambiaste el video?' : (e === 'cambios' ? 'Volvé a entregar' : 'Entregá tu contenido');
-    $('#btn-drive').textContent = e === 'entregado' ? 'Actualizar link' : 'Entregar';
-    if (D.entrega && D.entrega.drive && !$('#in-drive').value) $('#in-drive').value = D.entrega.drive;
+  // cuando publica la creadora, el bloque sigue abierto en `publicado` (ajustar links, cargar el 2º video)
+  const conSubir = CREADORA_PUBLICA() ? ['enviado','recibido','cambios','entregado','publicado'] : ['enviado','recibido','cambios','entregado'];
+  $('#bloque-subir').classList.toggle('oculto', !conSubir.includes(e));
+  if (conSubir.includes(e)){
+    if (CREADORA_PUBLICA()){
+      const dos = D.videos === 'dos';
+      const falta2 = dos && !(D.entregas && D.entregas[1] && D.entregas[1].drive);
+      $('#subir-tit').textContent = e === 'cambios' ? 'Volvé a cargar los links' : (e === 'publicado' ? (falta2 ? 'Cargá tu segundo video' : '¿Cambiaste algo?') : 'Publicá y cargá tus links');
+      $('#segm-videos').classList.toggle('oculto', !dos);
+      if (dos){
+        $('#segm-k1').textContent = nombreKit(D.kit); $('#segm-k2').textContent = nombreKit(D.kit2);
+        ENTREGA_N = (e === 'publicado' && falta2) ? 2 : ENTREGA_N;
+        document.querySelectorAll('#segm-videos button').forEach(x => x.classList.toggle('on', +x.dataset.n === ENTREGA_N));
+      } else ENTREGA_N = 1;
+      $('#lab-ig').classList.remove('oculto'); $('#lab-tt').classList.remove('oculto');
+      precargarEntrega();
+    } else {
+      $('#subir-tit').textContent = e === 'entregado' ? '¿Cambiaste el video?' : (e === 'cambios' ? 'Volvé a entregar' : 'Entregá tu contenido');
+      $('#btn-drive').textContent = e === 'entregado' ? 'Actualizar link' : 'Entregar';
+      if (D.entrega && D.entrega.drive && !$('#in-drive').value) $('#in-drive').value = D.entrega.drive;
+    }
   }
   pintarPlata();
+  // el TikTok va dentro de la entrega cuando publica la creadora
+  if (CREADORA_PUBLICA()) $('#bloque-tiktok').classList.add('oculto');
 
   const cod = D.codigo || '';
   $('#bloque-codigo').classList.toggle('oculto', !cod);
@@ -1322,12 +1471,16 @@ function pintarMarca(){
   $('#terminos-txt').innerHTML = (CFG.formulario && CFG.formulario.terminos) || `Autorizo a ${CFG.nombre} a usar el contenido que publique en su perfil y en su publicidad. Confirmo que los datos son correctos.`;
   $('#llego-txt').textContent = `Tocá acá cuando lo tengas en la mano. Ahí arrancan tus ${CFG.diasParaPublicar} días — no antes, así el correo no te come el plazo.`;
   const nFotos = (CFG.briefing && CFG.briefing.fotosProceso) || 5;
-  $('#subir-txt').innerHTML = `Subí a una carpeta de Google Drive <b style="color:var(--tx)">el video, las ${nFotos} fotos del proceso${(CFG.briefing && CFG.briefing.crudos) ? ` y los ${CFG.briefing.crudos} videos crudos` : ''}</b>, compartila con "Cualquier persona con el enlace" y pegá el link acá. El reel lo subimos nosotras como collab desde @${CFG.cuentaIg}.`;
+  $('#subir-txt').innerHTML = CREADORA_PUBLICA()
+    ? `Publicá el video en tu Instagram y en tu TikTok <b style="color:var(--tx)">etiquetando a @${CFG.cuentaIg}</b>, subí <b style="color:var(--tx)">el video y las ${nFotos} fotos</b> a una carpeta de Google Drive compartida con "Cualquier persona con el enlace", y cargá acá los tres links.`
+    : `Subí a una carpeta de Google Drive <b style="color:var(--tx)">el video, las ${nFotos} fotos del proceso${(CFG.briefing && CFG.briefing.crudos) ? ` y los ${CFG.briefing.crudos} videos crudos` : ''}</b>, compartila con "Cualquier persona con el enlace" y pegá el link acá. El reel lo subimos nosotras como collab desde @${CFG.cuentaIg}.`;
   const ll = CFG.llamada;
+  const igUrl = CFG.cuentaIgUrl || `https://www.instagram.com/${CFG.cuentaIg}/`;
   $('#dudas-txt').innerHTML = (CFG.grupo ? 'Preguntá en el grupo, es lo más rápido. ' : '') +
     (ll ? `La llamada es todos los ${String(ll.dia).toLowerCase()} a las ${ll.hora}. ` : '') +
-    `También podés escribirnos a <b style="color:var(--tx)" id="ig-handle">@${CFG.cuentaIg}</b>.`;
+    `También podés escribirnos a <a href="${igUrl}" target="_blank" rel="noopener" style="color:var(--tx);font-weight:700" id="ig-handle">@${CFG.cuentaIg}</a>.`;
   if (ELEGIR()){ TITULOS[3] = [CFG.eleccion.tituloFicha || 'Elegí tus opciones', CFG.eleccion.subFicha || '']; }
+  if (est.logoTamano === 'grande') document.body.classList.add('logo-grande');
 }
 
 (async function init(){
@@ -1355,13 +1508,16 @@ function pintarMarca(){
     const r = await api('estado', {});
     if (!r.ok){ ver('v-error'); return; }
     D = r.creadora; cabecera();
+    // el briefing depende del kit de la ficha (briefingPorKit): se arma recién acá
+    if (CFG.briefingPorKit) pintarBriefing();
+    pintarKits();
     if (D.estado === 'invitada'){ precargar(); traerBorrador(); ver('v-ficha'); }
     else if (D.estado === 'ficha_completa'){ modoBriefing(); ver('v-brief'); }
     else { pintarEstado(); ver('v-estado'); }
   } catch { if (DEMO){ precargar(); traerBorrador(); } ver(DEMO ? 'v-ficha' : 'v-error'); }
 })();
 
-const APP_VERSION = '2026-09-25-c';
+const APP_VERSION = '2026-09-26-a';
 </script>
 </body>
 </html>
