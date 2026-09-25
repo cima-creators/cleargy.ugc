@@ -622,7 +622,8 @@ function pintarMarca(){
   const est = CFG.estilo || {};
   document.title = `${CFG.nombre} · Panel`;
   $('#marca-ini').textContent = est.iniciales || CFG.nombre.slice(0,2).toUpperCase();
-  $('#marca-nombre').textContent = est.logoTexto || CFG.nombre;
+  if (est.logoImg){ $('#marca-nombre').innerHTML = `<img src="${est.logoImg}" alt="${CFG.nombre}" style="height:22px;width:auto;display:block">`; $('#marca-ini').style.display = 'none'; }
+  else $('#marca-nombre').textContent = est.logoTexto || CFG.nombre;
   $('#entregas-sub').textContent = CREADORA_PUBLICA()
     ? `Cada creadora publica el video en su Instagram y su TikTok etiquetando a @${CFG.cuentaIg} y carga acá la carpeta de Drive y los dos links. Revisá el video y aprobá o pedí cambios.`
     : `Los videos que mandaron por Drive: revisalos, subilos como collab desde @${CFG.cuentaIg} y pegá el link del reel. Después el sistema verifica solo que acepten la invitación.`;
@@ -1701,7 +1702,7 @@ function aplicarRol(){
     pintarTodo();
   }
 })();
-const APP_VERSION = '2026-09-26-a';
+const APP_VERSION = '2026-09-26-b';
 </script>
 </body>
 </html>
