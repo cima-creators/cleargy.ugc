@@ -358,6 +358,8 @@ body.condemo .wrap{padding-bottom:84px}
 .g-trad{margin-top:6px;font-size:.76rem;color:var(--tx3)}
 .g-trad summary{cursor:pointer;font-weight:600;color:var(--rosa)}
 .g-trad p{margin:6px 0 0;line-height:1.4;color:var(--tx)}
+.g-guion{margin:6px 0 0;padding-left:18px;color:var(--tx);line-height:1.45}
+.g-guion li{margin:4px 0}
 .nota-pantalla{font-size:.84rem;background:var(--sup2,rgba(0,0,0,.035));border-radius:10px;padding:9px 12px}
 .g-ref{display:flex;align-items:center;gap:10px;margin-top:10px;padding:9px 11px;border-radius:12px;background:var(--bg,#fff);border:1px solid var(--linea);text-decoration:none;color:var(--tx)}
 .g-ref .play{flex:0 0 30px;height:30px;border-radius:9px;display:grid;place-items:center;background:var(--rosa);color:#fff;font-size:.8rem}
@@ -811,7 +813,10 @@ function seccionGanchos(ganchos, br, hayGuion){
 function botonRef(r){
   if (!r || !r.u) return '';
   return `<a class="g-ref" href="${r.u}" target="_blank" rel="noopener"><span class="play">▶</span><span><b>Mirá el video que ganó</b><small>${r.t}</small></span></a>` +
-    (r.trad ? `<details class="g-trad"><summary>El video está en inglés · ver en castellano</summary><p>${r.trad}</p></details>` : '');
+    ((r.trad || r.guion) ? `<details class="g-trad"><summary>El video está en inglés · ver el guion en castellano</summary>
+      ${r.trad ? `<p><b>Qué pasa en el video:</b> ${r.trad}</p>` : ''}
+      ${(r.guion || []).length ? `<p><b>Tu guion, paso a paso</b> (mismo orden que el video, para Uniderma):</p><ol class="g-guion">${r.guion.map(l => `<li>${l}</li>`).join('')}</ol>` : ''}
+    </details>` : '');
 }
 function seccionReferencias(referencias){
   if (!referencias.length) return '';
@@ -1713,7 +1718,7 @@ function pintarMarca(){
   } catch { if (DEMO){ precargar(); traerBorrador(); } ver(DEMO ? 'v-ficha' : 'v-error'); }
 })();
 
-const APP_VERSION = '2026-09-26-o';
+const APP_VERSION = '2026-09-26-p';
 </script>
 </body>
 </html>
