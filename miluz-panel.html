@@ -555,6 +555,23 @@ const API = 'https://us-central1-cleargy-creators.cloudfunctions.net/canje';
 const QS = new URLSearchParams(location.search);
 const MARCA = (QS.get('marca') || 'miluz').toLowerCase().replace(/[^a-z0-9_-]/g, '') || 'miluz';
 const DEMO = QS.has('demo') || location.protocol === 'data:';
+/* Dirección linda en la barra (Nacho 26/9): los links cortos (cima-creators.github.io/<marca>/…)
+   redirigen acá, y esto vuelve a mostrar el corto. Recargar anda: el corto redirige de nuevo
+   conservando t= / ref=. Solo para las marcas que tienen carpeta en el repo raíz. */
+(function(){
+  try {
+    if (location.hostname !== 'cima-creators.github.io' || !history.replaceState) return;
+    if (!['miluz','valca','menlab','uniderma'].includes(MARCA)) return;
+    const q = new URLSearchParams(location.search);
+    const demo = q.has('demo');
+    if (demo && 'panel' !== 'app') return;
+    q.delete('marca'); q.delete('demo');
+    const path = '/' + MARCA + ('panel' === 'app' ? (demo ? '/demo' : '/app') : ('panel' ? '/panel' : ''));
+    const resto = q.toString();
+    history.replaceState(history.state, '', path + (resto ? '?' + resto : '') + location.hash);
+  } catch {}
+})();
+
 let CFG = null;
 let ROL = null;
 /* sessionStorage puede no existir (preview, webviews raros): nunca debe
@@ -1721,7 +1738,7 @@ function aplicarRol(){
     pintarTodo();
   }
 })();
-const APP_VERSION = '2026-09-26-e';
+const APP_VERSION = '2026-09-26-f';
 </script>
 </body>
 </html>

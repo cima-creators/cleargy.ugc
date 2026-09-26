@@ -737,6 +737,23 @@ const DEMO = QS.has('demo') || location.protocol === 'data:';
 /* Multi-marca: ?marca=<slug>. Default miluz para no romper los links ya
    enviados (miluz-canje.html?t=...). TODO lo de la marca viene de `config`. */
 const MARCA = (QS.get('marca') || 'miluz').toLowerCase().replace(/[^a-z0-9_-]/g, '') || 'miluz';
+/* Dirección linda en la barra (Nacho 26/9): los links cortos (cima-creators.github.io/<marca>/…)
+   redirigen acá, y esto vuelve a mostrar el corto. Recargar anda: el corto redirige de nuevo
+   conservando t= / ref=. Solo para las marcas que tienen carpeta en el repo raíz. */
+(function(){
+  try {
+    if (location.hostname !== 'cima-creators.github.io' || !history.replaceState) return;
+    if (!['miluz','valca','menlab','uniderma'].includes(MARCA)) return;
+    const q = new URLSearchParams(location.search);
+    const demo = q.has('demo');
+    if (demo && 'app' !== 'app') return;
+    q.delete('marca'); q.delete('demo');
+    const path = '/' + MARCA + ('app' === 'app' ? (demo ? '/demo' : '/app') : ('app' ? '/app' : ''));
+    const resto = q.toString();
+    history.replaceState(history.state, '', path + (resto ? '?' + resto : '') + location.hash);
+  } catch {}
+})();
+
 let CFG = null;
 
 /* ── config de la marca: cacheada por marca en sessionStorage ── */
@@ -1718,7 +1735,7 @@ function pintarMarca(){
   } catch { if (DEMO){ precargar(); traerBorrador(); } ver(DEMO ? 'v-ficha' : 'v-error'); }
 })();
 
-const APP_VERSION = '2026-09-26-p';
+const APP_VERSION = '2026-09-26-q';
 </script>
 </body>
 </html>
