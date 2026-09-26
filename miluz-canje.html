@@ -867,6 +867,7 @@ function seccionCta(){
        <li><span class="si">4</span> ${B('Qué cambió')}: lo que notaste y en cuánto tiempo.</li>
        <li><span class="si">5</span> ${B('El cierre')}: recomendalo y decí dónde se compra.</li>
      </ul>
+     ${((CFG.briefing || {}).tips || []).length ? `<p>${B('Podés sumar:')}</p><ul class="limpia">${CFG.briefing.tips.map(t => `<li><span class="si">+</span> ${t}</li>`).join('')}</ul>` : ''}
      <h3>El cierre</h3>
      <p>Recomendalo como a una amiga (${B('probalo, pedilo')}) y decí dónde: ${CFG.tienda ? B('con tu código') : (c.donde || B('el link de tu perfil'))}${(c.ofertas || []).length ? ` · ${c.ofertas.join(' · ')}` : ''}.</p>
      ${ej.length ? `<div class="angulos">${ej.map(x => `<div class="angulo"><div class="l"><span>🗣️</span><i>Ejemplo</i>«${x}»</div></div>`).join('')}</div>` : ''}`;
@@ -1712,7 +1713,7 @@ function pintarMarca(){
   } catch { if (DEMO){ precargar(); traerBorrador(); } ver(DEMO ? 'v-ficha' : 'v-error'); }
 })();
 
-const APP_VERSION = '2026-09-26-m';
+const APP_VERSION = '2026-09-26-n';
 </script>
 </body>
 </html>
