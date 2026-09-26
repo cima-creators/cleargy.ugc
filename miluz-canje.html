@@ -869,7 +869,7 @@ function seccionCta(){
      </ul>
      ${((CFG.briefing || {}).tips || []).length ? `<p>${B('Podés sumar:')}</p><ul class="limpia">${CFG.briefing.tips.map(t => `<li><span class="si">+</span> ${t}</li>`).join('')}</ul>` : ''}
      <h3>El cierre</h3>
-     <p>Recomendalo como a una amiga (${B('probalo, pedilo')}) y decí dónde: ${CFG.tienda ? B('con tu código') : (c.donde || B('el link de tu perfil'))}${(c.ofertas || []).length ? ` · ${c.ofertas.join(' · ')}` : ''}.</p>
+     <p>Recomendalo como a una amiga (${B('probalo, pedilo')}) y decí dónde: ${CFG.cupon ? B('con tu código') : (c.donde || B('el link de tu perfil'))}${(c.ofertas || []).length ? ` · ${c.ofertas.join(' · ')}` : ''}.</p>
      ${ej.length ? `<div class="angulos">${ej.map(x => `<div class="angulo"><div class="l"><span>🗣️</span><i>Ejemplo</i>«${x}»</div></div>`).join('')}</div>` : ''}`;
 }
 
@@ -921,7 +921,7 @@ function armarBriefing(){
   const br = CFG.briefing || {};
   const nFotos = br.fotosProceso || 5;
   const nCrudos = br.crudos || 0;
-  const conCodigo = !!CFG.tienda;
+  const conCodigo = !!CFG.cupon;   // solo si la marca genera cupones (Tienda Nube / Shopify conectados)
   const bk = briefKit();
   const intro = (bk && bk.intro && bk.intro.length) ? bk.intro : (br.intro || []);
   const ganchos = (bk && bk.ganchos && bk.ganchos.length) ? bk.ganchos : (CFG.ganchos || []);
@@ -1052,7 +1052,7 @@ function demo(accion, datos){
   }
   if (accion === 'avanzar'){
     g.estado = datos.a;
-    g.codigo = CFG.tienda ? 'SOFI10' : null;
+    g.codigo = CFG.cupon ? 'SOFI10' : null;
     if (datos.a === 'recibido') g.deadline = Date.now()+5*864e5;
     if (datos.a === 'cumplida') g.nivel = 2;
     if (['publicado','cumplida'].includes(datos.a)){
@@ -1499,7 +1499,7 @@ function pintarPlata(){
 
   $('#bono-comision-pct').textContent = B.comision + '%';
   // sin tienda no hay código ni comisión por ventas: se esconde el bono
-  $('#bono-comision-pct').closest('.bono').classList.toggle('oculto', !CFG.tienda);
+  $('#bono-comision-pct').closest('.bono').classList.toggle('oculto', !CFG.cupon);
 }
 
 function pintarEstado(){
@@ -1694,7 +1694,7 @@ function pintarMarca(){
     $('#ll-hora').textContent = CFG.llamada.hora;
     $('#a-llamada').addEventListener('click', () => $('#pop-llamada').showModal());
   } else $('#a-llamada').style.display = 'none';
-  if (!CFG.tienda) $('#a-codigo').style.display = 'none';
+  if (!CFG.cupon) $('#a-codigo').style.display = 'none';
   ajustarAccesos();
   $('#ll-cerrar').addEventListener('click', () => $('#pop-llamada').close());
 
@@ -1713,7 +1713,7 @@ function pintarMarca(){
   } catch { if (DEMO){ precargar(); traerBorrador(); } ver(DEMO ? 'v-ficha' : 'v-error'); }
 })();
 
-const APP_VERSION = '2026-09-26-n';
+const APP_VERSION = '2026-09-26-o';
 </script>
 </body>
 </html>
