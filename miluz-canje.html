@@ -346,6 +346,9 @@ body.condemo .wrap{padding-bottom:84px}
 .angulo .l{display:grid;grid-template-columns:22px 70px 1fr;gap:6px;align-items:start;font-size:.84rem;line-height:1.35;color:var(--tx);padding:3px 0}
 .angulo .l span{font-size:.95rem;line-height:1.2}
 .angulo .l i{font-style:normal;font-weight:700;font-size:.72rem;letter-spacing:.04em;text-transform:uppercase;color:var(--tx3);padding-top:2px}
+.demo-kits{display:flex;flex-wrap:wrap;gap:6px;align-items:center;margin:0 0 12px;font-size:.78rem;color:var(--tx3)}
+.demo-kits button{border:1px solid var(--linea);background:var(--bg,#fff);border-radius:999px;padding:6px 12px;font:inherit;font-weight:600;color:var(--tx);cursor:pointer}
+.demo-kits button.on{background:var(--rosa);border-color:var(--rosa);color:#fff}
 .chk-lista{display:flex;flex-direction:column;gap:8px;margin:10px 0}
 .chk-it{display:grid;grid-template-columns:22px 1fr;gap:10px;align-items:start;padding:10px 12px;border:1px solid var(--linea);border-radius:12px;background:var(--sup2,rgba(0,0,0,.035));font-size:.86rem;line-height:1.4;cursor:pointer}
 .chk-it input{width:18px;height:18px;margin-top:1px;accent-color:var(--rosa)}
@@ -528,6 +531,7 @@ body.condemo .wrap{padding-bottom:84px}
     <p class="eyebrow">Paso 2 de 2</p>
     <h1>Cómo hacemos el video</h1>
     <p class="lead">Cinco minutos de lectura. Es la diferencia entre un video que funciona y uno que no.</p>
+    <div class="demo-kits oculto" id="demo-kits"></div>
     <div class="card brief" id="brief-cuerpo"></div>
     <div class="card sutil">
       <label class="check">
@@ -809,7 +813,25 @@ function briefKit(){
   if (!bk) return null;
   return bk[kitActual()] || bk[Object.keys(bk)[0]] || null;
 }
-function pintarBriefing(){ $('#brief-cuerpo').innerHTML = armarBriefing(); pintarChk(); }
+function pintarBriefing(){ $('#brief-cuerpo').innerHTML = armarBriefing(); pintarChk(); pintarDemoKits(); }
+/* Solo en la demo: ver el briefing de cada producto (cada creadora real ve solo el suyo). */
+function pintarDemoKits(){
+  const box = $('#demo-kits');
+  const ops = (CFG.kitPorRespuesta && CFG.briefingPorKit) ? (CFG.opciones || []).filter(o => CFG.briefingPorKit[o.id]) : [];
+  if (!DEMO || ops.length < 2 || !D){ box.classList.add('oculto'); return; }
+  box.classList.remove('oculto');
+  box.innerHTML = `<span>Demo · ver el briefing de:</span>` + ops.map(o =>
+    `<button type="button" class="${D.kit === o.id && !D.kit2 ? 'on' : ''}" data-kit="${o.id}">${o.nom}</button>`).join('');
+  box.querySelectorAll('button').forEach(b => b.onclick = () => {
+    const k = b.dataset.kit;
+    D.kit = k; D.kit2 = null; D.videos = 'uno';
+    // el hook por dolor: el primer ángulo de ese producto
+    const g = CFG.guionesPorAngulo || {};
+    D.angulo = Object.keys(g).find(a => g[a].kit === k) || null;
+    try { _ls.guardar(D); } catch {}
+    pintarBriefing(); window.scrollTo({ top: 0, behavior: 'smooth' });
+  });
+}
 
 /* Ángulos como tarjetas "se ve / se lee / decís" (o texto suelto si son strings). */
 function seccionGanchos(ganchos, br, hayGuion){
@@ -1735,7 +1757,7 @@ function pintarMarca(){
   } catch { if (DEMO){ precargar(); traerBorrador(); } ver(DEMO ? 'v-ficha' : 'v-error'); }
 })();
 
-const APP_VERSION = '2026-09-26-q';
+const APP_VERSION = '2026-09-26-r';
 </script>
 </body>
 </html>
