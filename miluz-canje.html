@@ -850,40 +850,37 @@ function seccionesKit(kitId, numero, br){
 function seccionCta(){
   const c = CFG.cta || {};
   const cod = (D && D.codigo) || '';
-  const conCodigo = !!CFG.tienda;
-  const donde = conCodigo
-    ? (cod ? `con tu código ${B(cod)}` : `con ${B('tu código')} (te aparece en tu app)`)
-    : (c.donde || `en ${B('el link de tu perfil')}`);
-  const ej = (c.ejemplos || []).map(x => x.replace(/\{codigo\}/g, cod || 'TUCÓDIGO'));
-  return `<h3>Cómo cerrar el video</h3>
-     <p>Los últimos 5 segundos son los que venden. Tres partes, en este orden:</p>
+  const ej = (c.ejemplos || []).slice(0, 2).map(x => x.replace(/\{codigo\}/g, cod || 'TUCÓDIGO'));
+  return `<h3>Cómo armar tu video</h3>
+     <p>No hace falta un guion. Contalo como se lo contarías a una amiga, en este orden:</p>
      <ul class="limpia">
-       <li><span class="si">1</span> ${B('Volvé a tu problema')} en una línea: «Si a vos también te pasa…».</li>
-       <li><span class="si">2</span> ${B('Pedile algo concreto')}, como a una amiga: ${B('probalo, pedilo, llevatelo')}. «Te dejo el link» solo no alcanza: tiene que haber un pedido.</li>
-       <li><span class="si">3</span> ${B('Decí dónde')}: ${donde}${(c.ofertas || []).length ? `, y lo que es real hoy: ${c.ofertas.map(o => B(o)).join(' · ')}` : ''}.</li>
+       <li><span class="si">1</span> ${B('El hook')}: uno de los de arriba, en los primeros 3 segundos, con tu cara y el producto.</li>
+       <li><span class="si">2</span> ${B('Tu problema')}: qué te pasaba antes, con tus palabras.</li>
+       <li><span class="si">3</span> ${B('El producto')}: decí el nombre y mostrá cómo lo usás.</li>
+       <li><span class="si">4</span> ${B('Qué cambió')}: lo que notaste y en cuánto tiempo.</li>
+       <li><span class="si">5</span> ${B('El cierre')}: recomendalo y decí dónde se compra.</li>
      </ul>
-     ${ej.length ? `<p>${B('Así suena:')}</p><div class="angulos">${ej.map(x => `<div class="angulo"><div class="l"><span>🗣️</span><i>Decís</i>«${x}»</div></div>`).join('')}</div>` : ''}
-     <p>Nada de «aprovechá ya» ni «últimas unidades»: ${B('no vendas, recomendá')}.</p>`;
+     <h3>El cierre</h3>
+     <p>Recomendalo como a una amiga (${B('probalo, pedilo')}) y decí dónde: ${CFG.tienda ? B('con tu código') : (c.donde || B('el link de tu perfil'))}${(c.ofertas || []).length ? ` · ${c.ofertas.join(' · ')}` : ''}.</p>
+     ${ej.length ? `<div class="angulos">${ej.map(x => `<div class="angulo"><div class="l"><span>🗣️</span><i>Ejemplo</i>«${x}»</div></div>`).join('')}</div>` : ''}`;
 }
 
 /* Checklist que tilda ella misma antes de entregar. Se guarda en su celular. */
 function itemsChecklist(){
   const br = CFG.briefing || {};
   const nFotos = br.fotosProceso || 5, nCrudos = br.crudos || 0;
-  const dup = /nombre del producto|cómo lo aplic|tu cara|instagram y a tiktok|etiquet/i;
   const it = [
-    `Abro con un hook de la lista: ${B('lo que se ve')} y ${B('el texto en pantalla')} desde el segundo 1.`,
-    `Digo el hook en los ${B('primeros 3 segundos')}, sin saludar antes.`,
-    `Muestro ${B('mi cara y el problema real')}, sin filtro.`,
-    `Digo ${B('el nombre del producto en voz alta')}, dos veces.`,
-    `Muestro ${B('cómo lo uso')}.`,
-    `Cuento qué cambió ${B('con mi plazo real')} (días o semanas).`,
-    `Cierro con las tres partes: ${B('mi problema, el pedido y dónde')}.`,
+    `¿Usaste ${B('uno de los hooks')} que te recomendamos?`,
+    `¿Aparece ${B('tu cara al inicio, con el producto')}?`,
+    `¿Dura ${B(`${CFG.duracionMin || 30} segundos o más`)}?`,
+    `¿Dijiste ${B('el nombre del producto')} en voz alta?`,
+    `¿Mostraste ${B('cómo lo usás')}?`,
+    `¿Cerraste ${B('como te recomendamos')}, diciendo dónde se compra?`,
+    `¿Es ${B('vertical, con buena luz y sin marca de agua')}?`,
   ];
-  (CFG.reglas || []).filter(r => !dup.test(r.replace(/<[^>]+>/g, ''))).forEach(r => it.push(r));
-  if ((CFG.noDecir || []).length) it.push(`No dije nada de la lista de ${B('lo que NO se puede decir')}.`);
-  it.push(`Tengo ${B(`${nFotos} fotos del proceso`)}${nCrudos ? ` y ${B(`${nCrudos} crudos`)}` : ''} en una carpeta de Drive compartida con ${B('cualquiera con el enlace')}.`);
-  if (CREADORA_PUBLICA()) it.push(`Lo publiqué en Instagram y TikTok ${B(`etiquetando a @${CFG.cuentaIg}`)}.`);
+  if ((CFG.noDecir || []).length) it.push(`¿Evitaste ${B('lo que no se puede decir')}?`);
+  it.push(`¿Subiste ${B(`las ${nFotos} fotos`)}${nCrudos ? ` y ${B(`los ${nCrudos} crudos`)}` : ''} a la carpeta de Drive?`);
+  if (CREADORA_PUBLICA()) it.push(`¿Lo publicaste en Instagram y TikTok ${B(`etiquetando a @${CFG.cuentaIg}`)}?`);
   return it;
 }
 const CHK_KEY = () => `chk_${MARCA}_${(D && D.ig) || 'demo'}`;
@@ -891,7 +888,7 @@ function leerChk(){ try { return JSON.parse(localStorage.getItem(CHK_KEY()) || '
 function seccionChecklist(){
   const it = itemsChecklist(), ok = leerChk();
   return `<h3 id="checklist">Antes de entregar: tu checklist</h3>
-     <p>Tildá cada punto mirando ${B('tu propio video')}. Si falta uno, regrabalo antes de mandarlo: un video que no cumple no se aprueba.</p>
+     <p>Mirá tu video y tildá. Si alguna es «no», regrabalo antes de mandarlo.</p>
      <div class="chk-lista">${it.map((t, n) => `<label class="chk-it"><input type="checkbox" data-n="${n}" ${ok.includes(n) ? 'checked' : ''}><span>${t}</span></label>`).join('')}</div>
      <p class="chk-res" id="chk-res"></p>`;
 }
@@ -1657,7 +1654,7 @@ function pintarMarca(){
   } catch { if (DEMO){ precargar(); traerBorrador(); } ver(DEMO ? 'v-ficha' : 'v-error'); }
 })();
 
-const APP_VERSION = '2026-09-26-j';
+const APP_VERSION = '2026-09-26-k';
 </script>
 </body>
 </html>
