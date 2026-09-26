@@ -346,6 +346,10 @@ body.condemo .wrap{padding-bottom:84px}
 .angulo .l{display:grid;grid-template-columns:22px 52px 1fr;gap:6px;align-items:start;font-size:.84rem;line-height:1.35;color:var(--tx);padding:3px 0}
 .angulo .l span{font-size:.95rem;line-height:1.2}
 .angulo .l i{font-style:normal;font-weight:700;font-size:.72rem;letter-spacing:.04em;text-transform:uppercase;color:var(--tx3);padding-top:2px}
+.g-ref{display:flex;align-items:center;gap:10px;margin-top:10px;padding:9px 11px;border-radius:12px;background:var(--bg,#fff);border:1px solid var(--linea);text-decoration:none;color:var(--tx)}
+.g-ref .play{flex:0 0 30px;height:30px;border-radius:9px;display:grid;place-items:center;background:var(--rosa);color:#fff;font-size:.8rem}
+.g-ref b{display:block;font-size:.82rem}
+.g-ref small{display:block;font-size:.74rem;color:var(--tx3);line-height:1.3}
 .guion .angulo{border-left:3px solid var(--rosa)}
 .guion .angulo>b{font-size:.7rem;letter-spacing:.08em;text-transform:uppercase}
 .guion .nota{display:block;margin-top:6px;font-size:.74rem;line-height:1.35;color:var(--tx3)}
@@ -779,14 +783,19 @@ function seccionGanchos(ganchos, br, hayGuion){
   if (!ganchos.length) return '';
   return `<h3>${hayGuion ? 'Si preferís otro ángulo' : 'Los primeros 3 segundos'}</h3>
      <p>${B('Lo que se ve + lo que se lee + lo que se escucha')} tienen que contar la misma historia desde el primer segundo, aunque esté sin sonido. No arranques simplemente hablando a cámara.</p>
-     <p>${hayGuion ? 'Tu guion ya trae el hook. Si querés abrir con otro, elegí uno de estos y el resto del guion queda igual.' : `Elegí ${B('un ángulo')} que se parezca a tu experiencia y abrí con él.`} En cada uno tenés las tres cosas: qué se ve, qué se lee en pantalla y qué decís.</p>
+     <p>${hayGuion ? 'Tu guion ya trae el hook. Si querés abrir con otro, elegí uno de estos y el resto del guion queda igual.' : `Elegí ${B('un ángulo')} que se parezca a tu experiencia y abrí con él.`} En cada uno tenés qué se ve, qué se lee en pantalla, qué decís y ${B('el video que ya ganó')} con ese hook: miralo antes de grabar.</p>
      <div class="angulos">${ganchos.map((g, n) => typeof g === 'string'
        ? `<div class="angulo"><b>${n+1} · Ángulo</b><div class="l"><span>💬</span>${g}</div></div>`
        : `<div class="angulo"><b>${n+1} · ${g.t}</b>
             <div class="l"><span>🎬</span><i>Se ve</i>${g.ve}</div>
             <div class="l"><span>📝</span><i>Se lee</i>«${g.lee}»</div>
-            <div class="l"><span>🗣️</span><i>Decís</i>«${g.dice}»</div></div>`).join('')}</div>
+            <div class="l"><span>🗣️</span><i>Decís</i>«${g.dice}»</div>${botonRef(g.ref)}</div>`).join('')}</div>
      <p>Podés cambiar palabras para que suene a vos, pero la idea tiene que ser esa. Un video que no abre así no se aprueba.${br.ganchosDoc ? ` <a href="${br.ganchosDoc}" target="_blank" rel="noopener">Ver todos los ángulos con ejemplos →</a>` : ''}</p>`;
+}
+/* El video ganador del que sale cada hook, pegado al hook (Nacho 26/9). */
+function botonRef(r){
+  if (!r || !r.u) return '';
+  return `<a class="g-ref" href="${r.u}" target="_blank" rel="noopener"><span class="play">▶</span><span><b>Mirá el video que ganó</b><small>${r.t}</small></span></a>`;
 }
 function seccionReferencias(referencias){
   if (!referencias.length) return '';
@@ -804,17 +813,17 @@ function guionDe(kitId){
 }
 function seccionGuion(g){
   if (!g) return '';
-  const fila = f => `<div class="angulo">
+  const fila = (f, n) => `<div class="angulo">
       <b>${f.e}</b>
       <div class="l"><span>🎬</span><i>Se ve</i>${f.ve}</div>
       ${f.lee ? `<div class="l"><span>📝</span><i>Se lee</i>«${f.lee}»</div>` : ''}
       <div class="l"><span>🗣️</span><i>Decís</i>«${f.dice}»</div>
-      ${f.nota ? `<small class="nota">${f.nota}</small>` : ''}</div>`;
+      ${f.nota ? `<small class="nota">${f.nota}</small>` : ''}${n === 0 ? botonRef(g.ref) : ''}</div>`;
   return `<h3>Tu guion: ${g.t}</h3>
      <p>Sale de lo que contaste al aplicar y de los videos que ya vendieron en ${CFG.nombre}. Es tu ${B('base')}: cambiá palabras para que suene a vos, pero ${B('el orden y las ideas se respetan')}. Dura unos ${g.seg} segundos hablando normal.</p>
      <div class="angulos guion">${g.filas.map(fila).join('')}</div>
      ${g.nota ? `<p class="guion-nota">⚠️ ${g.nota}</p>` : ''}
-     ${g.ref && g.ref.u ? `<p>El hook sale de este video que ya ganó: <a href="${g.ref.u}" target="_blank" rel="noopener">${g.ref.t} →</a></p>` : ''}`;
+`;
 }
 /* Con dos kits, el briefing del segundo va completo después del primero. */
 function seccionesKit(kitId, numero, br){
@@ -1573,7 +1582,7 @@ function pintarMarca(){
   } catch { if (DEMO){ precargar(); traerBorrador(); } ver(DEMO ? 'v-ficha' : 'v-error'); }
 })();
 
-const APP_VERSION = '2026-09-26-h';
+const APP_VERSION = '2026-09-26-i';
 </script>
 </body>
 </html>
