@@ -625,7 +625,7 @@ function pintarMarca(){
   if (est.logoImg){ $('#marca-nombre').innerHTML = `<img src="${est.logoImg}" alt="${CFG.nombre}" style="height:22px;width:auto;display:block">`; $('#marca-ini').style.display = 'none'; }
   else $('#marca-nombre').textContent = est.logoTexto || CFG.nombre;
   $('#entregas-sub').textContent = CREADORA_PUBLICA()
-    ? `Cada creadora publica el video en su Instagram y su TikTok etiquetando a @${CFG.cuentaIg} y carga acá la carpeta de Drive y los dos links. Revisá el video y aprobá o pedí cambios.`
+    ? `Cada creadora manda primero el Drive. Revisalo y aprobalo (o pedí cambios): recién ahí lo publica en su Instagram y su TikTok etiquetando a @${CFG.cuentaIg} y carga los links. Al final aprobás la collab.`
     : `Los videos que mandaron por Drive: revisalos, subilos como collab desde @${CFG.cuentaIg} y pegá el link del reel. Después el sistema verifica solo que acepten la invitación.`;
   (CFG.opciones || []).concat(CFG.opcionesViejas || []).forEach(t => { NOMBRE_TONO[t.id] = t.nom; });
   if (CFG.estilo && CFG.estilo.logoTamano === 'grande') $('#marca-nombre').style.fontSize = '1.25rem';
@@ -712,6 +712,7 @@ async function cargar(){
     kit: f.kit || (f.datos && f.datos.kit) || null, kit2: f.kit2 || (f.datos && f.datos.kit2) || null,
     videos: f.videos || (f.datos && f.datos.videos) || null, entregas: Array.isArray(f.entregas) ? f.entregas : [],
     tiktokUser: (f.datos && f.datos.tiktok) || null,
+    aprobadoVideoEn: f.aprobadoVideoEn || null,
   }));
 
   CREADORAS = !todas ? [] : todas.fichas.map(f => ({
@@ -1148,7 +1149,7 @@ function pintarEntregas(){
        <b class="serif" style="font-size:1.2rem">Nada pendiente</b></div>`
     : `
     ${porRevisar.length ? `<p class="n2" style="margin:6px 0 10px;font-weight:600;color:var(--tinta2)">
-       ${porRevisar.length} para revisar y subir</p>` + porRevisar.map(e => tarjetaDrive(e)).join('') : ''}
+       ${porRevisar.length} ${CREADORA_PUBLICA() ? 'para revisar' : 'para revisar y subir'}</p>` + porRevisar.map(e => tarjetaDrive(e)).join('') : ''}
 
     ${enAjuste.length ? `<p class="n2" style="margin:22px 0 10px;font-weight:600;color:var(--tinta2)">
        ${enAjuste.length} esperando que manden el ajuste</p>` + enAjuste.map(e => tarjetaDrive(e)).join('') : ''}
@@ -1176,7 +1177,9 @@ function tarjetaDrive(e){
   const ix = ENTREGAS.indexOf(e);
   const hace = e.entregadoEn ? Math.max(0, Math.round((Date.now() - e.entregadoEn) / 864e5)) : null;
   const nG = (CFG && CFG.ganchos || []).length;
-  const queMirar = `abrí la carpeta, fijate que el video ${nG ? `abra con uno de los ${nG} ganchos, ` : ''}dure 35 segundos o más, muestre la cara${CFG && CFG.tienda ? ' y nombre el código' : ''}.`;
+  const queMirar = `abrí la carpeta, fijate que el video ${nG ? `abra con uno de los ganchos, ` : ''}dure ${(CFG && CFG.duracionMin) || 30} segundos o más, muestre la cara con el producto${CFG && CFG.tienda ? ' y nombre el código' : ''}.`;
+  const ella = CREADORA_PUBLICA();
+  const aprobado = ella && !!e.aprobadoVideoEn;
   return `
     <div class="entrega">
       <div class="prev">
@@ -1185,17 +1188,23 @@ function tarjetaDrive(e){
       <div class="cuerpo">
         <h3>${e.nom} <span class="hand">@${e.ig}</span></h3>
         <div class="pills">
-          <span class="pill ${e.estado === 'cambios' ? 'esp' : ''}">${e.estado === 'cambios' ? 'Le pedimos un ajuste' : 'Video entregado'}</span>
+          <span class="pill ${e.estado === 'cambios' ? 'esp' : (aprobado ? 'ok' : '')}">${e.estado === 'cambios' ? 'Le pedimos un ajuste' : (aprobado ? '✓ Aprobado · esperando que publique' : 'Video entregado')}</span>
           ${hace !== null ? `<span class="pill">${hace === 0 ? 'hoy' : 'hace ' + hace + ' d'}</span>` : ''}
           ${e.codigo ? `<span class="pill">código ${e.codigo}</span>` : ''}
           <span class="pill">${e.nro===1?'primera collab':`collab n° ${e.nro}`}</span>
         </div>
         ${e.estado === 'cambios' ? `<div class="aviso med"><b>Le pedimos:</b> ${e.motivo || '—'}</div>`
-          : `<div class="aviso med"><b>Qué hacer:</b> ${queMirar} Si está bien, subilo desde @${CFG.cuentaIg} como collab (Etiquetar personas → Invitar colaborador → @${e.ig}) y pegá acá el link del reel.</div>`}
+          : (ella
+            ? (aprobado
+              ? `<div class="aviso med"><b>Ya le avisamos que lo publique.</b> Cuando cargue los links de Instagram y TikTok, pasa a "publicadas" para aprobar la collab.</div>`
+              : `<div class="aviso med"><b>Qué hacer:</b> ${queMirar} Si está bien, tocá ${'<b>Aprobar video</b>'}: le llega el aviso para publicarlo en su Instagram y su TikTok etiquetando a @${CFG.cuentaIg}.</div>`)
+            : `<div class="aviso med"><b>Qué hacer:</b> ${queMirar} Si está bien, subilo desde @${CFG.cuentaIg} como collab (Etiquetar personas → Invitar colaborador → @${e.ig}) y pegá acá el link del reel.</div>`)}
         <div class="acc">
           <button class="b duda" onclick="pedirCambios(${ix})">Pedir cambios</button>
           <button class="b no" onclick="resolverEntrega(${ix},0)">Rechazar</button>
-          <button class="b ok" onclick="marcarPublicado(${ix})">Ya lo publiqué → pegar link</button>
+          ${ella
+            ? (aprobado ? '' : `<button class="b ok" onclick="aprobarVideo(${ix},1)">Aprobar video → que lo publique</button>`)
+            : `<button class="b ok" onclick="marcarPublicado(${ix})">Ya lo publiqué → pegar link</button>`}
         </div>
       </div>
     </div>`;
@@ -1226,7 +1235,9 @@ function tarjetaEntrega(e, revisar){
 
   // segunda entrega (dos videos): sus links, si ya la cargó
   const e2 = ella && e.entregas && e.entregas[1];
-  const links2 = e2 ? `<div class="aviso med" style="background:var(--arena);color:var(--tinta2)"><b>Video 2${e2.kit ? ' · ' + nombreKit(e2.kit) : ''}</b>
+  const links2 = (e2 && !e2.reel) ? `<div class="aviso med" style="background:var(--arena);color:var(--tinta2)"><b>Video 2${e2.kit ? ' · ' + nombreKit(e2.kit) : ''}</b>
+      <a class="verreel" href="${e2.drive}" target="_blank" rel="noopener">Drive</a> · ${e2.aprobadoEn ? 'aprobado, esperando que lo publique' : `<button class="b ok" style="padding:4px 10px" onclick="aprobarVideo(${ix},2)">Aprobar video 2</button>`}</div>`
+    : e2 ? `<div class="aviso med" style="background:var(--arena);color:var(--tinta2)"><b>Video 2${e2.kit ? ' · ' + nombreKit(e2.kit) : ''}</b>
       <a class="verreel" href="${e2.drive}" target="_blank" rel="noopener">Drive</a> · <a class="verreel" href="${e2.reel && e2.reel.url || '#'}" target="_blank" rel="noopener">Reel</a>${e2.tiktok && e2.tiktok.url ? ` · <a class="verreel" href="${e2.tiktok.url}" target="_blank" rel="noopener">TikTok</a>` : ''}
       · ${(((e2.reel && e2.reel.views) || 0) + ((e2.tiktok && e2.tiktok.views) || 0)).toLocaleString('es-AR')} views${e2.reel && e2.reel.collab === false ? ' · <span class="pill no">sin etiqueta</span>' : ''}</div>`
     : (ella && e.videos === 'dos' ? `<div class="aviso med" style="background:var(--arena);color:var(--tinta2)"><b>Video 2${e.kit2 ? ' · ' + nombreKit(e.kit2) : ''}</b> todavía no lo cargó.</div>` : '');
@@ -1277,6 +1288,14 @@ window.pedirCambios = ix => {
   if (motivo === null) return;
   if (!DEMO) api('resolver', { id: ENTREGAS[ix].id, decision: 'cambios', motivo }).catch(() => alert('No se pudo enviar. Reintentá.'));
   ENTREGAS[ix].estado = 'cambios'; ENTREGAS[ix].motivo = motivo; pintarEntregas();
+};
+window.aprobarVideo = (ix, n) => {
+  const e = ENTREGAS[ix];
+  if (!confirm(`¿Aprobás ${n === 2 ? 'el video 2' : 'el video'} de @${e.ig}? Le llega el aviso para publicarlo.`)) return;
+  if (n === 1) e.aprobadoVideoEn = Date.now();
+  else if (e.entregas && e.entregas[1]) e.entregas[1].aprobadoEn = Date.now();
+  pintarEntregas();
+  if (!DEMO) api('resolver', { id: e.id, decision: 'aprobar_video', n }).catch(() => alert('No se pudo aprobar. Reintentá.'));
 };
 window.marcarPublicado = ix => {
   const url = prompt(`Pegá el link del reel que subiste desde @${CFG.cuentaIg} (instagram.com/reel/...):`);
@@ -1702,7 +1721,7 @@ function aplicarRol(){
     pintarTodo();
   }
 })();
-const APP_VERSION = '2026-09-26-d';
+const APP_VERSION = '2026-09-26-e';
 </script>
 </body>
 </html>

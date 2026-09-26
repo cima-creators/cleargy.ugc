@@ -343,7 +343,7 @@ body.condemo .wrap{padding-bottom:84px}
 .angulos{display:flex;flex-direction:column;gap:10px;margin:10px 0 6px}
 .angulo{background:var(--sup2,rgba(0,0,0,.035));border:1px solid var(--linea);border-radius:14px;padding:12px 14px}
 .angulo>b{display:block;font-size:.9rem;margin-bottom:6px;color:var(--rosa)}
-.angulo .l{display:grid;grid-template-columns:22px 52px 1fr;gap:6px;align-items:start;font-size:.84rem;line-height:1.35;color:var(--tx);padding:3px 0}
+.angulo .l{display:grid;grid-template-columns:22px 70px 1fr;gap:6px;align-items:start;font-size:.84rem;line-height:1.35;color:var(--tx);padding:3px 0}
 .angulo .l span{font-size:.95rem;line-height:1.2}
 .angulo .l i{font-style:normal;font-weight:700;font-size:.72rem;letter-spacing:.04em;text-transform:uppercase;color:var(--tx3);padding-top:2px}
 .chk-lista{display:flex;flex-direction:column;gap:8px;margin:10px 0}
@@ -353,7 +353,12 @@ body.condemo .wrap{padding-bottom:84px}
 .chk-it:has(input:checked) span{text-decoration:line-through}
 .chk-res{font-size:.86rem;color:var(--tx3)}
 .chk-res.listo{color:var(--tx);background:var(--sup2,rgba(0,0,0,.035));border-radius:12px;padding:10px 12px}
+.btn.bloq{opacity:.45}
 .chk-link{display:block;margin:-6px 0 14px;font-size:.84rem;font-weight:600;color:var(--rosa);cursor:pointer}
+.g-trad{margin-top:6px;font-size:.76rem;color:var(--tx3)}
+.g-trad summary{cursor:pointer;font-weight:600;color:var(--rosa)}
+.g-trad p{margin:6px 0 0;line-height:1.4;color:var(--tx)}
+.nota-pantalla{font-size:.84rem;background:var(--sup2,rgba(0,0,0,.035));border-radius:10px;padding:9px 12px}
 .g-ref{display:flex;align-items:center;gap:10px;margin-top:10px;padding:9px 11px;border-radius:12px;background:var(--bg,#fff);border:1px solid var(--linea);text-decoration:none;color:var(--tx)}
 .g-ref .play{flex:0 0 30px;height:30px;border-radius:9px;display:grid;place-items:center;background:var(--rosa);color:#fff;font-size:.8rem}
 .g-ref b{display:block;font-size:.82rem}
@@ -595,7 +600,7 @@ body.condemo .wrap{padding-bottom:84px}
         <button type="button" data-n="1" class="on">Video 1<small id="segm-k1"></small></button>
         <button type="button" data-n="2">Video 2<small id="segm-k2"></small></button>
       </div>
-      <label>
+      <label id="lab-drive">
         <span class="lb">Link de tu carpeta compartida</span>
         <input id="in-drive" inputmode="url" placeholder="Link de Drive, iCloud, WeTransfer…">
         <span class="err" id="err-drive">Pegá el link de la carpeta compartida (Drive, iCloud, WeTransfer, Dropbox). No sirve un link de Instagram o TikTok.</span>
@@ -792,19 +797,21 @@ function seccionGanchos(ganchos, br, hayGuion){
   if (!ganchos.length) return '';
   return `<h3>${hayGuion ? 'Si preferís otro ángulo' : 'Los primeros 3 segundos'}</h3>
      <p>${B('Lo que se ve + lo que se lee + lo que se escucha')} tienen que contar la misma historia desde el primer segundo, aunque esté sin sonido. No arranques simplemente hablando a cámara.</p>
-     <p>${hayGuion ? 'Tu guion ya trae el hook. Si querés abrir con otro, elegí uno de estos y el resto del guion queda igual.' : `Elegí ${B('un ángulo')} que se parezca a tu experiencia y abrí con él.`} En cada uno tenés qué se ve, qué se lee en pantalla, qué decís y ${B('el video que ya ganó')} con ese hook: miralo antes de grabar.</p>
+     <p>${hayGuion ? 'Tu guion ya trae el hook. Si querés abrir con otro, elegí uno de estos y el resto del guion queda igual.' : `Elegí ${B('un ángulo')} que se parezca a tu experiencia y abrí con él.`} En cada uno tenés qué se ve, qué decís, ${B('el texto en pantalla')} y ${B('el video que ya ganó')} con ese hook: miralo antes de grabar.</p>
+     <p class="nota-pantalla">📝 ${B('«En pantalla»')} es el texto que escribís arriba del video, bien visible desde el primer segundo. Mucha gente mira sin sonido: si no está escrito, el hook no existe.</p>
      <div class="angulos">${ganchos.map((g, n) => typeof g === 'string'
        ? `<div class="angulo"><b>${n+1} · Ángulo</b><div class="l"><span>💬</span>${g}</div></div>`
        : `<div class="angulo"><b>${n+1} · ${g.t}</b>
             <div class="l"><span>🎬</span><i>Se ve</i>${g.ve}</div>
-            <div class="l"><span>📝</span><i>Se lee</i>«${g.lee}»</div>
+            <div class="l"><span>📝</span><i>En pantalla</i>«${g.lee}»</div>
             <div class="l"><span>🗣️</span><i>Decís</i>«${g.dice}»</div>${botonRef(g.ref)}</div>`).join('')}</div>
      <p>Podés cambiar palabras para que suene a vos, pero la idea tiene que ser esa. Un video que no abre así no se aprueba.${br.ganchosDoc ? ` <a href="${br.ganchosDoc}" target="_blank" rel="noopener">Ver todos los ángulos con ejemplos →</a>` : ''}</p>`;
 }
 /* El video ganador del que sale cada hook, pegado al hook (Nacho 26/9). */
 function botonRef(r){
   if (!r || !r.u) return '';
-  return `<a class="g-ref" href="${r.u}" target="_blank" rel="noopener"><span class="play">▶</span><span><b>Mirá el video que ganó</b><small>${r.t}</small></span></a>`;
+  return `<a class="g-ref" href="${r.u}" target="_blank" rel="noopener"><span class="play">▶</span><span><b>Mirá el video que ganó</b><small>${r.t}</small></span></a>` +
+    (r.trad ? `<details class="g-trad"><summary>El video está en inglés · ver en castellano</summary><p>${r.trad}</p></details>` : '');
 }
 function seccionReferencias(referencias){
   if (!referencias.length) return '';
@@ -824,11 +831,11 @@ function seccionGuion(g){
   if (!g) return '';
   const h = g.filas[0];
   return `<h3>Tu hook: ${g.t}</h3>
-     <p>Sale de lo que contaste al aplicar y de un video que ya vendió en ${CFG.nombre}. ${B('Abrí con esto')}: podés cambiar palabras para que suene a vos, pero la idea va igual.</p>
+     <p>Sale de lo que contaste al aplicar y de un video que ya vendió en ${CFG.nombre}. ${B('Abrí con esto')}: podés cambiar palabras para que suene a vos, pero la idea va igual. ${B('«En pantalla»')} es el texto que escribís arriba del video desde el primer segundo.</p>
      <div class="angulos guion"><div class="angulo">
        <b>Primeros 3 segundos</b>
        <div class="l"><span>🎬</span><i>Se ve</i>${h.ve}</div>
-       ${h.lee ? `<div class="l"><span>📝</span><i>Se lee</i>«${h.lee}»</div>` : ''}
+       ${h.lee ? `<div class="l"><span>📝</span><i>En pantalla</i>«${h.lee}»</div>` : ''}
        <div class="l"><span>🗣️</span><i>Decís</i>«${h.dice}»</div>
        ${h.nota ? `<small class="nota">${h.nota}</small>` : ''}${botonRef(g.ref)}</div></div>
      ${g.nota ? `<p class="guion-nota">⚠️ ${g.nota}</p>` : ''}`;
@@ -880,7 +887,7 @@ function itemsChecklist(){
   ];
   if ((CFG.noDecir || []).length) it.push(`¿Evitaste ${B('lo que no se puede decir')}?`);
   it.push(`¿Subiste ${B(`las ${nFotos} fotos`)}${nCrudos ? ` y ${B(`los ${nCrudos} crudos`)}` : ''} a la carpeta de Drive?`);
-  if (CREADORA_PUBLICA()) it.push(`¿Lo publicaste en Instagram y TikTok ${B(`etiquetando a @${CFG.cuentaIg}`)}?`);
+  it.push(`¿La carpeta es ${B('pública')}? (Compartir → «Cualquier persona con el enlace»)`);
   return it;
 }
 const CHK_KEY = () => `chk_${MARCA}_${(D && D.ig) || 'demo'}`;
@@ -904,7 +911,7 @@ document.addEventListener('change', e => {
   if (!e.target.matches('.chk-it input')) return;
   const ok = [...document.querySelectorAll('.chk-it input')].filter(c => c.checked).map(c => +c.dataset.n);
   try { localStorage.setItem(CHK_KEY(), JSON.stringify(ok)); } catch {}
-  pintarChk();
+  pintarChk(); if (D) pintarCandado();
 });
 
 /* ── briefing armado desde la config ── */
@@ -942,11 +949,11 @@ function armarBriefing(){
      </ul>`;
   const comoEntregar = CREADORA_PUBLICA()
     ? `<h3>Cómo entregar</h3>
-     <p>${B('Vos publicás el video')} en tu Instagram y en tu TikTok, ${B(`etiquetando a @${CFG.cuentaIg}`)}${CFG.tiktok ? ` (en TikTok, @${CFG.tiktok})` : ''}. Después cargás todo en tu app.</p>
+     <p>Primero ${B('nos mandás el video')} y lo revisamos. ${B('Cuando te lo aprobamos')}, lo publicás vos en tu Instagram y tu TikTok.</p>
      <ul class="limpia">
-       <li><span class="si">1</span> Creá una carpeta en Google Drive con ${B('el video')} y ${B(`las ${nFotos} fotos`)}${nCrudos ? ` y ${B(`${nCrudos} videos crudos`)}` : ''}, compartida con ${B('"Cualquier persona con el enlace"')}.</li>
-       <li><span class="si">2</span> Publicá el video en tu Instagram (reel) y en tu TikTok, etiquetando a @${CFG.cuentaIg}. Sin marca de agua.</li>
-       <li><span class="si">3</span> En tu app, en "Entregá tu contenido", pegá ${B('el link de la carpeta, el del reel y el del TikTok')}.${D && D.videos === 'dos' ? ' Con dos videos, cargás cada uno por separado (Video 1 / Video 2).' : ''}</li>
+       <li><span class="si">1</span> Creá una carpeta en Google Drive con ${B('el video')} y ${B(`las ${nFotos} fotos`)}${nCrudos ? ` y ${B(`${nCrudos} videos crudos`)}` : ''}, compartida con ${B('"Cualquier persona con el enlace"')}, y pegá el link en tu app.</li>
+       <li><span class="si">2</span> ${B('Todavía no lo publiques.')} Lo revisamos y te avisamos si está aprobado o si hay que ajustar algo.</li>
+       <li><span class="si">3</span> Con el video aprobado, publicalo en tu Instagram (reel) y en tu TikTok ${B(`etiquetando a @${CFG.cuentaIg}`)}, sin marca de agua, y cargá los dos links en tu app.${D && D.videos === 'dos' ? ' Con dos videos, cada uno va por separado (Video 1 / Video 2).' : ''}</li>
      </ul>`
     : `<h3>Cómo entregar</h3>
      <p>Vos ${B('no publicás el reel')}: nos mandás el video y lo subimos nosotras desde @${CFG.cuentaIg} como collab con vos.</p>
@@ -1023,13 +1030,24 @@ function demo(accion, datos){
   if (accion === 'llego'){ g.estado = 'recibido'; g.deadline = Date.now()+CFG.diasParaPublicar*864e5; }
   if (accion === 'reel'){ g.estado = 'publicado'; g.reel = datos.url; }
   if (accion === 'entregar'){
-    if (CREADORA_PUBLICA()){
+    if (CREADORA_PUBLICA() && !datos.ig){
       const n = datos.n === 2 ? 2 : 1;
       g.entregas = g.entregas || [];
-      g.entregas[n-1] = { n, drive: datos.drive, reel: { url: datos.ig, collab: true, views: 0 }, tiktok: datos.tiktok ? { url: datos.tiktok, views: 0 } : null };
+      g.entregas[n-1] = { n, drive: datos.drive, aprobadoEn: null };
+      if (n === 1){ g.entrega = { drive: datos.drive }; g.aprobadoVideoEn = null; }
+      if (!['publicado','cumplida'].includes(g.estado)) g.estado = 'entregado';
+    } else if (CREADORA_PUBLICA()){
+      const n = datos.n === 2 ? 2 : 1;
+      g.entregas = g.entregas || [];
+      g.entregas[n-1] = { ...(g.entregas[n-1] || {}), n, drive: datos.drive, reel: { url: datos.ig, collab: true, views: 0 }, tiktok: datos.tiktok ? { url: datos.tiktok, views: 0 } : null };
       if (n === 1){ g.entrega = { drive: datos.drive }; g.reel = { url: datos.ig, collab: true, views: 0 }; g.tiktok = datos.tiktok ? { url: datos.tiktok, views: 0 } : null; }
       if (g.estado !== 'publicado' && g.estado !== 'cumplida') g.estado = 'publicado';
     } else { g.estado = 'entregado'; g.entrega = { drive: datos.drive }; }
+  }
+  if (accion === 'aprobar_video'){
+    g.entregas = g.entregas || [];
+    g.entregas[0] = { ...(g.entregas[0] || { n: 1, drive: (g.entrega && g.entrega.drive) || 'https://drive.google.com/demo' }), aprobadoEn: Date.now() };
+    g.aprobadoVideoEn = Date.now(); g.estado = 'entregado';
   }
   if (accion === 'avanzar'){
     g.estado = datos.a;
@@ -1249,23 +1267,59 @@ document.querySelectorAll('#segm-videos button').forEach(b => b.addEventListener
   document.querySelectorAll('#segm-videos button').forEach(x => x.classList.toggle('on', x === b));
   precargarEntrega();
 }));
+/* La entrega que está cargando (Video 1 / Video 2) y si ya está aprobada para publicar. */
+function entregaActual(){
+  return (D && Array.isArray(D.entregas) && D.entregas[ENTREGA_N - 1]) ||
+    (ENTREGA_N === 1 && D ? { drive: D.entrega && D.entrega.drive, reel: D.reel, tiktok: D.tiktok, aprobadoEn: D.aprobadoVideoEn } : null);
+}
+const MODO_LINKS = () => {
+  if (!CREADORA_PUBLICA()) return false;
+  const x = entregaActual();
+  return !!(x && x.drive && (x.aprobadoEn || (x.reel && x.reel.url && x.reel.url !== '#') || (ENTREGA_N === 1 && D.aprobadoVideoEn)));
+};
 function precargarEntrega(){
-  const e = (D && Array.isArray(D.entregas) && D.entregas[ENTREGA_N - 1]) || (ENTREGA_N === 1 ? { drive: D && D.entrega && D.entrega.drive, reel: D && D.reel, tiktok: D && D.tiktok } : null);
-  $('#in-drive').value = (e && e.drive) || '';
-  $('#in-ig').value = (e && e.reel && e.reel.url && e.reel.url !== '#') ? e.reel.url : '';
-  $('#in-tt').value = (e && e.tiktok && e.tiktok.url) || '';
-  const hecha = !!(e && e.drive);
-  $('#btn-drive').textContent = hecha ? 'Actualizar links' : (CREADORA_PUBLICA() ? 'Cargar mis links' : 'Entregar');
+  const x = entregaActual();
+  const links = MODO_LINKS();
+  const e = D.estado;
+  $('#in-drive').value = (x && x.drive) || '';
+  $('#in-ig').value = (x && x.reel && x.reel.url && x.reel.url !== '#') ? x.reel.url : '';
+  $('#in-tt').value = (x && x.tiktok && x.tiktok.url) || '';
+  const tieneLinks = !!$('#in-ig').value;
+  $('#lab-drive').classList.toggle('oculto', links);
+  $('#lab-ig').classList.toggle('oculto', !links); $('#lab-tt').classList.toggle('oculto', !links);
+  if (links){
+    $('#subir-tit').textContent = tieneLinks ? '¿Cambiaste algo?' : '¡Aprobado! Publicalo y cargá los links';
+    $('#subir-txt').textContent = `Subilo a tu Instagram (reel) y a tu TikTok etiquetando a @${CFG.cuentaIg}, y pegá los dos links.`;
+    $('#btn-drive').textContent = tieneLinks ? 'Actualizar links' : 'Cargar mis links';
+  } else {
+    const yaMando = !!(x && x.drive);
+    $('#subir-tit').textContent = e === 'cambios' ? 'Volvé a mandar tu video' : e === 'vencida' ? 'Mandanos tu video hoy' : (yaMando ? '¿Cambiaste el video?' : (ENTREGA_N === 2 ? 'Mandanos tu segundo video' : 'Mandanos tu video'));
+    $('#subir-txt').textContent = yaMando ? 'Lo estamos revisando. Todavía no lo publiques: te avisamos apenas esté aprobado.' : 'Pegá el link de la carpeta con el video y las fotos. Todavía no lo publiques: primero lo revisamos.';
+    $('#btn-drive').textContent = yaMando ? 'Actualizar link' : 'Entregar';
+  }
+  pintarCandado();
+}
+/* Sin el checklist completo no se entrega el video (Nacho 26/9). Los links de después no piden checklist. */
+const CHECK_COMPLETO = () => leerChk().length >= itemsChecklist().length;
+function pintarCandado(){
+  const pide = !MODO_LINKS() && !CHECK_COMPLETO();
+  $('#btn-drive').classList.toggle('bloq', pide);
+  $('#a-chk').textContent = pide ? `🔒 Completá tu checklist para poder entregar (${leerChk().length} de ${itemsChecklist().length}) →` : '✅ Checklist completo';
+  $('#a-chk').classList.toggle('oculto', MODO_LINKS());
 }
 
 $('#btn-drive').addEventListener('click', async () => {
+  if (!MODO_LINKS() && !CHECK_COMPLETO()){
+    alert('Antes de entregar, completá tu checklist: está al final del briefing.');
+    $('#a-chk').click(); return;
+  }
   const i = $('#in-drive'), drive = i.value.trim();
   const ok = /^https?:\/\/\S+\.\S+/i.test(drive) && !/instagram\.com|tiktok\.com/i.test(drive);
   $('#err-drive').style.display = ok ? 'none' : 'block';
   if (!ok) return;
-  const datos = { drive };
-  if (CREADORA_PUBLICA()){
-    // ella publica: además del Drive van el reel de Instagram y el TikTok
+  const datos = { drive, n: ENTREGA_N };
+  if (MODO_LINKS()){
+    // video aprobado: ahora van el reel de Instagram y el TikTok
     const ig = $('#in-ig').value.trim(), tt = $('#in-tt').value.trim();
     const okIg = /instagram\.com\/(reel|p)\//i.test(ig);
     const okTt = /^https?:\/\/(www\.|vm\.|vt\.)?tiktok\.com\//i.test(tt);
@@ -1278,9 +1332,9 @@ $('#btn-drive').addEventListener('click', async () => {
   try {
     const r = await api('entregar', datos);
     D = r.creadora; b.disabled = false; pintarEstado();
-    if (CREADORA_PUBLICA() && r.collab === false) alert(`Recibimos tus links, pero en el reel no aparece @${CFG.cuentaIg} etiquetada. Editá la publicación y etiquetala, así cuenta.`);
+    if (MODO_LINKS() && r.collab === false) alert(`Recibimos tus links, pero en el reel no aparece @${CFG.cuentaIg} etiquetada. Editá la publicación y etiquetala, así cuenta.`);
   }
-  catch { b.disabled = false; b.textContent = 'Entregar'; alert('No se pudo enviar. Fijate los links y probá de nuevo.'); }
+  catch { b.disabled = false; precargarEntrega(); alert('No se pudo enviar. Fijate los links y probá de nuevo.'); }
 });
 
 function copiarCodigo(){
@@ -1371,8 +1425,9 @@ const FLUJO = () => [
   ['briefing_ok', '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 7h16M4 12h10M4 17h7"/></svg>','En la lista de envío','Estamos preparando tu kit.'],
   ['enviado',   '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 7.5l9-4 9 4-9 4z"/><path d="M3 7.5v9l9 4 9-4v-9"/><path d="M12 11.5v9"/></svg>','Kit despachado',      'Va en camino a tu casa.'],
   ['recibido',  '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3.5 11L12 4l8.5 7"/><path d="M5.5 9.7V19a1 1 0 0 0 1 1h11a1 1 0 0 0 1-1V9.7"/></svg>','Te llegó',            `Arrancaron tus ${CFG.diasParaPublicar} días.`],
-  // cuando publica la creadora (Valca) no hay paso "entregado": publica y carga los links en uno
-  ...(CREADORA_PUBLICA() ? [] : [['entregado', SVG_VIDEO,'Entregaste tu video','Lo estamos revisando.']]),
+  CREADORA_PUBLICA()
+    ? ['entregado', SVG_VIDEO,'Mandaste tu video', (D && D.aprobadoVideoEn) ? '¡Aprobado! Ya podés publicarlo.' : 'Lo revisamos. Todavía no lo publiques.']
+    : ['entregado', SVG_VIDEO,'Entregaste tu video','Lo estamos revisando.'],
   CREADORA_PUBLICA()
     ? ['publicado', SVG_VIDEO,'Publicaste y cargaste los links','Lo estamos revisando.']
     : ['publicado', SVG_VIDEO,`Publicado en @${CFG.cuentaIg}`,'Aceptá la invitación de colaboración.'],
@@ -1468,13 +1523,17 @@ function pintarEstado(){
     recibido:   ['Te quedan',
                  (dias === 1 ? 'Te queda<br>un día' : 'Te quedan<br>' + (dias!==null?dias:'—') + ' días'),
                  'Tu kit ya llegó. Grabá tranquila.','En curso'],
-    entregado:  ['Tu entrega','Recibimos<br>tu video','Lo estamos revisando. Te avisamos por Instagram cuando lo subamos.','En revisión'],
-    cambios:    ['Tu entrega','Te pedimos<br>un ajuste', (D.cambiosMotivo || 'Fijate el mensaje que te mandamos.') + (CREADORA_PUBLICA() ? ' Cuando lo tengas, volvé a cargar los links acá abajo.' : ' Cuando lo tengas, volvé a pegar el link acá abajo.'),'Ajustes'],
+    entregado:  !CREADORA_PUBLICA()
+      ? ['Tu entrega','Recibimos<br>tu video','Lo estamos revisando. Te avisamos por Instagram cuando lo subamos.','En revisión']
+      : (D.aprobadoVideoEn
+        ? ['Tu video','¡Aprobado!',`Ya podés publicarlo en tu Instagram y tu TikTok etiquetando a @${CFG.cuentaIg}. Después cargá los dos links acá abajo.`,'Para publicar']
+        : ['Tu entrega','Recibimos<br>tu video','Lo estamos revisando. Todavía no lo publiques: te avisamos apenas esté aprobado.','En revisión']),
+    cambios:    ['Tu entrega','Te pedimos<br>un ajuste', (D.cambiosMotivo || 'Fijate el mensaje que te mandamos.') + (CREADORA_PUBLICA() ? ' Cuando lo tengas, volvé a subir el Drive acá abajo.' : ' Cuando lo tengas, volvé a pegar el link acá abajo.'),'Ajustes'],
     publicado:  CREADORA_PUBLICA()
       ? ['Tu collab','Recibimos<br>tus links', (D.reel && D.reel.collab === false ? `En el reel no aparece @${CFG.cuentaIg} etiquetada: editalo y etiquetala. ` : '') + 'Lo estamos revisando. Resubilo a tus historias.' + (D.videos === 'dos' && !(D.entregas && D.entregas[1]) ? ' Cuando tengas el segundo video, cargalo abajo.' : ''),'En revisión']
       : ['Tu collab','¡Ya está<br>publicado!','Aceptá la invitación de colaboración en Instagram y resubilo a tus historias.','Publicado'],
     cumplida:   ['Tu collab','¡Listo!','Ya podés pedir tu próximo kit.','Completada'],
-    vencida:    ['Tu plazo','Se te pasó<br>el plazo', CREADORA_PUBLICA() ? 'El kit ya lo tenés: publicá hoy y cargá tus links acá abajo. Sin video no podemos mandarte más kits.' : 'El kit ya lo tenés: entregá tu video hoy acá abajo. Sin video no podemos mandarte más kits.','Atrasada']
+    vencida:    ['Tu plazo','Se te pasó<br>el plazo', CREADORA_PUBLICA() ? 'El kit ya lo tenés: mandanos tu video hoy acá abajo. Sin video no podemos mandarte más kits.' : 'El kit ya lo tenés: entregá tu video hoy acá abajo. Sin video no podemos mandarte más kits.','Atrasada']
   }[e] || ['Tu estado','—','','En curso'];
 
   /* anillo: solo cuando hay plazo corriendo */
@@ -1517,19 +1576,18 @@ function pintarEstado(){
     if (CREADORA_PUBLICA()){
       const dos = D.videos === 'dos';
       const falta2 = dos && !(D.entregas && D.entregas[1] && D.entregas[1].drive);
-      $('#subir-tit').textContent = e === 'vencida' ? 'Publicá hoy y cargá tus links' : e === 'cambios' ? 'Volvé a cargar los links' : (e === 'publicado' ? (falta2 ? 'Cargá tu segundo video' : '¿Cambiaste algo?') : 'Publicá y cargá tus links');
       $('#segm-videos').classList.toggle('oculto', !dos);
       if (dos){
         $('#segm-k1').textContent = nombreKit(D.kit); $('#segm-k2').textContent = nombreKit(D.kit2);
         ENTREGA_N = (e === 'publicado' && falta2) ? 2 : ENTREGA_N;
         document.querySelectorAll('#segm-videos button').forEach(x => x.classList.toggle('on', +x.dataset.n === ENTREGA_N));
       } else ENTREGA_N = 1;
-      $('#lab-ig').classList.remove('oculto'); $('#lab-tt').classList.remove('oculto');
       precargarEntrega();
     } else {
       $('#subir-tit').textContent = e === 'entregado' ? '¿Cambiaste el video?' : (e === 'cambios' ? 'Volvé a entregar' : (e === 'vencida' ? 'Entregá hoy' : 'Entregá tu contenido'));
       $('#btn-drive').textContent = e === 'entregado' ? 'Actualizar link' : 'Entregar';
       if (D.entrega && D.entrega.drive && !$('#in-drive').value) $('#in-drive').value = D.entrega.drive;
+      pintarCandado();
     }
   }
   pintarPlata();
@@ -1588,7 +1646,7 @@ function barraDemo(){
   nav.innerHTML = '<span class="lbl">Demo</span>';
   [['Ficha',()=>ver('v-ficha')],['Briefing',()=>ver('v-brief')],
    ['En lista',()=>irA('briefing_ok')],['Despachado',()=>irA('enviado')],
-   ['Te llegó',()=>irA('recibido')],['Publicado',()=>irA('publicado')],
+   ['Te llegó',()=>irA('recibido')],['Entregó',()=>irA('entregado')],['Aprobado',()=>api('aprobar_video',{}).then(r=>{D=r.creadora;pintarEstado();ver('v-estado');})],['Publicado',()=>irA('publicado')],
    ['Cumplida',()=>irA('cumplida')],['Vencida',()=>irA('vencida')]
   ].forEach(([t,fn]) => {
     const b = document.createElement('button'); b.textContent = t; b.onclick = fn; nav.appendChild(b);
@@ -1654,7 +1712,7 @@ function pintarMarca(){
   } catch { if (DEMO){ precargar(); traerBorrador(); } ver(DEMO ? 'v-ficha' : 'v-error'); }
 })();
 
-const APP_VERSION = '2026-09-26-k';
+const APP_VERSION = '2026-09-26-m';
 </script>
 </body>
 </html>
