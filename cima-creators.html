@@ -628,11 +628,14 @@ html.sin-redes .solo-redes{display:none !important;}
       <button class="wtab" id="vsort-day" onclick="setVideoSort('day',this)">↓ Recientes</button>
       <button class="wtab" id="vsort-featured" onclick="setVideoSort('featured',this)">⭐ Destacados</button>
       <button class="wtab solo-redes" id="vsort-viral" onclick="setVideoSort('viral',this)">🔥 Virales</button>
+      <button class="wtab" id="vsort-equipo" onclick="setVideoSort('equipo',this)">👥 Del equipo</button>
     </div>
     <div class="week-tabs" id="viral-product-filter" style="display:none;margin-bottom:12px;"></div>
     <div id="my-videos-list"></div>
     <div id="destacados-list" style="display:none;"></div>
     <div id="featured-list" style="display:none;"></div>
+    <div class="week-tabs" id="equipo-chips" style="display:none;margin-bottom:12px;"></div>
+    <div id="equipo-list" style="display:none;"></div>
   </div>
 
   <!-- BONOS -->
@@ -2011,6 +2014,49 @@ function renderMyVideos(){
 }
 
 // ═══════════════════════════════════
+// VIDEOS DEL EQUIPO — se miran, no se tocan
+// ═══════════════════════════════════
+let equipoFiltro = "ALL";
+function setEquipoFiltro(c){ equipoFiltro = c; renderEquipo(); }
+function videoCardOtra(v){
+  const nombre = esc(DISPLAY_NAMES[v.creator] || v.creator);
+  const views = viewsAcum(v);
+  const vClass = views>=10000?"viral":views>=1000?"good":"low";
+  const fecha = v.date?new Date(v.date).toLocaleDateString("es-AR",{day:"2-digit",month:"2-digit"}):"";
+  const ico = (v.crudo||v.platform==="drive")?"🎬":v.platform==="ig"?"📸":v.platform==="tt"?"🎵":"📸🎵";
+  const links = [
+    v.linkIg?`<a class="vc-copy-btn" href="${escUrl(v.linkIg)}" target="_blank" style="text-decoration:none;">📸 Ver en IG</a>`:"",
+    v.linkTt?`<a class="vc-copy-btn" href="${escUrl(v.linkTt)}" target="_blank" style="text-decoration:none;">🎵 Ver en TT</a>`:"",
+    (!v.linkIg&&!v.linkTt&&(v.driveLink||v.link))?`<a class="vc-copy-btn" href="${escUrl(v.driveLink||v.link)}" target="_blank" style="text-decoration:none;">🎬 Ver video</a>`:"",
+  ].filter(Boolean).join("");
+  return `<div class="video-card">
+    <div class="vc-body">
+      <div class="vc-top">
+        <div style="font-size:14px;font-weight:600;letter-spacing:-.015em;color:var(--text);">${ico} ${esc(v.cat||"Video")}</div>
+        <span class="vc-meta">${nombre}${fecha?" · "+fecha:""}</span>
+      </div>
+      <div class="vc-metrics${BRAND.driveOnly ? " solo-redes" : ""}">
+        <div class="vcm"><div class="vcm-val ${vClass}">${fmtV(views)}</div><div class="vcm-label">Views</div></div>
+      </div>
+      ${links?`<div class="vc-bottom">${links}</div>`:""}
+    </div>
+  </div>`;
+}
+function renderEquipo(){
+  const todas = (sharedData.videos||[]).filter(v=>v.creator!==currentUser && v.status!=="rejected");
+  const otras = Object.keys(DISPLAY_NAMES).filter(c=>c!==currentUser && todas.some(v=>v.creator===c));
+  if(!otras.includes(equipoFiltro)) equipoFiltro = "ALL";
+  const chips = document.getElementById("equipo-chips");
+  if(chips) chips.innerHTML = ["ALL"].concat(otras).map(c=>
+    `<button class="wtab ${equipoFiltro===c?"active":""}" onclick="setEquipoFiltro('${c}')">${c==="ALL"?"Todos":esc(DISPLAY_NAMES[c]||c)}</button>`).join("");
+  const vids = todas.filter(v=>equipoFiltro==="ALL"||v.creator===equipoFiltro)
+    .sort((a,b)=>(b.date||"").localeCompare(a.date||"")).slice(0,40);
+  document.getElementById("equipo-list").innerHTML = vids.length
+    ? vids.map(videoCardOtra).join("") + `<div class="week-msg" style="text-align:center;margin-top:10px;">Los últimos ${vids.length}. Acá solo se miran: cargás y editás únicamente los tuyos.</div>`
+    : `<div class="empty"><div class="empty-icon">👥</div><div class="empty-text">Todavía no subió nadie más</div></div>`;
+}
+
+// ═══════════════════════════════════
 // BONOS
 // ═══════════════════════════════════
 function renderBonos(){
@@ -2172,14 +2218,19 @@ function setVideoSort(sort, el){
   el.classList.add("active");
   const isFeat = sort === "featured";
   const isViral = sort === "viral";
-  document.getElementById("my-videos-list").style.display = (isFeat||isViral) ? "none" : "";
+  const isEquipo = sort === "equipo";
+  document.getElementById("my-videos-list").style.display = (isFeat||isViral||isEquipo) ? "none" : "";
   document.getElementById("destacados-list").style.display = isFeat ? "" : "none";
   document.getElementById("featured-list").style.display = isViral ? "" : "none";
+  document.getElementById("equipo-list").style.display = isEquipo ? "" : "none";
+  const _eq = document.getElementById("equipo-chips");
+  if(_eq) _eq.style.display = isEquipo ? "flex" : "none";
   const _vpf = document.getElementById("viral-product-filter");
   if(_vpf) _vpf.style.display = (isViral && BRAND.products) ? "flex" : "none";
-  document.getElementById("mis-videos-label").textContent = isFeat ? "DESTACADOS DE LA SEMANA" : isViral ? "VIDEOS VIRALES" : "MIS VIDEOS";
+  document.getElementById("mis-videos-label").textContent = isFeat ? "DESTACADOS DE LA SEMANA" : isViral ? "VIDEOS VIRALES" : isEquipo ? "VIDEOS DEL EQUIPO" : "MIS VIDEOS";
   if(isFeat) renderDestacados();
   else if(isViral) renderFeatured();
+  else if(isEquipo) renderEquipo();
   else renderMyVideos();
 }
 
@@ -2537,7 +2588,7 @@ loadData();
 <!-- Auto-actualización: GitHub Pages cachea el HTML y los celulares lo retienen mucho más.
      Esto compara la versión publicada con la que está corriendo y refresca sola. -->
 <script>
-const APP_VERSION = '2026-09-28-a';
+const APP_VERSION = '2026-09-28-b';
 (function(){
   var CLAVE='cima_ver_reload';
   function hayAlguienEscribiendo(){
