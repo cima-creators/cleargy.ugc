@@ -2043,8 +2043,10 @@ function videoCardOtra(v){
   </div>`;
 }
 function renderEquipo(){
-  const todas = (sharedData.videos||[]).filter(v=>v.creator!==currentUser && v.status!=="rejected");
-  const otras = Object.keys(DISPLAY_NAMES).filter(c=>c!==currentUser && todas.some(v=>v.creator===c));
+  // solo el equipo de hoy: las que se dieron de baja tienen la clave "baja-…"
+  const activas = Object.keys(BRAND.creators).filter(c=>!String((BRAND.creators[c]||{}).pass||"").startsWith("baja-"));
+  const todas = (sharedData.videos||[]).filter(v=>v.creator!==currentUser && v.status!=="rejected" && activas.includes(v.creator));
+  const otras = activas.filter(c=>c!==currentUser && todas.some(v=>v.creator===c));
   if(!otras.includes(equipoFiltro)) equipoFiltro = "ALL";
   const chips = document.getElementById("equipo-chips");
   if(chips) chips.innerHTML = ["ALL"].concat(otras).map(c=>
@@ -2588,7 +2590,7 @@ loadData();
 <!-- Auto-actualización: GitHub Pages cachea el HTML y los celulares lo retienen mucho más.
      Esto compara la versión publicada con la que está corriendo y refresca sola. -->
 <script>
-const APP_VERSION = '2026-09-28-b';
+const APP_VERSION = '2026-09-28-c';
 (function(){
   var CLAVE='cima_ver_reload';
   function hayAlguienEscribiendo(){
