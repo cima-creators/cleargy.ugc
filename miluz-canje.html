@@ -942,6 +942,7 @@ function itemsChecklist(){
     br.checkInicio || `¿Aparece ${B('tu cara al inicio, con el producto')}?`,
     `¿Dura ${B(`${CFG.duracionMin || 30} segundos o más`)}?`,
     `¿Dijiste ${B('el nombre del producto')} en voz alta?`,
+    ...(br.checksExtra || []),
     ((((CFG.briefingPorKit || {})[kitActual()]) || {}).checkUso) || `¿Mostraste ${B('cómo lo usás')}?`,
     `¿Cerraste ${B('como te recomendamos')}, diciendo dónde se compra?`,
     `¿Es ${B('vertical, con buena luz y sin marca de agua')}?`,
@@ -1782,7 +1783,7 @@ function pintarMarca(){
   } catch { if (DEMO){ precargar(); traerBorrador(); } ver(DEMO ? 'v-ficha' : 'v-error'); }
 })();
 
-const APP_VERSION = '2026-09-28-c';
+const APP_VERSION = '2026-09-28-d';
 </script>
 </body>
 </html>
