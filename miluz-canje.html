@@ -349,6 +349,10 @@ body.condemo .wrap{padding-bottom:84px}
 .demo-kits{display:flex;flex-wrap:wrap;gap:6px;align-items:center;margin:0 0 12px;font-size:.78rem;color:var(--tx3)}
 .demo-kits button{border:1px solid var(--linea);background:var(--bg,#fff);border-radius:999px;padding:6px 12px;font:inherit;font-weight:600;color:var(--tx);cursor:pointer}
 .demo-kits button.on{background:var(--rosa);border-color:var(--rosa);color:#fff}
+.principio{background:var(--sup2,rgba(0,0,0,.035));border-left:3px solid var(--rosa);border-radius:12px;padding:12px 14px;margin-bottom:6px}
+.principio h3{margin-top:0}
+.g-nuevo{font-style:normal;font-size:.66rem;font-weight:700;letter-spacing:.04em;text-transform:uppercase;color:var(--tx3);background:var(--bg,#fff);border:1px solid var(--linea);border-radius:999px;padding:2px 7px;margin-left:4px;vertical-align:middle}
+.brief ul:not(.limpia){margin:6px 0 6px 18px}
 .chk-lista{display:flex;flex-direction:column;gap:8px;margin:10px 0}
 .chk-it{display:grid;grid-template-columns:22px 1fr;gap:10px;align-items:start;padding:10px 12px;border:1px solid var(--linea);border-radius:12px;background:var(--sup2,rgba(0,0,0,.035));font-size:.86rem;line-height:1.4;cursor:pointer}
 .chk-it input{width:18px;height:18px;margin-top:1px;accent-color:var(--rosa)}
@@ -838,15 +842,15 @@ function seccionGanchos(ganchos, br, hayGuion){
   if (!ganchos.length) return '';
   return `<h3>${hayGuion ? 'Si preferís otro ángulo' : 'Los primeros 3 segundos'}</h3>
      <p>${B('Lo que se ve + lo que se lee + lo que se escucha')} tienen que contar la misma historia desde el primer segundo, aunque esté sin sonido. No arranques simplemente hablando a cámara.</p>
-     <p>${hayGuion ? 'Tu guion ya trae el hook. Si querés abrir con otro, elegí uno de estos y el resto del guion queda igual.' : `Elegí ${B('un ángulo')} que se parezca a tu experiencia y abrí con él.`} En cada uno tenés qué se ve, qué decís, ${B('el texto en pantalla')} y ${B('el video que ya ganó')} con ese hook: miralo antes de grabar.</p>
+     <p>${hayGuion ? 'Ya tenés tu hook arriba. Si querés abrir con otro, elegí uno de estos.' : `Elegí ${B('un ángulo')} que se parezca a tu experiencia y abrí con él.`} En cada uno tenés qué se ve, qué decís, ${B('el texto en pantalla')} y, si ya ganó, ${B('el video')}: miralo antes de grabar.</p>
      <p class="nota-pantalla">📝 ${B('«En pantalla»')} es el texto que escribís arriba del video, bien visible desde el primer segundo. Mucha gente mira sin sonido: si no está escrito, el hook no existe.</p>
      <div class="angulos">${ganchos.map((g, n) => typeof g === 'string'
        ? `<div class="angulo"><b>${n+1} · Ángulo</b><div class="l"><span>💬</span>${g}</div></div>`
-       : `<div class="angulo"><b>${n+1} · ${g.t}</b>
+       : `<div class="angulo"><b>${n+1} · ${g.t}${g.nuevo ? ' <em class="g-nuevo">Nuevo · para probar</em>' : ''}</b>
             <div class="l"><span>🎬</span><i>Se ve</i>${g.ve}</div>
             <div class="l"><span>📝</span><i>En pantalla</i>«${g.lee}»</div>
-            <div class="l"><span>🗣️</span><i>Decís</i>«${g.dice}»</div>${botonRef(g.ref)}</div>`).join('')}</div>
-     <p>Podés cambiar palabras para que suene a vos, pero la idea tiene que ser esa. Un video que no abre así no se aprueba.${br.ganchosDoc ? ` <a href="${br.ganchosDoc}" target="_blank" rel="noopener">Ver todos los ángulos con ejemplos →</a>` : ''}</p>`;
+            <div class="l"><span>🗣️</span><i>Decís</i>«${g.dice}»</div>${g.nota ? `<small class="nota">${g.nota}</small>` : ''}${botonRef(g.ref)}</div>`).join('')}</div>
+     <p>${B('El hook se dice tal cual')}, como está escrito. Lo que viene después, contalo con tus palabras. Un video que no abre con un hook de la lista no se aprueba.${br.ganchosDoc ? ` <a href="${br.ganchosDoc}" target="_blank" rel="noopener">Ver todos los ángulos con ejemplos →</a>` : ''}</p>`;
 }
 /* El video ganador del que sale cada hook, pegado al hook (Nacho 26/9). */
 function botonRef(r){
@@ -875,7 +879,7 @@ function seccionGuion(g){
   if (!g) return '';
   const h = g.filas[0];
   return `<h3>Tu hook: ${g.t}</h3>
-     <p>Sale de lo que contaste al aplicar y de un video que ya vendió en ${CFG.nombre}. ${B('Abrí con esto')}: podés cambiar palabras para que suene a vos, pero la idea va igual. ${B('«En pantalla»')} es el texto que escribís arriba del video desde el primer segundo.</p>
+     <p>Sale de lo que contaste al aplicar y de un video que ya vendió en ${CFG.nombre}. ${B('Abrí con esto y decilo tal cual.')} Lo que viene después, contalo con tus palabras. ${B('«En pantalla»')} es el texto que escribís arriba del video desde el primer segundo.</p>
      <div class="angulos guion"><div class="angulo">
        <b>Primeros 3 segundos</b>
        <div class="l"><span>🎬</span><i>Se ve</i>${h.ve}</div>
@@ -890,9 +894,13 @@ function seccionesKit(kitId, numero, br){
   const k = kitInfo(kitId) || { nom: kitId };
   const out = [`<h3 class="kit-h">${numero === 2 ? 'Tu segundo kit' : (D && D.kit2 ? 'Tu primer kit' : 'Tu kit')}: ${k.nom}</h3><p>${k.desc ? k.desc + '. ' : ''}${numero === 2 ? 'Este es el briefing de tu segundo video.' : 'Este briefing es el de tu kit.'}</p>`];
   (bk.intro || []).forEach(x => out.push(`<h3>${x.t}</h3>${x.html}`));
+  if ((bk.reglas || []).length) out.push(`<h3>Reglas técnicas${numero === 2 ? ` · ${k.nom}` : ''}</h3><ul class="limpia">${bk.reglas.map(r => `<li>${r}</li>`).join('')}</ul>`);
   const guion = numero === 1 ? guionDe(kitId) : null;
   if (guion) out.push(seccionGuion(guion));
   out.push(seccionGanchos(bk.ganchos || [], br, !!guion));
+  if (bk.casos) out.push(`<h3>Casos reales</h3>${bk.casos.html}${bk.casos.drive
+    ? `<p><a href="${bk.casos.drive}" target="_blank" rel="noopener">Abrir la carpeta con los casos →</a></p>`
+    : `<p class="guion-nota">La carpeta con los casos la compartimos en la comunidad. Si no la ves, pedila ahí.</p>`}`);
   out.push(seccionReferencias(bk.referencias || []));
   return out;
 }
@@ -905,7 +913,7 @@ function seccionCta(){
   return `<h3>Cómo armar tu video</h3>
      <p>No hace falta un guion. Contalo como se lo contarías a una amiga, en este orden:</p>
      <ul class="limpia">
-       <li><span class="si">1</span> ${B('El hook')}: uno de los de arriba, en los primeros 3 segundos, con tu cara y el producto.</li>
+       <li><span class="si">1</span> ${(CFG.briefing || {}).paso1 || `${B('El hook')}: uno de los de arriba, tal cual, en los primeros 3 segundos, con tu cara y el producto.`}</li>
        <li><span class="si">2</span> ${B('Tu problema')}: qué te pasaba antes, con tus palabras.</li>
        <li><span class="si">3</span> ${B('El producto')}: decí el nombre y mostrá cómo lo usás.</li>
        <li><span class="si">4</span> ${B('Qué cambió')}: lo que notaste y en cuánto tiempo.</li>
@@ -913,7 +921,7 @@ function seccionCta(){
      </ul>
      ${((CFG.briefing || {}).tips || []).length ? `<p>${B('Podés sumar:')}</p><ul class="limpia">${CFG.briefing.tips.map(t => `<li><span class="si">+</span> ${t}</li>`).join('')}</ul>` : ''}
      <h3>El cierre</h3>
-     <p>Recomendalo como a una amiga (${B('probalo, pedilo')}) y decí dónde: ${CFG.cupon ? B('con tu código') : (c.donde || B('el link de tu perfil'))}${(c.ofertas || []).length ? ` · ${c.ofertas.join(' · ')}` : ''}.</p>
+     <p>Recomendalo como a una amiga (${B('probalo, pedilo')}) y decí dónde: ${CFG.cupon ? ((CFG.briefing || {}).codigoHablado === false ? `${c.donde || B('el link de tu perfil')} (tu código va ${B('escrito en la descripción')}, no lo digas)` : B('con tu código')) : (c.donde || B('el link de tu perfil'))}${(c.ofertas || []).length ? ` · ${c.ofertas.join(' · ')}` : ''}.</p>
      ${ej.length ? `<div class="angulos">${ej.map(x => `<div class="angulo"><div class="l"><span>🗣️</span><i>Ejemplo</i>«${x}»</div></div>`).join('')}</div>` : ''}`;
 }
 
@@ -922,15 +930,16 @@ function itemsChecklist(){
   const br = CFG.briefing || {};
   const nFotos = br.fotosProceso || 5, nCrudos = br.crudos || 0;
   const it = [
-    `¿Usaste ${B('uno de los hooks')} que te recomendamos?`,
-    `¿Aparece ${B('tu cara al inicio, con el producto')}?`,
+    `¿Dijiste ${B('uno de los hooks')} que te recomendamos, tal cual?`,
+    br.checkInicio || `¿Aparece ${B('tu cara al inicio, con el producto')}?`,
     `¿Dura ${B(`${CFG.duracionMin || 30} segundos o más`)}?`,
     `¿Dijiste ${B('el nombre del producto')} en voz alta?`,
-    `¿Mostraste ${B('cómo lo usás')}?`,
+    ((((CFG.briefingPorKit || {})[kitActual()]) || {}).checkUso) || `¿Mostraste ${B('cómo lo usás')}?`,
     `¿Cerraste ${B('como te recomendamos')}, diciendo dónde se compra?`,
     `¿Es ${B('vertical, con buena luz y sin marca de agua')}?`,
   ];
   if ((CFG.noDecir || []).length) it.push(`¿Evitaste ${B('lo que no se puede decir')}?`);
+  if (br.codigoHablado === false && CFG.cupon) it.push(`¿Dejaste ${B('el código fuera del video')}? Va escrito en la descripción.`);
   it.push(`¿Subiste ${B(`las ${nFotos} fotos`)}${nCrudos ? ` y ${B(`los ${nCrudos} crudos`)}` : ''} a la carpeta de Drive?`);
   it.push(`¿La carpeta es ${B('pública')}? (Compartir → «Cualquier persona con el enlace»)`);
   return it;
@@ -959,6 +968,14 @@ document.addEventListener('change', e => {
   pintarChk(); if (D) pintarCandado();
 });
 
+/* Ejemplos de las 3 fotos: los del kit si los tiene, si no los de la marca. */
+function fotosEjemplo(bk){
+  const fotos = (bk && bk.fotos) || CFG.fotos || [];
+  if (fotos.length < 3) return '';
+  const caps = (bk && bk.fotosCaps) || [['01 · Escena','Da contexto y muestra el momento.'],['02 · Gesto','Acerca la acción sin forzar la postura.'],['03 · Detalle','Hace visible la materia.']];
+  return `<div class="fotos3">${fotos.slice(0, 3).map((f, n) => `<figure><img src="${f}" alt="${caps[n][0]}" loading="lazy"><figcaption><b>${caps[n][0]}</b><span>${caps[n][1]}</span></figcaption></figure>`).join('')}</div>`;
+}
+
 /* ── briefing armado desde la config ── */
 const B = t => `<b style="color:var(--tx)">${t}</b>`;
 function armarBriefing(){
@@ -971,6 +988,7 @@ function armarBriefing(){
   const ganchos = (bk && bk.ganchos && bk.ganchos.length) ? bk.ganchos : (CFG.ganchos || []);
   const referencias = (bk && bk.referencias && bk.referencias.length) ? bk.referencias : (CFG.referencias || []);
   const secciones = [];
+  if (br.principio) secciones.push(`<div class="principio"><h3>Lo más importante</h3><p>${br.principio}</p></div>`);
   const dosKits = !!(bk && CFG.kitPorRespuesta && D && D.kit2 && CFG.briefingPorKit && CFG.briefingPorKit[D.kit2]);
   if (bk && CFG.kitPorRespuesta){
     seccionesKit(kitActual(), 1, br).forEach(x => secciones.push(x));
@@ -978,13 +996,15 @@ function armarBriefing(){
     intro.forEach(x => secciones.push(`<h3>${x.t}</h3>${x.html}`));
   }
 
-  if ((CFG.reglas || []).length) secciones.push(`<h3>Reglas técnicas</h3><ul class="limpia">${CFG.reglas.map(r => `<li>${r}</li>`).join('')}</ul>`);
+  if ((CFG.reglas || []).length && !(bk && bk.reglas && bk.reglas.length)) secciones.push(`<h3>Reglas técnicas</h3><ul class="limpia">${CFG.reglas.map(r => `<li>${r}</li>`).join('')}</ul>`);
   if (!(bk && CFG.kitPorRespuesta)) secciones.push(seccionGanchos(ganchos, br));
   if (dosKits) seccionesKit(D.kit2, 2, br).forEach(x => secciones.push(x));
   if ((CFG.noDecir || []).length) secciones.push(`<h3>Lo que NO se puede decir</h3><ul class="limpia">${CFG.noDecir.map(r => `<li>${r}</li>`).join('')}</ul>`);
   // qué fotos: el texto propio de la marca (fotosProcesoNota) reemplaza el bloque Escena/Gesto/Detalle
-  const fotosBloque = br.fotosProcesoNota
-    ? `<h3>Las ${nFotos} fotos</h3><p>${br.fotosProcesoNota}</p>`
+  const notaFotos = (bk && bk.fotosNota) || br.fotosProcesoNota;
+  const bk2 = dosKits ? CFG.briefingPorKit[D.kit2] : null;
+  const fotosBloque = notaFotos
+    ? `<h3>Las ${nFotos} fotos</h3><p>${notaFotos}</p>${bk2 && bk2.fotosNota && bk2.fotosNota !== notaFotos ? `<p><b>Para tu segundo kit (${nombreKit(D.kit2)}):</b> ${bk2.fotosNota}</p>` : ''}`
     : `<h3>Las ${nFotos} fotos: qué buscamos</h3>
      <p>No son selfies ni fotos de catálogo: son fotos ${B('del momento')}, con luz natural. Mezclá estos tres tipos:</p>
      <ul class="limpia">
@@ -1014,18 +1034,15 @@ function armarBriefing(){
      <p>Te va a llegar una ${B('invitación de colaboración')} en Instagram (Notificaciones → "te invitó a colaborar"). <span class="si">Aceptala</span>: así el reel aparece también en tu perfil y cuenta como tu collab. Y ${B('resubilo a tus historias')} ese mismo día.</p>
      <p>${B('Subilo también a tu TikTok.')} El mismo video, en tu cuenta. Después pegá el link en tu app: las views de TikTok ${B('se suman a las del reel')} para el bono viral y el podio del mes.${br.hashtag ? ` En TikTok arrobá a @${CFG.cuentaIg} y usá ${B(br.hashtag)}.` : ''}</p>`;
   secciones.push(comoEntregar + fotosBloque +
-    ((CFG.fotos || []).length >= 3 ? `
-     <div class="fotos3">
-       <figure><img src="${CFG.fotos[0]}" alt="Escena" loading="lazy"><figcaption><b>01 · Escena</b><span>Da contexto y muestra el momento.</span></figcaption></figure>
-       <figure><img src="${CFG.fotos[1]}" alt="Gesto" loading="lazy"><figcaption><b>02 · Gesto</b><span>Acerca la acción sin forzar la postura.</span></figcaption></figure>
-       <figure><img src="${CFG.fotos[2]}" alt="Detalle" loading="lazy"><figcaption><b>03 · Detalle</b><span>Hace visible la materia.</span></figcaption></figure>
-     </div>` : '') +
+    fotosEjemplo(bk) + (bk2 && bk2.fotos ? fotosEjemplo(bk2) : '') +
     (nCrudos ? `<h3>Los ${nCrudos} videos crudos</h3>
      <p>Clips ${B('de 3 a 5 segundos')}, sin editar, sin texto ni música: los usamos para armar más piezas. ${br.crudosNota || ''}${br.crudosEjemplo ? ` <a href="${br.crudosEjemplo}" target="_blank" rel="noopener">Ver la carpeta de ejemplo →</a>` : ''}</p>
      ${(br.crudosLista || []).length ? `<ul class="limpia">${br.crudosLista.map((c, n) => `<li><span class="si">${n+1}</span> ${c}</li>`).join('')}</ul>` : ''}` : '') +
     cuandoSuba +
     (conCodigo ? `<h3>Tu código de descuento</h3>
-     <p>Nombralo en el video y dejalo fijado en los comentarios. Tus seguidoras compran con descuento y vos ganás comisión por cada venta.</p>` : '') +
+     <p>${br.codigoHablado === false
+       ? `${B('No lo digas en el video.')} Ponelo escrito en la descripción de tu publicación y fijalo en los comentarios: así el video queda limpio y sirve para pauta.`
+       : 'Nombralo en el video y dejalo fijado en los comentarios.'} Tus seguidoras compran con descuento y vos ganás comisión por cada venta.</p>` : '') +
     `<h3>El plazo</h3>
      <p>Tenés ${B(`${CFG.diasParaPublicar} días desde que el kit llega a tu casa`)} para ${CREADORA_PUBLICA() ? 'publicar y cargar los links' : 'mandarnos el video'}. Avisanos en la app cuando lo recibas.</p>`);
   if (!(bk && CFG.kitPorRespuesta)) secciones.push(seccionReferencias(referencias));
@@ -1757,7 +1774,7 @@ function pintarMarca(){
   } catch { if (DEMO){ precargar(); traerBorrador(); } ver(DEMO ? 'v-ficha' : 'v-error'); }
 })();
 
-const APP_VERSION = '2026-09-26-r';
+const APP_VERSION = '2026-09-28-a';
 </script>
 </body>
 </html>
