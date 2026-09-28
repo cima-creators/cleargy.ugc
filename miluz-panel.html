@@ -566,7 +566,7 @@ const DEMO = QS.has('demo') || location.protocol === 'data:';
     const q = new URLSearchParams(location.search);
     const demo = q.has('demo');
     if (demo && 'panel' !== 'app') return;
-    q.delete('marca'); q.delete('demo');
+    q.delete('marca'); q.delete('demo'); q.delete('v');
     const path = '/' + MARCA + ('panel' === 'app' ? (demo ? '/demo' : '/app') : ('panel' ? '/panel' : ''));
     const resto = q.toString();
     history.replaceState(history.state, '', path + (resto ? '?' + resto : '') + location.hash);
@@ -1758,7 +1758,7 @@ function aplicarRol(){
     pintarTodo();
   }
 })();
-const APP_VERSION = '2026-09-28-a';
+const APP_VERSION = '2026-09-28-b';
 </script>
 </body>
 </html>

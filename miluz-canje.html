@@ -755,7 +755,7 @@ const MARCA = (QS.get('marca') || 'miluz').toLowerCase().replace(/[^a-z0-9_-]/g,
     const q = new URLSearchParams(location.search);
     const demo = q.has('demo');
     if (demo && 'app' !== 'app') return;
-    q.delete('marca'); q.delete('demo');
+    q.delete('marca'); q.delete('demo'); q.delete('v');
     const path = '/' + MARCA + ('app' === 'app' ? (demo ? '/demo' : '/app') : ('app' ? '/app' : ''));
     const resto = q.toString();
     history.replaceState(history.state, '', path + (resto ? '?' + resto : '') + location.hash);
@@ -1774,7 +1774,7 @@ function pintarMarca(){
   } catch { if (DEMO){ precargar(); traerBorrador(); } ver(DEMO ? 'v-ficha' : 'v-error'); }
 })();
 
-const APP_VERSION = '2026-09-28-a';
+const APP_VERSION = '2026-09-28-b';
 </script>
 </body>
 </html>
