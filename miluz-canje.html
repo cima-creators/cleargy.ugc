@@ -353,6 +353,7 @@ body.condemo .wrap{padding-bottom:84px}
 .principio h3{margin-top:0}
 .g-nuevo{font-style:normal;font-size:.66rem;font-weight:700;letter-spacing:.04em;text-transform:uppercase;color:var(--tx3);background:var(--bg,#fff);border:1px solid var(--linea);border-radius:999px;padding:2px 7px;margin-left:4px;vertical-align:middle}
 .brief ul:not(.limpia){margin:6px 0 6px 18px}
+.row.calle-nro{grid-template-columns:1fr 110px}
 .chk-lista{display:flex;flex-direction:column;gap:8px;margin:10px 0}
 .chk-it{display:grid;grid-template-columns:22px 1fr;gap:10px;align-items:start;padding:10px 12px;border:1px solid var(--linea);border-radius:12px;background:var(--sup2,rgba(0,0,0,.035));font-size:.86rem;line-height:1.4;cursor:pointer}
 .chk-it input{width:18px;height:18px;margin-top:1px;accent-color:var(--rosa)}
@@ -463,11 +464,18 @@ body.condemo .wrap{padding-bottom:84px}
 
       <div class="paso oculto" data-paso="2">
       <div class="card">
-        <label>
-          <span class="lb">Calle y número</span>
-          <input name="calle" autocomplete="street-address" required>
-          <span class="err">Falta la dirección</span>
-        </label>
+        <div class="row calle-nro">
+          <label>
+            <span class="lb">Calle</span>
+            <input name="calle" autocomplete="address-line1" placeholder="Almirante Brown" required>
+            <span class="err">Falta la calle</span>
+          </label>
+          <label>
+            <span class="lb">Número</span>
+            <input name="numero" inputmode="numeric" placeholder="1424 o S/N" required>
+            <span class="err">Falta el número</span>
+          </label>
+        </div>
         <div class="row">
           <label>
             <span class="lb">Piso / depto <span class="hint">opcional</span></span>
@@ -1774,7 +1782,7 @@ function pintarMarca(){
   } catch { if (DEMO){ precargar(); traerBorrador(); } ver(DEMO ? 'v-ficha' : 'v-error'); }
 })();
 
-const APP_VERSION = '2026-09-28-b';
+const APP_VERSION = '2026-09-28-c';
 </script>
 </body>
 </html>

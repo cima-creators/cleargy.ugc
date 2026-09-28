@@ -475,6 +475,7 @@ dialog.dlg .fila{display:flex;gap:8px;justify-content:flex-end;flex-wrap:wrap}
     <p class="sub">Las que ya aceptaron el briefing y esperan su kit.</p>
     <div class="barrasup">
       <button class="bsec pri" id="btn-csv">Exportar lista para Luz</button>
+      <button class="bsec pri oculto" id="btn-masiva" title="Planilla de carga masiva del correo: una fila por creadora para despachar. El peso lo completa la marca.">Planilla del correo (.xlsx)</button>
       <button class="bsec" id="btn-desp">Marcar seleccionadas como despachadas</button>
     </div>
     <div id="tabla-envios"></div>
@@ -647,6 +648,8 @@ function pintarMarca(){
     : `Los videos que mandaron por Drive: revisalos, subilos como collab desde @${CFG.cuentaIg} y pegá el link del reel. Después el sistema verifica solo que acepten la invitación.`;
   (CFG.opciones || []).concat(CFG.opcionesViejas || []).forEach(t => { NOMBRE_TONO[t.id] = t.nom; });
   if (CFG.estilo && CFG.estilo.logoTamano === 'grande') $('#marca-nombre').style.fontSize = '1.25rem';
+  $('#btn-masiva').classList.toggle('oculto', !CFG.enviosMasiva);
+  if (MARCA !== 'miluz') $('#btn-csv').textContent = CFG.enviosMasiva ? 'Exportar lista (CSV)' : 'Exportar lista';
   Object.assign(FILTRO, CFG.filtro || {});
   Object.assign(ECONOMIA, CFG.economia || {}, {
     bonoViral: CFG.plata.viralMonto, bonoUmbral: CFG.plata.viralViews, comision: CFG.plata.comision,
@@ -659,7 +662,10 @@ function ENVIOS_desde(env){
   ENVIOS = env.fichas.map(f => ({
     id: f.id, nom: (f.datos && f.datos.nombre) || f.nombre || f.ig, ig: f.ig,
     // La ficha (2do form) guarda la dirección arriba del todo; `datos` es la aplicación inicial.
-    dir: f.calle ? `${f.calle}${f.piso ? ', ' + f.piso : ''}` : '—',
+    ...separarCalle(f.calle, f.numero),
+    dir: f.calle ? `${separarCalle(f.calle, f.numero).calle} ${separarCalle(f.calle, f.numero).numero}`.trim() + (f.piso ? ', ' + f.piso : '') : '—',
+    nombreCompleto: f.nombre || (f.datos && f.datos.nombre) || '',
+    kits: (f.videos || (f.datos && f.datos.videos)) === 'dos' && (f.kit2 || (f.datos && f.datos.kit2)) ? 2 : 1,
     loc: [f.localidad || (f.datos && f.datos.localidad), f.provincia || (f.datos && f.datos.provincia)].filter(Boolean).join(' · ') || '—',
     cp: f.cp || '—',
     dni: f.dni || '—', tel: f.tel || (f.datos && f.datos.tel) || '', email: f.email || (f.datos && f.datos.email) || '',
@@ -670,6 +676,14 @@ function ENVIOS_desde(env){
       : (f.tonos || (f.datos && f.datos.tonos) || []).map(t => NOMBRE_TONO[t] || t).join(' · '),
     estado: f.estado === 'enviado' ? 'despachado' : 'listo',
   }));
+}
+/* Calle y número por separado. Las fichas nuevas los traen en dos campos; en las viejas
+   el número va al final del texto ("Almirante Brown 1424") y se separa acá. */
+function separarCalle(calle, numero){
+  const c = String(calle || '').trim();
+  if (numero) return { calle: c, numero: String(numero).trim() };
+  const m = c.match(/^(.*?)[\s,]+(?:n[°ºo.]*\s*)?(\d+[a-zA-Z]?|s\/?n)$/i);
+  return m ? { calle: m[1].trim(), numero: m[2].trim() } : { calle: c, numero: '' };
 }
 /* ── opt-in por marca (Valca) ── */
 const CREADORA_PUBLICA = () => !!(CFG && CFG.publica === 'creadora');
@@ -1129,6 +1143,50 @@ $('#btn-csv').onclick = () => {
   bajarCsv('envios', [['Nombre','DNI','Telefono','Email','Instagram','Direccion','Localidad','CP', CFG && CFG.kitPorRespuesta ? 'Kit' : 'Colores']]
     .concat(ENVIOS.filter(e => e.estado === 'listo')
       .map(e => [e.nom, e.dni, e.tel, e.email, '@'+e.ig, e.dir, e.loc, e.cp, e.tonos])));
+};
+
+/* Planilla de carga masiva del correo (Valca, 28/9): columnas exactas del correo,
+   una fila por creadora lista para despachar (o solo las tildadas). Peso y lo que
+   sigue van vacíos: los completa la marca antes de subirla. */
+const sinAcentos = t => String(t || '').normalize('NFD').replace(/[\u0300-\u036f]/g, '');
+function cargarXlsx(){
+  if (window.XLSX) return Promise.resolve(window.XLSX);
+  return new Promise((ok, mal) => {
+    const sc = document.createElement('script');
+    sc.src = 'https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js';
+    sc.onload = () => ok(window.XLSX); sc.onerror = () => mal(new Error('no cargó la librería'));
+    document.head.appendChild(sc);
+  });
+}
+$('#btn-masiva').onclick = async () => {
+  const cfgM = CFG && CFG.enviosMasiva; if (!cfgM) return;
+  const tildadas = [...document.querySelectorAll('.sel:checked')].map(c => ENVIOS[+c.dataset.i]);
+  const filas = (tildadas.length ? tildadas : ENVIOS.filter(e => e.estado === 'listo'));
+  if (!filas.length){ alert('No hay creadoras para despachar.'); return; }
+  const sinNro = filas.filter(e => !e.numero);
+  if (sinNro.length && !confirm(`${sinNro.length} sin número de calle separado (${sinNro.map(e => '@' + e.ig).join(', ')}). Esa celda va a quedar vacía. ¿Bajar igual?`)) return;
+  const num = v => /^\d+$/.test(String(v || '').trim()) ? +String(v).trim() : String(v || '').trim();
+  const aoa = [['CalleRemitente','NroCalleRemitente','NyADestinatario','CPDestinatario','CalleDestinatario','NroCalleDestinatario','TeléfonoDestinatario','NroRemito','Bultos','Peso']]
+    .concat(filas.map(e => [
+      cfgM.calle, num(cfgM.numero),
+      e.nombreCompleto || e.nom,
+      num(e.cp === '—' ? '' : e.cp),
+      e.calle || '', num(e.numero),
+      String(e.tel || '').replace(/\D/g, ''),
+      sinAcentos(String(e.nombreCompleto || e.nom).trim().split(/\s+/)[0]).toUpperCase() + '-' + String(e.kits || 1).padStart(2, '0'),
+      e.kits || 1,
+      '',
+    ]));
+  const b = $('#btn-masiva'); const txt = b.textContent; b.disabled = true; b.textContent = 'Armando…';
+  try {
+    const X = await cargarXlsx();
+    const ws = X.utils.aoa_to_sheet(aoa);
+    ws['!cols'] = [14, 12, 28, 10, 26, 10, 16, 14, 7, 7].map(w => ({ wch: w }));
+    const wb = X.utils.book_new(); X.utils.book_append_sheet(wb, ws, 'Hoja1');
+    const hoy = new Date().toISOString().slice(0, 10);
+    X.writeFile(wb, `MASIVA ${CFG.nombre.toUpperCase()} ${hoy}.xlsx`);
+  } catch (err) { alert('No se pudo armar la planilla: ' + err.message); }
+  b.disabled = false; b.textContent = txt;
 };
 
 $('#btn-desp').onclick = () => {
@@ -1758,7 +1816,7 @@ function aplicarRol(){
     pintarTodo();
   }
 })();
-const APP_VERSION = '2026-09-28-b';
+const APP_VERSION = '2026-09-28-c';
 </script>
 </body>
 </html>
