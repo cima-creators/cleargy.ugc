@@ -354,6 +354,12 @@ body.condemo .wrap{padding-bottom:84px}
 .g-nuevo{font-style:normal;font-size:.66rem;font-weight:700;letter-spacing:.04em;text-transform:uppercase;color:var(--tx3);background:var(--bg,#fff);border:1px solid var(--linea);border-radius:999px;padding:2px 7px;margin-left:4px;vertical-align:middle}
 .brief ul:not(.limpia){margin:6px 0 6px 18px}
 .row.calle-nro{grid-template-columns:1fr 110px}
+#kit2-estado .kit2-fix{margin:0 0 14px}
+.kit2-fix{margin-top:12px;padding:12px 14px;border-radius:12px;border:1px solid var(--rosa);background:var(--sup2,rgba(0,0,0,.035));font-size:.88rem;line-height:1.4}
+.kit2-ops{display:flex;flex-wrap:wrap;gap:8px;margin:10px 0 6px}
+.kit2-ops button{display:flex;align-items:center;gap:6px;border:1px solid var(--linea);background:var(--bg,#fff);border-radius:999px;padding:8px 14px;font:inherit;font-weight:600;color:var(--tx);cursor:pointer}
+.kit2-ops button i{width:10px;height:10px;border-radius:50%}
+.kit2-fix small{color:var(--tx3)}
 .chk-lista{display:flex;flex-direction:column;gap:8px;margin:10px 0}
 .chk-it{display:grid;grid-template-columns:22px 1fr;gap:10px;align-items:start;padding:10px 12px;border:1px solid var(--linea);border-radius:12px;background:var(--sup2,rgba(0,0,0,.035));font-size:.86rem;line-height:1.4;cursor:pointer}
 .chk-it input{width:18px;height:18px;margin-top:1px;accent-color:var(--rosa)}
@@ -603,6 +609,8 @@ body.condemo .wrap{padding-bottom:84px}
       <small style="margin-bottom:14px" id="llego-txt">Tocá acá cuando lo tengas en la mano. Ahí arrancan tus días — no antes, así el correo no te come el plazo.</small>
       <button class="btn" id="btn-llego">Sí, ya me llegó</button>
     </div>
+
+    <div id="kit2-estado"></div>
 
     <div class="card">
       <h2>Tu recorrido</h2>
@@ -1115,6 +1123,7 @@ function demo(accion, datos){
       if (g.estado !== 'publicado' && g.estado !== 'cumplida') g.estado = 'publicado';
     } else { g.estado = 'entregado'; g.entrega = { drive: datos.drive }; }
   }
+  if (accion === 'kit2'){ g.kit2 = datos.kit2; }
   if (accion === 'aprobar_video'){
     g.entregas = g.entregas || [];
     g.entregas[0] = { ...(g.entregas[0] || { n: 1, drive: (g.entrega && g.entrega.drive) || 'https://drive.google.com/demo' }), aprobadoEn: Date.now() };
@@ -1136,6 +1145,32 @@ function demo(accion, datos){
 
 const ELEGIR = () => CFG.elegir || 0;
 /* kits que salieron del formulario (kitPorRespuesta): se muestran en la ficha, no se eligen */
+/* 29/9: si el 2º kit quedó igual al 1º (la pantalla del registro no mostraba cuál era el suyo),
+   que elija el segundo antes del despacho. Aparece en la ficha y en la pantalla principal. */
+function kit2Repetido(){
+  return !!(CFG.kitPorRespuesta && D && D.videos === 'dos' && D.kit2 && D.kit2 === D.kit &&
+    ['por_revisar','revisar','en_cola','invitada','ficha_completa','briefing_ok'].includes(D.estado));
+}
+function montarKit2Fix(){
+  document.querySelectorAll('.kit2-fix').forEach(x => x.remove());
+  if (!kit2Repetido()) return;
+  const ops = (CFG.opciones || []).filter(o => o.id !== D.kit);
+  const html = `<div class="kit2-fix">
+      <b>Tus dos kits quedaron iguales (${nombreKit(D.kit)} y ${nombreKit(D.kit)}).</b> Elegí el producto de tu segundo video:
+      <div class="kit2-ops">${ops.map(o => `<button type="button" data-k="${o.id}"><i style="background:${o.hex || 'var(--rosa)'}"></i>${o.nom}</button>`).join('')}</div>
+      <small>Si querés dos iguales, avisanos por la comunidad.</small></div>`;
+  const enFicha = $('#kits-lista'), enEstado = $('#kit2-estado');
+  if (enFicha && !$('#card-kits').classList.contains('oculto')) enFicha.insertAdjacentHTML('afterend', html);
+  if (enEstado) enEstado.innerHTML = html;
+  document.querySelectorAll('.kit2-fix button').forEach(b => b.onclick = async () => {
+    document.querySelectorAll('.kit2-fix button').forEach(x => x.disabled = true); b.textContent = 'Guardando…';
+    try {
+      D = (await api('kit2', { kit2: b.dataset.k })).creadora;
+      pintarKits(); montarKit2Fix();
+      alert(`Listo: tu segundo kit es ${nombreKit(D.kit2)}.`);
+    } catch { alert('No se pudo guardar. Probá de nuevo.'); montarKit2Fix(); }
+  });
+}
 function pintarKits(){
   if (!CFG.kitPorRespuesta || !D) return;
   const ids = [D.kit, D.videos === 'dos' ? D.kit2 : null].filter(Boolean);
@@ -1145,6 +1180,7 @@ function pintarKits(){
   $('#kits-nota').innerHTML = ids.length > 1 ? ((CFG.eleccion && CFG.eleccion.nota) || 'Un kit por video.') : 'Salió de lo que contaste al aplicar.';
   $('#kits-lista').innerHTML = ids.map((id, n) => { const k = kitInfo(id) || { nom: id }; return `
     <div><i style="background:${k.hex || 'var(--rosa)'}">${n + 1}</i><span><b>${k.nom}</b>${k.desc ? `<small>${k.desc}</small>` : ''}</span></div>`; }).join('');
+  montarKit2Fix();
 }
 function pintarTonos(){
   if (!ELEGIR()){ $('#card-tonos').classList.add('oculto'); return; }
@@ -1678,6 +1714,7 @@ function pintarEstado(){
   ajustarAccesos();
 
   pintarReferidas();
+  montarKit2Fix();
 }
 
 function linkReferida(){
@@ -1783,7 +1820,7 @@ function pintarMarca(){
   } catch { if (DEMO){ precargar(); traerBorrador(); } ver(DEMO ? 'v-ficha' : 'v-error'); }
 })();
 
-const APP_VERSION = '2026-09-28-d';
+const APP_VERSION = '2026-09-29-a';
 </script>
 </body>
 </html>

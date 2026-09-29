@@ -105,6 +105,8 @@ main{flex:1;display:flex;align-items:center;justify-content:center;padding:24px 
 .op:has(input:checked) .tec{background:var(--grad);color:#fff}
 
 /* ── fotos ── */
+.kit1{margin:0 0 12px;padding:10px 12px;border-radius:12px;background:var(--sup2,rgba(0,0,0,.04));font-size:.9rem}
+.kit1 small{display:block;color:var(--tx3,#888);font-size:.78rem}
 .fotos{display:grid;grid-template-columns:1fr 1fr;gap:12px}
 .slot{
   position:relative;aspect-ratio:3/4;border-radius:16px;overflow:hidden;
@@ -270,6 +272,8 @@ function aplicarEstilo(e){
 
 /* ── lo que vamos juntando ── */
 const R = { fotos: [] };
+/* El kit que sale de la respuesta (Valca: problema → kit). El 2º nunca puede ser el mismo (29/9). */
+const primerKit = () => { const k = CFG && CFG.kitPorRespuesta; return k ? (k.mapa || {})[R[k.campo]] || null : null; };
 /* Si llegó desde el DM de ManyChat, el link trae su id (?mc=...).
    Con eso el backend puede escribirle SIEMPRE, sin ventana de 24 h. */
 R.manychatId = QS.get('mc') || null;
@@ -531,11 +535,12 @@ function plantilla(p){
     ${botonSig(p)}`;
 
   // kits (kitPorRespuesta): lista con nombre y descripción, no paleta de colores
-  if (p.tipo === 'colores' && CFG.kitPorRespuesta) return `
+  if (p.tipo === 'colores' && CFG.kitPorRespuesta) { const k1 = primerKit(); const k1i = CFG.opciones.find(o => o.id === k1); return `
     <h2 class="pregunta">${p.q}</h2>
     <p class="ayuda">${p.a}</p>
+    ${k1i ? `<div class="kit1">Tu primer kit: <b>${k1i.nom}</b>${k1i.desc ? ` <small>${k1i.desc}</small>` : ''}</div>` : ''}
     <div class="ops kits" id="tonos">
-      ${CFG.opciones.map(t => { const lleno = kitLleno(t.id); return `
+      ${CFG.opciones.filter(t => t.id !== k1).map(t => { const lleno = kitLleno(t.id); return `
         <label class="op ${lleno ? 'off' : ''}">
           <input type="checkbox" value="${t.id}" ${(R.tonos||[]).includes(t.id)?'checked':''} ${lleno ? 'disabled' : ''}>
           <span class="tec sw" style="${t.hex ? `background:${t.hex};color:#fff` : ''}">${t.nom.slice(0,1)}</span>
@@ -544,7 +549,7 @@ function plantilla(p){
         </label>`; }).join('')}
     </div>
     <p class="err" id="e"></p>
-    ${botonSig(p)}`;
+    ${botonSig(p)}`; }
 
   if (p.tipo === 'colores') return `
     <h2 class="pregunta">${p.q}</h2>
@@ -668,6 +673,7 @@ async function avanzar(){
     mostrarError(p.error || 'Necesitamos al menos una foto'); return;
   }
 
+  if (p.tipo === 'colores' && CFG.kitPorRespuesta) R.tonos = (R.tonos || []).filter(t => t !== primerKit());
   if (p.tipo === 'colores' && (R.tonos || []).length !== (p.elegir || CFG.elegir)){
     mostrarError((CFG.eleccion && CFG.eleccion.error) || `Elegí exactamente ${p.elegir || CFG.elegir}`); return;
   }
@@ -722,7 +728,7 @@ async function enviar(){
   armarPasos();
   pintar();
 })();
-const APP_VERSION = '2026-09-28-a';
+const APP_VERSION = '2026-09-29-a';
 </script>
 </body>
 </html>
