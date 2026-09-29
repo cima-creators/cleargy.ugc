@@ -700,7 +700,7 @@ const conCupos = () => !!(CFG && CFG.cupos);
 const SOLAPAS = {
   admin:  ['resumen','admision','envios','entregas','creadoras','pagos','cupos'],
   equipo: ['resumen','admision','envios','entregas','creadoras','pagos','cupos'],
-  marca:  ['admision','entregas','creadoras','cupos'],
+  marca:  ['admision','envios','entregas','creadoras','cupos'],   // 29/9: ve Envíos; despachar queda para logística
   envios: ['envios'],
   avisos: ['creadoras'],   // 29/9: solo mandar el link a mano a las aceptadas (Jhose)
 };
@@ -1830,6 +1830,7 @@ function aplicarRol(){
   const solapas = (SOLAPAS[ROL] || SOLAPAS.equipo).filter(puede);
   document.querySelectorAll('.lat button[data-t]').forEach(b => { if (!solapas.includes(b.dataset.t)) b.remove(); else b.hidden = false; });
   $('#btn-importar').hidden = ROL !== 'admin';
+  if (ROL === 'marca') $('#btn-desp').hidden = true;   // ve la lista y la exporta; marca despachadas logística
   if (ROL === 'avisos'){
     filtroCre = 'mano';
     document.querySelectorAll('.fcre').forEach(b => b.classList.toggle('activo', b.dataset.f === 'mano'));
@@ -1857,7 +1858,7 @@ function aplicarRol(){
     pintarTodo();
   }
 })();
-const APP_VERSION = '2026-09-29-e';
+const APP_VERSION = '2026-09-29-f';
 </script>
 </body>
 </html>
