@@ -473,7 +473,7 @@ dialog.dlg .fila{display:flex;gap:8px;justify-content:flex-end;flex-wrap:wrap}
   <!-- ══ ENVÍOS ══ -->
   <section id="t-envios" class="oculto">
     <h1>Envíos</h1>
-    <p class="sub">Las que ya aceptaron el briefing y esperan su kit.</p>
+    <p class="sub">Las que completaron su ficha y esperan su kit. Si alguna no confirmó el briefing, se le puede mandar igual: lo lee en su app.</p>
     <div class="barrasup">
       <button class="bsec pri" id="btn-csv">Exportar lista para Luz</button>
       <button class="bsec pri oculto" id="btn-masiva" title="Planilla de carga masiva del correo: una fila por creadora para despachar. El peso lo completa la marca.">Planilla del correo (.xlsx)</button>
@@ -676,6 +676,7 @@ function ENVIOS_desde(env){
       ? nombresKits(f.kit || (f.datos && f.datos.kit), f.kit2 || (f.datos && f.datos.kit2))
       : (f.tonos || (f.datos && f.datos.tonos) || []).map(t => NOMBRE_TONO[t] || t).join(' · '),
     estado: f.estado === 'enviado' ? 'despachado' : 'listo',
+    sinBriefing: f.estado === 'ficha_completa',   // completó la ficha pero no confirmó que leyó el briefing
   }));
 }
 /* Calle y número por separado. Las fichas nuevas los traen en dos campos; en las viejas
@@ -1122,7 +1123,7 @@ function pintarEnvios(){
       <tbody>${ENVIOS.map((e,ix) => `
         <tr>
           <td>${e.estado === 'listo' ? `<input type="checkbox" class="sel" data-i="${ix}">` : ''}</td>
-          <td><b>${e.nom}</b><span class="n2">@${e.ig}</span>${e.email?`<span class="n2">${e.email}</span>`:''}${e.tel?`<span class="n2">${e.tel}</span>`:''}</td>
+          <td><b>${e.nom}</b><span class="n2">@${e.ig}</span>${e.sinBriefing ? '<span class="pill esp" style="margin-top:3px" title="Completó la ficha pero todavía no confirmó que leyó el briefing. El kit se puede mandar igual: lo lee en su app.">sin confirmar briefing</span>' : ''}${e.email?`<span class="n2">${e.email}</span>`:''}${e.tel?`<span class="n2">${e.tel}</span>`:''}</td>
           <td>${e.dir}<span class="n2">${e.loc} · CP ${e.cp}</span></td>
           ${conOpciones ? `<td>${e.tonos}</td>` : ''}
           <td><span class="pill ${e.estado === 'despachado' ? 'ok' : 'esp'}">
@@ -1831,7 +1832,7 @@ function aplicarRol(){
     pintarTodo();
   }
 })();
-const APP_VERSION = '2026-09-29-c';
+const APP_VERSION = '2026-09-29-d';
 </script>
 </body>
 </html>
