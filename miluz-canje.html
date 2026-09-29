@@ -1123,7 +1123,7 @@ function demo(accion, datos){
       if (g.estado !== 'publicado' && g.estado !== 'cumplida') g.estado = 'publicado';
     } else { g.estado = 'entregado'; g.entrega = { drive: datos.drive }; }
   }
-  if (accion === 'kit2'){ g.kit2 = datos.kit2; }
+  if (accion === 'kit2'){ if (datos.soloUno){ g.kit2 = null; g.videos = 'uno'; } else g.kit2 = datos.kit2; }
   if (accion === 'aprobar_video'){
     g.entregas = g.entregas || [];
     g.entregas[0] = { ...(g.entregas[0] || { n: 1, drive: (g.entrega && g.entrega.drive) || 'https://drive.google.com/demo' }), aprobadoEn: Date.now() };
@@ -1154,10 +1154,12 @@ function kit2Repetido(){
 function montarKit2Fix(){
   document.querySelectorAll('.kit2-fix').forEach(x => x.remove());
   if (!kit2Repetido()) return;
-  const ops = (CFG.opciones || []).filter(o => o.id !== D.kit);
+  const lleno = id => { const c = CFG.cupos, u = CFG.cuposUsados; if (!c || !u) return false;
+    const tope = (c.tanda1 && c.tanda1[id] != null) ? c.tanda1[id] : (c.kit && c.kit[id]); return tope != null && ((u.kit[id] || {}).aprobadas || 0) >= tope; };
+  const ops = (CFG.opciones || []).filter(o => o.id !== D.kit && !lleno(o.id));
   const html = `<div class="kit2-fix">
-      <b>Tus dos kits quedaron iguales (${nombreKit(D.kit)} y ${nombreKit(D.kit)}).</b> Elegí el producto de tu segundo video:
-      <div class="kit2-ops">${ops.map(o => `<button type="button" data-k="${o.id}"><i style="background:${o.hex || 'var(--rosa)'}"></i>${o.nom}</button>`).join('')}</div>
+      <b>Tus dos kits quedaron iguales (${nombreKit(D.kit)} y ${nombreKit(D.kit)}).</b> ${ops.length ? 'Elegí el producto de tu segundo video:' : 'Por ahora no queda cupo en otro producto.'}
+      <div class="kit2-ops">${ops.map(o => `<button type="button" data-k="${o.id}"><i style="background:${o.hex || 'var(--rosa)'}"></i>${o.nom}</button>`).join('')}<button type="button" data-uno="1">Hago 1 solo video</button></div>
       <small>Si querés dos iguales, avisanos por la comunidad.</small></div>`;
   const enFicha = $('#kits-lista'), enEstado = $('#kit2-estado');
   if (enFicha && !$('#card-kits').classList.contains('oculto')) enFicha.insertAdjacentHTML('afterend', html);
@@ -1165,9 +1167,9 @@ function montarKit2Fix(){
   document.querySelectorAll('.kit2-fix button').forEach(b => b.onclick = async () => {
     document.querySelectorAll('.kit2-fix button').forEach(x => x.disabled = true); b.textContent = 'Guardando…';
     try {
-      D = (await api('kit2', { kit2: b.dataset.k })).creadora;
-      pintarKits(); montarKit2Fix();
-      alert(`Listo: tu segundo kit es ${nombreKit(D.kit2)}.`);
+      D = (await api('kit2', b.dataset.uno ? { soloUno: true } : { kit2: b.dataset.k })).creadora;
+      pintarKits(); montarKit2Fix(); if (typeof pintarEstado === 'function' && $('#v-estado') && !$('#v-estado').classList.contains('oculto')) pintarEstado();
+      alert(b.dataset.uno ? 'Listo: quedaste con 1 video.' : `Listo: tu segundo kit es ${nombreKit(D.kit2)}.`);
     } catch { alert('No se pudo guardar. Probá de nuevo.'); montarKit2Fix(); }
   });
 }
@@ -1820,7 +1822,7 @@ function pintarMarca(){
   } catch { if (DEMO){ precargar(); traerBorrador(); } ver(DEMO ? 'v-ficha' : 'v-error'); }
 })();
 
-const APP_VERSION = '2026-09-29-a';
+const APP_VERSION = '2026-09-29-b';
 </script>
 </body>
 </html>

@@ -274,6 +274,7 @@ function aplicarEstilo(e){
 const R = { fotos: [] };
 /* El kit que sale de la respuesta (Valca: problema → kit). El 2º nunca puede ser el mismo (29/9). */
 const primerKit = () => { const k = CFG && CFG.kitPorRespuesta; return k ? (k.mapa || {})[R[k.campo]] || null : null; };
+const alternativas = () => (CFG.opciones || []).filter(o => o.id !== primerKit() && !kitLleno(o.id));
 /* Si llegó desde el DM de ManyChat, el link trae su id (?mc=...).
    Con eso el backend puede escribirle SIEMPRE, sin ventana de 24 h. */
 R.manychatId = QS.get('mc') || null;
@@ -297,7 +298,8 @@ function cupoDe(tipo, k){
   const v = (tanda && tanda[k] != null) ? tanda[k] : (total && total[k] != null ? total[k] : null);
   return v == null ? null : Number(v);
 }
-function usados(tipo, k){ const u = CFG.cuposUsados; return (u && u[tipo] && u[tipo][k] && u[tipo][k].aplicaron) || 0; }
+// 29/9: lo que cierra una opción son las APROBADAS (el backend ya no cuenta el 2º kit en el cupo)
+function usados(tipo, k){ const u = CFG.cuposUsados; return (u && u[tipo] && u[tipo][k] && u[tipo][k].aprobadas) || 0; }
 /* ¿la opción `v` de la pregunta `p` tiene el cupo lleno? Se mira el cupo del
    ángulo (campo con tabla en cupos) o el del kit al que lleva (kitPorRespuesta). */
 function cupoLleno(p, v){
@@ -539,6 +541,7 @@ function plantilla(p){
     <h2 class="pregunta">${p.q}</h2>
     <p class="ayuda">${p.a}</p>
     ${k1i ? `<div class="kit1">Tu primer kit: <b>${k1i.nom}</b>${k1i.desc ? ` <small>${k1i.desc}</small>` : ''}</div>` : ''}
+    ${!alternativas().length ? `<div class="kit1">Por ahora no queda cupo en otro producto para un segundo video. <b>Te anotamos con 1 video.</b> Si se libera lugar, te avisamos.</div>` : ''}
     <div class="ops kits" id="tonos">
       ${CFG.opciones.filter(t => t.id !== k1).map(t => { const lleno = kitLleno(t.id); return `
         <label class="op ${lleno ? 'off' : ''}">
@@ -673,7 +676,14 @@ async function avanzar(){
     mostrarError(p.error || 'Necesitamos al menos una foto'); return;
   }
 
-  if (p.tipo === 'colores' && CFG.kitPorRespuesta) R.tonos = (R.tonos || []).filter(t => t !== primerKit());
+  if (p.tipo === 'colores' && CFG.kitPorRespuesta){
+    R.tonos = (R.tonos || []).filter(t => t !== primerKit());
+    if (!alternativas().length){   // sin otro producto con cupo: sigue con 1 video
+      R.videos = 'uno'; R.tonos = [];
+      if (esUltimo(i)){ await enviar(); return; }
+      i = siguiente(i); pintar(); return;
+    }
+  }
   if (p.tipo === 'colores' && (R.tonos || []).length !== (p.elegir || CFG.elegir)){
     mostrarError((CFG.eleccion && CFG.eleccion.error) || `Elegí exactamente ${p.elegir || CFG.elegir}`); return;
   }
@@ -728,7 +738,7 @@ async function enviar(){
   armarPasos();
   pintar();
 })();
-const APP_VERSION = '2026-09-29-a';
+const APP_VERSION = '2026-09-29-b';
 </script>
 </body>
 </html>

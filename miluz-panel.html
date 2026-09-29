@@ -929,16 +929,17 @@ function bloqueCupos(){
   const fila = (tipo, k, nom, extra) => {
     const q = cupoDe(tipo, k), u = usadosDe(tipo, k);
     const tope = q.tanda != null ? q.tanda : q.total;
-    const pct = tope ? Math.min(100, Math.round(u.aplicaron / tope * 100)) : 0;
-    const lleno = tope != null && u.aplicaron >= tope;
+    const pct = tope ? Math.min(100, Math.round(u.aprobadas / tope * 100)) : 0;
+    const lleno = tope != null && u.aprobadas >= tope;
+    const k2 = tipo === 'kit' ? (((CFG.cuposUsados || {}).kit2 || {})[k] || { aplicaron: 0 }).aplicaron : null;
     return `<tr>
       <td><b>${nom}</b>${extra ? `<span class="n2">${extra}</span>` : ''}</td>
-      <td class="num">${u.aplicaron}</td><td class="num">${u.aprobadas}</td>
+      <td class="num">${u.aplicaron}</td><td class="num"><b>${u.aprobadas}</b></td>${tipo === 'kit' ? `<td class="num">${k2}</td>` : '<td class="num"></td>'}
       <td class="num">${q.tanda != null ? q.tanda : '—'}</td><td class="num">${q.total != null ? q.total : '—'}</td>
       <td style="min-width:120px"><span class="mini" style="display:block;height:6px;border-radius:99px;background:var(--beige);overflow:hidden"><u style="display:block;height:100%;width:${pct}%;background:${lleno ? 'var(--no)' : 'var(--acento)'}"></u></span>${lleno ? '<span class="pill no" style="margin-top:4px">cupo lleno</span>' : ''}</td>
     </tr>`;
   };
-  const cab = `<thead><tr><th>Kit</th><th class="num">Aplicaron</th><th class="num">Aprobadas</th><th class="num">Cupo tanda</th><th class="num">Cupo total</th><th>Avance</th></tr></thead>`;
+  const cab = `<thead><tr><th>Kit</th><th class="num">Aplicaron</th><th class="num">Aprobadas</th><th class="num" title="Segundos kits de las que hacen dos videos: no ocupan cupo, es para ver stock">2º kits</th><th class="num">Cupo tanda</th><th class="num">Cupo total</th><th>Avance</th></tr></thead>`;
   const kits = (CFG.opciones || []).filter(o => c.kit && c.kit[o.id] != null).map(o => fila('kit', o.id, o.nom, o.desc || '')).join('');
   const pA = preguntaAngulo();
   const kpr = CFG.kitPorRespuesta;
@@ -946,7 +947,7 @@ function bloqueCupos(){
   if (pA && pA.opsPor){
     angulos = Object.entries(pA.opsPor).map(([padre, ops]) => {
       const kitDe = kpr && kpr.campo === pA.dependeDe ? nombreKit((kpr.mapa || {})[padre]) : etiquetaResp(padre, pA.dependeDe);
-      return `<tr><td colspan="6" style="background:var(--arena);font-weight:700">${kitDe || padre}</td></tr>` +
+      return `<tr><td colspan="7" style="background:var(--arena);font-weight:700">${kitDe || padre}</td></tr>` +
         ops.map(o => fila('angulo', o[0], o[1], o[2] || '')).join('');
     }).join('');
   } else if (pA){
@@ -955,7 +956,7 @@ function bloqueCupos(){
   return `
     <div class="bloque">
       <h2>Cupos por kit</h2>
-      <p class="n2">Aplicaron = fichas que no fueron descartadas ni rechazadas (es lo que apaga la opción en el formulario). Aprobadas = ya pasaron la admisión. El 2º kit de las que hacen dos videos también cuenta.</p>
+      <p class="n2"><b>El cupo es de creadoras aprobadas por su producto principal</b>: cuando las aprobadas llegan al cupo, la opción se apaga en el formulario. Aplicaron = las que siguen en carrera (en revisión + aprobadas). 2º kits = los segundos productos de las que hacen dos videos: no ocupan cupo, están para que veas el stock.</p>
       <table>${cab.replace('Kit', 'Kit')}<tbody>${kits || '<tr><td colspan="6">Sin cupos por kit.</td></tr>'}</tbody></table>
     </div>
     ${pA ? `<div class="bloque">
@@ -1004,7 +1005,7 @@ function pintarFicha(){
     vc = 'duda';
   }
   else if (descartable){ v = desc.veredicto || 'No cumple el requisito del producto.'; vc = 'no'; }
-  else if (a.motivo === 'cupo_lleno'){ v = 'Pasa el filtro, pero el ángulo o el kit que eligió ya llenó su cupo. Aceptala solo si querés pasarte del cupo.'; vc = 'duda'; }
+  else if (a.motivo === 'cupo_lleno'){ v = 'Pasa el filtro, pero el ángulo o el kit que eligió ya tiene el cupo de aprobadas completo. Aceptala solo si querés pasarte del cupo.'; vc = 'duda'; }
   else if (!pasaTodo){ v = 'No llega al piso de métricas.'; vc = 'no'; }
   else if (inflada){ v = `Ojo: ${a.views.toLocaleString('es-AR')} views promedio con ${a.seguidores.toLocaleString('es-AR')} seguidores. Puede tener seguidores comprados.`; vc = 'duda'; }
   else { v = 'Pasa el filtro automático. Mirá la foto y decidí.'; vc = 'si'; }
@@ -1830,7 +1831,7 @@ function aplicarRol(){
     pintarTodo();
   }
 })();
-const APP_VERSION = '2026-09-29-b';
+const APP_VERSION = '2026-09-29-c';
 </script>
 </body>
 </html>
