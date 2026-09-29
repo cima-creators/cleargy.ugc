@@ -101,6 +101,7 @@ main>section{max-width:980px;margin:0 auto}
 h1{font-size:1.5rem;font-weight:800;letter-spacing:-.03em;margin:0 0 4px}
 .sub{color:var(--tinta2);margin:0 0 22px;font-size:.92rem}
 .oculto{display:none!important}
+.acc a.b.wa{text-decoration:none;background:#25D366;border-color:#25D366;color:#fff}
 
 /* ── ficha de admisión ── */
 .ficha{
@@ -746,6 +747,7 @@ async function cargar(){
     videos: f.videos || (f.datos && f.datos.videos) || null, entregas: Array.isArray(f.entregas) ? f.entregas : [],
     tiktokUser: (f.datos && f.datos.tiktok) || null,
     aprobadoVideoEn: f.aprobadoVideoEn || null,
+    tel: f.tel || (f.datos && f.datos.tel) || '',
   }));
 
   CREADORAS = !todas ? [] : todas.fichas.map(f => ({
@@ -1277,6 +1279,7 @@ function tarjetaDrive(e){
               : `<div class="aviso med"><b>Qué hacer:</b> ${queMirar} Si está bien, tocá ${'<b>Aprobar video</b>'}: le llega el aviso para publicarlo en su Instagram y su TikTok etiquetando a @${CFG.cuentaIg}.</div>`)
             : `<div class="aviso med"><b>Qué hacer:</b> ${queMirar} Si está bien, subilo desde @${CFG.cuentaIg} como collab (Etiquetar personas → Invitar colaborador → @${e.ig}) y pegá acá el link del reel.</div>`)}
         <div class="acc">
+          ${waEntrega(e)}
           <button class="b duda" onclick="pedirCambios(${ix})">Pedir cambios</button>
           <button class="b no" onclick="resolverEntrega(${ix},0)">Rechazar</button>
           ${ella
@@ -1337,6 +1340,7 @@ function tarjetaEntrega(e, revisar){
         ${aviso}
         ${links2}
         <div class="acc">
+          ${waEntrega(e)}
           ${sinCollab ? `<button class="b duda" onclick="pedirCollab(${ix})">${ella ? 'Pedirle que etiquete' : 'Pedirle que acepte'}</button>` : ''}
           ${ella ? `<button class="b duda" onclick="pedirCambios(${ix})">Pedir cambios</button>` : ''}
           <button class="b no" onclick="resolverEntrega(${ix},0)">Rechazar</button>
@@ -1532,6 +1536,11 @@ function telWa(tel){
 function waLinkTexto(tel, texto){
   const d = telWa(tel);
   return d ? `https://wa.me/${d}?text=${encodeURIComponent(texto)}` : null;
+}
+/* Chat de WhatsApp con la creadora desde Entregas, para pedir correcciones (Luz, 29/9). */
+function waEntrega(e){
+  const url = waLinkTexto(e.tel, `Hola ${String(e.nom || '').split(' ')[0]}! Te escribo por tu video de ${CFG.nombre}: `);
+  return url ? `<a class="b wa" href="${url}" target="_blank" rel="noopener" title="Abre el chat de WhatsApp con ella para pedirle correcciones">WhatsApp</a>` : '';
 }
 function waLink(tel, nombre, link){
   return waLinkTexto(tel, mensajeAceptada(nombre, link));
@@ -1821,7 +1830,7 @@ function aplicarRol(){
     pintarTodo();
   }
 })();
-const APP_VERSION = '2026-09-29-a';
+const APP_VERSION = '2026-09-29-b';
 </script>
 </body>
 </html>
