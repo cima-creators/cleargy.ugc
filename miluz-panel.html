@@ -699,6 +699,7 @@ const SOLAPAS = {
   equipo: ['resumen','admision','envios','entregas','creadoras','pagos','cupos'],
   marca:  ['admision','entregas','creadoras','cupos'],
   envios: ['envios'],
+  avisos: ['creadoras'],   // 29/9: solo mandar el link a mano a las aceptadas (Jhose)
 };
 const puede = t => (SOLAPAS[ROL] || SOLAPAS.equipo).includes(t) && (t !== 'cupos' || conCupos());
 
@@ -1627,7 +1628,7 @@ function pintarCreadoras(){
             ? `<span class="pill ok" title="${c.avisadaManual?'Se le mandó el link a mano':'El DM de aceptación salió solo'}">${c.avisadaManual?'a mano ✓':'DM ✓'}</span><button class="mini copiar" data-id="${c.id}" data-nom="${(c.nom||'').replace(/"/g,'')}">copiar</button>`
             : `<span class="pill no" title="No le llegó el DM automático: hace más de 24 h que no interactúa con el bot">sin DM</span><button class="mini copiar" data-id="${c.id}" data-nom="${(c.nom||'').replace(/"/g,'')}" title="Copia el mensaje completo con su link para pegarlo por Instagram">copiar</button>${c.tel?`<a class="mini" target="_blank" href="${waLink(c.tel, c.nom, LINK_APP(c.id))}" title="Abre WhatsApp con el mensaje armado">WhatsApp</a>`:''}<button class="mini yamande" data-id="${c.id}" title="Marcar que ya se lo mandaste">listo</button>`)
           : (['ficha_completa','briefing_ok'].includes(c.estado)&&c.id ? `<button class="mini copiar" data-id="${c.id}" data-nom="${(c.nom||'').replace(/"/g,'')}">copiar</button>`
-            : (['descartada','rechazada'].includes(c.estado)&&c.id ? `<button class="mini rescatar" data-id="${c.id}" title="La acepta igual: pasa a “Aceptadas, falta la ficha” y le sale el aviso">aceptar igual</button>` : ''))}</td>
+            : (['descartada','rechazada'].includes(c.estado)&&c.id&&ROL!=='avisos' ? `<button class="mini rescatar" data-id="${c.id}" title="La acepta igual: pasa a “Aceptadas, falta la ficha” y le sale el aviso">aceptar igual</button>` : ''))}</td>
           <td class="num">${c.seguidores!=null ? c.seguidores.toLocaleString('es-AR') : '—'}</td>
           <td class="num">${c.posts90!=null ? c.posts90 : '—'}</td>
           <td class="num">${c.vistas!=null ? c.vistas.toLocaleString('es-AR') : '—'}</td>
@@ -1793,6 +1794,10 @@ function aplicarRol(){
   const solapas = (SOLAPAS[ROL] || SOLAPAS.equipo).filter(puede);
   document.querySelectorAll('.lat button[data-t]').forEach(b => { if (!solapas.includes(b.dataset.t)) b.remove(); else b.hidden = false; });
   $('#btn-importar').hidden = ROL !== 'admin';
+  if (ROL === 'avisos'){
+    filtroCre = 'mano';
+    document.querySelectorAll('.fcre').forEach(b => b.classList.toggle('activo', b.dataset.f === 'mano'));
+  }
   irA(solapas[0]);
 }
 
@@ -1816,7 +1821,7 @@ function aplicarRol(){
     pintarTodo();
   }
 })();
-const APP_VERSION = '2026-09-28-c';
+const APP_VERSION = '2026-09-29-a';
 </script>
 </body>
 </html>
