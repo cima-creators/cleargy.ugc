@@ -509,6 +509,7 @@ dialog.dlg .fila{display:flex;gap:8px;justify-content:flex-end;flex-wrap:wrap}
       <button class="bsec fcre" data-f="enviados">3 · Kit enviado <span class="n" data-n="enviados">0</span></button>
       <button class="bsec fcre" data-f="recibieron">4 · Ya lo recibieron <span class="n" data-n="recibieron">0</span></button>
       <button class="bsec fcre" data-f="mano">⚠ Mandar link a mano <span class="n" data-n="mano">0</span></button>
+      <button class="bsec fcre oculto" data-f="repetidos" title="Eligieron dos videos y les quedaron los dos kits iguales: hay que avisarles que elijan el segundo en su app">🔁 Kits repetidos <span class="n" data-n="repetidos">0</span></button>
       <button class="bsec fcre" data-f="afuera" title="Las que el filtro automático dejó afuera. Podés aceptar a mano las que valgan la pena.">✕ Afuera por el filtro <span class="n" data-n="afuera">0</span></button>
     </div>
     <div id="tabla-creadoras"></div>
@@ -755,7 +756,7 @@ async function cargar(){
     nom: f.nombre || f.ig, ig: f.ig, estado: f.estado, nivel: f.nivel,
     pideHumana: f.pideHumana || null, quiereOtro: f.quiereOtro || null,
     id: f.id, seguidores: f.seguidores ?? null, posts90: f.posts90 ?? null, vistas: f.vistas ?? null,
-    kit: f.kit || null, kit2: f.kit2 || null, videos: f.videos || null,
+    kit: f.kit || null, kit2: f.kit2 || null, videos: f.videos || null, kit2AvisadaEn: f.kit2AvisadaEn || null,
     motivo: f.motivo || null, unas: f.unas || null, respuestas: f.respuestas || {}, importada: !!f.importada,
     manychatId: f.manychatId || null,
     avisadaEn: f.avisadaEn || null, avisadaManual: !!f.avisadaManual, decididaEn: f.decididaEn || null,
@@ -1573,6 +1574,13 @@ document.addEventListener('click', e => {
   pintarCreadoras();
 });
 
+/* 29/9: dos videos con los dos kits iguales, antes del despacho: hay que avisarles que elijan el 2º en su app. */
+const KIT_REPETIDO = c => c.videos === 'dos' && c.kit && c.kit === c.kit2 &&
+  ['por_revisar','revisar','en_cola','invitada','ficha_completa','briefing_ok'].includes(c.estado);
+function mensajeKit2(c){
+  const n = String(c.nom || '').split(' ')[0];
+  return `Hola ${n}! Te escribimos de ${CFG.nombre} 💛 Por un error del formulario te quedaron los dos kits iguales (${nombreKit(c.kit)} y ${nombreKit(c.kit)}). Entrá a tu app y elegí el producto de tu segundo video, o quedate con uno solo: ${LINK_APP(c.id)}\n\nLo necesitamos antes de despachar 🙌`;
+}
 function pintarCreadoras(){
   const q = ($('#buscar')?.value || '').trim().toLowerCase();
   const PREVIAS = ['iniciada','enviada','en_cola','revisar','por_revisar','descartada','rechazada'];
@@ -1586,12 +1594,15 @@ function pintarCreadoras(){
     recibieron: c => ['recibido','publicado','cumplida'].includes(c.estado),
     mano:       SIN_AVISO,
     afuera:     c => c.estado === 'descartada',
+    repetidos:  KIT_REPETIDO,
     aceptadas:  c => !PREVIAS.includes(c.estado),
   };
   const pasaFiltro = FILTROS[filtroCre] || FILTROS.todas;
   document.querySelectorAll('#filtro-cre [data-n]').forEach(el => {
     el.textContent = CREADORAS.filter(FILTROS[el.dataset.n] || (() => false)).length;
   });
+  const nRep = CREADORAS.filter(KIT_REPETIDO).length;
+  document.querySelector('[data-f=repetidos]')?.classList.toggle('oculto', !nRep && filtroCre !== 'repetidos');
   const lista = CREADORAS
     .filter(pasaFiltro)
     .filter(c => !q || c.nom.toLowerCase().includes(q) || c.ig.toLowerCase().includes(q))
@@ -1635,7 +1646,9 @@ function pintarCreadoras(){
         const [et,cl] = ETIQUETA[c.estado] || [c.estado,''];
         return `<tr>
           <td><b>${c.nom}</b><span class="n2"><a href="https://instagram.com/${c.ig}" target="_blank" rel="noopener" class="verreel">@${c.ig}</a>${c.reel ? ` · <a href="${c.reel}" target="_blank" rel="noopener" class="verreel">ver reel</a>` : ''}</span></td>
-          <td><span class="pill ${cl}">${et}</span>${c.motivo?`<span class="n2" title="Motivo del filtro automático">${MOTIVO[c.motivo]||c.motivo}</span>`:''}${c.importada?'<span class="pill" style="margin-left:4px" title="Entró por importación, sin pasar por la landing">importada</span>':''}${c.bono?'<span class="pill ok" style="margin-left:4px">bono</span>':''}${c.pideHumana?'<span class="pill no" style="margin-left:4px" title="Tocó “Hablar con alguien” en el bot">pide hablar</span>':''}${c.quiereOtro?'<span class="pill" style="margin-left:4px">quiere otro kit</span>':''}${c.referidaPor?`<span class="pill" style="margin-left:4px" title="Entró con el link de @${c.referidaPor}">ref @${c.referidaPor}</span>`:''}${c.referidasCumplidas?`<span class="pill ok" style="margin-left:4px" title="Referidas que cumplieron su primera collab">${c.referidasCumplidas} referida${c.referidasCumplidas>1?'s':''} ✓</span>`:''}</td><td class="dmacc">${c.estado==='invitada'&&c.id ? (c.avisadaEn
+          <td><span class="pill ${cl}">${et}</span>${c.motivo?`<span class="n2" title="Motivo del filtro automático">${MOTIVO[c.motivo]||c.motivo}</span>`:''}${c.importada?'<span class="pill" style="margin-left:4px" title="Entró por importación, sin pasar por la landing">importada</span>':''}${c.bono?'<span class="pill ok" style="margin-left:4px">bono</span>':''}${c.pideHumana?'<span class="pill no" style="margin-left:4px" title="Tocó “Hablar con alguien” en el bot">pide hablar</span>':''}${c.quiereOtro?'<span class="pill" style="margin-left:4px">quiere otro kit</span>':''}${c.referidaPor?`<span class="pill" style="margin-left:4px" title="Entró con el link de @${c.referidaPor}">ref @${c.referidaPor}</span>`:''}${c.referidasCumplidas?`<span class="pill ok" style="margin-left:4px" title="Referidas que cumplieron su primera collab">${c.referidasCumplidas} referida${c.referidasCumplidas>1?'s':''} ✓</span>`:''}</td><td class="dmacc">${KIT_REPETIDO(c)&&c.id ? `<div style="margin-bottom:6px">${c.kit2AvisadaEn
+            ? '<span class="pill ok" title="Ya se le avisó que sus dos kits quedaron iguales">kits iguales · avisada ✓</span>'
+            : `<span class="pill no" title="Le quedaron los dos kits iguales">kits iguales</span>${c.tel ? `<a class="mini" target="_blank" href="${waLinkTexto(c.tel, mensajeKit2(c))}" title="Abre WhatsApp con el mensaje y su link">WhatsApp</a>` : ''}<button class="mini copiarkit2" data-id="${c.id}" title="Copia el mensaje con su link">copiar</button><button class="mini listokit2" data-id="${c.id}" title="Marcar que ya se lo mandaste">listo</button>`}</div>` : ''}${c.estado==='invitada'&&c.id ? (c.avisadaEn
             ? `<span class="pill ok" title="${c.avisadaManual?'Se le mandó el link a mano':'El DM de aceptación salió solo'}">${c.avisadaManual?'a mano ✓':'DM ✓'}</span><button class="mini copiar" data-id="${c.id}" data-nom="${(c.nom||'').replace(/"/g,'')}">copiar</button>`
             : `<span class="pill no" title="No le llegó el DM automático: hace más de 24 h que no interactúa con el bot">sin DM</span><button class="mini copiar" data-id="${c.id}" data-nom="${(c.nom||'').replace(/"/g,'')}" title="Copia el mensaje completo con su link para pegarlo por Instagram">copiar</button>${c.tel?`<a class="mini" target="_blank" href="${waLink(c.tel, c.nom, LINK_APP(c.id))}" title="Abre WhatsApp con el mensaje armado">WhatsApp</a>`:''}<button class="mini yamande" data-id="${c.id}" title="Marcar que ya se lo mandaste">listo</button>`)
           : (['ficha_completa','briefing_ok'].includes(c.estado)&&c.id ? `<button class="mini copiar" data-id="${c.id}" data-nom="${(c.nom||'').replace(/"/g,'')}">copiar</button>`
@@ -1667,6 +1680,18 @@ function pintarCreadoras(){
       const c = CREADORAS.find(x => x.id === b.dataset.id); if (c) { c.avisadaEn = Date.now(); c.avisadaManual = true; }
       pintarCreadoras();
     } catch (e) { alert('No se pudo marcar: ' + e.message); b.disabled = false; b.textContent = '✓ ya se lo mandé'; }
+  });
+  document.querySelectorAll('#tabla-creadoras .copiarkit2').forEach(b => b.onclick = () => {
+    const c = CREADORAS.find(x => x.id === b.dataset.id); if (!c) return;
+    navigator.clipboard.writeText(mensajeKit2(c)).then(() => { b.textContent = 'copiado ✓'; });
+  });
+  document.querySelectorAll('#tabla-creadoras .listokit2').forEach(b => b.onclick = async () => {
+    b.disabled = true; b.textContent = '…';
+    try {
+      if (!DEMO) await api('avisokit2', { id: b.dataset.id });
+      const c = CREADORAS.find(x => x.id === b.dataset.id); if (c) c.kit2AvisadaEn = Date.now();
+      pintarCreadoras();
+    } catch (e) { alert('No se pudo marcar: ' + e.message); b.disabled = false; b.textContent = 'listo'; }
   });
   document.querySelectorAll('#tabla-creadoras .rescatar').forEach(b => b.onclick = async () => {
     const c = CREADORAS.find(x => x.id === b.dataset.id); if (!c) return;
@@ -1832,7 +1857,7 @@ function aplicarRol(){
     pintarTodo();
   }
 })();
-const APP_VERSION = '2026-09-29-d';
+const APP_VERSION = '2026-09-29-e';
 </script>
 </body>
 </html>
