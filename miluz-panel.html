@@ -668,6 +668,9 @@ function ENVIOS_desde(env){
     dir: f.calle ? `${separarCalle(f.calle, f.numero).calle} ${separarCalle(f.calle, f.numero).numero}`.trim() + (f.piso ? ', ' + f.piso : '') : '—',
     nombreCompleto: f.nombre || (f.datos && f.datos.nombre) || '',
     kits: (f.videos || (f.datos && f.datos.videos)) === 'dos' && (f.kit2 || (f.datos && f.datos.kit2)) ? 2 : 1,
+    kitIds: [f.kit || (f.datos && f.datos.kit), (f.videos || (f.datos && f.datos.videos)) === 'dos' ? (f.kit2 || (f.datos && f.datos.kit2)) : null].filter(Boolean),
+    localidad: f.localidad || (f.datos && f.datos.localidad) || '', provincia: f.provincia || (f.datos && f.datos.provincia) || '',
+    piso: f.piso || '', referencia: f.referencia || '',
     loc: [f.localidad || (f.datos && f.datos.localidad), f.provincia || (f.datos && f.datos.provincia)].filter(Boolean).join(' · ') || '—',
     cp: f.cp || '—',
     dni: f.dni || '—', tel: f.tel || (f.datos && f.datos.tel) || '', email: f.email || (f.datos && f.datos.email) || '',
@@ -1172,7 +1175,10 @@ $('#btn-masiva').onclick = async () => {
   const sinNro = filas.filter(e => !e.numero);
   if (sinNro.length && !confirm(`${sinNro.length} sin número de calle separado (${sinNro.map(e => '@' + e.ig).join(', ')}). Esa celda va a quedar vacía. ¿Bajar igual?`)) return;
   const num = v => /^\d+$/.test(String(v || '').trim()) ? +String(v).trim() : String(v || '').trim();
-  const aoa = [['CalleRemitente','NroCalleRemitente','NyADestinatario','CPDestinatario','CalleDestinatario','NroCalleDestinatario','TeléfonoDestinatario','NroRemito','Bultos','Peso']]
+  // 1/10 (Ferni): la ciudad va en Observaciones (un CP puede tener varias localidades), después el mail y al final el SKU
+  const obs = e => [e.localidad && `Ciudad: ${[e.localidad, e.provincia].filter(Boolean).join(', ')}`, e.piso && `Piso/depto: ${e.piso}`, e.referencia && `Ref: ${e.referencia}`].filter(Boolean).join('. ');
+  const sku = e => (e.kitIds || []).map(k => (cfgM.sku || {})[k] || k).join(', ');
+  const aoa = [['CalleRemitente','NroCalleRemitente','NyADestinatario','CPDestinatario','CalleDestinatario','NroCalleDestinatario','TeléfonoDestinatario','NroRemito','Bultos','Peso','Observaciones','Email','SKU']]
     .concat(filas.map(e => [
       cfgM.calle, num(cfgM.numero),
       e.nombreCompleto || e.nom,
@@ -1182,12 +1188,15 @@ $('#btn-masiva').onclick = async () => {
       sinAcentos(String(e.nombreCompleto || e.nom).trim().split(/\s+/)[0]).toUpperCase() + '-' + String(e.kits || 1).padStart(2, '0'),
       e.kits || 1,
       '',
+      obs(e),
+      e.email || '',
+      sku(e),
     ]));
   const b = $('#btn-masiva'); const txt = b.textContent; b.disabled = true; b.textContent = 'Armando…';
   try {
     const X = await cargarXlsx();
     const ws = X.utils.aoa_to_sheet(aoa);
-    ws['!cols'] = [14, 12, 28, 10, 26, 10, 16, 14, 7, 7].map(w => ({ wch: w }));
+    ws['!cols'] = [14, 12, 28, 10, 26, 10, 16, 14, 7, 7, 40, 28, 12].map(w => ({ wch: w }));
     const wb = X.utils.book_new(); X.utils.book_append_sheet(wb, ws, 'Hoja1');
     const hoy = new Date().toISOString().slice(0, 10);
     X.writeFile(wb, `MASIVA ${CFG.nombre.toUpperCase()} ${hoy}.xlsx`);
@@ -1858,7 +1867,7 @@ function aplicarRol(){
     pintarTodo();
   }
 })();
-const APP_VERSION = '2026-09-29-f';
+const APP_VERSION = '2026-10-01-a';
 </script>
 </body>
 </html>
