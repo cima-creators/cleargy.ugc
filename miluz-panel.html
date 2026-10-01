@@ -428,6 +428,35 @@ dialog.dlg .cuerpo{padding:22px}
 dialog.dlg h2{margin:0 0 4px;font-size:1.2rem}
 dialog.dlg textarea{width:100%;min-height:180px;font:inherit;font-size:.85rem;padding:12px;border:1px solid var(--linea);border-radius:12px;resize:vertical;margin:12px 0}
 dialog.dlg .fila{display:flex;gap:8px;justify-content:flex-end;flex-wrap:wrap}
+
+/* ── WhatsApp (1/10) ── */
+.wa-caja{display:grid;grid-template-columns:320px 1fr;gap:0;background:#fff;border:1px solid var(--linea);border-radius:16px;overflow:hidden;height:calc(100vh - 210px);min-height:440px}
+.wa-lista{border-right:1px solid var(--linea);overflow-y:auto}
+.wa-conv{display:block;width:100%;text-align:left;background:none;border:0;border-bottom:1px solid var(--linea);padding:12px 14px;cursor:pointer;font:inherit;color:inherit}
+.wa-conv:hover{background:var(--crema)}.wa-conv.on{background:var(--acento-suave)}
+.wa-conv b{display:flex;justify-content:space-between;gap:8px;font-size:.88rem}.wa-conv b small{font-weight:500;color:var(--topo);font-size:.72rem;white-space:nowrap}
+.wa-conv span{display:block;font-size:.8rem;color:var(--tinta2);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;margin-top:2px}
+.wa-conv .pill{margin-top:6px;display:inline-block}
+.wa-hilo{display:flex;flex-direction:column;min-width:0}
+.wa-cab{padding:12px 16px;border-bottom:1px solid var(--linea);display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+.wa-cab h3{margin:0;font-size:1rem;flex:1;min-width:0}.wa-cab small{display:block;color:var(--topo);font-weight:500;font-size:.75rem}
+.wa-msgs{flex:1;overflow-y:auto;padding:16px;background:var(--crema);display:flex;flex-direction:column;gap:8px}
+.wa-m{max-width:78%;padding:9px 12px;border-radius:14px;font-size:.86rem;line-height:1.45;white-space:pre-wrap;word-wrap:break-word;box-shadow:var(--sombra)}
+.wa-m.in{align-self:flex-start;background:#fff;border:1px solid var(--linea);border-bottom-left-radius:4px}
+.wa-m.out{align-self:flex-end;background:#DCF5D6;border-bottom-right-radius:4px}
+.wa-m.auto{background:#EEF0EC;color:var(--tinta2)}
+.wa-m i{display:block;font-style:normal;font-size:.68rem;color:var(--topo);margin-top:4px;text-align:right}
+.wa-pie{border-top:1px solid var(--linea);padding:10px 12px;display:flex;flex-direction:column;gap:6px}
+.wa-pie textarea{width:100%;min-height:56px;max-height:160px;resize:vertical;border:1px solid var(--linea2);border-radius:10px;padding:9px 11px;font:inherit;font-size:.88rem}
+.wa-pie .fila{display:flex;gap:8px;align-items:center;justify-content:space-between;flex-wrap:wrap}
+.wa-nota{font-size:.75rem;color:var(--tinta2)}.wa-nota.no{color:var(--no)}
+.wa-vacio{margin:auto;color:var(--topo);font-size:.9rem;text-align:center;padding:30px}
+.wa-volver{display:none}
+@media (max-width:820px){
+  .wa-caja{grid-template-columns:1fr;height:calc(100vh - 170px)}
+  .wa-caja.abierto .wa-lista{display:none}.wa-caja:not(.abierto) .wa-hilo{display:none}
+  .wa-volver{display:inline-flex}
+}
 </style>
 </head>
 <body>
@@ -445,6 +474,7 @@ dialog.dlg .fila{display:flex;gap:8px;justify-content:flex-end;flex-wrap:wrap}
   <button data-t="entregas"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="6" width="18" height="13" rx="2.5"/><path d="M10 10.5l5 3-5 3z"/></svg><span class="et">Entregas</span><span class="n" id="n-ent">0</span></button>
   <button data-t="creadoras"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9.5" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.9"/><path d="M16 3.1a4 4 0 0 1 0 7.8"/></svg><span class="et">Creadoras</span><span class="n" id="n-cre">0</span></button>
   <button data-t="pagos"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><rect x="2.5" y="6" width="19" height="12.5" rx="2.5"/><path d="M2.5 10h19"/><path d="M6 15h4"/></svg><span class="et">Pagos</span><span class="n" id="n-pag">0</span></button>
+  <button data-t="wa" hidden><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M20.5 11.6a8.5 8.5 0 0 1-12.6 7.4L3.5 20.5l1.6-4.2A8.5 8.5 0 1 1 20.5 11.6z"/><path d="M9 9.5c.3 1.9 1.8 3.9 4.4 5 .6.2 1.3-.2 1.6-.8l.3-.6-1.7-.9-.7.7c-.9-.4-1.8-1.3-2.2-2.2l.7-.7-.9-1.7-.6.3c-.6.3-1 .9-.9 1.6z"/></svg><span class="et">WhatsApp</span><span class="n" id="n-wa">0</span></button>
   <button data-t="cupos" hidden><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M4 19V9M10 19V5M16 19v-8M22 19H2"/></svg><span class="et">Cupos</span></button>
   <button class="plegar" id="plegar">
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M15 18l-6-6 6-6"/></svg>
@@ -520,6 +550,16 @@ dialog.dlg .fila{display:flex;gap:8px;justify-content:flex-end;flex-wrap:wrap}
     <h1>Entregas</h1>
     <p class="sub" id="entregas-sub">Los videos que mandaron por Drive: revisalos, subilos como collab desde la cuenta de la marca y pegá el link del reel. Después el sistema verifica solo que acepten la invitación.</p>
     <div id="lista-entregas"></div>
+  </section>
+
+  <!-- ══ WHATSAPP (1/10) ══ -->
+  <section id="t-wa" class="oculto">
+    <h1>WhatsApp</h1>
+    <p class="sub">Los avisos que salieron del WhatsApp de CIMA y lo que respondieron las creadoras. Podés contestar desde acá durante las 24 h siguientes a su último mensaje.</p>
+    <div class="wa-caja" id="wa-caja">
+      <div class="wa-lista" id="wa-lista"></div>
+      <div class="wa-hilo" id="wa-hilo"><div class="wa-vacio">Elegí una conversación.</div></div>
+    </div>
   </section>
 
   <!-- ══ CUPOS (solo marcas con cupos por kit / ángulo) ══ -->
@@ -701,11 +741,11 @@ const conCupos = () => !!(CFG && CFG.cupos);
    plata, pagos ni envíos; logística solo envíos. "cupos" solo existe en
    las marcas con cupos configurados (se quita en aplicarRol si no). */
 const SOLAPAS = {
-  admin:  ['resumen','admision','envios','entregas','creadoras','pagos','cupos'],
-  equipo: ['resumen','admision','envios','entregas','creadoras','pagos','cupos'],
+  admin:  ['resumen','admision','envios','entregas','creadoras','pagos','cupos','wa'],
+  equipo: ['resumen','admision','envios','entregas','creadoras','pagos','cupos','wa'],
   marca:  ['admision','envios','entregas','creadoras','cupos'],   // 29/9: ve Envíos; despachar queda para logística
   envios: ['envios'],
-  avisos: ['creadoras'],   // 29/9: solo mandar el link a mano a las aceptadas (Jhose)
+  avisos: ['creadoras','wa'],   // 29/9: solo mandar el link a mano a las aceptadas (Jhose) · 1/10: y atender WhatsApp
 };
 const puede = t => (SOLAPAS[ROL] || SOLAPAS.equipo).includes(t) && (t !== 'cupos' || conCupos());
 
@@ -874,7 +914,7 @@ let i = 0, total = APLICANTES.length;
 const $ = s => document.querySelector(s);
 
 /* ── navegación entre pestañas ── */
-const VISTAS = ['resumen','admision','envios','entregas','creadoras','pagos','cupos'];
+const VISTAS = ['resumen','admision','envios','entregas','creadoras','pagos','cupos','wa'];
 function irA(t){
   document.querySelectorAll('.lat button[data-t]').forEach(x => x.classList.toggle('on', x.dataset.t === t));
   VISTAS.forEach(v => $('#t-'+v).classList.toggle('oculto', v !== t));
@@ -1558,6 +1598,85 @@ function waLink(tel, nombre, link){
   return waLinkTexto(tel, mensajeAceptada(nombre, link));
 }
 
+
+/* ── WhatsApp (1/10): bandeja del número de CIMA ── */
+let WA = { mensajes: [], fichas: {}, sel: null, timer: null };
+const escH = t => String(t ?? '').replace(/[&<>"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+const horaWa = ts => { const d = new Date(ts), hoy = new Date(); const hh = d.toLocaleTimeString('es-AR',{hour:'2-digit',minute:'2-digit'});
+  return d.toDateString() === hoy.toDateString() ? hh : d.toLocaleDateString('es-AR',{day:'numeric',month:'short'}) + ' ' + hh; };
+function convsWa(){
+  const m = new Map();
+  WA.mensajes.forEach(x => { if (!m.has(x.tel)) m.set(x.tel, []); m.get(x.tel).push(x); });
+  return [...m.entries()].map(([tel, ms]) => {
+    const f = WA.fichas[tel] || {}, ult = ms[ms.length - 1], ultIn = [...ms].reverse().find(x => x.dir === 'in');
+    const nombre = f.nom || (f.ig ? '@' + f.ig : '') || ms.map(x => x.nombre).find(Boolean) || '+' + tel;
+    return { tel, ms, f, ult, ultIn, nombre, ig: f.ig || ms.map(x => x.ig).find(Boolean) || null,
+      responder: ult.dir === 'in', ayuda: !!f.pideHumana, abierta: ultIn && Date.now() - ultIn.ts < 864e5 };
+  }).sort((a, b) => (b.responder - a.responder) || (b.ult.ts - a.ult.ts));
+}
+async function cargarWa(){
+  if (DEMO) { pintarWa(); return; }
+  try { const d = await api('wa'); WA.mensajes = d.mensajes || []; WA.fichas = d.fichas || {}; }
+  catch (e) { console.warn('wa', e); }
+  pintarWa();
+  clearTimeout(WA.timer); WA.timer = setTimeout(cargarWa, 60e3);
+}
+function pintarWa(){
+  const cs = convsWa();
+  setN('n-wa', cs.filter(c => c.responder).length);
+  const lista = $('#wa-lista');
+  if (!lista) return;
+  lista.innerHTML = cs.length ? cs.map(c => `<button class="wa-conv${c.tel === WA.sel ? ' on' : ''}" data-tel="${c.tel}">
+      <b>${escH(c.nombre)}<small>${horaWa(c.ult.ts)}</small></b>
+      <span>${c.ult.dir === 'out' ? '↪ ' : ''}${escH(c.ult.texto)}</span>
+      ${c.ayuda ? '<em class="pill no">Pidió ayuda</em>' : c.responder ? '<em class="pill esp">Responder</em>' : ''}
+    </button>`).join('') : '<div class="wa-vacio">Todavía no hay mensajes.<br>Acá van a aparecer los avisos que salgan por WhatsApp y lo que respondan las creadoras.</div>';
+  lista.querySelectorAll('.wa-conv').forEach(b => b.onclick = () => abrirWa(b.dataset.tel));
+  if (WA.sel) pintarHiloWa(cs.find(c => c.tel === WA.sel), false);
+}
+function abrirWa(tel){
+  WA.sel = tel; $('#wa-caja').classList.add('abierto');
+  document.querySelectorAll('.wa-conv').forEach(b => b.classList.toggle('on', b.dataset.tel === tel));
+  pintarHiloWa(convsWa().find(c => c.tel === tel), true);
+}
+function pintarHiloWa(c, foco){
+  const hilo = $('#wa-hilo');
+  if (!c) { hilo.innerHTML = '<div class="wa-vacio">Elegí una conversación.</div>'; return; }
+  const borrador = ($('#wa-txt') || {}).value || '';
+  const quedan = c.ultIn ? Math.max(0, 864e5 - (Date.now() - c.ultIn.ts)) : 0;
+  const hs = Math.floor(quedan / 36e5), mins = Math.floor(quedan % 36e5 / 6e4);
+  const link = waLinkTexto(c.tel, '');
+  hilo.innerHTML = `<div class="wa-cab">
+      <button class="bsec wa-volver" id="wa-volver">← Volver</button>
+      <h3>${escH(c.nombre)}<small>+${c.tel}${c.ig ? ' · @' + escH(c.ig) : ''}${c.f.estado ? ' · ' + escH((ETIQUETA[c.f.estado] || [c.f.estado])[0]) : ''}</small></h3>
+      ${link ? `<a class="bsec" href="${link}" target="_blank" rel="noopener">Abrir en mi WhatsApp</a>` : ''}
+    </div>
+    <div class="wa-msgs" id="wa-msgs">${c.ms.map(m => `<div class="wa-m ${m.dir}${m.dir === 'out' && !m.manual ? ' auto' : ''}">${escH(m.texto)}<i>${m.dir === 'out' ? (m.manual ? 'Equipo · ' : m.plantilla ? 'Aviso automático · ' : 'Respuesta automática · ') : ''}${horaWa(m.ts)}</i></div>`).join('')}</div>
+    <div class="wa-pie">
+      <textarea id="wa-txt" placeholder="${c.abierta ? 'Escribile…' : 'Ventana cerrada'}" ${c.abierta ? '' : 'disabled'}>${escH(borrador)}</textarea>
+      <div class="fila">
+        <span class="wa-nota${c.abierta ? '' : ' no'}">${c.abierta ? `Podés contestarle desde acá ${hs ? hs + ' h ' : ''}${mins} min más.` : 'Pasaron más de 24 h desde su último mensaje: WhatsApp no deja escribirle texto libre. Usá "Abrir en mi WhatsApp".'}</span>
+        <button class="bsec pri" id="wa-env" ${c.abierta ? '' : 'disabled'}>Enviar</button>
+      </div>
+    </div>`;
+  const ms = $('#wa-msgs'); ms.scrollTop = ms.scrollHeight;
+  $('#wa-volver').onclick = () => { WA.sel = null; $('#wa-caja').classList.remove('abierto'); pintarWa(); };
+  const env = $('#wa-env');
+  if (env) env.onclick = async () => {
+    const txt = $('#wa-txt').value.trim(); if (!txt) return;
+    env.disabled = true; env.textContent = 'Enviando…';
+    try {
+      const r = await api('wa_enviar', { tel: c.tel, texto: txt, id: c.f.id || null });
+      if (!r.ok) { alert(r.msg || 'No se pudo enviar.'); env.disabled = false; env.textContent = 'Enviar'; return; }
+      $('#wa-txt').value = '';
+      WA.mensajes.push({ tel: c.tel, dir: 'out', texto: txt, ts: Date.now(), manual: true });
+      if (WA.fichas[c.tel]) WA.fichas[c.tel].pideHumana = null;
+      pintarWa();
+    } catch (e) { alert('No se pudo enviar.'); env.disabled = false; env.textContent = 'Enviar'; }
+  };
+  if (foco && c.abierta) $('#wa-txt').focus();
+}
+
 /* ── creadoras ── */
 const ETIQUETA = {
   cumplida:['Cumplida','ok'], publicado:['Publicada','esp'], enviado:['Kit en camino',''],
@@ -1832,6 +1951,7 @@ function pintarTodo(){
   if (puede('creadoras')) pintarCreadoras();
   if (puede('pagos')) pintarPagos();
   if (puede('cupos')) pintarCupos();
+  if (puede('wa')) cargarWa();
 }
 
 /* esconde las solapas que el rol no puede ver y abre la primera permitida */
@@ -1867,7 +1987,7 @@ function aplicarRol(){
     pintarTodo();
   }
 })();
-const APP_VERSION = '2026-10-01-a';
+const APP_VERSION = '2026-10-01-b';
 </script>
 </body>
 </html>
