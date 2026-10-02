@@ -456,6 +456,26 @@ dialog.dlg .fila{display:flex;gap:8px;justify-content:flex-end;flex-wrap:wrap}
 .wa-nota{font-size:.75rem;color:var(--tinta2)}.wa-nota.no{color:var(--no)}
 .wa-vacio{margin:auto;color:var(--topo);font-size:.9rem;text-align:center;padding:30px}
 .wa-volver{display:none}
+.wa-filtros{display:flex;gap:6px;flex-wrap:wrap;margin:0 0 12px}
+.wa-conv.nolei b{font-weight:800}.wa-conv.nolei b::before{content:'';display:inline-block;width:8px;height:8px;border-radius:50%;background:#25D366;margin-right:6px;flex:0 0 auto;align-self:center}
+dialog.dlg.dlg-cre{max-width:680px}
+.cre-cab{display:flex;justify-content:space-between;gap:12px;align-items:flex-start;flex-wrap:wrap}
+.cre-cab h2 small{display:block;font-size:.8rem;font-weight:500;color:var(--topo);margin-top:2px}
+.cre-etapa{margin:14px 0;padding:14px 16px;border-radius:14px;background:var(--acento-suave)}
+.cre-etapa b{font-size:1.05rem}.cre-etapa .hace{color:var(--tinta2);font-size:.85rem;margin-top:2px}
+.cre-etapa .falta{margin-top:8px;font-size:.9rem}
+.cre-alerta{padding:9px 12px;border-radius:10px;background:var(--duda-suave);color:#7a5414;font-size:.84rem;margin:6px 0}
+.cre-alerta.no{background:var(--no-suave);color:var(--no)}
+.cre-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:10px}
+.cre-box{border:1px solid var(--linea);border-radius:12px;padding:11px 13px;font-size:.84rem}
+.cre-box h4{margin:0 0 6px;font-size:.72rem;letter-spacing:.06em;text-transform:uppercase;color:var(--topo)}
+.cre-box .f{display:flex;justify-content:space-between;gap:10px;padding:2px 0}.cre-box .f span{color:var(--tinta2)}
+.cre-box a{color:var(--acento);font-weight:600}
+.cre-hist{margin-top:10px}.cre-hist .h{display:flex;gap:10px;font-size:.82rem;padding:5px 0;border-bottom:1px dashed var(--linea)}
+.cre-hist .h time{flex:0 0 108px;color:var(--topo)}
+.cre-acc{display:flex;gap:8px;flex-wrap:wrap;margin-top:16px}
+.cre-acc a.bsec,.cre-acc button.bsec{text-decoration:none;color:inherit;flex:0 0 auto}
+@media (max-width:640px){.cre-grid{grid-template-columns:1fr}}
 .wa-cab .bsec{flex:0 0 auto;padding:7px 11px;font-size:.78rem;text-decoration:none;color:inherit}
 @media (max-width:820px){
   .wa-caja{grid-template-columns:1fr;height:calc(100vh - 170px)}
@@ -561,6 +581,12 @@ dialog.dlg .fila{display:flex;gap:8px;justify-content:flex-end;flex-wrap:wrap}
   <section id="t-wa" class="oculto">
     <h1>WhatsApp</h1>
     <p class="sub">Los avisos que salieron del WhatsApp de CIMA y lo que respondieron las creadoras. Podés contestar desde acá durante las 24 h siguientes a su último mensaje.</p>
+    <div class="wa-filtros" id="wa-filtros">
+      <button class="bsec fwa activo" data-f="todas">Todas</button>
+      <button class="bsec fwa" data-f="responder">Por responder <span class="n" data-n="responder">0</span></button>
+      <button class="bsec fwa" data-f="nolei">No leídas <span class="n" data-n="nolei">0</span></button>
+      <button class="bsec fwa" data-f="ayuda">Pidieron ayuda <span class="n" data-n="ayuda">0</span></button>
+    </div>
     <div class="wa-caja" id="wa-caja">
       <div class="wa-lista" id="wa-lista"></div>
       <div class="wa-hilo" id="wa-hilo"><div class="wa-vacio">Elegí una conversación.</div></div>
@@ -575,6 +601,8 @@ dialog.dlg .fila{display:flex;gap:8px;justify-content:flex-end;flex-wrap:wrap}
   </section>
 
 </main>
+
+<dialog class="dlg dlg-cre" id="dlg-cre"><div class="cuerpo" id="cre-cuerpo"></div></dialog>
 
 <dialog class="dlg" id="dlg-importar">
   <div class="cuerpo">
@@ -1605,7 +1633,7 @@ function waLink(tel, nombre, link){
 
 
 /* ── WhatsApp (1/10): bandeja del número de CIMA ── */
-let WA = { mensajes: [], fichas: {}, sel: null, timer: null };
+let WA = { mensajes: [], fichas: {}, leidos: {}, sel: null, timer: null, filtro: 'todas' };
 const escH = t => String(t ?? '').replace(/[&<>"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
 const horaWa = ts => { const d = new Date(ts), hoy = new Date(); const hh = d.toLocaleTimeString('es-AR',{hour:'2-digit',minute:'2-digit'});
   return d.toDateString() === hoy.toDateString() ? hh : d.toLocaleDateString('es-AR',{day:'numeric',month:'short'}) + ' ' + hh; };
@@ -1618,31 +1646,41 @@ function convsWa(){
     const ult = [...ms].reverse().find(x => !esReaccion(x)) || ms[ms.length - 1];
     const nombre = f.nom || (f.ig ? '@' + f.ig : '') || ms.map(x => x.nombre).find(Boolean) || '+' + tel;
     return { tel, ms, f, ult, ultIn, nombre, ig: f.ig || ms.map(x => x.ig).find(Boolean) || null,
+      nolei: ms.some(x => x.dir === 'in' && !esReaccion(x) && x.ts > (WA.leidos[tel] || 0)),
       responder: ult.dir === 'in' && !esReaccion(ult), ayuda: !!f.pideHumana, abierta: ultIn && Date.now() - ultIn.ts < 864e5 };
   }).sort((a, b) => (b.responder - a.responder) || (b.ult.ts - a.ult.ts));
 }
 async function cargarWa(){
   if (DEMO) { pintarWa(); return; }
-  try { const d = await api('wa'); WA.mensajes = d.mensajes || []; WA.fichas = d.fichas || {}; }
+  try { const d = await api('wa'); WA.mensajes = d.mensajes || []; WA.fichas = d.fichas || {}; WA.leidos = d.leidos || {}; }
   catch (e) { console.warn('wa', e); }
   pintarWa();
   clearTimeout(WA.timer); WA.timer = setTimeout(cargarWa, 60e3);
 }
 function pintarWa(){
-  const cs = convsWa();
-  setN('n-wa', cs.filter(c => c.responder).length);
+  const todas = convsWa();
+  const F = { todas: () => true, responder: c => c.responder, nolei: c => c.nolei, ayuda: c => c.ayuda };
+  document.querySelectorAll('#wa-filtros [data-n]').forEach(el => el.textContent = todas.filter(F[el.dataset.n]).length);
+  document.querySelectorAll('.fwa').forEach(b => { b.classList.toggle('activo', b.dataset.f === WA.filtro); b.onclick = () => { WA.filtro = b.dataset.f; pintarWa(); }; });
+  const cs = todas.filter(F[WA.filtro] || F.todas);
+  setN('n-wa', todas.filter(c => c.nolei || c.responder).length);
   const lista = $('#wa-lista');
   if (!lista) return;
-  lista.innerHTML = cs.length ? cs.map(c => `<button class="wa-conv${c.tel === WA.sel ? ' on' : ''}" data-tel="${c.tel}">
+  lista.innerHTML = cs.length ? cs.map(c => `<button class="wa-conv${c.tel === WA.sel ? ' on' : ''}${c.nolei ? ' nolei' : ''}" data-tel="${c.tel}">
       <b>${escH(c.nombre)}<small>${horaWa(c.ult.ts)}</small></b>
       <span>${c.ult.dir === 'out' ? '↪ ' : ''}${escH(c.ult.texto)}</span>
       ${c.ayuda ? '<em class="pill no">Pidió ayuda</em>' : c.responder ? '<em class="pill esp">Responder</em>' : ''}
-    </button>`).join('') : '<div class="wa-vacio">Todavía no hay mensajes.<br>Acá van a aparecer los avisos que salgan por WhatsApp y lo que respondan las creadoras.</div>';
+    </button>`).join('') : (todas.length ? '<div class="wa-vacio">Ninguna conversación en este filtro. 🎉</div>' : '<div class="wa-vacio">Todavía no hay mensajes.<br>Acá van a aparecer los avisos que salgan por WhatsApp y lo que respondan las creadoras.</div>');
   lista.querySelectorAll('.wa-conv').forEach(b => b.onclick = () => abrirWa(b.dataset.tel));
   if (WA.sel) pintarHiloWa(cs.find(c => c.tel === WA.sel), false);
 }
 function abrirWa(tel){
   WA.sel = tel; $('#wa-caja').classList.add('abierto');
+  const ultIn = [...WA.mensajes].reverse().find(x => x.tel === tel && x.dir === 'in');
+  if (ultIn && ultIn.ts > (WA.leidos[tel] || 0)) {
+    WA.leidos[tel] = ultIn.ts; pintarWa();
+    if (!DEMO) api('wa_leido', { tel, ts: ultIn.ts }).catch(() => {});
+  }
   document.querySelectorAll('.wa-conv').forEach(b => b.classList.toggle('on', b.dataset.tel === tel));
   pintarHiloWa(convsWa().find(c => c.tel === tel), true);
 }
@@ -1659,7 +1697,7 @@ function pintarHiloWa(c, foco){
         ${c.f.estado ? `<span class="pill ${(ETIQUETA[c.f.estado] || [])[1] || ''}" style="margin-top:6px;display:inline-block">${escH((ETIQUETA[c.f.estado] || [c.f.estado])[0])}</span>` : '<span class="pill" style="margin-top:6px;display:inline-block">No es creadora de esta marca</span>'}
         ${c.f.kit ? `<span class="pill" style="margin-top:6px;display:inline-block">kit ${escH(nombresKits(c.f.kit, c.f.kit2))}</span>` : ''}</h3>
       <div class="acc">
-        ${c.f.id ? `<button class="bsec" id="wa-ficha">Ver en Creadoras</button>` : ''}
+        ${c.f.id ? `<button class="bsec" id="wa-ficha">Ver ficha</button>` : ''}
         ${c.f.link ? `<a class="bsec" href="${c.f.link}" target="_blank" rel="noopener" title="Su app, tal cual la ve ella">Ver su app</a>` : ''}
         ${c.ig ? `<a class="bsec" href="https://instagram.com/${encodeURIComponent(c.ig)}" target="_blank" rel="noopener">Instagram</a>` : ''}
         ${link ? `<a class="bsec" href="${link}" target="_blank" rel="noopener">Abrir en mi WhatsApp</a>` : ''}
@@ -1677,8 +1715,8 @@ function pintarHiloWa(c, foco){
     <div class="wa-pie">
       <textarea id="wa-txt" placeholder="${c.abierta ? 'Escribile…' : 'Ventana cerrada'}" ${c.abierta ? '' : 'disabled'}>${escH(borrador)}</textarea>
       <div class="fila">
-        <span class="wa-nota${c.abierta ? '' : ' no'}">${c.abierta ? `Podés contestarle desde acá ${hs ? hs + ' h ' : ''}${mins} min más.` : 'Pasaron más de 24 h desde su último mensaje: WhatsApp no deja escribirle texto libre. Usá "Abrir en mi WhatsApp".'}</span>
-        <button class="bsec pri" id="wa-env" ${c.abierta ? '' : 'disabled'}>Enviar</button>
+        <span class="wa-nota${c.abierta ? '' : ' no'}">${c.abierta ? `Podés contestarle desde acá ${hs ? hs + ' h ' : ''}${mins} min más.` : (c.ultIn ? 'Pasaron más de 24 h desde su último mensaje.' : 'Ella todavía no escribió.') + ' WhatsApp no deja mandarle texto libre: pedile que responda y se abren 24 h.'}</span>
+        ${c.abierta ? `<button class="bsec pri" id="wa-env">Enviar</button>` : `<button class="bsec pri" id="wa-consulta">Pedirle que responda</button>`}
       </div>
     </div>`;
   const ms = $('#wa-msgs');
@@ -1686,11 +1724,17 @@ function pintarHiloWa(c, foco){
   ms.onscroll = () => { WA._pos = ms.scrollTop; WA._abajo = ms.scrollHeight - ms.scrollTop - ms.clientHeight < 40; };
   $('#wa-volver').onclick = () => { WA.sel = null; $('#wa-caja').classList.remove('abierto'); pintarWa(); };
   const vf = $('#wa-ficha');
-  if (vf) vf.onclick = () => {
-    filtroCre = 'todas';
-    document.querySelectorAll('.fcre').forEach(b => b.classList.toggle('activo', b.dataset.f === 'todas'));
-    const bus = $('#buscar'); if (bus) bus.value = c.ig || c.nombre;
-    if (puede('creadoras')) { pintarCreadoras(); irA('creadoras'); }
+  if (vf) vf.onclick = () => abrirCreadora(c.f.id);
+  const cons = $('#wa-consulta');
+  if (cons) cons.onclick = async () => {
+    if (!confirm(`Le llega por WhatsApp: "Collabs de ${CFG.nombre} 💛 Hola, te escribimos por tu collab. Respondé este mensaje así seguimos la charla por acá." ¿Lo mando?`)) return;
+    cons.disabled = true; cons.textContent = 'Enviando…';
+    try {
+      const r = await api('wa_consulta', { tel: c.tel, id: c.f.id || null });
+      if (!r.ok) { alert(r.msg || 'No se pudo enviar.'); cons.disabled = false; cons.textContent = 'Pedirle que responda'; return; }
+      WA.mensajes.push({ tel: c.tel, dir: 'out', texto: `Collabs de ${CFG.nombre} 💛 Te escribimos por tu collab. Respondé este mensaje así seguimos la charla por acá.`, ts: Date.now(), manual: true, plantilla: 'cima_consulta' });
+      pintarWa();
+    } catch { alert('No se pudo enviar.'); cons.disabled = false; cons.textContent = 'Pedirle que responda'; }
   };
   const env = $('#wa-env');
   if (env) env.onclick = async () => {
@@ -1707,6 +1751,107 @@ function pintarHiloWa(c, foco){
   };
   if (foco && c.abierta) $('#wa-txt').focus();
 }
+
+
+/* ── Ficha de la creadora en popup (2/10): etapa, hace cuánto, qué falta, alertas, todo lo clave ── */
+const fechaLarga = ts => ts ? new Date(ts).toLocaleDateString('es-AR', { day:'numeric', month:'short' }) + ' ' + new Date(ts).toLocaleTimeString('es-AR', { hour:'2-digit', minute:'2-digit' }) : '—';
+const haceTxt = ts => { if (!ts) return ''; const d = Date.now() - ts, dd = Math.floor(d / 864e5), hh = Math.floor(d / 36e5);
+  return dd >= 1 ? `hace ${dd} día${dd === 1 ? '' : 's'}` : hh >= 1 ? `hace ${hh} h` : 'hace un rato'; };
+const diasA = ts => Math.ceil((ts - Date.now()) / 864e5);
+function desdeEstado(c){
+  const ev = [...(c.eventos || [])].reverse().find(e => e.tipo === 'estado' && e.a === c.estado);
+  if (ev) return ev.en;
+  const F = c.fechas || {};
+  return { invitada: F.decidida, descartada: F.creada, rechazada: F.decidida, ficha_completa: F.ficha, briefing_ok: F.ficha,
+    enviado: F.despachado, recibido: F.recibido, vencida: F.vencida, entregado: F.entregado, cambios: F.cambios,
+    publicado: F.publicado, cumplida: F.cumplida, por_revisar: F.creada, revisar: F.creada, en_cola: F.creada }[c.estado] || null;
+}
+function queFalta(c){
+  const F = c.fechas || {}, ella = CREADORA_PUBLICA();
+  switch (c.estado) {
+    case 'por_revisar': case 'revisar': case 'en_cola': return 'Hay que decidir si entra (Admisión).';
+    case 'descartada': return `Quedó afuera por el filtro${c.motivo ? ': ' + c.motivo : ''}. Se puede aceptar igual desde Creadoras → Quedaron afuera.`;
+    case 'rechazada': return 'La rechazaron. No sigue.';
+    case 'invitada': return 'Le falta completar la ficha con sus datos de envío.';
+    case 'ficha_completa': case 'briefing_ok': return 'Ficha lista: falta despachar el kit (Envíos).';
+    case 'enviado': { const d = F.despachado ? Math.floor((Date.now() - F.despachado) / 864e5) : null; return `Kit despachado${d != null ? ` hace ${d} día${d === 1 ? '' : 's'}` : ''}: falta que confirme que le llegó.`; }
+    case 'recibido': { if (!F.deadline) return 'Está grabando.'; const d = diasA(F.deadline); return d >= 0 ? `Está grabando. Le quedan ${d} día${d === 1 ? '' : 's'} (vence el ${new Date(F.deadline).toLocaleDateString('es-AR',{day:'numeric',month:'short'})}).` : `Se pasó del plazo hace ${-d} día${d === -1 ? '' : 's'}.`; }
+    case 'vencida': return 'Se le pasó el plazo. Todavía puede entregar: hay que apurarla.';
+    case 'entregado': return ella ? (F.aprobadoVideo ? 'Video aprobado: falta que lo publique y cargue los links.' : 'Mandó el Drive: hay que revisarlo y aprobarlo (Entregas).') : 'Mandó el video: hay que revisarlo y subirlo como collab (Entregas).';
+    case 'cambios': return `Le pedimos un ajuste${c.cambiosMotivo ? ': «' + c.cambiosMotivo + '»' : ''}. Falta que lo vuelva a mandar.`;
+    case 'publicado': return ella ? 'Cargó los links: falta revisarlos y dar la collab por cumplida.' : (c.reel && c.reel.collab ? 'Collab aceptada: queda medir views y darla por cumplida.' : 'Publicado: falta que acepte la invitación de colaboración.');
+    case 'cumplida': return 'Collab completa. Puede pedir el próximo kit.';
+    default: return '';
+  }
+}
+async function abrirCreadora(id){
+  const dlg = $('#dlg-cre'), cu = $('#cre-cuerpo');
+  cu.innerHTML = '<div class="wa-vacio">Cargando…</div>'; dlg.showModal();
+  let c;
+  try { const r = await api('creadora', { id }); c = r.creadora; } catch (e) { cu.innerHTML = '<div class="wa-vacio">No se pudo cargar la ficha.</div>'; return; }
+  const F = c.fechas || {}, desde = desdeEstado(c), et = ETIQUETA[c.estado] || [c.estado, ''];
+  const fila = (k, v) => v || v === 0 ? `<div class="f"><span>${k}</span><b>${v}</b></div>` : '';
+  const num = n => n == null ? null : Number(n).toLocaleString('es-AR');
+  const alertas = [
+    c.pideHumana && `<div class="cre-alerta no">Pidió hablar con alguien ${haceTxt(c.pideHumana)}.</div>`,
+    c.dijoAceptoEn && !(c.reel && c.reel.collab) && `<div class="cre-alerta">Dice que aceptó la collab (${haceTxt(c.dijoAceptoEn)}) y todavía no figura.</div>`,
+    c.estado === 'recibido' && F.deadline && diasA(F.deadline) <= 2 && `<div class="cre-alerta no">Vence en ${Math.max(0, diasA(F.deadline))} día(s).</div>`,
+    c.estado === 'enviado' && F.despachado && Date.now() - F.despachado > 7 * 864e5 && `<div class="cre-alerta">Hace más de una semana que salió el kit y no confirmó que le llegó.</div>`,
+    c.kit && c.kit2 && c.kit === c.kit2 && `<div class="cre-alerta">Eligió dos veces el mismo kit.</div>`,
+    c.quiereOtro && `<div class="cre-alerta">Quiere otro kit (${haceTxt(c.quiereOtro)}).</div>`,
+  ].filter(Boolean).join('');
+  const resp = Object.entries(c.respuestas || {}).map(([k, v]) => {
+    const p = preguntasMarca().concat(camposMarca()).find(x => x.campo === k);
+    return fila((p && (p.corto || p.campo)) || k, escH(etiquetaResp(v, k)));
+  }).join('');
+  const ent = (c.entregas || []).map(e => `${e.drive ? fila(`Drive ${e.n}`, `<a href="${escH(e.drive)}" target="_blank" rel="noopener">abrir</a>${e.aprobadoEn ? ' · aprobado' : ''}`) : ''}
+    ${e.reel ? fila(`Reel ${e.n}`, `<a href="${escH(e.reel.url)}" target="_blank" rel="noopener">ver</a> · ${num(e.reel.views)} views${e.reel.collab ? ' ✓' : ''}`) : ''}
+    ${e.tiktok ? fila(`TikTok ${e.n}`, `<a href="${escH(e.tiktok.url)}" target="_blank" rel="noopener">ver</a> · ${num(e.tiktok.views)} views`) : ''}`).join('');
+  const reelPrincipal = !(c.entregas || []).some(e => e.reel) && c.reel ? fila('Reel', `<a href="${escH(c.reel.url)}" target="_blank" rel="noopener">ver</a> · ${num(c.reel.views)} views · ${c.reel.collab ? 'collab ✓' : 'collab sin aceptar'}`) : '';
+  const nombresEv = { estado: null, cupon: 'Cupón creado', video_aprobado: 'Video aprobado', dijo_acepto: 'Dijo que aceptó la collab', entrar: 'Entró a la app', bono_referida: 'Bono por referida' };
+  const hist = (c.eventos || []).filter(e => e.tipo === 'estado' || nombresEv[e.tipo]).map(e => `<div class="h"><time>${fechaLarga(e.en)}</time><span>${e.tipo === 'estado' ? `${escH((ETIQUETA[e.a] || [e.a])[0])}${e.actor ? ` <small style="color:var(--topo)">· ${escH(e.actor)}</small>` : ''}${e.motivo ? ` — «${escH(e.motivo)}»` : ''}` : escH(nombresEv[e.tipo])}</span></div>`).join('');
+  const env = c.envio ? [c.envio.calle + ' ' + c.envio.numero + (c.envio.piso ? ', ' + c.envio.piso : ''), [c.envio.localidad, c.envio.provincia].filter(Boolean).join(', ') + (c.envio.cp ? ` (CP ${c.envio.cp})` : ''), c.envio.referencia].filter(Boolean).map(escH).join('<br>') : '';
+  const waL = waLinkTexto(c.tel, '');
+  cu.innerHTML = `
+    <div class="cre-cab">
+      <h2>${escH(c.nombre || '@' + c.ig)}<small>@${escH(c.ig)}${c.tiktok ? ' · TikTok ' + escH(c.tiktok) : ''}${c.tel ? ' · ' + escH(c.tel) : ''}</small></h2>
+      <button class="bsec" onclick="document.getElementById('dlg-cre').close()">Cerrar</button>
+    </div>
+    <div class="cre-etapa">
+      <span class="pill ${et[1] || ''}">${escH(et[0])}</span>
+      <div class="hace">${desde ? `En esta etapa ${haceTxt(desde)} · desde el ${fechaLarga(desde)}` : ''}</div>
+      <div class="falta">${escH(queFalta(c))}</div>
+    </div>
+    ${alertas}
+    <div class="cre-grid">
+      <div class="cre-box"><h4>Kit</h4>
+        ${fila('Kit', c.kit ? escH(nombresKits(c.kit, c.videos === 'dos' ? c.kit2 : null)) : null)}
+        ${fila('Videos', c.videos === 'dos' ? 'Dos' : (c.kit ? 'Uno' : null))}
+        ${fila('Colores', c.tonos && c.tonos.length ? escH(c.tonos.map(nombreKit).join(', ')) : null)}
+        ${fila('Código', c.codigo ? escH(c.codigo) : null)}
+        ${resp}
+      </div>
+      <div class="cre-box"><h4>Su Instagram</h4>
+        ${fila('Seguidores', c.metricas ? num(c.metricas.seguidores) : null)}
+        ${fila('Posts 90 días', c.metricas ? num(c.metricas.posts90) : null)}
+        ${fila('Views por reel', c.metricas ? num(c.metricas.views) : null)}
+        ${c.metricas && c.metricas.privada ? fila('Cuenta', 'privada') : ''}
+        ${fila('Views de la collab', c.views ? num(c.views) : null)}
+        ${c.referidaPor ? fila('Referida por', '@' + escH(c.referidaPor)) : ''}
+        ${c.referidasCumplidas ? fila('Referidas que cumplieron', c.referidasCumplidas) : ''}
+      </div>
+      ${ent || reelPrincipal || c.tiktokVideo ? `<div class="cre-box"><h4>Entregas</h4>${ent}${reelPrincipal}${c.tiktokVideo && !(c.entregas || []).some(e => e.tiktok) ? fila('TikTok', `<a href="${escH(c.tiktokVideo.url)}" target="_blank" rel="noopener">ver</a> · ${num(c.tiktokVideo.views)} views`) : ''}</div>` : ''}
+      ${env ? `<div class="cre-box"><h4>Envío</h4><div style="line-height:1.5">${env}</div>${c.email ? `<div style="margin-top:6px;color:var(--tinta2)">${escH(c.email)}</div>` : ''}</div>` : ''}
+    </div>
+    ${hist ? `<div class="cre-box cre-hist" style="margin-top:10px"><h4>Historial</h4>${hist}</div>` : ''}
+    <div class="cre-acc">
+      <a class="bsec" href="${c.link}" target="_blank" rel="noopener">Ver su app</a>
+      <a class="bsec" href="https://instagram.com/${encodeURIComponent(c.ig)}" target="_blank" rel="noopener">Instagram</a>
+      ${waL ? `<a class="bsec" href="${waL}" target="_blank" rel="noopener">Abrir en mi WhatsApp</a>` : ''}
+    </div>`;
+}
+$('#dlg-cre') && $('#dlg-cre').addEventListener('click', e => { if (e.target.id === 'dlg-cre') e.target.close(); });
+document.addEventListener('click', e => { const t = e.target.closest && e.target.closest('.abre-cre'); if (t && t.dataset.id && !DEMO) abrirCreadora(t.dataset.id); });
 
 /* ── creadoras ── */
 const ETIQUETA = {
@@ -1804,7 +1949,7 @@ function pintarCreadoras(){
       <tbody>${lista.map(c => {
         const [et,cl] = ETIQUETA[c.estado] || [c.estado,''];
         return `<tr>
-          <td><b>${c.nom}</b><span class="n2"><a href="https://instagram.com/${c.ig}" target="_blank" rel="noopener" class="verreel">@${c.ig}</a>${c.reel ? ` · <a href="${c.reel}" target="_blank" rel="noopener" class="verreel">ver reel</a>` : ''}</span></td>
+          <td><b class="abre-cre" data-id="${c.id}" title="Ver la ficha completa" style="cursor:pointer;text-decoration:underline dotted">${c.nom}</b><span class="n2"><a href="https://instagram.com/${c.ig}" target="_blank" rel="noopener" class="verreel">@${c.ig}</a>${c.reel ? ` · <a href="${c.reel}" target="_blank" rel="noopener" class="verreel">ver reel</a>` : ''}</span></td>
           <td><span class="pill ${cl}">${et}</span>${c.motivo?`<span class="n2" title="Motivo del filtro automático">${MOTIVO[c.motivo]||c.motivo}</span>`:''}${c.importada?'<span class="pill" style="margin-left:4px" title="Entró por importación, sin pasar por la landing">importada</span>':''}${c.bono?'<span class="pill ok" style="margin-left:4px">bono</span>':''}${c.pideHumana?'<span class="pill no" style="margin-left:4px" title="Tocó “Hablar con alguien” en el bot">pide hablar</span>':''}${c.quiereOtro?'<span class="pill" style="margin-left:4px">quiere otro kit</span>':''}${c.referidaPor?`<span class="pill" style="margin-left:4px" title="Entró con el link de @${c.referidaPor}">ref @${c.referidaPor}</span>`:''}${c.referidasCumplidas?`<span class="pill ok" style="margin-left:4px" title="Referidas que cumplieron su primera collab">${c.referidasCumplidas} referida${c.referidasCumplidas>1?'s':''} ✓</span>`:''}</td><td class="dmacc">${KIT_REPETIDO(c)&&c.id ? `<div style="margin-bottom:6px">${c.kit2AvisadaEn
             ? '<span class="pill ok" title="Ya se le avisó que sus dos kits quedaron iguales">kits iguales · avisada ✓</span>'
             : `<span class="pill no" title="Le quedaron los dos kits iguales">kits iguales</span>${c.tel ? `<a class="mini" target="_blank" href="${waLinkTexto(c.tel, mensajeKit2(c))}" title="Abre WhatsApp con el mensaje y su link">WhatsApp</a>` : ''}<button class="mini copiarkit2" data-id="${c.id}" title="Copia el mensaje con su link">copiar</button><button class="mini listokit2" data-id="${c.id}" title="Marcar que ya se lo mandaste">listo</button>`}</div>` : ''}${c.estado==='invitada'&&c.id ? (c.avisadaEn
@@ -2018,7 +2163,7 @@ function aplicarRol(){
     pintarTodo();
   }
 })();
-const APP_VERSION = '2026-10-02-d';
+const APP_VERSION = '2026-10-02-e';
 </script>
 </body>
 </html>
