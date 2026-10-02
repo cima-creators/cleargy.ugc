@@ -610,6 +610,13 @@ body.condemo .wrap{padding-bottom:84px}
       <button class="btn" id="btn-llego">Sí, ya me llegó</button>
     </div>
 
+    <!-- 2/10: ya acepté la collab (marcas donde publica la marca, Mi Luz) -->
+    <div class="card oculto" id="bloque-collab">
+      <h2 id="collab-tit">¿Ya aceptaste la collab?</h2>
+      <small style="margin-bottom:14px" id="collab-txt">En Instagram: Notificaciones → «te invitó a colaborar» → Aceptar. Cuando lo hagas, tocá acá y lo verificamos al toque.</small>
+      <button class="btn" id="btn-collab">Ya la acepté</button>
+    </div>
+
     <div id="kit2-estado"></div>
 
     <div class="card">
@@ -1080,6 +1087,30 @@ const TOKEN = QS.get('t');
 // Soporte de la app (CIMA, la agencia): por si algo de la app no funciona. Es el mismo para todas las marcas.
 const SOPORTE_WA = '5491170823624';
 const soporteLink = (motivo) => 'https://wa.me/' + SOPORTE_WA + '?text=' + encodeURIComponent(`Hola! Vengo de la app de collabs de ${(CFG && CFG.nombre) || 'la marca'}${D && D.ig ? ' (soy @' + D.ig + ')' : ''}. Necesito ayuda con: ${motivo || ''}`);
+
+/* 2/10: ella avisa que aceptó la collab y lo re-verificamos en el momento */
+function pintarCollab(e){
+  const b = $('#bloque-collab');
+  const ver = !CREADORA_PUBLICA() && e === 'publicado' && D.reel && D.reel.url && !D.reel.collab;
+  b.classList.toggle('oculto', !ver);
+  if (!ver) return;
+  if (D.dijoAceptoEn){
+    $('#collab-tit').textContent = 'Nos avisaste que la aceptaste';
+    $('#collab-txt').textContent = 'Todavía no la vemos en el reel. A veces Instagram tarda unos minutos: probá de nuevo en un rato. Si ya la aceptaste, quedó avisado y lo revisa el equipo.';
+    $('#btn-collab').textContent = 'Verificar de nuevo';
+  }
+}
+document.addEventListener('click', async ev => {
+  if (!ev.target || ev.target.id !== 'btn-collab') return;
+  const btn = ev.target; btn.disabled = true; const antes = btn.textContent; btn.textContent = 'Verificando…';
+  try {
+    const r = await api('acepte', {});
+    if (r && r.collab){ D.reel = { ...(D.reel || {}), collab: true }; }
+    else { D.dijoAceptoEn = Date.now(); }
+    pintarEstado();
+  } catch { alert('No se pudo verificar. Probá de nuevo en un rato.'); }
+  btn.disabled = false; if (btn.textContent === 'Verificando…') btn.textContent = antes;
+});
 
 async function api(accion, datos){
   if (DEMO) return demo(accion, datos);
@@ -1640,7 +1671,9 @@ function pintarEstado(){
     cambios:    ['Tu entrega','Te pedimos<br>un ajuste', (D.cambiosMotivo || 'Fijate el mensaje que te mandamos.') + (CREADORA_PUBLICA() ? ' Cuando lo tengas, volvé a subir el Drive acá abajo.' : ' Cuando lo tengas, volvé a pegar el link acá abajo.'),'Ajustes'],
     publicado:  CREADORA_PUBLICA()
       ? ['Tu collab','Recibimos<br>tus links', (D.reel && D.reel.collab === false ? `En el reel no aparece @${CFG.cuentaIg} etiquetada: editalo y etiquetala. ` : '') + 'Lo estamos revisando. Resubilo a tus historias.' + (D.videos === 'dos' && !(D.entregas && D.entregas[1]) ? ' Cuando tengas el segundo video, cargalo abajo.' : ''),'En revisión']
-      : ['Tu collab','¡Ya está<br>publicado!','Aceptá la invitación de colaboración en Instagram y resubilo a tus historias.','Publicado'],
+      : (D.reel && D.reel.collab
+        ? ['Tu collab','¡Collab<br>aceptada!','Ya aparece en tu perfil. Resubilo a tus historias: esas views suman para tus bonos.','Publicado']
+        : ['Tu collab','¡Ya está<br>publicado!','Aceptá la invitación de colaboración en Instagram y resubilo a tus historias.','Publicado']),
     cumplida:   ['Tu collab','¡Listo!','Ya podés pedir tu próximo kit.','Completada'],
     vencida:    ['Tu plazo','Se te pasó<br>el plazo', CREADORA_PUBLICA() ? 'El kit ya lo tenés: mandanos tu video hoy acá abajo. Sin video no podemos mandarte más kits.' : 'El kit ya lo tenés: entregá tu video hoy acá abajo. Sin video no podemos mandarte más kits.','Atrasada']
   }[e] || ['Tu estado','—','','En curso'];
@@ -1677,6 +1710,7 @@ function pintarEstado(){
   $('#hero-badge').textContent = cab[3];
 
   $('#bloque-llego').classList.toggle('oculto', e !== 'enviado');
+  pintarCollab(e);
   // cuando publica la creadora, el bloque sigue abierto en `publicado` (ajustar links, cargar el 2º video)
   // `vencida` sigue pudiendo entregar: el plazo la apura, no la deja afuera
   const conSubir = CREADORA_PUBLICA() ? ['enviado','recibido','cambios','entregado','publicado','vencida'] : ['enviado','recibido','cambios','entregado','vencida'];
@@ -1822,7 +1856,7 @@ function pintarMarca(){
   } catch { if (DEMO){ precargar(); traerBorrador(); } ver(DEMO ? 'v-ficha' : 'v-error'); }
 })();
 
-const APP_VERSION = '2026-09-29-b';
+const APP_VERSION = '2026-10-02-a';
 </script>
 </body>
 </html>

@@ -785,7 +785,7 @@ async function cargar(){
     url: (f.reel && f.reel.url) || '#',
     views: ((f.reel && f.reel.views) || 0) + ((f.tiktok && f.tiktok.views) || 0),
     viewsTt: (f.tiktok && f.tiktok.views) || 0, tiktok: (f.tiktok && f.tiktok.url) || '',
-    collab: !!(f.reel && f.reel.collab),
+    collab: !!(f.reel && f.reel.collab), dijoAcepto: f.dijoAceptoEn || 0,
     dias: f.recibidoEn && f.publicadoEn ? Math.max(1, Math.ceil((f.publicadoEn - f.recibidoEn) / 864e5)) : 0,
     nro: (f.cumplidas || 0) + 1,
     // kits y segunda entrega (Valca)
@@ -1383,7 +1383,7 @@ function tarjetaEntrega(e, revisar){
       <div class="cuerpo">
         <h3>${e.nom} <span class="hand">@${e.ig}${e.tiktokUser ? ` · TikTok @${e.tiktokUser}` : ''}</span></h3>
         <div class="pills">
-          <span class="pill ${e.collab?'ok':'no'}">${ella ? (e.collab ? '✓ Etiquetó a la marca' : '✕ Sin etiqueta a la marca') : (e.collab?'✓ Aceptó la collab':'✕ No aceptó la collab aún')}</span>
+          <span class="pill ${e.collab?'ok':'no'}">${ella ? (e.collab ? '✓ Etiquetó a la marca' : '✕ Sin etiqueta a la marca') : (e.collab?'✓ Aceptó la collab':(e.dijoAcepto?'✕ No figura · ella dice que la aceptó':'✕ No aceptó la collab aún'))}</span>
           <span class="pill ${pocasViews?'esp':'ok'}" title="${e.viewsTt?'Reel + TikTok':'Reel'}">${e.views.toLocaleString('es-AR')} views${e.viewsTt?` (TT ${e.viewsTt.toLocaleString('es-AR')})`:''}</span>${e.tiktok?`<a class="pill" href="${e.tiktok}" target="_blank" rel="noopener" style="text-decoration:none">ver TikTok</a>`:''}
           ${ella && e.drive ? `<a class="pill" href="${e.drive}" target="_blank" rel="noopener" style="text-decoration:none">📁 Drive (video + fotos)</a>` : ''}
           ${ella && e.kit ? `<span class="pill">kit ${nombresKits(e.kit, e.videos === 'dos' ? e.kit2 : null)}</span>` : ''}
@@ -1988,7 +1988,7 @@ function aplicarRol(){
     pintarTodo();
   }
 })();
-const APP_VERSION = '2026-10-01-c';
+const APP_VERSION = '2026-10-02-a';
 </script>
 </body>
 </html>
