@@ -341,7 +341,7 @@ function armarPasos(){
     valida: v => c.obligatorio ? (v.replace(/^@/, '').trim().length >= 2 || (c.error || 'Completá este dato')) : true }));
   const camposAntes = campos.filter(c => c.pos === 'antes'), camposDespues = campos.filter(c => c.pos !== 'antes');
   // elección a mano: los colores (Mi Luz) siempre; el 2º kit (kitPorRespuesta) solo si marcó dos videos
-  const elegirN = CFG.elegir > 0 ? CFG.elegir : (CFG.kitPorRespuesta ? (CFG.kit2Elegir || 1) : 0);
+  const elegirN = CFG.elegir > 0 ? CFG.elegir : (CFG.kitPorRespuesta && !CFG.kit2Igual ? (CFG.kit2Elegir || 1) : 0);
   const eleccion = elegirN > 0 ? [{ tipo:'colores', q:CFG.eleccion.titulo, a:CFG.eleccion.ayuda, elegir: elegirN,
     condicion: CFG.kitPorRespuesta ? () => R.videos === 'dos' : null }] : [];
 
@@ -738,7 +738,7 @@ async function enviar(){
   armarPasos();
   pintar();
 })();
-const APP_VERSION = '2026-09-29-b';
+const APP_VERSION = '2026-10-03-c';
 </script>
 </body>
 </html>

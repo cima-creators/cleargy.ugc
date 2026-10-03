@@ -768,7 +768,7 @@ function separarCalle(calle, numero){
 /* ── opt-in por marca (Valca) ── */
 const CREADORA_PUBLICA = () => !!(CFG && CFG.publica === 'creadora');
 const nombreKit = id => { const k = (CFG && CFG.opciones || []).find(o => o.id === id); return k ? k.nom : (id || ''); };
-const nombresKits = (k1, k2) => [k1, k2].filter(Boolean).map(nombreKit).join(' + ') || '—';
+const nombresKits = (k1, k2) => (k1 && k1 === k2) ? '2 × ' + nombreKit(k1) : ([k1, k2].filter(Boolean).map(nombreKit).join(' + ') || '—');
 const conCupos = () => !!(CFG && CFG.cupos);
 
 /* Qué ve cada rol. admin y equipo ven todo; el cliente (marca) no ve
@@ -1805,7 +1805,7 @@ async function abrirCreadora(id){
     c.dijoAceptoEn && !(c.reel && c.reel.collab) && `<div class="cre-alerta">Dice que aceptó la collab (${haceTxt(c.dijoAceptoEn)}) y todavía no figura.</div>`,
     c.estado === 'recibido' && F.deadline && diasA(F.deadline) <= 2 && `<div class="cre-alerta no">Vence en ${Math.max(0, diasA(F.deadline))} día(s).</div>`,
     c.estado === 'enviado' && F.despachado && Date.now() - F.despachado > 7 * 864e5 && `<div class="cre-alerta">Hace más de una semana que salió el kit y no confirmó que le llegó.</div>`,
-    c.kit && c.kit2 && c.kit === c.kit2 && `<div class="cre-alerta">Eligió dos veces el mismo kit.</div>`,
+    !CFG.kit2Igual && c.kit && c.kit2 && c.kit === c.kit2 && `<div class="cre-alerta">Eligió dos veces el mismo kit.</div>`,
     c.quiereOtro && `<div class="cre-alerta">Quiere otro kit (${haceTxt(c.quiereOtro)}).</div>`,
   ].filter(Boolean).join('');
   const resp = Object.entries(c.respuestas || {}).map(([k, v]) => {
@@ -1887,7 +1887,7 @@ document.addEventListener('click', e => {
 });
 
 /* 29/9: dos videos con los dos kits iguales, antes del despacho: hay que avisarles que elijan el 2º en su app. */
-const KIT_REPETIDO = c => c.videos === 'dos' && c.kit && c.kit === c.kit2 &&
+const KIT_REPETIDO = c => !(CFG && CFG.kit2Igual) && c.videos === 'dos' && c.kit && c.kit === c.kit2 &&
   ['por_revisar','revisar','en_cola','invitada','ficha_completa','briefing_ok'].includes(c.estado);
 function mensajeKit2(c){
   const n = String(c.nom || '').split(' ')[0];
@@ -2171,7 +2171,7 @@ function aplicarRol(){
     pintarTodo();
   }
 })();
-const APP_VERSION = '2026-10-03-b';
+const APP_VERSION = '2026-10-03-c';
 </script>
 </body>
 </html>

@@ -1179,7 +1179,7 @@ const ELEGIR = () => CFG.elegir || 0;
 /* 29/9: si el 2º kit quedó igual al 1º (la pantalla del registro no mostraba cuál era el suyo),
    que elija el segundo antes del despacho. Aparece en la ficha y en la pantalla principal. */
 function kit2Repetido(){
-  return !!(CFG.kitPorRespuesta && D && D.videos === 'dos' && D.kit2 && D.kit2 === D.kit &&
+  return !!(CFG.kitPorRespuesta && !CFG.kit2Igual && D && D.videos === 'dos' && D.kit2 && D.kit2 === D.kit &&
     ['por_revisar','revisar','en_cola','invitada','ficha_completa','briefing_ok'].includes(D.estado));
 }
 function montarKit2Fix(){
@@ -1662,7 +1662,7 @@ function pintarEstado(){
     enviado:    ['Tu kit','Va en<br>camino','Avisanos cuando te llegue.','Despachado'],
     recibido:   ['Te quedan',
                  (dias === 1 ? 'Te queda<br>un día' : 'Te quedan<br>' + (dias!==null?dias:'—') + ' días'),
-                 'Tu kit ya llegó. Grabá tranquila.','En curso'],
+                 'Tu kit ya llegó. Grabá con tiempo.','En curso'],
     entregado:  !CREADORA_PUBLICA()
       ? ['Tu entrega','Recibimos<br>tu video','Lo estamos revisando. Te avisamos por Instagram cuando lo subamos.','En revisión']
       : (D.aprobadoVideoEn
@@ -1856,7 +1856,7 @@ function pintarMarca(){
   } catch { if (DEMO){ precargar(); traerBorrador(); } ver(DEMO ? 'v-ficha' : 'v-error'); }
 })();
 
-const APP_VERSION = '2026-10-02-a';
+const APP_VERSION = '2026-10-03-c';
 </script>
 </body>
 </html>
