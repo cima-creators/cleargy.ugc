@@ -1512,8 +1512,10 @@ function renderStatusPanel(){
   const today=argToday();
   el.innerHTML=CREATORS.map(c=>{
     const _desde=((data&&data.startDates)||{})[c];
-    const total=(data.videos||[]).filter(v=>v.creator===c&&v.status!=='rejected'
-      &&(!_desde||(v.date&&argDate(v.date)>=_desde))).length;   // solo los de su tanda
+    const _prev=((data&&data.previos)||{})[c];                  // videos de tandas anteriores
+    const _suyos=(data.videos||[]).filter(v=>v.creator===c&&v.status!=='rejected');
+    const total=_prev!=null ? Math.max(0,_suyos.length-_prev)   // solo los de su tanda
+      : _suyos.filter(v=>!_desde||(v.date&&argDate(v.date)>=_desde)).length;
     const hoy=(data.videos||[]).filter(v=>v.creator===c&&argDate(v.date)===today).length;
     // Alerta: no subió ni hoy ni ayer (nada que ver con el bono de racha)
     const frenada=getVideosOnDay(c,0)===0&&getVideosOnDay(c,1)===0;
@@ -3053,7 +3055,7 @@ loadConfig();
 <!-- Auto-actualización: GitHub Pages cachea el HTML y los celulares lo retienen mucho más.
      Esto compara la versión publicada con la que está corriendo y refresca sola. -->
 <script>
-const APP_VERSION = '2026-10-03-e';
+const APP_VERSION = '2026-10-03-f';
 (function(){
   var CLAVE='cima_ver_reload';
   function hayAlguienEscribiendo(){

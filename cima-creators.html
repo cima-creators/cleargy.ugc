@@ -1415,10 +1415,18 @@ function myCampaignStart(){
   }
   return (sharedData.startDates||{})[currentUser]||BRAND.defaultCampaignStart||"2026-05-25";
 }
-// Videos de la tanda en curso: si tiene fecha propia, los de antes son de la tanda anterior
+// Videos de la tanda en curso. Dos formas de cortar, en este orden:
+//  1) `previos[creadora]`: cuántos videos ya entregó en tandas anteriores (los primeros N no cuentan).
+//     Sirve cuando la tanda nueva arrancó a mitad de día y la fecha no alcanza para separarlas.
+//  2) `startDates[creadora]`: cuentan los videos de esa fecha en adelante.
 function misDeLaTanda(){
-  const d=(sharedData.startDates||{})[currentUser];
   const v=myVideos();
+  const prev=(sharedData.previos||{})[currentUser];
+  if(prev!=null){
+    const ord=[...v].sort((a,b)=>String(a.date||"").localeCompare(String(b.date||"")));
+    return ord.slice(prev);
+  }
+  const d=(sharedData.startDates||{})[currentUser];
   if(!d) return v;
   return v.filter(x=>x.date && new Date(x.date).toLocaleDateString("sv")>=d);
 }
@@ -2603,7 +2611,7 @@ loadData();
 <!-- Auto-actualización: GitHub Pages cachea el HTML y los celulares lo retienen mucho más.
      Esto compara la versión publicada con la que está corriendo y refresca sola. -->
 <script>
-const APP_VERSION = '2026-10-03-e';
+const APP_VERSION = '2026-10-03-f';
 (function(){
   var CLAVE='cima_ver_reload';
   function hayAlguienEscribiendo(){
