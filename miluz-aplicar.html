@@ -733,14 +733,14 @@ async function enviar(){
     return;
   }
   aplicarEstilo(CFG.estilo);
-  document.title = `${CFG.nombre} · Sumate como creadora`;
+  document.title = `${CFG.nombre} · Sumate como ${CFG.genero === 'm' ? 'creador' : 'creadora'}`;
   if (CFG.estilo && CFG.estilo.logoImg) $('#marca-nombre').innerHTML = `<img src="${CFG.estilo.logoImg}" alt="${CFG.nombre}" class="logo-img">`;
   else $('#marca-nombre').textContent = (CFG.estilo && CFG.estilo.logoTexto) || CFG.nombre;
   if (CFG.estilo && CFG.estilo.logoTamano === 'grande') document.body.classList.add('logo-grande');
   armarPasos();
   pintar();
 })();
-const APP_VERSION = '2026-10-03-e';
+const APP_VERSION = '2026-10-03-f';
 </script>
 </body>
 </html>

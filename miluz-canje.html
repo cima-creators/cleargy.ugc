@@ -1804,7 +1804,7 @@ function barraDemo(){
 /* ── textos fijos de la marca en el markup ── */
 function pintarMarca(){
   const est = CFG.estilo || {};
-  document.title = `${CFG.nombre} · Creadoras`;
+  document.title = `${CFG.nombre} · ${CFG.genero === 'm' ? 'Creadores' : 'Creadoras'}`;
   $('#quien').textContent = `${CFG.nombre} · Creadoras`;
   $('#av').textContent = est.iniciales || CFG.nombre.slice(0,2).toUpperCase();
   $('#terminos-txt').innerHTML = (CFG.formulario && CFG.formulario.terminos) || `Autorizo a ${CFG.nombre} a usar el contenido que publique en su perfil y en su publicidad. Confirmo que los datos son correctos.`;
@@ -1858,7 +1858,7 @@ function pintarMarca(){
   } catch { if (DEMO){ precargar(); traerBorrador(); } ver(DEMO ? 'v-ficha' : 'v-error'); }
 })();
 
-const APP_VERSION = '2026-10-03-e';
+const APP_VERSION = '2026-10-03-f';
 </script>
 </body>
 </html>
