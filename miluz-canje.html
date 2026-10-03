@@ -934,7 +934,7 @@ function seccionCta(){
   const cod = (D && D.codigo) || '';
   const ej = (c.ejemplos || []).slice(0, 2).map(x => x.replace(/\{codigo\}/g, cod || 'TUCÓDIGO'));
   return `<h3>Cómo armar tu video</h3>
-     <p>No hace falta un guion. Contalo como se lo contarías a una amiga, en este orden:</p>
+     <p>No hace falta un guion. Contalo como se lo contarías ${CFG.genero === 'm' ? 'a un amigo' : 'a una amiga'}, en este orden:</p>
      <ul class="limpia">
        <li><span class="si">1</span> ${(CFG.briefing || {}).paso1 || `${B('El hook')}: uno de los de arriba, tal cual, en los primeros 3 segundos, con tu cara y el producto.`}</li>
        <li><span class="si">2</span> ${B('Tu problema')}: qué te pasaba antes, con tus palabras.</li>
@@ -944,7 +944,7 @@ function seccionCta(){
      </ul>
      ${((CFG.briefing || {}).tips || []).length ? `<p>${B('Podés sumar:')}</p><ul class="limpia">${CFG.briefing.tips.map(t => `<li><span class="si">+</span> ${t}</li>`).join('')}</ul>` : ''}
      <h3>El cierre</h3>
-     <p>Recomendalo como a una amiga (${B('probalo, pedilo')}) y decí dónde: ${CFG.cupon ? ((CFG.briefing || {}).codigoHablado === false ? `${c.donde || B('el link de tu perfil')} (tu código va ${B('escrito en la descripción')}, no lo digas)` : B('con tu código')) : (c.donde || B('el link de tu perfil'))}${(c.ofertas || []).length ? ` · ${c.ofertas.join(' · ')}` : ''}.</p>
+     <p>Recomendalo como ${CFG.genero === 'm' ? 'a un amigo' : 'a una amiga'} (${B('probalo, pedilo')}) y decí dónde: ${CFG.cupon ? ((CFG.briefing || {}).codigoHablado === false ? `${c.donde || B('el link de tu perfil')} (tu código va ${B('escrito en la descripción')}, no lo digas)` : B('con tu código')) : (c.donde || B('el link de tu perfil'))}${(c.ofertas || []).length ? ` · ${c.ofertas.join(' · ')}` : ''}.</p>
      ${ej.length ? `<div class="angulos">${ej.map(x => `<div class="angulo"><div class="l"><span>🗣️</span><i>Ejemplo</i>«${x}»</div></div>`).join('')}</div>` : ''}`;
 }
 
@@ -1856,7 +1856,7 @@ function pintarMarca(){
   } catch { if (DEMO){ precargar(); traerBorrador(); } ver(DEMO ? 'v-ficha' : 'v-error'); }
 })();
 
-const APP_VERSION = '2026-10-03-c';
+const APP_VERSION = '2026-10-03-d';
 </script>
 </body>
 </html>
