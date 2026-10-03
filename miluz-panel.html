@@ -1634,7 +1634,7 @@ function waLink(tel, nombre, link){
 
 
 /* ── WhatsApp (1/10): bandeja del número de CIMA ── */
-let WA = { mensajes: [], fichas: {}, leidos: {}, sel: null, timer: null, filtro: 'todas' };
+let WA = { mensajes: [], fichas: {}, leidos: {}, resueltos: {}, sel: null, timer: null, filtro: 'todas' };
 const escH = t => String(t ?? '').replace(/[&<>"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
 const horaWa = ts => { const d = new Date(ts), hoy = new Date(); const hh = d.toLocaleTimeString('es-AR',{hour:'2-digit',minute:'2-digit'});
   return d.toDateString() === hoy.toDateString() ? hh : d.toLocaleDateString('es-AR',{day:'numeric',month:'short'}) + ' ' + hh; };
@@ -1648,13 +1648,13 @@ function convsWa(){
     const nombre = f.nom || (f.ig ? '@' + f.ig : '') || ms.map(x => x.nombre).find(Boolean) || '+' + tel;
     return { tel, ms, f, ult, ultIn, nombre, ig: f.ig || ms.map(x => x.ig).find(Boolean) || null,
       nolei: ms.some(x => x.dir === 'in' && !esReaccion(x) && x.ts > (WA.leidos[tel] || 0)),
-      responder: ult.dir === 'in' && !esReaccion(ult), ayuda: !!f.pideHumana, abierta: ultIn && Date.now() - ultIn.ts < 864e5 };
+      responder: ult.dir === 'in' && !esReaccion(ult) && ult.ts > (WA.resueltos[tel] || 0), ayuda: !!f.pideHumana, abierta: ultIn && Date.now() - ultIn.ts < 864e5 };
   }).sort((a, b) => (b.responder - a.responder) || (b.ult.ts - a.ult.ts));
 }
 const TXT_RARO = { '[unsupported]': '⚠️ Mensaje que WhatsApp no deja ver desde acá (foto de una sola vista, encuesta, llamada…)', '[reaction]': 'Reaccionó' };
 async function cargarWa(){
   if (DEMO) { pintarWa(); return; }
-  try { const d = await api('wa'); WA.mensajes = (d.mensajes || []).map(m => TXT_RARO[m.texto] ? { ...m, texto: TXT_RARO[m.texto] } : m); WA.fichas = d.fichas || {}; WA.leidos = d.leidos || {}; }
+  try { const d = await api('wa'); WA.mensajes = (d.mensajes || []).map(m => TXT_RARO[m.texto] ? { ...m, texto: TXT_RARO[m.texto] } : m); WA.fichas = d.fichas || {}; WA.leidos = d.leidos || {}; WA.resueltos = d.resueltos || {}; }
   catch (e) { console.warn('wa', e); }
   pintarWa();
   clearTimeout(WA.timer); WA.timer = setTimeout(cargarWa, 60e3);
@@ -1703,6 +1703,7 @@ function pintarHiloWa(c, foco){
         ${c.f.link ? `<a class="bsec" href="${c.f.link}" target="_blank" rel="noopener" title="Su app, tal cual la ve ella">Ver su app</a>` : ''}
         ${c.ig ? `<a class="bsec" href="https://instagram.com/${encodeURIComponent(c.ig)}" target="_blank" rel="noopener">Instagram</a>` : ''}
         ${link ? `<a class="bsec" href="${link}" target="_blank" rel="noopener">Abrir en mi WhatsApp</a>` : ''}
+        ${c.responder ? `<button class="bsec" id="wa-listo" title="La saca de Por responder hasta que vuelva a escribir">✓ No hace falta responder</button>` : ''}
       </div>
     </div>
     <div class="wa-msgs" id="wa-msgs">${(() => {
@@ -1725,6 +1726,11 @@ function pintarHiloWa(c, foco){
   if (foco || WA._abajo !== false) ms.scrollTop = ms.scrollHeight; else ms.scrollTop = WA._pos || 0;
   ms.onscroll = () => { WA._pos = ms.scrollTop; WA._abajo = ms.scrollHeight - ms.scrollTop - ms.clientHeight < 40; };
   $('#wa-volver').onclick = () => { WA.sel = null; $('#wa-caja').classList.remove('abierto'); pintarWa(); };
+  const wl = $('#wa-listo');
+  if (wl) wl.onclick = () => {
+    const ts = c.ult.ts; WA.resueltos[c.tel] = ts; WA.leidos[c.tel] = Math.max(WA.leidos[c.tel] || 0, ts); pintarWa();
+    if (!DEMO) api('wa_leido', { tel: c.tel, ts, resuelto: true }).catch(() => {});
+  };
   const vf = $('#wa-ficha');
   if (vf) vf.onclick = () => abrirCreadora(c.f.id);
   const cons = $('#wa-consulta');
@@ -2165,7 +2171,7 @@ function aplicarRol(){
     pintarTodo();
   }
 })();
-const APP_VERSION = '2026-10-03-a';
+const APP_VERSION = '2026-10-03-b';
 </script>
 </body>
 </html>
