@@ -639,14 +639,16 @@ const DEMO = QS.has('demo') || location.protocol === 'data:';
 (function(){
   try {
     if (location.hostname !== 'cima-creators.github.io' || !history.replaceState) return;
-    if (!['miluz','valca','menlab','uniderma'].includes(MARCA)) return;
+    // 3/10: sin lista fija de marcas — vale para TODAS las que tengan su carpeta en el repo raíz (se chequea abajo)
     const q = new URLSearchParams(location.search);
     const demo = q.has('demo');
     if (demo && 'panel' !== 'app') return;
     q.delete('marca'); q.delete('demo'); q.delete('v');
     const path = '/' + MARCA + ('panel' === 'app' ? (demo ? '/demo' : '/app') : ('panel' ? '/panel' : ''));
     const resto = q.toString();
-    history.replaceState(history.state, '', path + (resto ? '?' + resto : '') + location.hash);
+    const corto = path + (resto ? '?' + resto : '') + location.hash;
+    // solo si el link corto existe (si no, recargar daría 404)
+    fetch('/' + MARCA + '/', { method: 'HEAD', cache: 'no-store' }).then(r => { if (r.ok) history.replaceState(history.state, '', corto); }).catch(() => {});
   } catch {}
 })();
 
@@ -2171,7 +2173,7 @@ function aplicarRol(){
     pintarTodo();
   }
 })();
-const APP_VERSION = '2026-10-03-c';
+const APP_VERSION = '2026-10-03-e';
 </script>
 </body>
 </html>

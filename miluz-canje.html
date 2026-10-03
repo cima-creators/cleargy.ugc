@@ -774,14 +774,16 @@ const MARCA = (QS.get('marca') || 'miluz').toLowerCase().replace(/[^a-z0-9_-]/g,
 (function(){
   try {
     if (location.hostname !== 'cima-creators.github.io' || !history.replaceState) return;
-    if (!['miluz','valca','menlab','uniderma'].includes(MARCA)) return;
+    // 3/10: sin lista fija de marcas — vale para TODAS las que tengan su carpeta en el repo raíz (se chequea abajo)
     const q = new URLSearchParams(location.search);
     const demo = q.has('demo');
     if (demo && 'app' !== 'app') return;
     q.delete('marca'); q.delete('demo'); q.delete('v');
     const path = '/' + MARCA + ('app' === 'app' ? (demo ? '/demo' : '/app') : ('app' ? '/app' : ''));
     const resto = q.toString();
-    history.replaceState(history.state, '', path + (resto ? '?' + resto : '') + location.hash);
+    const corto = path + (resto ? '?' + resto : '') + location.hash;
+    // solo si el link corto existe (si no, recargar daría 404)
+    fetch('/' + MARCA + '/', { method: 'HEAD', cache: 'no-store' }).then(r => { if (r.ok) history.replaceState(history.state, '', corto); }).catch(() => {});
   } catch {}
 })();
 
@@ -1856,7 +1858,7 @@ function pintarMarca(){
   } catch { if (DEMO){ precargar(); traerBorrador(); } ver(DEMO ? 'v-ficha' : 'v-error'); }
 })();
 
-const APP_VERSION = '2026-10-03-d';
+const APP_VERSION = '2026-10-03-e';
 </script>
 </body>
 </html>
