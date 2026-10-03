@@ -979,7 +979,7 @@ const BRAND_CONFIGS = {
   },
   lagos: {
     border:'#d2d6da', muted2:'#bcc2c8',
-    name:'Lagos', logoText:'LAGOS', defaultCampaignStart:'2026-10-03', diaUno:'2026-10-03',   // 2ª tanda: 270 videos, arranca 3/10 sub:'Creators Hub',
+    name:'Lagos', logoText:'LAGOS', defaultCampaignStart:'2026-10-03',   // 2ª tanda desde el 3/10; cada creadora tiene su fecha en Config sub:'Creators Hub',
     logoImg:'data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="300" height="96"><rect width="300" height="96" rx="12" fill="%23F2F3F4"/><g fill="%23A7ACB1"><rect x="36" y="24" width="9" height="40"/><rect x="36" y="55" width="26" height="9"/><rect x="52" y="24" width="9" height="9"/><rect x="66" y="24" width="9" height="22"/></g><text x="185" y="56" font-family="Arial Black,Arial,sans-serif" font-size="38" font-weight="900" fill="%23A7ACB1" text-anchor="middle" letter-spacing="-1">LAGOS</text><rect x="100" y="68" width="170" height="6" fill="%23A7ACB1"/></svg>',
     collection:'lagos', storeUrl:'https://shop.lagoslab.com.ar/', no100k:true, bgDark:'#dfe3e6',
     cats:['Review / unboxing','Antes y después','Tutorial de uso','Tips','Trend / challenge','Otro'],
@@ -1402,6 +1402,10 @@ function goScreen(name, el){
 // ═══════════════════════════════════
 // Tu campaña arranca el día que subís tu PRIMER video (si no hay, fecha configurada o inicio de marca)
 function myCampaignStart(){
+  // Fecha propia de la creadora (su tanda): manda sobre todo. Se carga en el panel,
+  // en Config → Creadoras, y sirve para que convivan dos tandas en la misma marca.
+  const _mia=(sharedData.startDates||{})[currentUser];
+  if(_mia) return _mia;
   // diaUno: la marca fija a mano cuándo es el día 1 (los videos anteriores igual suman)
   if(BRAND.diaUno) return BRAND.diaUno;
   const mios = myVideos().filter(v=>v.date);
@@ -1410,6 +1414,13 @@ function myCampaignStart(){
     return new Date(min).toLocaleDateString("sv");
   }
   return (sharedData.startDates||{})[currentUser]||BRAND.defaultCampaignStart||"2026-05-25";
+}
+// Videos de la tanda en curso: si tiene fecha propia, los de antes son de la tanda anterior
+function misDeLaTanda(){
+  const d=(sharedData.startDates||{})[currentUser];
+  const v=myVideos();
+  if(!d) return v;
+  return v.filter(x=>x.date && new Date(x.date).toLocaleDateString("sv")>=d);
 }
 function getCampaignDay(){
   const now = new Date();
@@ -1475,7 +1486,7 @@ function renderHome(){
       _sub.textContent="Todavía tenés todo el día. Subí de a uno.";
     } else {
       _tit.textContent=_falta===1?"Te falta uno solo":("Te faltan "+_n(_falta));
-      _sub.textContent="Vas "+myVids.length+" de "+minMio()+" en la campaña.";
+      _sub.textContent="Vas "+misDeLaTanda().length+" de "+minMio()+" en la campaña.";
     }
   }
   const ventas = sharedData.ventas[currentUser]||0;
@@ -1551,7 +1562,7 @@ function renderHome(){
       ? Math.round(_viewsTot/myVids.length).toLocaleString("es-AR")+" por video"
       : "todavía sin views";
   }
-  document.getElementById("home-total-videos").textContent = myVids.length;
+  document.getElementById("home-total-videos").textContent = misDeLaTanda().length;
   const _htg=document.getElementById("home-total-goal"); if(_htg) _htg.textContent = "de "+minMio()+" de la campaña";
   document.getElementById("home-per-video").textContent = fmtPesos(perVideo);
   if(document.getElementById("home-bonos")) document.getElementById("home-bonos").textContent = fmtPesos(bonos);
@@ -2592,7 +2603,7 @@ loadData();
 <!-- Auto-actualización: GitHub Pages cachea el HTML y los celulares lo retienen mucho más.
      Esto compara la versión publicada con la que está corriendo y refresca sola. -->
 <script>
-const APP_VERSION = '2026-10-03-d';
+const APP_VERSION = '2026-10-03-e';
 (function(){
   var CLAVE='cima_ver_reload';
   function hayAlguienEscribiendo(){

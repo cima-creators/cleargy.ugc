@@ -942,7 +942,7 @@ const BRAND_CONFIGS = {
   },
   lagos: {
     goal:270, // objetivo del mes (la marca pagó 270 videos en octubre)
-    name:'Lagos', logoText:'LAGOS', collection:'lagos', defaultCampaignStart:'2026-10-03', diaUno:'2026-10-03',   // 2ª tanda: 270 videos, arranca 3/10 dailyVideos:2, videoGoal:65, no100k:true, salary:450000, minVideos:65,
+    name:'Lagos', logoText:'LAGOS', collection:'lagos', defaultCampaignStart:'2026-10-03',   // 2ª tanda desde el 3/10; cada creadora tiene su fecha en Config dailyVideos:2, videoGoal:65, no100k:true, salary:450000, minVideos:65,
     logoImg:'data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="300" height="96"><rect width="300" height="96" rx="12" fill="%23F2F3F4"/><g fill="%23A7ACB1"><rect x="36" y="24" width="9" height="40"/><rect x="36" y="55" width="26" height="9"/><rect x="52" y="24" width="9" height="9"/><rect x="66" y="24" width="9" height="22"/></g><text x="185" y="56" font-family="Arial Black,Arial,sans-serif" font-size="38" font-weight="900" fill="%23A7ACB1" text-anchor="middle" letter-spacing="-1">LAGOS</text><rect x="100" y="68" width="170" height="6" fill="%23A7ACB1"/></svg>',
     adminPass:'lagos-admin-2025', adminPass2:'lagos-2025', adminPass4:'abril-2026',
     accent:'#5A626A', accentLight:'#7c858e', bg:'#f4f6f7', surface2:'#eaedef', border:'#d2d6da',
@@ -1100,7 +1100,11 @@ const WHATICKET_CONNECTION = "ca448a0f-b10e-4088-8ce2-ef78810cf7d2";
 const ADMIN_PHONE = "5491123538064";
 const PHONES = Object.fromEntries(Object.entries(BRAND.creators).map(([k,v])=>[k,v.phone||'']));
 // Inicio de campaña por creadora: 1) fecha de SU PRIMER video, 2) fecha configurada a mano, 3) inicio de marca
+// Fecha de inicio de SU tanda (Config → Creadoras). Manda sobre diaUno: así una marca
+// puede tener a alguien terminando la tanda 1 mientras el resto arranca la 2.
 function campaignStartFor(c){
+  const propia=((data&&data.startDates)||{})[c];
+  if(propia) return propia;
   if(BRAND.diaUno) return BRAND.diaUno;
   const vids = ((data&&data.videos)||[]).filter(v=>v.creator===c && v.date);
   if(vids.length){
@@ -1507,7 +1511,9 @@ function renderStatusPanel(){
   if(!el)return;
   const today=argToday();
   el.innerHTML=CREATORS.map(c=>{
-    const total=(data.videos||[]).filter(v=>v.creator===c&&v.status!=='rejected').length;
+    const _desde=((data&&data.startDates)||{})[c];
+    const total=(data.videos||[]).filter(v=>v.creator===c&&v.status!=='rejected'
+      &&(!_desde||(v.date&&argDate(v.date)>=_desde))).length;   // solo los de su tanda
     const hoy=(data.videos||[]).filter(v=>v.creator===c&&argDate(v.date)===today).length;
     // Alerta: no subió ni hoy ni ayer (nada que ver con el bono de racha)
     const frenada=getVideosOnDay(c,0)===0&&getVideosOnDay(c,1)===0;
@@ -3047,7 +3053,7 @@ loadConfig();
 <!-- Auto-actualización: GitHub Pages cachea el HTML y los celulares lo retienen mucho más.
      Esto compara la versión publicada con la que está corriendo y refresca sola. -->
 <script>
-const APP_VERSION = '2026-10-03-d';
+const APP_VERSION = '2026-10-03-e';
 (function(){
   var CLAVE='cima_ver_reload';
   function hayAlguienEscribiendo(){
