@@ -457,6 +457,7 @@ dialog.dlg .fila{display:flex;gap:8px;justify-content:flex-end;flex-wrap:wrap}
 .wa-vacio{margin:auto;color:var(--topo);font-size:.9rem;text-align:center;padding:30px}
 .wa-volver{display:none}
 .wa-filtros{display:flex;gap:6px;flex-wrap:wrap;margin:0 0 12px}
+.fwa.activo{background:var(--tinta);color:#fff;border-color:var(--tinta)}
 .wa-conv.nolei b{font-weight:800}.wa-conv.nolei b::before{content:'';display:inline-block;width:8px;height:8px;border-radius:50%;background:#25D366;margin-right:6px;flex:0 0 auto;align-self:center}
 dialog.dlg.dlg-cre{max-width:680px}
 .cre-cab{display:flex;justify-content:space-between;gap:12px;align-items:flex-start;flex-wrap:wrap}
@@ -1650,9 +1651,10 @@ function convsWa(){
       responder: ult.dir === 'in' && !esReaccion(ult), ayuda: !!f.pideHumana, abierta: ultIn && Date.now() - ultIn.ts < 864e5 };
   }).sort((a, b) => (b.responder - a.responder) || (b.ult.ts - a.ult.ts));
 }
+const TXT_RARO = { '[unsupported]': '⚠️ Mensaje que WhatsApp no deja ver desde acá (foto de una sola vista, encuesta, llamada…)', '[reaction]': 'Reaccionó' };
 async function cargarWa(){
   if (DEMO) { pintarWa(); return; }
-  try { const d = await api('wa'); WA.mensajes = d.mensajes || []; WA.fichas = d.fichas || {}; WA.leidos = d.leidos || {}; }
+  try { const d = await api('wa'); WA.mensajes = (d.mensajes || []).map(m => TXT_RARO[m.texto] ? { ...m, texto: TXT_RARO[m.texto] } : m); WA.fichas = d.fichas || {}; WA.leidos = d.leidos || {}; }
   catch (e) { console.warn('wa', e); }
   pintarWa();
   clearTimeout(WA.timer); WA.timer = setTimeout(cargarWa, 60e3);
@@ -1694,7 +1696,7 @@ function pintarHiloWa(c, foco){
   hilo.innerHTML = `<div class="wa-cab">
       <button class="bsec wa-volver" id="wa-volver">← Volver</button>
       <h3>${escH(c.nombre)}<small>+${c.tel}${c.ig ? ' · @' + escH(c.ig) : ''}</small>
-        ${c.f.estado ? `<span class="pill ${(ETIQUETA[c.f.estado] || [])[1] || ''}" style="margin-top:6px;display:inline-block">${escH((ETIQUETA[c.f.estado] || [c.f.estado])[0])}</span>` : '<span class="pill" style="margin-top:6px;display:inline-block">No es creadora de esta marca</span>'}
+        ${c.f.estado ? `<span class="pill ${(ETIQUETA[c.f.estado] || [])[1] || ''}" style="margin-top:6px;display:inline-block">${escH((ETIQUETA[c.f.estado] || [c.f.estado])[0])}</span>` : `<span class="pill" style="margin-top:6px;display:inline-block">${c.ms.some(m => m.marca) ? 'No es creadora de esta marca' : 'Número desconocido · no es creadora de ninguna marca'}</span>`}
         ${c.f.kit ? `<span class="pill" style="margin-top:6px;display:inline-block">kit ${escH(nombresKits(c.f.kit, c.f.kit2))}</span>` : ''}</h3>
       <div class="acc">
         ${c.f.id ? `<button class="bsec" id="wa-ficha">Ver ficha</button>` : ''}
@@ -2163,7 +2165,7 @@ function aplicarRol(){
     pintarTodo();
   }
 })();
-const APP_VERSION = '2026-10-02-e';
+const APP_VERSION = '2026-10-03-a';
 </script>
 </body>
 </html>
