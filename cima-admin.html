@@ -319,6 +319,7 @@ body.archivo .abtn,body.archivo .action-row button,body.archivo #apify-sync-btn,
 
       <!-- OVERVIEW -->
       <div id="view-overview" class="view active">
+        <div id="tanda-barra2" style="display:none;margin-bottom:12px;"></div>
         <div id="overview-date" style="font-family:'Poppins';font-size:9px;letter-spacing:2px;text-transform:uppercase;color:var(--muted);margin-bottom:16px;"></div>
         <div id="overview-hero" style="margin-bottom:16px;"></div>
         <div style="display:flex;gap:6px;margin-bottom:14px;" id="period-pills">
@@ -1292,10 +1293,10 @@ function enterAdmin(){
 
 // Botón para pasar de la campaña actual a la anterior y volver
 function pintarBarraTanda(){
-  const box=document.getElementById('tanda-barra');
-  if(!box || !BRAND.archivoT1) return;
+  const cajas=[document.getElementById('tanda-barra'),document.getElementById('tanda-barra2')].filter(Boolean);
+  if(!cajas.length || !BRAND.archivoT1) return;
+  const box={ set innerHTML(h){ cajas.forEach(c=>{ c.innerHTML=h; c.style.display='block'; }); } };
   const url=new URL(location.href);
-  box.style.display='block';
   if(TANDA_ARCHIVO){
     url.searchParams.delete('tanda');
     box.innerHTML=`<div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;background:rgba(176,123,46,.10);border:1px solid rgba(176,123,46,.35);border-radius:12px;padding:10px 14px;">
@@ -3106,7 +3107,7 @@ loadConfig();
 <!-- Auto-actualización: GitHub Pages cachea el HTML y los celulares lo retienen mucho más.
      Esto compara la versión publicada con la que está corriendo y refresca sola. -->
 <script>
-const APP_VERSION = '2026-10-05-f';
+const APP_VERSION = '2026-10-05-g';
 (function(){
   var CLAVE='cima_ver_reload';
   function hayAlguienEscribiendo(){
