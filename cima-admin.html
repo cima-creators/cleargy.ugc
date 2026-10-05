@@ -260,6 +260,7 @@ table td,table th{border-color:var(--border);}
 .bulk-btn:hover{background:rgba(255,255,255,.24);}
 .bulk-btn.primaria{background:#fff;color:var(--text);font-weight:600;}
 .bulk-btn.fantasma{background:none;opacity:.6;}
+body.archivo .abtn,body.archivo .action-row button,body.archivo #apify-sync-btn,body.archivo #tt-sync-btn,body.archivo #apify-full-btn,body.archivo #tt-full-btn,body.archivo #wp-notify-btn{display:none !important}
 </style>
 </head>
 <body>
@@ -340,6 +341,7 @@ table td,table th{border-color:var(--border);}
       <div id="view-videos" class="view">
         <div class="view-title">Videos</div>
         <div class="view-sub">Revisá, puntuá y aprobá el contenido</div>
+        <div id="tanda-barra" style="display:none;margin-bottom:12px;"></div>
         <div style="margin-bottom:12px;display:flex;align-items:center;gap:10px;flex-wrap:wrap;">
           <button id="apify-sync-btn" class="hbtn" onclick="syncApify()" title="Solo videos de las últimas 48h" style="background:linear-gradient(135deg,#833ab4,#fd1d1d,#fcb045);color:white;border:none;padding:10px 18px;border-radius:12px;font-family:'Poppins';font-weight:800;font-size:13px;cursor:pointer;box-shadow:0 4px 14px rgba(131,58,180,.3);">📸 Sync IG</button>
           <button id="tt-sync-btn" class="hbtn" onclick="syncTikTok()" title="Solo videos de las últimas 48h" style="background:linear-gradient(135deg,#010101,#69c9d0);color:white;border:none;padding:10px 18px;border-radius:12px;font-family:'Poppins';font-weight:800;font-size:13px;cursor:pointer;box-shadow:0 4px 14px rgba(0,0,0,.3);">🎵 Sync TikTok</button>
@@ -942,7 +944,7 @@ const BRAND_CONFIGS = {
   },
   lagos: {
     goal:270, // objetivo del mes (la marca pagó 270 videos en octubre)
-    name:'Lagos', logoText:'LAGOS', collection:'lagos', defaultCampaignStart:'2026-10-03',   // 2ª tanda desde el 3/10; cada creadora tiene su fecha en Config dailyVideos:2, videoGoal:65, no100k:true, salary:450000, minVideos:65,
+    name:'Lagos', logoText:'LAGOS', collection:'lagos', archivoT1:true, defaultCampaignStart:'2026-10-03',   // 2ª tanda desde el 3/10; cada creadora tiene su fecha en Config dailyVideos:2, videoGoal:65, no100k:true, salary:450000, minVideos:65,
     logoImg:'data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="300" height="96"><rect width="300" height="96" rx="12" fill="%23F2F3F4"/><g fill="%23A7ACB1"><rect x="36" y="24" width="9" height="40"/><rect x="36" y="55" width="26" height="9"/><rect x="52" y="24" width="9" height="9"/><rect x="66" y="24" width="9" height="22"/></g><text x="185" y="56" font-family="Arial Black,Arial,sans-serif" font-size="38" font-weight="900" fill="%23A7ACB1" text-anchor="middle" letter-spacing="-1">LAGOS</text><rect x="100" y="68" width="170" height="6" fill="%23A7ACB1"/></svg>',
     adminPass:'lagos-admin-2025', adminPass2:'lagos-2025', adminPass4:'abril-2026',
     accent:'#5A626A', accentLight:'#7c858e', bg:'#f4f6f7', surface2:'#eaedef', border:'#d2d6da',
@@ -1003,7 +1005,30 @@ const BRAND_CONFIGS = {
   }
 };
 const BRAND = BRAND_CONFIGS[BRAND_ID] || BRAND_CONFIGS.cleargy;
+
+// Si el link viene sin ?brand= (o con una marca que no existe) la app abría Cleargy —
+// o sea, la marca equivocada. Mejor decirlo y no mostrar nada de otra marca.
+(function(){
+  var _p = new URLSearchParams(window.location.search).get('brand');
+  if(_p && BRAND_CONFIGS[_p]) return;
+  document.addEventListener('DOMContentLoaded', function(){
+    var d=document.createElement('div');
+    d.style.cssText='position:fixed;inset:0;z-index:999999;background:#FAF7F4;color:#26211E;'+
+      'display:flex;align-items:center;justify-content:center;padding:28px;'+
+      "font-family:'Poppins',-apple-system,system-ui,sans-serif;text-align:center;";
+    d.innerHTML='<div style="max-width:420px"><div style="font-size:34px;margin-bottom:14px">🔗</div>'+
+      '<div style="font-size:19px;font-weight:700;letter-spacing:-.02em;margin-bottom:8px">Te falta el link de tu marca</div>'+
+      '<div style="font-size:14px;line-height:1.55;color:#8A7E77">Este link está incompleto. Abrí el que te pasamos de CIMA: '+
+      'termina en <b style="color:#26211E">/videos</b> o <b style="color:#26211E">/admin</b>. Si lo perdiste, pedínoslo y te lo mandamos de nuevo.</div></div>';
+    document.body.appendChild(d);
+  });
+})();
+
 window.BRAND_COLLECTION = BRAND.collection;
+// Campaña anterior (archivo): mismos videos de la tanda 1, guardados en <marca>_videos_t1.
+// Se mira y nada más: sin aprobar, sin editar y sin plata.
+const TANDA_ARCHIVO = new URLSearchParams(window.location.search).get('tanda')==='1' && !!BRAND.archivoT1;
+if(TANDA_ARCHIVO) window.BRAND_VIDEOS_COL = BRAND.collection + '_videos_t1';
 
 // Rellena todos los selectores de creadoras desde BRAND.creators
 (function populateCreatorSelects(){
@@ -1223,6 +1248,11 @@ function enterAdmin(){
   // Render inicial con localStorage mientras Firebase carga
   // Siempre cargar desde Firebase — nunca usar localStorage como fuente principal
   localStorage.removeItem(BRAND_ID+"_data");
+  pintarBarraTanda();
+  if(TANDA_ARCHIVO){
+    document.body.classList.add('archivo');
+    ['nav-finanzas','nav-comprobantes','nav-bonos'].forEach(id=>{ const e=document.getElementById(id); if(e) e.style.display='none'; });
+  }
   // Ocultar Pagos y Comprobantes para el rol brand
   if(window.adminRole==='brand'){
     document.getElementById('nav-finanzas').style.display='none';
@@ -1257,6 +1287,23 @@ function enterAdmin(){
   if(window._fbListen) startAdminListen();
   else window.addEventListener('firebase-ready', startAdminListen, {once:true});
   irADestinoDeUrl();
+}
+
+// Botón para pasar de la campaña actual a la anterior y volver
+function pintarBarraTanda(){
+  const box=document.getElementById('tanda-barra');
+  if(!box || !BRAND.archivoT1) return;
+  const url=new URL(location.href);
+  box.style.display='block';
+  if(TANDA_ARCHIVO){
+    url.searchParams.delete('tanda');
+    box.innerHTML=`<div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;background:rgba(176,123,46,.10);border:1px solid rgba(176,123,46,.35);border-radius:12px;padding:10px 14px;">
+      <span style="font-family:'Poppins';font-size:12px;font-weight:700;color:#96682A;">📁 Campaña anterior — solo para mirar</span>
+      <a href="${url}" style="margin-left:auto;background:var(--accent);color:#fff;text-decoration:none;font-family:'Poppins';font-size:12px;font-weight:700;padding:8px 14px;border-radius:10px;">← Volver a la campaña actual</a></div>`;
+  }else{
+    url.searchParams.set('tanda','1');
+    box.innerHTML=`<a href="${url}" style="display:inline-block;background:var(--surface2);border:1px solid var(--border);color:var(--text);text-decoration:none;font-family:'Poppins';font-size:12px;font-weight:700;padding:9px 15px;border-radius:12px;">📁 Ver campaña anterior</a>`;
+  }
 }
 
 function doAdminLogin(){
@@ -2785,7 +2832,7 @@ loadConfig();
     }
     const BRAND_COL_NAME = window.BRAND_COLLECTION || 'cleargy';
     const DATA_DOC = doc(db, BRAND_COL_NAME, 'main');
-    const VIDEOS_COL = collection(db, BRAND_COL_NAME + '_videos');
+    const VIDEOS_COL = collection(db, window.BRAND_VIDEOS_COL || (BRAND_COL_NAME + '_videos'));
 
     // Login anónimo: requerido por las reglas para leer/escribir. En conexiones
     // lentas (móvil) puede tardar — reintentamos hasta lograrlo en vez de abandonar.
@@ -3058,7 +3105,7 @@ loadConfig();
 <!-- Auto-actualización: GitHub Pages cachea el HTML y los celulares lo retienen mucho más.
      Esto compara la versión publicada con la que está corriendo y refresca sola. -->
 <script>
-const APP_VERSION = '2026-10-05-d';
+const APP_VERSION = '2026-10-05-e';
 (function(){
   var CLAVE='cima_ver_reload';
   function hayAlguienEscribiendo(){

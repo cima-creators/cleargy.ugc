@@ -1048,6 +1048,25 @@ const BRAND_CONFIGS = {
   }
 };
 const BRAND = BRAND_CONFIGS[BRAND_ID] || BRAND_CONFIGS.cleargy;
+
+// Si el link viene sin ?brand= (o con una marca que no existe) la app abría Cleargy —
+// o sea, la marca equivocada. Mejor decirlo y no mostrar nada de otra marca.
+(function(){
+  var _p = new URLSearchParams(window.location.search).get('brand');
+  if(_p && BRAND_CONFIGS[_p]) return;
+  document.addEventListener('DOMContentLoaded', function(){
+    var d=document.createElement('div');
+    d.style.cssText='position:fixed;inset:0;z-index:999999;background:#FAF7F4;color:#26211E;'+
+      'display:flex;align-items:center;justify-content:center;padding:28px;'+
+      "font-family:'Poppins',-apple-system,system-ui,sans-serif;text-align:center;";
+    d.innerHTML='<div style="max-width:420px"><div style="font-size:34px;margin-bottom:14px">🔗</div>'+
+      '<div style="font-size:19px;font-weight:700;letter-spacing:-.02em;margin-bottom:8px">Te falta el link de tu marca</div>'+
+      '<div style="font-size:14px;line-height:1.55;color:#8A7E77">Este link está incompleto. Abrí el que te pasamos de CIMA: '+
+      'termina en <b style="color:#26211E">/videos</b> o <b style="color:#26211E">/admin</b>. Si lo perdiste, pedínoslo y te lo mandamos de nuevo.</div></div>';
+    document.body.appendChild(d);
+  });
+})();
+
 window.BRAND_COLLECTION = BRAND.collection;
 // Apply brand CSS vars
 (function(){
@@ -2612,7 +2631,7 @@ loadData();
 <!-- Auto-actualización: GitHub Pages cachea el HTML y los celulares lo retienen mucho más.
      Esto compara la versión publicada con la que está corriendo y refresca sola. -->
 <script>
-const APP_VERSION = '2026-10-05-d';
+const APP_VERSION = '2026-10-05-e';
 (function(){
   var CLAVE='cima_ver_reload';
   function hayAlguienEscribiendo(){
