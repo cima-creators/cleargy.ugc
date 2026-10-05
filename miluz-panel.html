@@ -1677,7 +1677,7 @@ function pintarWa(){
   const todas = convsWa();
   const F = { todas: () => true, responder: c => c.responder, nolei: c => c.nolei, ayuda: c => c.ayuda };
   document.querySelectorAll('#wa-filtros [data-n]').forEach(el => el.textContent = todas.filter(F[el.dataset.n]).length);
-  document.querySelectorAll('.fwa').forEach(b => { b.classList.toggle('activo', b.dataset.f === WA.filtro); b.onclick = () => { WA.filtro = b.dataset.f; pintarWa(); }; });
+  document.querySelectorAll('#wa-filtros .fwa').forEach(b => { b.classList.toggle('activo', b.dataset.f === WA.filtro); b.onclick = () => { WA.filtro = b.dataset.f; pintarWa(); }; });
   const cs = todas.filter(F[WA.filtro] || F.todas);
   setN('n-wa', todas.filter(c => c.nolei || c.responder).length);
   const lista = $('#wa-lista');
@@ -2185,7 +2185,7 @@ function aplicarRol(){
     pintarTodo();
   }
 })();
-const APP_VERSION = '2026-10-05-a';
+const APP_VERSION = '2026-10-05-b';
 </script>
 </body>
 </html>
