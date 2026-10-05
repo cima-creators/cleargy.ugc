@@ -754,7 +754,7 @@ function ENVIOS_desde(env){
     loc: [f.localidad || (f.datos && f.datos.localidad), f.provincia || (f.datos && f.datos.provincia)].filter(Boolean).join(' · ') || '—',
     cp: f.cp || '—',
     dni: f.dni || '—', tel: f.tel || (f.datos && f.datos.tel) || '', email: f.email || (f.datos && f.datos.email) || '',
-    avisoDespachoEn: f.avisoDespachoEn || null, despachadoEn: f.despachadoEn || 0,
+    avisoDespachoEn: f.avisoDespachoEn || null, despachadoEn: f.despachadoEn || 0, seguimiento: f.seguimiento || null,
     // kits (kitPorRespuesta, Valca): "Ceras + Capilar" · si no, los colores elegidos (Mi Luz)
     tonos: CFG && CFG.kitPorRespuesta
       ? nombresKits(f.kit || (f.datos && f.datos.kit), f.kit2 || (f.datos && f.datos.kit2))
@@ -1219,7 +1219,7 @@ function pintarEnvios(){
           ${conOpciones ? `<td>${e.tonos}</td>` : ''}
           <td>${e.estado !== 'despachado' ? '<span class="pill esp">Para enviar</span>'
             : e.recibido ? `<span class="pill ok">Recibido${e.recibidoEn ? ' · ' + new Date(e.recibidoEn).toLocaleDateString('es-AR', {day:'numeric', month:'short'}) : ''}</span>`
-            : `<span class="pill">En camino${e.despachadoEn ? ' · salió ' + new Date(e.despachadoEn).toLocaleDateString('es-AR', {day:'numeric', month:'short'}) : ''}</span>`}</td>
+            : `<span class="pill">En camino${e.despachadoEn ? ' · salió ' + new Date(e.despachadoEn).toLocaleDateString('es-AR', {day:'numeric', month:'short'}) : ''}</span>`}${e.seguimiento && e.seguimiento.codigo ? `<a class="n2 verreel" href="${e.seguimiento.url}" target="_blank" rel="noopener" title="Seguir el envío">${e.seguimiento.correo} · ${e.seguimiento.codigo} ↗</a>` : ''}</td>
           <td class="dmacc">${e.estado !== 'despachado' ? '' : (e.avisoDespachoEn
             ? `<span class="pill ok" title="Le llegó el DM 'tu kit salió'">DM ✓</span>`
             : `<span class="pill no" title="No le llegó el DM: hace más de 24 h que no escribe al bot (Instagram lo bloquea)">sin DM</span>${e.tel ? `<a class="mini" target="_blank" href="${waLinkTexto(e.tel, mensajeDespachado(e.nom))}" title="Abre WhatsApp con el aviso armado">WhatsApp</a>` : ''}`)}</td>
@@ -1851,6 +1851,7 @@ async function abrirCreadora(id){
         ${fila('Videos', c.videos === 'dos' ? 'Dos' : (c.kit ? 'Uno' : null))}
         ${fila('Colores', c.tonos && c.tonos.length ? escH(c.tonos.map(nombreKit).join(', ')) : null)}
         ${fila('Código', c.codigo ? escH(c.codigo) : null)}
+        ${c.seguimiento && c.seguimiento.codigo ? fila('Seguimiento', `<a href="${escH(c.seguimiento.url)}" target="_blank" rel="noopener">${escH(c.seguimiento.correo)} · ${escH(c.seguimiento.codigo)} ↗</a>`) : ''}
         ${resp}
       </div>
       <div class="cre-box"><h4>Su Instagram</h4>
@@ -2185,7 +2186,7 @@ function aplicarRol(){
     pintarTodo();
   }
 })();
-const APP_VERSION = '2026-10-05-b';
+const APP_VERSION = '2026-10-05-c';
 </script>
 </body>
 </html>

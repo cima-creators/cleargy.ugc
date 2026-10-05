@@ -605,6 +605,11 @@ body.condemo .wrap{padding-bottom:84px}
 
     <!-- ya me llegó -->
     <div class="card" id="bloque-llego">
+      <div id="seg-envio" class="oculto" style="margin:0 0 14px;padding:12px 14px;border-radius:12px;background:var(--acento-suave,#f3f1ee)">
+        <small style="display:block;opacity:.75">Tu envío · <span id="seg-correo"></span></small>
+        <b id="seg-codigo" style="display:block;font-size:1.05rem;letter-spacing:.02em;margin:2px 0 8px"></b>
+        <a class="btn sec" id="seg-link" target="_blank" rel="noopener" style="display:block;text-align:center;text-decoration:none">Seguir mi envío</a>
+      </div>
       <h2>¿Ya te llegó el kit?</h2>
       <small style="margin-bottom:14px" id="llego-txt">Tocá acá cuando lo tengas en la mano. Ahí arrancan tus días — no antes, así el correo no te come el plazo.</small>
       <button class="btn" id="btn-llego">Sí, ya me llegó</button>
@@ -1712,6 +1717,10 @@ function pintarEstado(){
   $('#hero-badge').textContent = cab[3];
 
   $('#bloque-llego').classList.toggle('oculto', e !== 'enviado');
+  // 5/10: nº de seguimiento que la marca carga en su planilla
+  const sg = D.seguimiento;
+  $('#seg-envio').classList.toggle('oculto', !(sg && sg.codigo));
+  if (sg && sg.codigo) { $('#seg-correo').textContent = sg.correo || 'correo'; $('#seg-codigo').textContent = sg.codigo; $('#seg-link').href = sg.url; }
   pintarCollab(e);
   // cuando publica la creadora, el bloque sigue abierto en `publicado` (ajustar links, cargar el 2º video)
   // `vencida` sigue pudiendo entregar: el plazo la apura, no la deja afuera
@@ -1858,7 +1867,7 @@ function pintarMarca(){
   } catch { if (DEMO){ precargar(); traerBorrador(); } ver(DEMO ? 'v-ficha' : 'v-error'); }
 })();
 
-const APP_VERSION = '2026-10-03-f';
+const APP_VERSION = '2026-10-05-a';
 </script>
 </body>
 </html>
