@@ -535,6 +535,10 @@ dialog.dlg.dlg-cre{max-width:680px}
       <button class="bsec pri oculto" id="btn-masiva" title="Planilla de carga masiva del correo: una fila por creadora para despachar. El peso lo completa la marca.">Planilla del correo (.xlsx)</button>
       <button class="bsec" id="btn-desp">Marcar seleccionadas como despachadas</button>
     </div>
+    <div class="wa-filtros" id="filtro-env">
+      <button class="bsec fwa activo" data-f="listo">Para enviar <span class="n" data-n="listo">0</span></button>
+      <button class="bsec fwa" data-f="despachado">Despachados <span class="n" data-n="despachado">0</span></button>
+    </div>
     <div id="tabla-envios"></div>
   </section>
 
@@ -750,12 +754,13 @@ function ENVIOS_desde(env){
     loc: [f.localidad || (f.datos && f.datos.localidad), f.provincia || (f.datos && f.datos.provincia)].filter(Boolean).join(' · ') || '—',
     cp: f.cp || '—',
     dni: f.dni || '—', tel: f.tel || (f.datos && f.datos.tel) || '', email: f.email || (f.datos && f.datos.email) || '',
-    avisoDespachoEn: f.avisoDespachoEn || null,
+    avisoDespachoEn: f.avisoDespachoEn || null, despachadoEn: f.despachadoEn || 0,
     // kits (kitPorRespuesta, Valca): "Ceras + Capilar" · si no, los colores elegidos (Mi Luz)
     tonos: CFG && CFG.kitPorRespuesta
       ? nombresKits(f.kit || (f.datos && f.datos.kit), f.kit2 || (f.datos && f.datos.kit2))
       : (f.tonos || (f.datos && f.datos.tonos) || []).map(t => NOMBRE_TONO[t] || t).join(' · '),
-    estado: f.estado === 'enviado' ? 'despachado' : 'listo',
+    estado: ['ficha_completa','briefing_ok'].includes(f.estado) ? 'listo' : 'despachado',
+    recibido: !['ficha_completa','briefing_ok','enviado'].includes(f.estado), recibidoEn: f.recibidoEn || 0,
     sinBriefing: f.estado === 'ficha_completa',   // completó la ficha pero no confirmó que leyó el briefing
   }));
 }
@@ -1191,7 +1196,13 @@ function decidir(qué, motivo){
 
 
 /* ── envíos ── */
+let filtroEnv = 'listo';   // 5/10: separar los que faltan enviar de los ya despachados
 function pintarEnvios(){
+  document.querySelectorAll('#filtro-env [data-n]').forEach(el => { const n = ENVIOS.filter(e => e.estado === el.dataset.n); el.textContent = el.dataset.n === 'despachado' ? `${n.length} · ${n.filter(e => e.recibido).length} recibidos` : n.length; });
+  document.querySelectorAll('#filtro-env .fwa').forEach(b => { b.classList.toggle('activo', b.dataset.f === filtroEnv); b.onclick = () => { filtroEnv = b.dataset.f; pintarEnvios(); }; });
+  const btnD = $('#btn-desp'); if (btnD && ROL !== 'marca') btnD.hidden = filtroEnv !== 'listo';
+  const vista = ENVIOS.map((e, ix) => ({ e, ix })).filter(x => x.e.estado === filtroEnv)
+    .sort((a, b) => filtroEnv === 'despachado' ? (b.e.despachadoEn || 0) - (a.e.despachadoEn || 0) : 0);
   const conOpciones = !!(CFG && (CFG.elegir || CFG.kitPorRespuesta));
   const colOpciones = CFG && CFG.kitPorRespuesta ? 'Kit' : 'Colores';
   $('#tabla-envios').innerHTML = `
@@ -1200,14 +1211,15 @@ function pintarEnvios(){
         <th style="width:34px"></th><th>Creadora</th><th>Dirección</th>
         ${conOpciones ? `<th>${colOpciones}</th>` : ''}<th>Estado</th><th>Aviso</th>
       </tr></thead>
-      <tbody>${ENVIOS.map((e,ix) => `
+      <tbody>${!vista.length ? `<tr><td colspan="7" class="n2" style="padding:24px;text-align:center">${filtroEnv === 'listo' ? 'No queda nadie por enviar 🎉' : 'Todavía no se despachó ningún kit.'}</td></tr>` : ''}${vista.map(({e, ix}) => `
         <tr>
           <td>${e.estado === 'listo' ? `<input type="checkbox" class="sel" data-i="${ix}">` : ''}</td>
           <td><b>${e.nom}</b><span class="n2">@${e.ig}</span>${e.sinBriefing ? '<span class="pill esp" style="margin-top:3px" title="Completó la ficha pero todavía no confirmó que leyó el briefing. El kit se puede mandar igual: lo lee en su app.">sin confirmar briefing</span>' : ''}${e.email?`<span class="n2">${e.email}</span>`:''}${e.tel?`<span class="n2">${e.tel}</span>`:''}</td>
           <td>${e.dir}<span class="n2">${e.loc} · CP ${e.cp}</span></td>
           ${conOpciones ? `<td>${e.tonos}</td>` : ''}
-          <td><span class="pill ${e.estado === 'despachado' ? 'ok' : 'esp'}">
-            ${e.estado === 'despachado' ? 'Despachado' : 'Para enviar'}</span></td>
+          <td>${e.estado !== 'despachado' ? '<span class="pill esp">Para enviar</span>'
+            : e.recibido ? `<span class="pill ok">Recibido${e.recibidoEn ? ' · ' + new Date(e.recibidoEn).toLocaleDateString('es-AR', {day:'numeric', month:'short'}) : ''}</span>`
+            : `<span class="pill">En camino${e.despachadoEn ? ' · salió ' + new Date(e.despachadoEn).toLocaleDateString('es-AR', {day:'numeric', month:'short'}) : ''}</span>`}</td>
           <td class="dmacc">${e.estado !== 'despachado' ? '' : (e.avisoDespachoEn
             ? `<span class="pill ok" title="Le llegó el DM 'tu kit salió'">DM ✓</span>`
             : `<span class="pill no" title="No le llegó el DM: hace más de 24 h que no escribe al bot (Instagram lo bloquea)">sin DM</span>${e.tel ? `<a class="mini" target="_blank" href="${waLinkTexto(e.tel, mensajeDespachado(e.nom))}" title="Abre WhatsApp con el aviso armado">WhatsApp</a>` : ''}`)}</td>
@@ -2173,7 +2185,7 @@ function aplicarRol(){
     pintarTodo();
   }
 })();
-const APP_VERSION = '2026-10-03-e';
+const APP_VERSION = '2026-10-05-a';
 </script>
 </body>
 </html>
