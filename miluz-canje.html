@@ -606,8 +606,9 @@ body.condemo .wrap{padding-bottom:84px}
     <!-- ya me llegó -->
     <div class="card" id="bloque-llego">
       <div id="seg-envio" class="oculto" style="margin:0 0 14px;padding:12px 14px;border-radius:12px;background:var(--acento-suave,#f3f1ee)">
-        <small style="display:block;opacity:.75">Tu envío · <span id="seg-correo"></span></small>
-        <b id="seg-codigo" style="display:block;font-size:1.05rem;letter-spacing:.02em;margin:2px 0 8px"></b>
+        <small style="display:block;opacity:.75">Tu envío · <span id="seg-correo"></span> · <span id="seg-tipo"></span></small>
+        <b id="seg-codigo" style="display:block;font-size:1.05rem;letter-spacing:.02em;margin:2px 0 4px"></b>
+        <small id="seg-nota" style="display:block;margin:0 0 8px;line-height:1.45"></small>
         <a class="btn sec" id="seg-link" target="_blank" rel="noopener" style="display:block;text-align:center;text-decoration:none">Seguir mi envío</a>
       </div>
       <h2>¿Ya te llegó el kit?</h2>
@@ -1720,7 +1721,14 @@ function pintarEstado(){
   // 5/10: nº de seguimiento que la marca carga en su planilla
   const sg = D.seguimiento;
   $('#seg-envio').classList.toggle('oculto', !(sg && sg.codigo));
-  if (sg && sg.codigo) { $('#seg-correo').textContent = sg.correo || 'correo'; $('#seg-codigo').textContent = sg.codigo; $('#seg-link').href = sg.url; }
+  if (sg && sg.codigo) {
+    const remito = sg.tipo === 'remito' || sg.correo === 'Andesmar';
+    $('#seg-correo').textContent = sg.correo || 'correo';
+    $('#seg-tipo').textContent = remito ? 'número de remito' : 'número de seguimiento';
+    $('#seg-codigo').textContent = sg.codigo;
+    $('#seg-nota').innerHTML = remito ? `Andesmar se busca por <b>número de remito</b>: en su página elegí la opción <b>"Remito"</b> y pegá <b>${sg.codigo}</b>.` : '';
+    $('#seg-link').href = sg.url;
+  }
   pintarCollab(e);
   // cuando publica la creadora, el bloque sigue abierto en `publicado` (ajustar links, cargar el 2º video)
   // `vencida` sigue pudiendo entregar: el plazo la apura, no la deja afuera
@@ -1867,7 +1875,7 @@ function pintarMarca(){
   } catch { if (DEMO){ precargar(); traerBorrador(); } ver(DEMO ? 'v-ficha' : 'v-error'); }
 })();
 
-const APP_VERSION = '2026-10-05-a';
+const APP_VERSION = '2026-10-05-b';
 </script>
 </body>
 </html>

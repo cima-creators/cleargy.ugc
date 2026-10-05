@@ -1219,7 +1219,7 @@ function pintarEnvios(){
           ${conOpciones ? `<td>${e.tonos}</td>` : ''}
           <td>${e.estado !== 'despachado' ? '<span class="pill esp">Para enviar</span>'
             : e.recibido ? `<span class="pill ok">Recibido${e.recibidoEn ? ' · ' + new Date(e.recibidoEn).toLocaleDateString('es-AR', {day:'numeric', month:'short'}) : ''}</span>`
-            : `<span class="pill">En camino${e.despachadoEn ? ' · salió ' + new Date(e.despachadoEn).toLocaleDateString('es-AR', {day:'numeric', month:'short'}) : ''}</span>`}${e.seguimiento && e.seguimiento.codigo ? `<a class="n2 verreel" href="${e.seguimiento.url}" target="_blank" rel="noopener" title="Seguir el envío">${e.seguimiento.correo} · ${e.seguimiento.codigo} ↗</a>` : ''}</td>
+            : `<span class="pill">En camino${e.despachadoEn ? ' · salió ' + new Date(e.despachadoEn).toLocaleDateString('es-AR', {day:'numeric', month:'short'}) : ''}</span>`}${e.seguimiento && e.seguimiento.codigo ? `<a class="n2 verreel" href="${e.seguimiento.url}" target="_blank" rel="noopener" title="Seguir el envío">${e.seguimiento.correo} · ${e.seguimiento.correo === 'Andesmar' ? 'remito ' : ''}${e.seguimiento.codigo} ↗</a>` : ''}</td>
           <td class="dmacc">${e.estado !== 'despachado' ? '' : (e.avisoDespachoEn
             ? `<span class="pill ok" title="Le llegó el DM 'tu kit salió'">DM ✓</span>`
             : `<span class="pill no" title="No le llegó el DM: hace más de 24 h que no escribe al bot (Instagram lo bloquea)">sin DM</span>${e.tel ? `<a class="mini" target="_blank" href="${waLinkTexto(e.tel, mensajeDespachado(e.nom))}" title="Abre WhatsApp con el aviso armado">WhatsApp</a>` : ''}`)}</td>
@@ -2186,7 +2186,7 @@ function aplicarRol(){
     pintarTodo();
   }
 })();
-const APP_VERSION = '2026-10-05-c';
+const APP_VERSION = '2026-10-05-d';
 </script>
 </body>
 </html>
