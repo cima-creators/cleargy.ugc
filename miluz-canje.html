@@ -1172,6 +1172,8 @@ function demo(accion, datos){
     g.estado = datos.a;
     g.codigo = CFG.cupon ? 'SOFI10' : null;
     if (datos.a === 'recibido') g.deadline = Date.now()+5*864e5;
+    // 5/10: la demo muestra el nº de seguimiento cuando el kit está despachado
+    if (datos.a === 'enviado') g.seguimiento = { codigo: '360003121621210', correo: 'Andreani', tipo: 'seguimiento', url: 'https://www.andreani.com/envio/360003121621210' };
     if (datos.a === 'cumplida') g.nivel = 2;
     if (['publicado','cumplida'].includes(datos.a)){
       g.reel = { url:'#', views: 62400 };
@@ -1875,7 +1877,7 @@ function pintarMarca(){
   } catch { if (DEMO){ precargar(); traerBorrador(); } ver(DEMO ? 'v-ficha' : 'v-error'); }
 })();
 
-const APP_VERSION = '2026-10-05-b';
+const APP_VERSION = '2026-10-05-c';
 </script>
 </body>
 </html>
