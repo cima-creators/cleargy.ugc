@@ -2954,20 +2954,24 @@ loadConfig();
   function renderShopify(){
     const el = document.getElementById('shopify-content');
     if(!el) return;
-    if(!salesData.length){
+    if(!(TANDA_ARCHIVO ? _ventasTodas() : salesData).length){
       el.innerHTML=`<div style="text-align:center;padding:48px;color:var(--muted);font-family:'Poppins';font-size:11px;line-height:1.8;">Sin ventas registradas todavía.<br>Las ventas aparecen acá cuando alguien compra usando el link UTM de una creadora.</div>`;
       return;
     }
-    // Las ventas de campañas anteriores se muestran aparte, no suman a esta
-    const _deAhora = salesData.filter(ventaDeLaTanda);
-    const _deAntes = salesData.filter(s=>!ventaDeLaTanda(s));
+    // Cada vista muestra SUS ventas: la campaña actual las de ahora, el archivo las viejas.
+    // Mezclarlas en la misma lista es lo que hacía que la campaña nueva pareciera llena de
+    // ventas de septiembre.
+    const _fuente = TANDA_ARCHIVO ? _ventasTodas() : salesData;
+    const _deAhora = _fuente.filter(ventaDeLaTanda);
+    const _deAntes = _fuente.filter(s=>!ventaDeLaTanda(s));
+    const _lista = TANDA_ARCHIVO ? _deAntes : _deAhora;
     const byCreator={};
     CREATORS.forEach(c=>byCreator[c]={count:0,total:0});
-    _deAhora.forEach(s=>{
+    _lista.forEach(s=>{
       if(byCreator[s.creator]){byCreator[s.creator].count++;byCreator[s.creator].total+=s.amount||0;}
     });
-    const totalVentas=_deAhora.length;
-    const totalAmount=_deAhora.reduce((a,s)=>a+(s.amount||0),0);
+    const totalVentas=_lista.length;
+    const totalAmount=_lista.reduce((a,s)=>a+(s.amount||0),0);
     const sorted=[...CREATORS].sort((a,b)=>(byCreator[b].total||0)-(byCreator[a].total||0));
     const top=sorted.find(c=>byCreator[c].count>0);
     const badge=document.getElementById('nb-shopify');
@@ -2983,16 +2987,16 @@ loadConfig();
       _idas.length ? `${_deAntes.length-_viejas.length} con códigos de ${_idas.join(" y ")}, que ya no están en la campaña` : "",
       _viejas.length ? `${_viejas.length} de ${[...new Set(_viejas.map(s=>_nom(s.creator)))].join(" y ")} anteriores al día 1 de su tanda` : "",
     ].filter(Boolean).join(" · ");
-    const _avisoAntes = _deAntes.length
-      ? `<div style="background:rgba(176,123,46,.08);border:1px solid rgba(176,123,46,.28);border-radius:var(--radius);padding:11px 14px;margin-bottom:16px;font-size:12px;color:var(--muted);line-height:1.6;">⏮ <b style="color:#b45309;">${_deAntes.length} venta${_deAntes.length===1?"":"s"} más (${fmtP(_montoAntes)}) que no entran en esta campaña</b> — ${_motivos}. Son ventas reales de la tienda y están listadas abajo, pero no suman al objetivo de esta campaña ni se le pagan a nadie.</div>`
+    const _avisoAntes = (_deAntes.length && !TANDA_ARCHIVO)
+      ? `<div style="background:rgba(176,123,46,.08);border:1px solid rgba(176,123,46,.28);border-radius:var(--radius);padding:11px 14px;margin-bottom:16px;font-size:12px;color:var(--muted);line-height:1.6;">⏮ <b style="color:#b45309;">Hay ${_deAntes.length} venta${_deAntes.length===1?"":"s"} más (${fmtP(_montoAntes)}) que no son de esta campaña</b> — ${_motivos}. ${BRAND.archivoT1?`Se ven en <a href="?brand=${BRAND_ID}&tanda=1" style="color:#b45309;font-weight:700;">la campaña anterior</a>.`:""} No suman acá ni se le pagan a nadie.</div>`
       : "";
     el.innerHTML=`
       ${_avisoAntes}
       <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-bottom:20px;">
         <div style="background:var(--surface);border-radius:var(--radius);padding:16px;box-shadow:var(--shadow);border-left:4px solid #3F8F6B;">
-          <div style="font-family:'Poppins';font-size:9px;letter-spacing:1px;color:var(--muted);text-transform:uppercase;margin-bottom:6px;">Ventas de esta campaña</div>
+          <div style="font-family:'Poppins';font-size:9px;letter-spacing:1px;color:var(--muted);text-transform:uppercase;margin-bottom:6px;">${TANDA_ARCHIVO?"Ventas de la campaña anterior":"Ventas de esta campaña"}</div>
           <div style="font-family:'Poppins';font-size:28px;font-weight:900;color:#3F8F6B;">${totalVentas}</div>
-          ${_deAntes.length?`<div style="font-size:10px;font-family:'Poppins';color:var(--muted);margin-top:4px;">${salesData.length} con códigos de creadoras en total</div>`:""}
+          ${(!TANDA_ARCHIVO&&_deAntes.length)?`<div style="font-size:10px;font-family:'Poppins';color:var(--muted);margin-top:4px;">${_fuente.length} con códigos de creadoras en total</div>`:""}
         </div>
         <div style="background:var(--surface);border-radius:var(--radius);padding:16px;box-shadow:var(--shadow);border-left:4px solid var(--accent);">
           <div style="font-family:'Poppins';font-size:9px;letter-spacing:1px;color:var(--muted);text-transform:uppercase;margin-bottom:6px;">Total recaudado</div>
@@ -3030,12 +3034,11 @@ loadConfig();
             <th style="padding:10px 14px;text-align:right;font-family:'Poppins';font-size:9px;letter-spacing:1px;color:var(--muted);">ORDEN / TOKEN</th>
           </tr></thead>
           <tbody>
-            ${[...salesData].sort((a,b)=>(b.date||'').localeCompare(a.date||'')).slice(0,50).map(s=>`
-              <tr style="border-bottom:1px solid var(--border2);${ventaDeLaTanda(s)?'':'opacity:.5;'}">
+            ${[..._lista].sort((a,b)=>(b.date||'').localeCompare(a.date||'')).slice(0,50).map(s=>`
+              <tr style="border-bottom:1px solid var(--border2);">
                 <td style="padding:10px 14px;"><div style="display:flex;align-items:center;gap:8px;">
                   <div style="width:24px;height:24px;border-radius:50%;background:${(COLORS[s.creator]||'#999')}18;border:1px solid ${COLORS[s.creator]||'#999'};display:flex;align-items:center;justify-content:center;font-size:8px;font-weight:700;color:${COLORS[s.creator]||'#999'}">${AVATARS[s.creator]||'?'}</div>
                   <span style="font-size:12px;">${(NAMES[s.creator]||s.creator||'—').split(' ')[0]}</span>
-                  ${ventaDeLaTanda(s)?'':`<span style="font-family:'Poppins';font-size:8px;font-weight:700;letter-spacing:.5px;padding:1px 6px;border-radius:20px;background:rgba(176,123,46,.12);color:#b45309;" title="Es de la campaña anterior: no suma a esta">ANTES</span>`}
                 </div></td>
                 <td style="padding:10px 14px;font-size:11px;color:var(--muted);max-width:140px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${s.product||'—'}</td>
                 <td style="padding:10px 14px;text-align:center;">${s.coupon?`<span style="font-family:'Poppins';font-size:10px;font-weight:700;color:#7c3aed;background:rgba(124,58,237,.1);border:1px solid rgba(124,58,237,.25);border-radius:8px;padding:2px 7px;">${s.coupon}</span>`:'<span style="font-size:10px;color:var(--muted2);opacity:.5;">UTM</span>'}</td>
@@ -3357,7 +3360,7 @@ loadConfig();
 <!-- Auto-actualización: GitHub Pages cachea el HTML y los celulares lo retienen mucho más.
      Esto compara la versión publicada con la que está corriendo y refresca sola. -->
 <script>
-const APP_VERSION = '2026-10-06-g';
+const APP_VERSION = '2026-10-06-h';
 (function(){
   var CLAVE='cima_ver_reload';
   function hayAlguienEscribiendo(){
