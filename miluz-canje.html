@@ -1694,7 +1694,7 @@ function pintarEstado(){
   }[e] || ['Tu estado','—','','En curso'];
 
   /* anillo: solo cuando hay plazo corriendo */
-  const conAnillo = (e === 'recibido' && dias !== null);
+  const conAnillo = (e === 'recibido' && dias !== null && !CFG.sinKit);   // CIMA Club no tiene plazo
   $('#hero').classList.toggle('con-anillo', conAnillo);
   if (conAnillo){
     const hechos = Math.min(total, Math.max(0, total - dias));
@@ -1883,7 +1883,7 @@ function pintarMarca(){
   } catch { if (DEMO){ precargar(); traerBorrador(); } ver(DEMO ? 'v-ficha' : 'v-error'); }
 })();
 
-const APP_VERSION = '2026-10-06-a';
+const APP_VERSION = '2026-10-06-b';
 </script>
 </body>
 </html>
