@@ -1440,7 +1440,7 @@ function precargarEntrega(){
   $('#lab-ig').classList.toggle('oculto', !links); $('#lab-tt').classList.toggle('oculto', !links);
   if (links && CFG.entregaDirecta){
     $('#subir-tit').textContent = tieneLinks ? '¿Subiste otro?' : 'Subí tu reel';
-    $('#subir-txt').textContent = `Publicá tu reel (y tus historias) invitando al evento, etiquetando a @${CFG.cuentaIg}, y pegá el link acá. El TikTok es opcional.`;
+    $('#subir-txt').textContent = `Publicá tu reel invitando al evento, etiquetando a @${CFG.cuentaIg}, y pegá el link acá. El TikTok es opcional. Sin historia antes del evento no hay entrada.`;
     $('#btn-drive').textContent = tieneLinks ? 'Actualizar link' : 'Cargar mi reel';
   } else if (links){
     $('#subir-tit').textContent = tieneLinks ? '¿Cambiaste algo?' : '¡Aprobado! Publicalo y cargá los links';
@@ -1675,7 +1675,7 @@ function pintarEstado(){
     briefing_ok:['Tu estado','Ya estás<br>en la lista','Te avisamos cuando salga tu kit.','En preparación'],
     aprobada:   ['Tu estado','Preparando<br>tu kit','En breve lo despachamos.','En preparación'],
     enviado:    ['Tu kit','Va en<br>camino','Avisanos cuando te llegue.','Despachado'],
-    recibido:   CFG.sinKit ? ['CIMA Club','Subí tu<br>reel',`Publicá tu reel y tus historias invitando al evento, etiquetando a @${CFG.cuentaIg}, y pegá el link acá abajo.`,'Activo'] : ['Te quedan',
+    recibido:   CFG.sinKit ? ['CIMA Club','Historia<br>y reel',`Subí tu historia antes del evento (con eso te mandamos tus 2 entradas) y tu reel invitando a tu gente. En el evento, etiquetá a las marcas.`,'Activo'] : ['Te quedan',
                  (dias === 1 ? 'Te queda<br>un día' : 'Te quedan<br>' + (dias!==null?dias:'—') + ' días'),
                  'Tu kit ya llegó. Grabá con tiempo.','En curso'],
     entregado:  !CREADORA_PUBLICA()
@@ -1883,7 +1883,7 @@ function pintarMarca(){
   } catch { if (DEMO){ precargar(); traerBorrador(); } ver(DEMO ? 'v-ficha' : 'v-error'); }
 })();
 
-const APP_VERSION = '2026-10-06-b';
+const APP_VERSION = '2026-10-06-c';
 </script>
 </body>
 </html>
