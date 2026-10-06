@@ -329,6 +329,7 @@ body.archivo .abtn,body.archivo .action-row button,body.archivo #apify-sync-btn,
           <button class="period-pill" onclick="setOverviewPeriod(7,this)">7 días</button>
           <button class="period-pill" onclick="setOverviewPeriod(30,this)">30 días</button>
         </div>
+        <div id="banner-guiones"></div>
         <div class="stats-row" id="admin-stats"></div>
         <div class="sec-label">Creadoras</div>
         <div class="creator-grid" id="creator-grid"></div>
@@ -456,7 +457,13 @@ body.archivo .abtn,body.archivo .action-row button,body.archivo #apify-sync-btn,
             </div>
           </div>
           <div class="frow">
-            <div class="fgroup" style="justify-content:flex-end;padding-top:6px;"><button class="hbtn primary" onclick="cargarGuiones()">Cargar</button></div>
+            <div class="fgroup" style="justify-content:flex-end;padding-top:6px;display:flex;gap:8px;flex-direction:row;align-items:center;">
+              <label style="font-size:12px;color:var(--muted);display:flex;align-items:center;gap:6px;cursor:pointer;">
+                <input type="checkbox" id="guion-repartir" checked style="width:15px;height:15px;cursor:pointer;accent-color:var(--accent);">
+                Repartir los que no tengan creadora entre los activos
+              </label>
+              <button class="hbtn primary" onclick="cargarGuiones()">Cargar</button>
+            </div>
           </div>
         </div>
         <div id="guiones-admin-list"></div>
@@ -1544,6 +1551,9 @@ function renderOverview(){
     </div>
   `;
 
+  const _bg=document.getElementById("banner-guiones");
+  if(_bg) _bg.innerHTML=bannerGuiones();
+
   document.getElementById("admin-stats").innerHTML=`
     <div class="scard"><div class="sc-label">Videos · ${periodLabel}</div><div class="sc-val" style="color:#3F8F6B">${videosEnPeriodo.length}</div><div class="sc-sub">en el período</div></div>
     <div class="scard"><div class="sc-label">Total videos</div><div class="sc-val" style="color:#2a8fd4">${totalVids}</div><div class="sc-sub">en la campaña</div></div>
@@ -2145,6 +2155,7 @@ function cargarGuiones(){
     yaHay.add(_gCode(code));
     nuevos++;
   });
+  if(document.getElementById("guion-repartir")?.checked) _repartirSueltos();
   saveData();
   document.getElementById("guion-pegar").value="";
   renderGuionesAdmin();
@@ -2152,6 +2163,30 @@ function cargarGuiones(){
   if(repetidos) msg+=` · ${repetidos} ya estaban`;
   if(sinCreadora.length) msg+=` · ⚠ no reconocí: ${[...new Set(sinCreadora)].join(", ")}`;
   showToast(msg, sinCreadora.length?7000:4000);
+}
+
+// Regla de Nacho (6/10): todo guion que escribimos se reparte entre los creadores
+// ACTIVOS de la app. Los que entran sin dueña se asignan en ronda, equilibrando por
+// la carga que ya tiene cada uno.
+function _repartirSueltos(){
+  const activos=CREATORS.filter(c=>!(BRAND.creators[c]||{}).inactive);
+  if(!activos.length) return 0;
+  const carga={}; activos.forEach(c=>carga[c]=0);
+  (data.guiones||[]).forEach(g=>{ if(g.creadora && carga[g.creadora]!==undefined) carga[g.creadora]++; });
+  let n=0;
+  (data.guiones||[]).forEach(g=>{
+    if(g.creadora) return;
+    const quien=activos.reduce((a,b)=>carga[a]<=carga[b]?a:b);
+    g.creadora=quien; carga[quien]++; n++;
+  });
+  return n;
+}
+
+function repartirGuiones(){
+  const n=_repartirSueltos();
+  if(!n){ showToast("No hay guiones sueltos para repartir"); return; }
+  saveData(); renderGuionesAdmin();
+  showToast(`✓ ${n} guion${n===1?"":"es"} repartido${n===1?"":"s"} entre los activos`);
 }
 
 function borrarGuion(code){
@@ -2176,6 +2211,39 @@ function guionesPendientes(){
   return ((data&&data.guiones)||[]).filter(g=>!hechos[_gCode(g.code)]).length;
 }
 
+// Cuántos guiones sin grabar le quedan a cada creadora activa. Se queda sin guiones =
+// no puede subir más videos, así que esto se avisa ANTES de que pase.
+function guionesPorCreadora(){
+  const hechos=_videosPorGuion();
+  const gs=((data&&data.guiones)||[]);
+  return CREATORS.filter(c=>!(BRAND.creators[c]||{}).inactive).map(c=>{
+    const suyos=gs.filter(g=>!g.creadora || g.creadora===c);
+    const pend=suyos.filter(g=>!hechos[_gCode(g.code)]).length;
+    return {c, nombre:(NAMES[c]||c).split(" ")[0], total:suyos.length, pend};
+  }).filter(x=>x.total>0);
+}
+
+// Umbral: un día de trabajo o menos = rojo, dos días = ámbar
+function alertasGuiones(){
+  const dia=BRAND.dailyVideos||3;
+  return guionesPorCreadora()
+    .filter(x=>x.pend<=dia*2)
+    .map(x=>({...x, nivel: x.pend===0 ? "sin" : x.pend<=dia ? "rojo" : "amarillo"}))
+    .sort((a,b)=>a.pend-b.pend);
+}
+
+function bannerGuiones(){
+  const al=alertasGuiones();
+  if(!al.length) return "";
+  const txt=al.map(x=>x.pend===0
+    ? `<b>${x.nombre} se quedó sin guiones</b> (no puede subir)`
+    : `${x.nombre}: <b>${x.pend}</b>`).join(" · ");
+  const rojo=al.some(x=>x.nivel!=="amarillo");
+  const col=rojo?["rgba(193,97,60,.09)","rgba(193,97,60,.32)","#B0512F"]:["rgba(176,123,46,.09)","rgba(176,123,46,.3)","#b45309"];
+  return `<div onclick="nav(document.querySelector('[data-view=guiones]'))" style="cursor:pointer;background:${col[0]};border:1px solid ${col[1]};border-radius:var(--radius);padding:11px 14px;margin-bottom:16px;font-size:12.5px;color:var(--muted);line-height:1.6;">
+    📄 <b style="color:${col[2]};">Guiones por agotarse</b> — ${txt}. Cargá más en Guiones →</div>`;
+}
+
 function renderGuionesAdmin(){
   const cont=document.getElementById("guiones-admin-list");
   if(!cont) return;
@@ -2193,8 +2261,19 @@ function renderGuionesAdmin(){
   cont.innerHTML=`
     <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px;">
       <div style="font-family:'Poppins';font-size:12px;color:var(--muted);font-weight:600;">${pend} sin grabar · ${orden.length-pend} grabados · ${orden.length} en total</div>
-      <button class="hbtn" onclick="vaciarGuiones()" style="font-size:11px;">Vaciar lista</button>
+      <div style="display:flex;gap:8px;">
+        <button class="hbtn" onclick="repartirGuiones()" style="font-size:11px;">Repartir los sueltos</button>
+        <button class="hbtn" onclick="vaciarGuiones()" style="font-size:11px;">Vaciar lista</button>
+      </div>
     </div>
+    <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:8px;margin-bottom:16px;">` +
+      guionesPorCreadora().map(x=>{
+        const col = x.pend===0 ? "#B0512F" : x.pend<=(BRAND.dailyVideos||3) ? "#b45309" : "var(--muted)";
+        return `<div style="background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:11px 13px;">
+          <div style="font-family:'Poppins';font-weight:800;font-size:12px;">${x.nombre}</div>
+          <div style="font-family:'Poppins';font-size:11px;color:${col};margin-top:3px;"><b>${x.pend}</b> sin grabar de ${x.total}${x.pend===0?" · no puede subir":""}</div>
+        </div>`;
+      }).join("") + `</div>
     <div class="twrap"><div class="twrap-scroll"><table><thead><tr>
       <th>Guion</th><th>Creadora</th><th>Estado</th><th></th>
     </tr></thead><tbody>` +
@@ -3387,7 +3466,7 @@ loadConfig();
 <!-- Auto-actualización: GitHub Pages cachea el HTML y los celulares lo retienen mucho más.
      Esto compara la versión publicada con la que está corriendo y refresca sola. -->
 <script>
-const APP_VERSION = '2026-10-06-l';
+const APP_VERSION = '2026-10-06-m';
 (function(){
   var CLAVE='cima_ver_reload';
   function hayAlguienEscribiendo(){

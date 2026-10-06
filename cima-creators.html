@@ -597,6 +597,9 @@ html.sin-redes .solo-redes{display:none !important;}
           <option value="">Seleccioná...</option>
         </select>
       </div>
+      <div id="up-guion-vacio" style="display:none;background:rgba(193,97,60,.09);border:1px solid rgba(193,97,60,.3);border-radius:var(--radius-sm);padding:13px 15px;margin-bottom:14px;font-size:12px;color:var(--text);line-height:1.6;">
+        📄 <b>Te quedaste sin guiones.</b> Ya grabaste todos los que te cargaron, así que no podés subir más hasta que te pasen los nuevos. Avisale a CIMA.
+      </div>
       <div class="fgroup" id="up-guion-group" style="display:none;">
         <div class="flabel">📄 ¿Qué guion grabaste? <span style="color:var(--accent2)">*</span></div>
         <select class="finput" id="up-guion">
@@ -1486,7 +1489,8 @@ function renderHomeGuiones(){
     pend.length ? `${pend.length} de ${todos.length} sin grabar` : "✓ todos grabados";
   document.getElementById("home-gui-next").textContent = pend.length
     ? `Te toca: ${pend[0].code}${pend[0].titulo?" · "+pend[0].titulo:""}`
-    : "Terminaste todos tus guiones 🎉";
+    : "Terminaste todos — pedí guiones nuevos para poder seguir subiendo";
+  card.style.borderColor = pend.length ? "" : "rgba(193,97,60,.45)";
 }
 
 function renderGuiones(){
@@ -1521,12 +1525,18 @@ function llenarGuionesUpload(){
   const sel = document.getElementById("up-guion");
   if(!grp || !sel) return;
   const todos = misGuiones();
-  if(!todos.length){ grp.style.display="none"; sel.innerHTML=`<option value="">—</option>`; return; }
+  if(!todos.length){
+    grp.style.display="none"; sel.innerHTML=`<option value="">—</option>`;
+    const av=document.getElementById("up-guion-vacio"); if(av) av.style.display="none";
+    return;
+  }
   const pend = misGuionesPendientes();
   grp.style.display = "block";
   sel.innerHTML = `<option value="">Seleccioná...</option>`
-    + pend.map(g=>`<option value="${esc(_gCode(g.code))}">${esc(g.code)}${g.titulo?" · "+esc(g.titulo):""}</option>`).join("")
-    + `<option value="__otro__">Ninguno — es otro video</option>`;
+    + pend.map(g=>`<option value="${esc(_gCode(g.code))}">${esc(g.code)}${g.titulo?" · "+esc(g.titulo):""}</option>`).join("");
+  // Si se quedó sin guiones no puede subir: es a propósito, la marca le tiene que cargar más
+  const aviso = document.getElementById("up-guion-vacio");
+  if(aviso) aviso.style.display = pend.length ? "none" : "block";
 }
 
 // ═══════════════════════════════════
@@ -1975,11 +1985,14 @@ function submitVideo(){
   const _gGrp = document.getElementById("up-guion-group");
   const _pideGuion = _gGrp && _gGrp.style.display !== "none";
   let _guionVal = _pideGuion ? document.getElementById("up-guion").value : "";
-  if(_pideGuion && !_guionVal){document.getElementById("up-err").style.display="block";document.getElementById("up-err").textContent="Elegí qué guion grabaste.";return;}
-  if(_guionVal==="__otro__"){
-    if(_notaVal.length < 5){document.getElementById("up-err").style.display="block";document.getElementById("up-err").textContent="Si no es ninguno de tus guiones, contá en la nota qué grabaste.";return;}
-    _guionVal = "OTRO";
+  if(_pideGuion && !_guionVal){
+    document.getElementById("up-err").style.display="block";
+    document.getElementById("up-err").textContent = misGuionesPendientes().length
+      ? "Elegí qué guion grabaste."
+      : "Te quedaste sin guiones: no podés subir más hasta que CIMA te cargue los nuevos.";
+    return;
   }
+
   // Validar que cada link sea de su plataforma (evita pegar el de IG en el campo de TikTok)
   if(!_crudo && !/instagram\.com\//i.test(linkIg)){document.getElementById("up-err").style.display="block";document.getElementById("up-err").textContent="El link de Instagram no parece válido — copialo desde la app de Instagram (debe contener instagram.com).";return;}
   if(linkTt && !/tiktok\.com\//i.test(linkTt)){document.getElementById("up-err").style.display="block";document.getElementById("up-err").textContent="El link de TikTok no parece válido — copialo desde la app de TikTok (debe contener tiktok.com).";return;}
@@ -2779,7 +2792,7 @@ loadData();
 <!-- Auto-actualización: GitHub Pages cachea el HTML y los celulares lo retienen mucho más.
      Esto compara la versión publicada con la que está corriendo y refresca sola. -->
 <script>
-const APP_VERSION = '2026-10-06-l';
+const APP_VERSION = '2026-10-06-m';
 (function(){
   var CLAVE='cima_ver_reload';
   function hayAlguienEscribiendo(){
