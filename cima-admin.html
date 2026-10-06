@@ -2953,15 +2953,17 @@ loadConfig();
     const top=sorted.find(c=>byCreator[c].count>0);
     const badge=document.getElementById('nb-shopify');
     if(badge)badge.textContent=totalVentas;
+    const _montoAntes = _deAntes.reduce((a,s)=>a+(s.amount||0),0);
     const _avisoAntes = _deAntes.length
-      ? `<div style="background:rgba(176,123,46,.08);border:1px solid rgba(176,123,46,.28);border-radius:var(--radius);padding:11px 14px;margin-bottom:16px;font-size:12px;color:var(--muted);">⏮ <b style="color:#b45309;">${_deAntes.length} venta${_deAntes.length===1?"":"s"} de la campaña anterior</b> — ${[...new Set(_deAntes.map(s=>NAMES[s.creator]?String(NAMES[s.creator]).split(" ")[0]:s.creator))].join(", ")}. No se cuentan acá ni se pagan en esta campaña.</div>`
+      ? `<div style="background:rgba(176,123,46,.08);border:1px solid rgba(176,123,46,.28);border-radius:var(--radius);padding:11px 14px;margin-bottom:16px;font-size:12px;color:var(--muted);line-height:1.6;">⏮ <b style="color:#b45309;">${_deAntes.length} venta${_deAntes.length===1?"":"s"} más (${fmtP(_montoAntes)}) con códigos de ${[...new Set(_deAntes.map(s=>NAMES[s.creator]?String(NAMES[s.creator]).split(" ")[0]:s.creator))].join(" y ")}</b>, que ya no están en la campaña. Son ventas reales de la tienda y están listadas abajo, pero no entran en el objetivo de esta campaña ni se le pagan a nadie.</div>`
       : "";
     el.innerHTML=`
       ${_avisoAntes}
       <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-bottom:20px;">
         <div style="background:var(--surface);border-radius:var(--radius);padding:16px;box-shadow:var(--shadow);border-left:4px solid #3F8F6B;">
-          <div style="font-family:'Poppins';font-size:9px;letter-spacing:1px;color:var(--muted);text-transform:uppercase;margin-bottom:6px;">Total ventas</div>
+          <div style="font-family:'Poppins';font-size:9px;letter-spacing:1px;color:var(--muted);text-transform:uppercase;margin-bottom:6px;">Ventas de esta campaña</div>
           <div style="font-family:'Poppins';font-size:28px;font-weight:900;color:#3F8F6B;">${totalVentas}</div>
+          ${_deAntes.length?`<div style="font-size:10px;font-family:'Poppins';color:var(--muted);margin-top:4px;">${salesData.length} con códigos de creadoras en total</div>`:""}
         </div>
         <div style="background:var(--surface);border-radius:var(--radius);padding:16px;box-shadow:var(--shadow);border-left:4px solid var(--accent);">
           <div style="font-family:'Poppins';font-size:9px;letter-spacing:1px;color:var(--muted);text-transform:uppercase;margin-bottom:6px;">Total recaudado</div>
@@ -3317,7 +3319,7 @@ loadConfig();
 <!-- Auto-actualización: GitHub Pages cachea el HTML y los celulares lo retienen mucho más.
      Esto compara la versión publicada con la que está corriendo y refresca sola. -->
 <script>
-const APP_VERSION = '2026-10-06-d';
+const APP_VERSION = '2026-10-06-e';
 (function(){
   var CLAVE='cima_ver_reload';
   function hayAlguienEscribiendo(){
