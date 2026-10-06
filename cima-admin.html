@@ -897,6 +897,18 @@ const BRAND_CONFIGS = {
       creadora4:{name:'Fabi',avatar:'FA',color:'#66CCD6',phone:'',salary:600000},
     }
   },
+  magnelab: {
+    goal:270, // objetivo del mes (3 creadores × 90)
+    name:'MagneLab', logoText:'MAGNELAB', collection:'magnelab', defaultCampaignStart:'2026-10-06',
+    dailyVideos:3, videoGoal:90, no100k:true, salary:562500, minVideos:90,
+    adminPass:'magnelab-admin-2026', adminPass2:'magnelab-2026', adminPass4:'abril-2026',
+    accent:'#D42130', accentLight:'#e05561', bg:'#faf5f5', surface2:'#f2e8e8', border:'#e2d7d7',
+    text:'#1f1414', muted:'#7a6666', loginBg:'linear-gradient(135deg,#faf5f5 0%,#f2e2e2 50%,#e8d2d2 100%)',
+    creators:{
+      creadora1:{name:'Leandro',avatar:'LE',color:'#D42130',phone:''},
+      creadora2:{name:'Sebastián',avatar:'SE',color:'#a81a26',phone:''},
+    }
+  },
   uniderma: {
     goal:300, // objetivo total de la campaña (5 creadoras × 60)
     name:'Uniderma', logoText:'UNIDERMA', collection:'uniderma', defaultCampaignStart:'2026-09-21', dailyVideos:2, videoGoal:60, no100k:true, noRacha:true, salary:375000, minVideos:60,
@@ -3375,7 +3387,7 @@ loadConfig();
 <!-- Auto-actualización: GitHub Pages cachea el HTML y los celulares lo retienen mucho más.
      Esto compara la versión publicada con la que está corriendo y refresca sola. -->
 <script>
-const APP_VERSION = '2026-10-06-k';
+const APP_VERSION = '2026-10-06-l';
 (function(){
   var CLAVE='cima_ver_reload';
   function hayAlguienEscribiendo(){
