@@ -2954,8 +2954,18 @@ loadConfig();
     const badge=document.getElementById('nb-shopify');
     if(badge)badge.textContent=totalVentas;
     const _montoAntes = _deAntes.reduce((a,s)=>a+(s.amount||0),0);
+    // Dos motivos distintos, y conviene decir cuál es cada uno: la creadora ya no está,
+    // o la venta es anterior al día 1 de su tanda. Mezclarlos hacía que el aviso dijera
+    // que una creadora que SÍ está se había ido.
+    const _nom = c => NAMES[c] ? String(NAMES[c]).split(" ")[0] : c;
+    const _idas = [...new Set(_deAntes.filter(s=>(BRAND.creators[s.creator]||{}).inactive).map(s=>_nom(s.creator)))];
+    const _viejas = _deAntes.filter(s=>!(BRAND.creators[s.creator]||{}).inactive);
+    const _motivos = [
+      _idas.length ? `${_deAntes.length-_viejas.length} con códigos de ${_idas.join(" y ")}, que ya no están en la campaña` : "",
+      _viejas.length ? `${_viejas.length} de ${[...new Set(_viejas.map(s=>_nom(s.creator)))].join(" y ")} anteriores al día 1 de su tanda` : "",
+    ].filter(Boolean).join(" · ");
     const _avisoAntes = _deAntes.length
-      ? `<div style="background:rgba(176,123,46,.08);border:1px solid rgba(176,123,46,.28);border-radius:var(--radius);padding:11px 14px;margin-bottom:16px;font-size:12px;color:var(--muted);line-height:1.6;">⏮ <b style="color:#b45309;">${_deAntes.length} venta${_deAntes.length===1?"":"s"} más (${fmtP(_montoAntes)}) con códigos de ${[...new Set(_deAntes.map(s=>NAMES[s.creator]?String(NAMES[s.creator]).split(" ")[0]:s.creator))].join(" y ")}</b>, que ya no están en la campaña. Son ventas reales de la tienda y están listadas abajo, pero no entran en el objetivo de esta campaña ni se le pagan a nadie.</div>`
+      ? `<div style="background:rgba(176,123,46,.08);border:1px solid rgba(176,123,46,.28);border-radius:var(--radius);padding:11px 14px;margin-bottom:16px;font-size:12px;color:var(--muted);line-height:1.6;">⏮ <b style="color:#b45309;">${_deAntes.length} venta${_deAntes.length===1?"":"s"} más (${fmtP(_montoAntes)}) que no entran en esta campaña</b> — ${_motivos}. Son ventas reales de la tienda y están listadas abajo, pero no suman al objetivo de esta campaña ni se le pagan a nadie.</div>`
       : "";
     el.innerHTML=`
       ${_avisoAntes}
@@ -3319,7 +3329,7 @@ loadConfig();
 <!-- Auto-actualización: GitHub Pages cachea el HTML y los celulares lo retienen mucho más.
      Esto compara la versión publicada con la que está corriendo y refresca sola. -->
 <script>
-const APP_VERSION = '2026-10-06-e';
+const APP_VERSION = '2026-10-06-f';
 (function(){
   var CLAVE='cima_ver_reload';
   function hayAlguienEscribiendo(){
