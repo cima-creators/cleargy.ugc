@@ -51,6 +51,20 @@ select.linput option{background:white;}
 .user-name{font-size:12px;color:var(--muted);font-weight:600;}
 
 /* BOTTOM NAV */
+/* Guiones asignados a la creadora */
+.gui-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:15px 16px;margin-bottom:14px;cursor:pointer;}
+.gui-top{display:flex;justify-content:space-between;align-items:center;margin-bottom:7px;}
+.gui-lbl{font-family:'Poppins';font-size:8px;letter-spacing:2.5px;text-transform:uppercase;color:var(--muted2);}
+.gui-count{font-family:'Poppins';font-size:11px;font-weight:700;color:var(--accent);}
+.gui-next{font-size:13px;font-weight:600;color:var(--text);line-height:1.45;}
+.gui-cta{font-family:'Poppins';font-size:11px;color:var(--accent);margin-top:10px;font-weight:600;}
+.gui-item{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-sm);padding:13px 14px;margin-bottom:9px;}
+.gui-item.hecho{opacity:.52;}
+.gui-code{display:inline-block;font-family:'Poppins';font-size:9.5px;font-weight:700;padding:2px 9px;border-radius:20px;background:rgba(var(--acc-rgb),.1);color:var(--accent);margin-bottom:7px;}
+.gui-code.ok{background:rgba(63,143,107,.13);color:#3F8F6B;}
+.gui-tit{font-size:13.5px;font-weight:600;color:var(--text);line-height:1.4;}
+.gui-txt{font-size:12px;color:var(--muted);line-height:1.65;margin-top:8px;white-space:pre-wrap;}
+.gui-link{display:inline-block;margin-top:10px;font-family:'Poppins';font-size:11px;font-weight:600;color:var(--accent);text-decoration:none;}
 .bottom-nav{position:fixed;bottom:14px;left:50%;transform:translateX(-50%);width:calc(100% - 32px);max-width:400px;background:rgba(255,255,255,.97);backdrop-filter:blur(28px);-webkit-backdrop-filter:blur(28px);border-radius:26px;border:1px solid rgba(var(--acc-rgb),.09);padding:8px 6px;display:flex;justify-content:space-around;align-items:center;z-index:50;box-shadow:0 8px 32px rgba(var(--acc-rgb),.14),0 2px 8px rgba(0,0,0,.07);}
 .bnav-item{display:flex;flex-direction:column;align-items:center;gap:3px;cursor:pointer;padding:7px 8px;border-radius:18px;transition:all .18s cubic-bezier(.4,0,.2,1);color:var(--muted);flex:1;}
 .bnav-item.active{color:var(--accent);background:rgba(var(--acc-rgb),.08);}
@@ -471,6 +485,16 @@ html.sin-redes .solo-redes{display:none !important;}
 
     <div id="home-streak-banner" style="display:none;"></div>
 
+    <!-- Guiones que tiene asignados -->
+    <div id="home-guiones" class="gui-card" style="display:none;" onclick="goScreen('guiones')">
+      <div class="gui-top">
+        <span class="gui-lbl">Tus guiones</span>
+        <span class="gui-count" id="home-gui-count">—</span>
+      </div>
+      <div class="gui-next" id="home-gui-next"></div>
+      <div class="gui-cta">Ver todos mis guiones →</div>
+    </div>
+
     <!-- Ritmo de la semana -->
     <div id="home-semana" class="week-card" style="display:none;">
       <div class="week-top"><b>Tu semana</b><span id="home-semana-tot"></span></div>
@@ -573,6 +597,13 @@ html.sin-redes .solo-redes{display:none !important;}
           <option value="">Seleccioná...</option>
         </select>
       </div>
+      <div class="fgroup" id="up-guion-group" style="display:none;">
+        <div class="flabel">📄 ¿Qué guion grabaste? <span style="color:var(--accent2)">*</span></div>
+        <select class="finput" id="up-guion">
+          <option value="">Seleccioná...</option>
+        </select>
+        <div style="font-size:10px;font-family:'Poppins';color:var(--muted);margin-top:4px;">Así la marca sabe cuáles ya están grabados y cuáles faltan.</div>
+      </div>
       <div class="fgroup">
         <div class="flabel">Categoría</div>
         <select class="finput" id="up-cat">
@@ -651,6 +682,13 @@ html.sin-redes .solo-redes{display:none !important;}
 
 
   <!-- IDEAS SEPARADO -->
+  <!-- GUIONES -->
+  <div class="screen" id="screen-guiones">
+    <div class="stitle">Tus guiones</div>
+    <div class="ssub">Lo que tenés para grabar</div>
+    <div id="guiones-list"></div>
+  </div>
+
   <div class="screen" id="screen-ideas">
     <div class="stitle">Ideas</div>
     <div class="ssub">Contenido sugerido por el admin</div>
@@ -1210,6 +1248,7 @@ let sharedData = {
   ventas: _emptyObj(), bonos: _emptyObj(),
   videos: [],
   ideas: [],
+  guiones: [],
   semanaActual: 0,
 };
 
@@ -1229,6 +1268,7 @@ function _withDefaults(d){
   if(!d.bonos) d.bonos = _emptyObj();
   if(!d.videos) d.videos = [];
   if(!d.ideas) d.ideas = [];
+  if(!d.guiones) d.guiones = [];
   return d;
 }
 // Mezcla los videos en cola offline dentro de un payload de Firebase para que no desaparezcan de la vista
@@ -1399,6 +1439,81 @@ function logout(){
 }
 
 // ═══════════════════════════════════
+// GUIONES
+// ═══════════════════════════════════
+// El catálogo lo carga la marca desde el panel. Un guion está grabado cuando existe
+// un video con ese código: el video es la prueba, así no hay dos fuentes de verdad.
+function _gCode(c){ return String(c==null?"":c).trim().toUpperCase(); }
+
+// Los míos: los que me asignaron + los que quedaron libres para cualquiera
+function misGuiones(){
+  return (sharedData.guiones||[]).filter(g => !g.creadora || g.creadora===currentUser);
+}
+function guionesGrabados(){
+  const s = new Set();
+  (sharedData.videos||[]).forEach(v => { if(v.guion) s.add(_gCode(v.guion)); });
+  return s;
+}
+function misGuionesPendientes(){
+  const hechos = guionesGrabados();
+  return misGuiones().filter(g => !hechos.has(_gCode(g.code)));
+}
+
+function renderHomeGuiones(){
+  const card = document.getElementById("home-guiones");
+  if(!card) return;
+  const todos = misGuiones();
+  if(!todos.length){ card.style.display="none"; return; }
+  const pend = misGuionesPendientes();
+  card.style.display = "block";
+  document.getElementById("home-gui-count").textContent =
+    pend.length ? `${pend.length} de ${todos.length} sin grabar` : "✓ todos grabados";
+  document.getElementById("home-gui-next").textContent = pend.length
+    ? `Te toca: ${pend[0].code}${pend[0].titulo?" · "+pend[0].titulo:""}`
+    : "Terminaste todos tus guiones 🎉";
+}
+
+function renderGuiones(){
+  const cont = document.getElementById("guiones-list");
+  if(!cont) return;
+  const todos = misGuiones();
+  if(!todos.length){
+    cont.innerHTML = `<div class="empty"><div class="empty-icon">📄</div><div class="empty-text">La marca todavía no te cargó guiones</div></div>`;
+    return;
+  }
+  const hechos = guionesGrabados();
+  const orden = [...todos].sort((a,b)=>{
+    const ha = hechos.has(_gCode(a.code)) ? 1 : 0, hb = hechos.has(_gCode(b.code)) ? 1 : 0;
+    return ha-hb || String(a.code).localeCompare(String(b.code), "es", {numeric:true});
+  });
+  const pend = orden.filter(g=>!hechos.has(_gCode(g.code))).length;
+  cont.innerHTML = `<div style="font-family:'Poppins';font-size:11px;color:var(--muted);margin-bottom:12px;font-weight:600;">${pend ? pend+" sin grabar de "+orden.length : "Grabaste los "+orden.length+" 🎉"}</div>` +
+    orden.map(g=>{
+      const hecho = hechos.has(_gCode(g.code));
+      return `<div class="gui-item${hecho?" hecho":""}">
+        <span class="gui-code${hecho?" ok":""}">${hecho?"✓ ":""}${esc(g.code)}</span>
+        ${g.titulo?`<div class="gui-tit">${esc(g.titulo)}</div>`:""}
+        ${g.texto?`<div class="gui-txt">${esc(g.texto)}</div>`:""}
+        ${g.link?`<a class="gui-link" href="${escUrl(g.link)}" target="_blank" rel="noopener">Abrir el guion ↗</a>`:""}
+      </div>`;
+    }).join("");
+}
+
+// Opciones del selector al subir: solo los que le faltan, más la salida "otro"
+function llenarGuionesUpload(){
+  const grp = document.getElementById("up-guion-group");
+  const sel = document.getElementById("up-guion");
+  if(!grp || !sel) return;
+  const todos = misGuiones();
+  if(!todos.length){ grp.style.display="none"; sel.innerHTML=`<option value="">—</option>`; return; }
+  const pend = misGuionesPendientes();
+  grp.style.display = "block";
+  sel.innerHTML = `<option value="">Seleccioná...</option>`
+    + pend.map(g=>`<option value="${esc(_gCode(g.code))}">${esc(g.code)}${g.titulo?" · "+esc(g.titulo):""}</option>`).join("")
+    + `<option value="__otro__">Ninguno — es otro video</option>`;
+}
+
+// ═══════════════════════════════════
 // NAV
 // ═══════════════════════════════════
 function goScreen(name, el){
@@ -1406,7 +1521,7 @@ function goScreen(name, el){
   document.getElementById("screen-"+name).classList.add("active");
   document.querySelectorAll(".bnav-item").forEach(b=>b.classList.remove("active"));
   if(el) el.classList.add("active");
-  if(name==="home") renderHome();
+  if(name==="home"){ renderHome(); renderHomeGuiones(); }
   if(name==="leaderboard") renderLeaderboard();
   if(name==="videos"){
     const activeTab = document.getElementById("vsort-views");
@@ -1416,6 +1531,8 @@ function goScreen(name, el){
   if(name==="bonos") renderBonos();
   if(name==="notifs") renderNotifs();
   if(name==="ideas") renderIdeasOnly();
+  if(name==="guiones") renderGuiones();
+  if(name==="upload") llenarGuionesUpload();
 }
 
 // ═══════════════════════════════════
@@ -1743,7 +1860,7 @@ function videoCardHTML(v){
     <div class="vc-day-badge">Día ${v.date?(()=>{const s=myCampaignStart();const[sy,sm,sd]=s.split("-").map(Number);return Math.max(1,Math.floor((new Date(v.date)-new Date(sy,sm-1,sd))/86400000)+1);})():(v.day||1)}</div>
     <div class="vc-body">
       <div class="vc-top">
-        <div style="font-size:14px;font-weight:600;letter-spacing:-.015em;color:var(--text);">${platIcon} ${esc(v.cat)}${v.crudo?`<span style="display:inline-block;margin-left:6px;padding:1px 7px;border-radius:20px;background:rgba(184,124,42,.13);color:#96682A;font-family:'Poppins';font-size:9.5px;font-weight:600;vertical-align:middle;">crudo</span>`:""}${dateStr?`<span style="font-family:'Poppins';font-size:11px;font-weight:400;color:var(--muted);margin-left:8px;">${dateStr}</span>`:""}</div>
+        <div style="font-size:14px;font-weight:600;letter-spacing:-.015em;color:var(--text);">${platIcon} ${esc(v.cat)}${v.crudo?`<span style="display:inline-block;margin-left:6px;padding:1px 7px;border-radius:20px;background:rgba(184,124,42,.13);color:#96682A;font-family:'Poppins';font-size:9.5px;font-weight:600;vertical-align:middle;">crudo</span>`:""}${v.guion&&v.guion!=="OTRO"?`<span style="display:inline-block;margin-left:6px;padding:1px 7px;border-radius:20px;background:rgba(var(--acc-rgb),.11);color:var(--accent);font-family:'Poppins';font-size:9.5px;font-weight:600;vertical-align:middle;">${esc(v.guion)}</span>`:""}${dateStr?`<span style="font-family:'Poppins';font-size:11px;font-weight:400;color:var(--muted);margin-left:8px;">${dateStr}</span>`:""}</div>
         <span class="vc-status ${stClass}">${stLabel}</span>
       </div>
       ${v.notes?`<div style="background:var(--surface2);border-left:3px solid var(--border2);border-radius:0 8px 8px 0;padding:6px 11px;margin-bottom:6px;font-size:11px;line-height:1.5;color:var(--muted);">🏷 <strong>Tu nota:</strong> ${esc(v.notes)}</div>`:""}
@@ -1838,6 +1955,15 @@ function submitVideo(){
   }
   if((!linkIg&&!_crudo)||(!cat&&!BRAND.products)){document.getElementById("up-err").style.display="block";document.getElementById("up-err").textContent=_crudo?"Seleccioná la categoría.":(BRAND.products?"Completá el link de Instagram.":"Completá el link de Instagram y la categoría.");return;}
   if(BRAND.products && !producto){document.getElementById("up-err").style.display="block";document.getElementById("up-err").textContent="Seleccioná de qué producto es el video.";return;}
+  // Guion: obligatorio cuando la marca le cargó guiones. "Otro" se permite, pero hay que explicarlo
+  const _gGrp = document.getElementById("up-guion-group");
+  const _pideGuion = _gGrp && _gGrp.style.display !== "none";
+  let _guionVal = _pideGuion ? document.getElementById("up-guion").value : "";
+  if(_pideGuion && !_guionVal){document.getElementById("up-err").style.display="block";document.getElementById("up-err").textContent="Elegí qué guion grabaste.";return;}
+  if(_guionVal==="__otro__"){
+    if(_notaVal.length < 5){document.getElementById("up-err").style.display="block";document.getElementById("up-err").textContent="Si no es ninguno de tus guiones, contá en la nota qué grabaste.";return;}
+    _guionVal = "OTRO";
+  }
   // Validar que cada link sea de su plataforma (evita pegar el de IG en el campo de TikTok)
   if(!_crudo && !/instagram\.com\//i.test(linkIg)){document.getElementById("up-err").style.display="block";document.getElementById("up-err").textContent="El link de Instagram no parece válido — copialo desde la app de Instagram (debe contener instagram.com).";return;}
   if(linkTt && !/tiktok\.com\//i.test(linkTt)){document.getElementById("up-err").style.display="block";document.getElementById("up-err").textContent="El link de TikTok no parece válido — copialo desde la app de TikTok (debe contener tiktok.com).";return;}
@@ -1868,6 +1994,7 @@ function submitVideo(){
     cat,
     producto,
     crudo: _crudo && !BRAND.driveOnly,
+    guion: _guionVal,
     notes: _notaVal,
     driveLink: document.getElementById("up-drive").value.trim(),
     day,
@@ -1891,6 +2018,7 @@ function submitVideo(){
     ["up-link-ig","up-link-tt","up-link-fb","up-notes","up-drive"].forEach(id=>document.getElementById(id).value="");
     document.getElementById("up-cat").value="";
     const _ps=document.getElementById("up-product"); if(_ps) _ps.value="";
+    llenarGuionesUpload();   // el guion recién grabado ya no tiene que estar en la lista
   };
 
   let _retryCount = 0;
@@ -2201,6 +2329,7 @@ function mergeExtraCreators(){
 function renderAll(){
   mergeExtraCreators();
   renderHome();
+  renderHomeGuiones();
   const active = document.querySelector('.screen.active');
   if(active){
     const id = active.id;
@@ -2209,6 +2338,8 @@ function renderAll(){
     if(id==='screen-bonos') renderBonos();
     if(id==='screen-notifs') renderNotifs();
     if(id==='screen-ideas') renderIdeasOnly();
+    if(id==='screen-guiones') renderGuiones();
+    if(id==='screen-upload') llenarGuionesUpload();
   }
 }
 
@@ -2632,7 +2763,7 @@ loadData();
 <!-- Auto-actualización: GitHub Pages cachea el HTML y los celulares lo retienen mucho más.
      Esto compara la versión publicada con la que está corriendo y refresca sola. -->
 <script>
-const APP_VERSION = '2026-10-06-a';
+const APP_VERSION = '2026-10-06-b';
 (function(){
   var CLAVE='cima_ver_reload';
   function hayAlguienEscribiendo(){

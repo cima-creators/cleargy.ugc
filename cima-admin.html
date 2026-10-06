@@ -302,6 +302,7 @@ body.archivo .abtn,body.archivo .action-row button,body.archivo #apify-sync-btn,
         <div class="slabel">Principal</div>
         <div class="nitem active" data-view="overview" onclick="nav(this)"><div class="ndot" style="background:var(--blue)"></div>Overview</div>
         <div class="nitem" data-view="videos" onclick="nav(this)"><div class="ndot" style="background:var(--blue-mid)"></div>Videos <span class="nbadge" id="nb-pending">0</span></div>
+        <div class="nitem" data-view="guiones" onclick="nav(this)"><div class="ndot" style="background:#7c3aed"></div>Guiones <span class="nbadge" id="nb-guiones">0</span></div>
         <div class="nitem" data-view="bonos" onclick="nav(this)" id="nav-bonos"><div class="ndot" style="background:var(--accent2)"></div>Bonos</div>
         <div class="nitem" data-view="viral" onclick="nav(this)"><div class="ndot" style="background:#3F8F6B)"></div>Videos Virales</div>
         <div class="slabel">Comunicación</div>
@@ -434,6 +435,33 @@ body.archivo .abtn,body.archivo .action-row button,body.archivo #apify-sync-btn,
       </div>
 
       <!-- IDEAS -->
+      <!-- GUIONES -->
+      <div id="view-guiones" class="view">
+        <div class="view-title">Guiones</div>
+        <div class="view-sub">Lo que cada creadora tiene para grabar. Lo ve en su app y lo elige al subir el video.</div>
+        <button class="hbtn primary" style="margin-bottom:20px;" onclick="toggleGuionForm()">+ Cargar guiones</button>
+        <div class="idea-form" id="guion-form" style="display:none;">
+          <div class="frow">
+            <div class="fgroup full">
+              <div class="flabel">Pegá un guion por línea</div>
+              <textarea class="fi" id="guion-pegar" rows="8" placeholder="61 | Línea en la cara | Flor | https://docs.google.com/document/d/...
+62 | Rutina de noche | Flor | https://docs.google.com/document/d/...
+63 | Antes y después | Cate"></textarea>
+              <div style="font-size:11px;color:var(--muted);margin-top:8px;line-height:1.6;">
+                Formato: <b>código | título | creadora | link</b>. Separá con <b>|</b>.<br>
+                El <b>código</b> es lo único obligatorio y es el que después se ve en el video (ej. <code>61</code> o <code>UN-P-F01-N2-16</code>).<br>
+                La <b>creadora</b> puede ir por nombre (Flor) o vacía: si la dejás vacía, el guion le aparece a todas.<br>
+                El <b>link</b> es el del Doc donde está el guion escrito.
+              </div>
+            </div>
+          </div>
+          <div class="frow">
+            <div class="fgroup" style="justify-content:flex-end;padding-top:6px;"><button class="hbtn primary" onclick="cargarGuiones()">Cargar</button></div>
+          </div>
+        </div>
+        <div id="guiones-admin-list"></div>
+      </div>
+
       <div id="view-ideas" class="view">
         <div class="view-title">Ideas de Contenido</div>
         <div class="view-sub">Las ven todas las creadoras</div>
@@ -1164,7 +1192,7 @@ const CAMPAIGN_DAYS = 30;
 let data = {
   ventas:{creadora1:0,creadora2:0,creadora3:0,creadora4:0,creadora5:0,creadora6:0,creadora7:0},
   bonos:{creadora1:0,creadora2:0,creadora3:0,creadora4:0,creadora5:0,creadora6:0,creadora7:0},
-  videos:[],ideas:[],semanaActual:1,
+  videos:[],ideas:[],guiones:[],semanaActual:1,
 };
 
 // Rescate: si el key viejo "clargy_data" tiene más videos que el nuevo "cleargy_data", lo restaura
@@ -1334,6 +1362,7 @@ function nav(el){
   if(v==="bonos")renderBonos();
   if(v==="viral")renderViral();
   if(v==="ideas")renderIdeas();
+  if(v==="guiones")renderGuionesAdmin();
   if(v==="mensajes")renderMensajes();
   if(v==="finanzas")renderFinanzas();
   if(v==="shopify")renderShopify();
@@ -1378,6 +1407,8 @@ function renderAll(){
     if(nbp) nbp.textContent=pending;
     const nbm=document.getElementById("nb-msgs");
     if(nbm) nbm.textContent=(data.notifs||[]).length;
+    const nbg=document.getElementById("nb-guiones");
+    if(nbg){ const _gp=guionesPendientes(); nbg.textContent=_gp; nbg.style.display=_gp?"":"none"; }
   }catch(e){console.error("renderAll error:",e);}
 }
 
@@ -1536,6 +1567,11 @@ function videoRow(v, compact=false){
     ? `<a href="${escUrl(v.linkFb)}" target="_blank" style="padding:2px 8px;border-radius:20px;font-size:9px;font-family:'Poppins';cursor:pointer;border:1px solid var(--border2);color:var(--muted);background:none;text-decoration:none;">👥 FB</a>`
     : "";
   const copyBtn = (sinDrive||crudoTag||igBtn||ttBtn||fbBtn) ? [sinDrive,crudoTag,igBtn,ttBtn,fbBtn].filter(Boolean).join(" ") : `<button onclick="copyLink('${v.id}',event)" style="padding:2px 8px;border-radius:20px;font-size:9px;font-family:'Poppins';cursor:pointer;border:1px solid var(--border2);color:var(--muted);background:none;">📋 Copiar</button>`;
+  const guionTag = v.guion
+    ? (v.guion==="OTRO"
+      ? `<span style="font-family:'Poppins';font-size:9px;font-weight:700;padding:1px 7px;border-radius:20px;background:rgba(176,123,46,.1);border:1px solid rgba(176,123,46,.3);color:#b45309;" title="La creadora dijo que no es ninguno de sus guiones">sin guion</span>`
+      : `<span style="font-family:'Poppins';font-size:9px;font-weight:700;padding:1px 7px;border-radius:20px;background:rgba(124,58,237,.08);border:1px solid rgba(124,58,237,.22);color:#7c3aed;" title="Guion grabado">${esc(v.guion)}</span>`)
+    : "";
   const startStr = campaignStartFor(v.creator);
   const calcDay = v.date ? Math.max(1,Math.floor((new Date(v.date)-new Date(startStr))/(86400000))+1) : (v.day||1);
   return`<tr>
@@ -1544,7 +1580,7 @@ function videoRow(v, compact=false){
     <td style="font-family:'Poppins';font-size:11px;white-space:nowrap;">${v.date?new Date(v.date).toLocaleDateString("es-AR",{day:"2-digit",month:"2-digit"}):"—"} · D${calcDay}</td>
     ${cols.plat?`<td style="font-size:11px;white-space:nowrap;">${v.linkIg&&v.linkTt?'📸🎵':v.linkIg?'📸':'🎵'}</td>`:""}
     ${cols.cat?`<td style="font-size:11px;color:var(--muted);max-width:120px;">${v.producto?`<div style="font-size:9.5px;font-weight:800;color:#7c3aed;background:rgba(124,58,237,.08);border:1px solid rgba(124,58,237,.25);border-radius:8px;padding:1px 7px;margin-bottom:2px;display:inline-block;white-space:nowrap;">📦 ${esc(v.producto)}</div><br>`:""}<span style="overflow:hidden;text-overflow:ellipsis;white-space:nowrap;display:inline-block;max-width:115px;">${esc(v.cat)}</span></td>`:""}
-    <td style="white-space:nowrap;">${copyBtn}</td>
+    <td style="white-space:nowrap;">${guionTag?guionTag+" ":""}${copyBtn}</td>
     ${cols.metrics?`<td style="font-family:'Poppins';font-size:10px;color:var(--muted);white-space:nowrap;">${metricsStr}</td>`:""}
     <td><span class="badge badge-${v.status}">${v.status==="approved"?"✓ Ok":v.status==="rejected"?"✗":"⏳"}</span>
       ${v.statusBy&&v.status!=="pending"?`<div style="font-size:9px;font-family:'Poppins';color:var(--muted);margin-top:3px;white-space:nowrap;" title="${esc(nombreAdmin(v.statusBy))}${v.statusAt?' · '+new Date(v.statusAt).toLocaleString('es-AR',{day:'2-digit',month:'2-digit',hour:'2-digit',minute:'2-digit'}):''}">${esc(nombreAdmin(v.statusBy))}${v.statusAt?' · '+new Date(v.statusAt).toLocaleDateString('es-AR',{day:'2-digit',month:'2-digit'}):''}</div>`:""}</td>
@@ -1972,6 +2008,116 @@ function renderIdeas(){
 
 function deleteIdea(id){
   data.ideas=data.ideas.filter(i=>i.id!==id);saveData();renderIdeas();
+}
+
+// ═══ GUIONES ═══
+// Catálogo de lo que cada creadora tiene para grabar. Un guion está grabado cuando
+// existe un video con ese código: el video es la prueba, no hay un check aparte.
+function _gCode(c){ return String(c==null?"":c).trim().toUpperCase(); }
+function toggleGuionForm(){
+  const f=document.getElementById("guion-form");
+  f.style.display = f.style.display==="none" ? "block" : "none";
+}
+
+// Nombre escrito a mano → slot de creadora ("Flor" o "flor perez" → creadora5)
+function _slotPorNombre(txt){
+  const t=String(txt||"").trim().toLowerCase();
+  if(!t) return "";
+  if(/^creadora\d+$/.test(t)) return t;
+  const claves=Object.keys(NAMES||{});
+  let hit=claves.find(c=>String(NAMES[c]||"").toLowerCase()===t);
+  if(!hit) hit=claves.find(c=>String(NAMES[c]||"").toLowerCase().split(" ")[0]===t);
+  if(!hit) hit=claves.find(c=>String(NAMES[c]||"").toLowerCase().startsWith(t));
+  return hit||"";
+}
+
+function cargarGuiones(){
+  const raw=document.getElementById("guion-pegar").value;
+  const lineas=raw.split("\n").map(l=>l.trim()).filter(Boolean);
+  if(!lineas.length){ showToast("Pegá al menos una línea"); return; }
+  if(!data.guiones) data.guiones=[];
+  const yaHay=new Set(data.guiones.map(g=>_gCode(g.code)));
+  let nuevos=0, repetidos=0, sinCreadora=[];
+  lineas.forEach(l=>{
+    const p=l.split("|").map(x=>x.trim());
+    const code=p[0]||"";
+    if(!code) return;
+    if(yaHay.has(_gCode(code))){ repetidos++; return; }
+    const creadora=_slotPorNombre(p[2]);
+    if(p[2] && !creadora) sinCreadora.push(p[2]);
+    data.guiones.push({ code, titulo:p[1]||"", creadora, link:p[3]||"", texto:"" });
+    yaHay.add(_gCode(code));
+    nuevos++;
+  });
+  saveData();
+  document.getElementById("guion-pegar").value="";
+  renderGuionesAdmin();
+  let msg=`✓ ${nuevos} guion${nuevos===1?"":"es"} cargado${nuevos===1?"":"s"}`;
+  if(repetidos) msg+=` · ${repetidos} ya estaban`;
+  if(sinCreadora.length) msg+=` · ⚠ no reconocí: ${[...new Set(sinCreadora)].join(", ")}`;
+  showToast(msg, sinCreadora.length?7000:4000);
+}
+
+function borrarGuion(code){
+  data.guiones=(data.guiones||[]).filter(g=>_gCode(g.code)!==_gCode(code));
+  saveData(); renderGuionesAdmin();
+}
+
+function vaciarGuiones(){
+  if(!confirm("¿Borrar TODOS los guiones cargados? Los videos ya subidos no se tocan.")) return;
+  data.guiones=[]; saveData(); renderGuionesAdmin();
+}
+
+// Qué código grabó cada video (para cruzar con el catálogo)
+function _videosPorGuion(){
+  const m={};
+  ((data&&data.videos)||[]).forEach(v=>{ if(v.guion) (m[_gCode(v.guion)]=m[_gCode(v.guion)]||[]).push(v); });
+  return m;
+}
+
+function guionesPendientes(){
+  const hechos=_videosPorGuion();
+  return ((data&&data.guiones)||[]).filter(g=>!hechos[_gCode(g.code)]).length;
+}
+
+function renderGuionesAdmin(){
+  const cont=document.getElementById("guiones-admin-list");
+  if(!cont) return;
+  const gs=(data.guiones)||[];
+  if(!gs.length){
+    cont.innerHTML=`<div style="color:var(--muted);text-align:center;padding:40px;">Sin guiones cargados todavía.<br><span style="font-size:12px;">Cargá la lista y cada creadora los va a ver en su app.</span></div>`;
+    return;
+  }
+  const hechos=_videosPorGuion();
+  const orden=[...gs].sort((a,b)=>{
+    const ha=hechos[_gCode(a.code)]?1:0, hb=hechos[_gCode(b.code)]?1:0;
+    return ha-hb || String(a.creadora||"zz").localeCompare(String(b.creadora||"zz")) || String(a.code).localeCompare(String(b.code),"es",{numeric:true});
+  });
+  const pend=orden.filter(g=>!hechos[_gCode(g.code)]).length;
+  cont.innerHTML=`
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px;">
+      <div style="font-family:'Poppins';font-size:12px;color:var(--muted);font-weight:600;">${pend} sin grabar · ${orden.length-pend} grabados · ${orden.length} en total</div>
+      <button class="hbtn" onclick="vaciarGuiones()" style="font-size:11px;">Vaciar lista</button>
+    </div>
+    <div class="twrap"><div class="twrap-scroll"><table><thead><tr>
+      <th>Guion</th><th>Creadora</th><th>Estado</th><th></th>
+    </tr></thead><tbody>` +
+    orden.map(g=>{
+      const vs=hechos[_gCode(g.code)]||[];
+      const v=vs[0];
+      const quien=g.creadora?(NAMES[g.creadora]||g.creadora):`<span style="color:var(--muted);">libre</span>`;
+      const estado = v
+        ? `<span class="badge badge-approved">✓ grabado</span> <span style="font-size:10px;font-family:'Poppins';color:var(--muted);">${NAMES[v.creator]?String(NAMES[v.creator]).split(" ")[0]:v.creator}${v.date?" · "+new Date(v.date).toLocaleDateString("es-AR",{day:"2-digit",month:"2-digit"}):""}</span>${v.driveLink||v.link?` <a href="${escUrl(v.driveLink||v.link)}" target="_blank" style="font-size:10px;font-family:'Poppins';color:var(--accent);text-decoration:none;">ver ↗</a>`:""}`
+        : `<span class="badge badge-pending">⏳ sin grabar</span>`;
+      return `<tr>
+        <td><span style="font-family:'Poppins';font-size:10px;font-weight:700;color:#7c3aed;background:rgba(124,58,237,.08);border:1px solid rgba(124,58,237,.22);border-radius:8px;padding:1px 7px;">${esc(g.code)}</span>${g.titulo?`<div style="font-size:12px;margin-top:4px;">${esc(g.titulo)}</div>`:""}${g.link?`<a href="${escUrl(g.link)}" target="_blank" style="font-size:10px;font-family:'Poppins';color:var(--accent);text-decoration:none;">abrir el guion ↗</a>`:""}</td>
+        <td style="font-size:12px;">${quien}</td>
+        <td style="white-space:nowrap;">${estado}</td>
+        <td><button onclick="borrarGuion('${esc(g.code).replace(/'/g,"\\'")}')" style="background:none;border:none;color:var(--muted);cursor:pointer;font-size:15px;padding:4px;">✕</button></td>
+      </tr>`;
+    }).join("") + `</tbody></table></div></div>`;
+  const nb=document.getElementById("nb-guiones");
+  if(nb){ nb.textContent=pend; nb.style.display=pend?"":"none"; }
 }
 
 
@@ -3112,7 +3258,7 @@ loadConfig();
 <!-- Auto-actualización: GitHub Pages cachea el HTML y los celulares lo retienen mucho más.
      Esto compara la versión publicada con la que está corriendo y refresca sola. -->
 <script>
-const APP_VERSION = '2026-10-06-a';
+const APP_VERSION = '2026-10-06-b';
 (function(){
   var CLAVE='cima_ver_reload';
   function hayAlguienEscribiendo(){
