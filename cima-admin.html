@@ -1182,6 +1182,11 @@ function _ventasTodas(){
   (window.salesData||[]).forEach(s=>m.set(s.id,s));
   return [...m.values()];
 }
+// Total de ventas de la campaña que se está mirando — lo usan el badge del menú y la vista
+function ventasDeLaVistaTotal(){
+  if(TANDA_ARCHIVO) return _ventasTodas().filter(s=>!ventaDeLaTanda(s)).length;
+  return (window.salesData||[]).filter(ventaDeLaTanda).length;
+}
 function ventasDeLaVista(c){
   if(!TANDA_ARCHIVO) return (data.ventas||{})[c]||0;
   const todas = _ventasTodas();
@@ -1442,6 +1447,8 @@ function renderAll(){
     if(nbm) nbm.textContent=(data.notifs||[]).length;
     const nbg=document.getElementById("nb-guiones");
     if(nbg){ const _gp=guionesPendientes(); nbg.textContent=_gp; nbg.style.display=_gp?"":"none"; }
+    const nbs=document.getElementById("nb-shopify");
+    if(nbs) nbs.textContent=ventasDeLaVistaTotal();
   }catch(e){console.error("renderAll error:",e);}
 }
 
@@ -3344,7 +3351,7 @@ loadConfig();
       if(changed && _fbDataLoaded){ saveData(); renderAll(); }
 
       const badge = document.getElementById('nb-shopify');
-      if(badge) badge.textContent = salesData.length;
+      if(badge) badge.textContent = (typeof ventasDeLaVistaTotal === 'function') ? ventasDeLaVistaTotal() : salesData.length;
       const activeView = document.querySelector('.view.active');
       if(activeView && activeView.id === 'view-shopify') renderShopify();
     });
@@ -3367,7 +3374,7 @@ loadConfig();
 <!-- Auto-actualización: GitHub Pages cachea el HTML y los celulares lo retienen mucho más.
      Esto compara la versión publicada con la que está corriendo y refresca sola. -->
 <script>
-const APP_VERSION = '2026-10-06-i';
+const APP_VERSION = '2026-10-06-j';
 (function(){
   var CLAVE='cima_ver_reload';
   function hayAlguienEscribiendo(){
