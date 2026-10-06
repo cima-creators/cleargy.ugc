@@ -1537,7 +1537,14 @@ function renderOverview(){
     const vids = data.videos.filter(v=>v.creator===c && v.status!=='rejected');
     return {vids, ventas: _ventasVista(c), views: vids.reduce((a,v)=>a+viewsAcum(v),0)};
   };
-  const _ordenadas = [...creadorasDeLaVista()].sort((a,b)=>{
+  // Una creadora de baja solo sigue en la grilla si aportó algo a ESTA campaña; si no,
+  // es ruido (en Lagos quedaban Vane y Dani en cero porque sus videos están archivados)
+  const _grilla = creadorasDeLaVista().filter(c=>{
+    if(!(BRAND.creators[c]||{}).inactive) return true;
+    const st=_statsDe(c);
+    return st.vids.length>0 || st.ventas>0;
+  });
+  const _ordenadas = [..._grilla].sort((a,b)=>{
     const iA=(BRAND.creators[a]||{}).inactive?1:0, iB=(BRAND.creators[b]||{}).inactive?1:0;
     if(iA!==iB) return iA-iB; // bajas al final
     const A=_statsDe(a), B=_statsDe(b);
@@ -3360,7 +3367,7 @@ loadConfig();
 <!-- Auto-actualización: GitHub Pages cachea el HTML y los celulares lo retienen mucho más.
      Esto compara la versión publicada con la que está corriendo y refresca sola. -->
 <script>
-const APP_VERSION = '2026-10-06-h';
+const APP_VERSION = '2026-10-06-i';
 (function(){
   var CLAVE='cima_ver_reload';
   function hayAlguienEscribiendo(){
