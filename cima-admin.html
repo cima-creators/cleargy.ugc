@@ -1157,6 +1157,19 @@ const WHATICKET_CONNECTION = "ca448a0f-b10e-4088-8ce2-ef78810cf7d2";
 const ADMIN_PHONE = "5491123538064";
 const PHONES = Object.fromEntries(Object.entries(BRAND.creators).map(([k,v])=>[k,v.phone||'']));
 // Inicio de campaña por creadora: 1) fecha de SU PRIMER video, 2) fecha configurada a mano, 3) inicio de marca
+// ¿Esta venta es de la campaña que está corriendo? Misma regla que los videos.
+// Dos cortes: si la creadora ya no está en la marca, la venta es de una tanda anterior
+// (su cupón y su link UTM siguen dando vueltas); y si la venta es anterior al día 1
+// de SU tanda, también. Sin esto, una venta vieja infla la campaña nueva.
+function ventaDeLaTanda(s){
+  const c = s && s.creator;
+  if(!c) return false;
+  if((BRAND.creators[c]||{}).inactive) return false;
+  const desde = campaignStartFor(c);
+  if(!desde || !s.date) return true;
+  return String(s.date).slice(0,10) >= desde;
+}
+
 // Fecha de inicio de SU tanda (Config → Creadoras). Manda sobre diaUno: así una marca
 // puede tener a alguien terminando la tanda 1 mientras el resto arranca la 2.
 function campaignStartFor(c){
@@ -1453,7 +1466,8 @@ function renderOverview(){
   const validos=data.videos.filter(v=>v.status!=='rejected');
   const videosEnPeriodo=validos.filter(v=>v.date&&new Date(v.date)>=cutoff);
   const totalVids=validos.length;
-  const totalVentas=CREATORS.reduce((a,c)=>a+(data.ventas[c]||0),0);
+  const _ventasVista = c => TANDA_ARCHIVO ? (((data.tanda1||{}).ventas||{})[c]||0) : (data.ventas[c]||0);
+  const totalVentas=creadorasDeLaVista().reduce((a,c)=>a+_ventasVista(c),0);
   const pending=data.videos.filter(v=>v.status==="pending").length;
   const viral=validos.filter(v=>viewsAcum(v)>=10000).length;
   const totalViews=validos.reduce((a,v)=>a+viewsAcum(v),0);
@@ -1461,7 +1475,9 @@ function renderOverview(){
   const VIDEO_GOAL=BRAND.videoGoal||750;
 
   const vidPct = Math.min(100, Math.round(totalVids / 750 * 100));
-  const _goal=BRAND.goal||750;
+  // En el archivo la meta de la campaña vieja no está guardada: la barra se mide contra
+  // lo que efectivamente se entregó, para no comparar contra el objetivo de la tanda de ahora
+  const _goal=TANDA_ARCHIVO ? (totalVids||1) : (BRAND.goal||750);
   const _vidPct=Math.min(100,Math.round((totalVids/_goal)*100));
   document.getElementById("overview-hero").innerHTML=`
     <div style="background:var(--blue);border-radius:20px;padding:24px 22px;color:white;">
@@ -1499,9 +1515,9 @@ function renderOverview(){
   // Ranking: mejor a peor — 1º ventas, 2º views totales, 3º cantidad de videos
   const _statsDe = c => {
     const vids = data.videos.filter(v=>v.creator===c && v.status!=='rejected');
-    return {vids, ventas: data.ventas[c]||0, views: vids.reduce((a,v)=>a+viewsAcum(v),0)};
+    return {vids, ventas: _ventasVista(c), views: vids.reduce((a,v)=>a+viewsAcum(v),0)};
   };
-  const _ordenadas = [...CREATORS].sort((a,b)=>{
+  const _ordenadas = [...creadorasDeLaVista()].sort((a,b)=>{
     const iA=(BRAND.creators[a]||{}).inactive?1:0, iB=(BRAND.creators[b]||{}).inactive?1:0;
     if(iA!==iB) return iA-iB; // bajas al final
     const A=_statsDe(a), B=_statsDe(b);
@@ -1599,11 +1615,39 @@ function videoRow(v, compact=false){
   </tr>`;
 }
 
+// Quiénes estuvieron en la campaña que se está mirando. En el archivo son las que
+// tienen videos ahí: las que entraron después no existían en esa campaña.
+function creadorasDeLaVista(){
+  if(!TANDA_ARCHIVO) return CREATORS;
+  const conVideos = new Set(((data&&data.videos)||[]).map(v=>v.creator));
+  return CREATORS.filter(c=>conVideos.has(c));
+}
+
 function renderStatusPanel(){
   const el=document.getElementById("status-panel");
   if(!el)return;
   const today=argToday();
-  el.innerHTML=CREATORS.map(c=>{
+  const _lista=creadorasDeLaVista();
+  // En el archivo el total es TODO lo que entregó en esa campaña: las fechas de corte
+  // y los `previos` son de la tanda de ahora y no tienen nada que ver con la vieja.
+  const _maxArch = TANDA_ARCHIVO
+    ? Math.max(1, ..._lista.map(c=>((data.videos||[]).filter(v=>v.creator===c&&v.status!=='rejected').length)))
+    : 1;
+  el.innerHTML=_lista.map(c=>{
+    if(TANDA_ARCHIVO){
+      const _tot=(data.videos||[]).filter(v=>v.creator===c&&v.status!=='rejected').length;
+      const _vts=((data.tanda1||{}).ventas||{})[c];
+      const _col=COLORS[c]||"#6366f1";
+      return`<div style="background:var(--surface2);border:1px solid var(--border);border-radius:12px;padding:12px 16px;">
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:6px;">
+          <span style="font-family:'Poppins';font-weight:800;font-size:13px;color:${_col}">${NAMES[c].split(" ")[0]}</span>
+          <span style="font-family:'Poppins';font-size:11px;color:var(--muted);"><b style="color:var(--text);">${_tot}</b> videos${_vts?` · ${_vts} ventas`:""}</span>
+        </div>
+        <div style="height:5px;background:var(--border);border-radius:3px;overflow:hidden;">
+          <div style="height:100%;width:${Math.round(_tot/_maxArch*100)}%;background:${_col};border-radius:3px;"></div>
+        </div>
+      </div>`;
+    }
     const _desde=((data&&data.startDates)||{})[c];
     const _prev=((data&&data.previos)||{})[c];                  // videos de tandas anteriores
     const _suyos=(data.videos||[]).filter(v=>v.creator===c&&v.status!=='rejected');
@@ -2888,18 +2932,25 @@ loadConfig();
       el.innerHTML=`<div style="text-align:center;padding:48px;color:var(--muted);font-family:'Poppins';font-size:11px;line-height:1.8;">Sin ventas registradas todavía.<br>Las ventas aparecen acá cuando alguien compra usando el link UTM de una creadora.</div>`;
       return;
     }
+    // Las ventas de campañas anteriores se muestran aparte, no suman a esta
+    const _deAhora = salesData.filter(ventaDeLaTanda);
+    const _deAntes = salesData.filter(s=>!ventaDeLaTanda(s));
     const byCreator={};
     CREATORS.forEach(c=>byCreator[c]={count:0,total:0});
-    salesData.forEach(s=>{
+    _deAhora.forEach(s=>{
       if(byCreator[s.creator]){byCreator[s.creator].count++;byCreator[s.creator].total+=s.amount||0;}
     });
-    const totalVentas=salesData.length;
-    const totalAmount=salesData.reduce((a,s)=>a+(s.amount||0),0);
+    const totalVentas=_deAhora.length;
+    const totalAmount=_deAhora.reduce((a,s)=>a+(s.amount||0),0);
     const sorted=[...CREATORS].sort((a,b)=>(byCreator[b].total||0)-(byCreator[a].total||0));
     const top=sorted.find(c=>byCreator[c].count>0);
     const badge=document.getElementById('nb-shopify');
     if(badge)badge.textContent=totalVentas;
+    const _avisoAntes = _deAntes.length
+      ? `<div style="background:rgba(176,123,46,.08);border:1px solid rgba(176,123,46,.28);border-radius:var(--radius);padding:11px 14px;margin-bottom:16px;font-size:12px;color:var(--muted);">⏮ <b style="color:#b45309;">${_deAntes.length} venta${_deAntes.length===1?"":"s"} de la campaña anterior</b> — ${[...new Set(_deAntes.map(s=>NAMES[s.creator]?String(NAMES[s.creator]).split(" ")[0]:s.creator))].join(", ")}. No se cuentan acá ni se pagan en esta campaña.</div>`
+      : "";
     el.innerHTML=`
+      ${_avisoAntes}
       <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-bottom:20px;">
         <div style="background:var(--surface);border-radius:var(--radius);padding:16px;box-shadow:var(--shadow);border-left:4px solid #3F8F6B;">
           <div style="font-family:'Poppins';font-size:9px;letter-spacing:1px;color:var(--muted);text-transform:uppercase;margin-bottom:6px;">Total ventas</div>
@@ -2942,10 +2993,11 @@ loadConfig();
           </tr></thead>
           <tbody>
             ${[...salesData].sort((a,b)=>(b.date||'').localeCompare(a.date||'')).slice(0,50).map(s=>`
-              <tr style="border-bottom:1px solid var(--border2);">
+              <tr style="border-bottom:1px solid var(--border2);${ventaDeLaTanda(s)?'':'opacity:.5;'}">
                 <td style="padding:10px 14px;"><div style="display:flex;align-items:center;gap:8px;">
                   <div style="width:24px;height:24px;border-radius:50%;background:${(COLORS[s.creator]||'#999')}18;border:1px solid ${COLORS[s.creator]||'#999'};display:flex;align-items:center;justify-content:center;font-size:8px;font-weight:700;color:${COLORS[s.creator]||'#999'}">${AVATARS[s.creator]||'?'}</div>
                   <span style="font-size:12px;">${(NAMES[s.creator]||s.creator||'—').split(' ')[0]}</span>
+                  ${ventaDeLaTanda(s)?'':`<span style="font-family:'Poppins';font-size:8px;font-weight:700;letter-spacing:.5px;padding:1px 6px;border-radius:20px;background:rgba(176,123,46,.12);color:#b45309;" title="Es de la campaña anterior: no suma a esta">ANTES</span>`}
                 </div></td>
                 <td style="padding:10px 14px;font-size:11px;color:var(--muted);max-width:140px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${s.product||'—'}</td>
                 <td style="padding:10px 14px;text-align:center;">${s.coupon?`<span style="font-family:'Poppins';font-size:10px;font-weight:700;color:#7c3aed;background:rgba(124,58,237,.1);border:1px solid rgba(124,58,237,.25);border-radius:8px;padding:2px 7px;">${s.coupon}</span>`:'<span style="font-size:10px;color:var(--muted2);opacity:.5;">UTM</span>'}</td>
@@ -3224,10 +3276,10 @@ loadConfig();
         };
       });
 
-      // Auto-actualizar data.ventas desde Shopify sales
+      // Auto-actualizar data.ventas desde Shopify sales — solo las de ESTA campaña
       const counts = {};
       CREATORS.forEach(c => counts[c] = 0);
-      salesData.forEach(s => { if(counts[s.creator] !== undefined) counts[s.creator]++; });
+      salesData.forEach(s => { if(counts[s.creator] !== undefined && ventaDeLaTanda(s)) counts[s.creator]++; });
       let changed = false;
       CREATORS.forEach(c => {
         if((data.ventas[c]||0) !== counts[c]){ data.ventas[c] = counts[c]; changed = true; }
@@ -3258,7 +3310,7 @@ loadConfig();
 <!-- Auto-actualización: GitHub Pages cachea el HTML y los celulares lo retienen mucho más.
      Esto compara la versión publicada con la que está corriendo y refresca sola. -->
 <script>
-const APP_VERSION = '2026-10-06-b';
+const APP_VERSION = '2026-10-06-c';
 (function(){
   var CLAVE='cima_ver_reload';
   function hayAlguienEscribiendo(){
