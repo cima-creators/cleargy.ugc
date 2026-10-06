@@ -1172,6 +1172,24 @@ function ventaDeLaTanda(s){
   return String(s.date).slice(0,10) >= desde;
 }
 
+// Las ventas de la campaña ANTERIOR son, justamente, las que no son de esta: las de las
+// creadoras que ya no están (todas) y las de las que siguen pero anteriores al día 1 de su
+// tanda. Se juntan las dos colecciones porque el sync reimporta en la activa lo de 21 días
+// y el archivo guarda lo más viejo.
+function _ventasTodas(){
+  const m = new Map();
+  (window.salesArchivo||[]).forEach(s=>m.set(s.id,s));
+  (window.salesData||[]).forEach(s=>m.set(s.id,s));
+  return [...m.values()];
+}
+function ventasDeLaVista(c){
+  if(!TANDA_ARCHIVO) return (data.ventas||{})[c]||0;
+  const todas = _ventasTodas();
+  // Mientras no cargaron, el número cerrado de la tanda 1 es mejor que un 0
+  if(!todas.length) return (((data.tanda1||{}).ventas)||{})[c]||0;
+  return todas.filter(s=>s.creator===c && !ventaDeLaTanda(s)).length;
+}
+
 // Fecha de inicio de SU tanda (Config → Creadoras). Manda sobre diaUno: así una marca
 // puede tener a alguien terminando la tanda 1 mientras el resto arranca la 2.
 function campaignStartFor(c){
@@ -1468,7 +1486,7 @@ function renderOverview(){
   const validos=data.videos.filter(v=>v.status!=='rejected');
   const videosEnPeriodo=validos.filter(v=>v.date&&new Date(v.date)>=cutoff);
   const totalVids=validos.length;
-  const _ventasVista = c => TANDA_ARCHIVO ? (((data.tanda1||{}).ventas||{})[c]||0) : (data.ventas[c]||0);
+  const _ventasVista = ventasDeLaVista;
   const totalVentas=creadorasDeLaVista().reduce((a,c)=>a+_ventasVista(c),0);
   const pending=data.videos.filter(v=>v.status==="pending").length;
   const viral=validos.filter(v=>viewsAcum(v)>=10000).length;
@@ -1643,7 +1661,7 @@ function renderStatusPanel(){
   el.innerHTML=_lista.map(c=>{
     if(TANDA_ARCHIVO){
       const _tot=(data.videos||[]).filter(v=>v.creator===c&&v.status!=='rejected').length;
-      const _vts=((data.tanda1||{}).ventas||{})[c];
+      const _vts=ventasDeLaVista(c);
       const _col=COLORS[c]||"#6366f1";
       return`<div style="background:var(--surface2);border:1px solid var(--border);border-radius:12px;padding:12px 16px;">
         <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:6px;">
@@ -2932,6 +2950,7 @@ loadConfig();
 
   <script>
   var salesData = [];
+  var salesArchivo = [];   // {marca}_sales_t1 — solo se carga mirando la campaña anterior
   function renderShopify(){
     const el = document.getElementById('shopify-content');
     if(!el) return;
@@ -3274,6 +3293,15 @@ loadConfig();
       };
     };
 
+    // Mirando la campaña anterior: sus ventas viven en el archivo. Se cargan una vez
+    // y se juntan con las de la colección activa (el sync reimporta ahí lo de 21 días).
+    if (TANDA_ARCHIVO) {
+      getDocs(collection(db, BRAND_COL_NAME + '_sales_t1')).then(snap => {
+        window.salesArchivo = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+        if (typeof renderAll === 'function') renderAll();
+      }).catch(e => console.warn('sin archivo de ventas:', e && e.message));
+    }
+
     // Listener para ventas Shopify
     const _salesColName = BRAND_COL_NAME === 'cleargy' ? 'sales' : BRAND_COL_NAME + '_sales';
     const SALES_COL = collection(db, _salesColName);
@@ -3329,7 +3357,7 @@ loadConfig();
 <!-- Auto-actualización: GitHub Pages cachea el HTML y los celulares lo retienen mucho más.
      Esto compara la versión publicada con la que está corriendo y refresca sola. -->
 <script>
-const APP_VERSION = '2026-10-06-f';
+const APP_VERSION = '2026-10-06-g';
 (function(){
   var CLAVE='cima_ver_reload';
   function hayAlguienEscribiendo(){
