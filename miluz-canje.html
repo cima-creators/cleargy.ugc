@@ -625,7 +625,7 @@ body.condemo .wrap{padding-bottom:84px}
 
     <div id="kit2-estado"></div>
 
-    <div class="card">
+    <div class="card" id="bloque-recorrido">
       <h2>Tu recorrido</h2>
       <div id="pasos"></div>
     </div>
@@ -1423,6 +1423,7 @@ function entregaActual(){
     (ENTREGA_N === 1 && D ? { drive: D.entrega && D.entrega.drive, reel: D.reel, tiktok: D.tiktok, aprobadoEn: D.aprobadoVideoEn } : null);
 }
 const MODO_LINKS = () => {
+  if (CFG.entregaDirecta) return true;   // CIMA Club: sube el reel directo
   if (!CREADORA_PUBLICA()) return false;
   const x = entregaActual();
   return !!(x && x.drive && (x.aprobadoEn || (x.reel && x.reel.url && x.reel.url !== '#') || (ENTREGA_N === 1 && D.aprobadoVideoEn)));
@@ -1437,7 +1438,11 @@ function precargarEntrega(){
   const tieneLinks = !!$('#in-ig').value;
   $('#lab-drive').classList.toggle('oculto', links);
   $('#lab-ig').classList.toggle('oculto', !links); $('#lab-tt').classList.toggle('oculto', !links);
-  if (links){
+  if (links && CFG.entregaDirecta){
+    $('#subir-tit').textContent = tieneLinks ? '¿Subiste otro?' : 'Subí tu reel';
+    $('#subir-txt').textContent = `Publicá tu reel (y tus historias) invitando al evento, etiquetando a @${CFG.cuentaIg}, y pegá el link acá. El TikTok es opcional.`;
+    $('#btn-drive').textContent = tieneLinks ? 'Actualizar link' : 'Cargar mi reel';
+  } else if (links){
     $('#subir-tit').textContent = tieneLinks ? '¿Cambiaste algo?' : '¡Aprobado! Publicalo y cargá los links';
     $('#subir-txt').textContent = `Subilo a tu Instagram (reel) y a tu TikTok etiquetando a @${CFG.cuentaIg}, y pegá los dos links.`;
     $('#btn-drive').textContent = tieneLinks ? 'Actualizar links' : 'Cargar mis links';
@@ -1464,7 +1469,7 @@ $('#btn-drive').addEventListener('click', async () => {
     $('#a-chk').click(); return;
   }
   const i = $('#in-drive'), drive = i.value.trim();
-  const ok = /^https?:\/\/\S+\.\S+/i.test(drive) && !/instagram\.com|tiktok\.com/i.test(drive);
+  const ok = CFG.entregaDirecta || (/^https?:\/\/\S+\.\S+/i.test(drive) && !/instagram\.com|tiktok\.com/i.test(drive));
   $('#err-drive').style.display = ok ? 'none' : 'block';
   if (!ok) return;
   const datos = { drive, n: ENTREGA_N };
@@ -1472,7 +1477,7 @@ $('#btn-drive').addEventListener('click', async () => {
     // video aprobado: ahora van el reel de Instagram y el TikTok
     const ig = $('#in-ig').value.trim(), tt = $('#in-tt').value.trim();
     const okIg = /instagram\.com\/(reel|p)\//i.test(ig);
-    const okTt = /^https?:\/\/(www\.|vm\.|vt\.)?tiktok\.com\//i.test(tt);
+    const okTt = (CFG.entregaDirecta && !tt) || /^https?:\/\/(www\.|vm\.|vt\.)?tiktok\.com\//i.test(tt);
     $('#err-ig').style.display = okIg ? 'none' : 'block';
     $('#err-tt').style.display = okTt ? 'none' : 'block';
     if (!okIg || !okTt) return;
@@ -1670,7 +1675,7 @@ function pintarEstado(){
     briefing_ok:['Tu estado','Ya estás<br>en la lista','Te avisamos cuando salga tu kit.','En preparación'],
     aprobada:   ['Tu estado','Preparando<br>tu kit','En breve lo despachamos.','En preparación'],
     enviado:    ['Tu kit','Va en<br>camino','Avisanos cuando te llegue.','Despachado'],
-    recibido:   ['Te quedan',
+    recibido:   CFG.sinKit ? ['CIMA Club','Subí tu<br>reel',`Publicá tu reel y tus historias invitando al evento, etiquetando a @${CFG.cuentaIg}, y pegá el link acá abajo.`,'Activo'] : ['Te quedan',
                  (dias === 1 ? 'Te queda<br>un día' : 'Te quedan<br>' + (dias!==null?dias:'—') + ' días'),
                  'Tu kit ya llegó. Grabá con tiempo.','En curso'],
     entregado:  !CREADORA_PUBLICA()
@@ -1732,6 +1737,7 @@ function pintarEstado(){
     $('#seg-link').href = sg.url;
   }
   pintarCollab(e);
+  $('#bloque-recorrido').classList.toggle('oculto', !!CFG.sinKit);   // CIMA Club: no hay kit que seguir
   // cuando publica la creadora, el bloque sigue abierto en `publicado` (ajustar links, cargar el 2º video)
   // `vencida` sigue pudiendo entregar: el plazo la apura, no la deja afuera
   const conSubir = CREADORA_PUBLICA() ? ['enviado','recibido','cambios','entregado','publicado','vencida'] : ['enviado','recibido','cambios','entregado','vencida'];
@@ -1877,7 +1883,7 @@ function pintarMarca(){
   } catch { if (DEMO){ precargar(); traerBorrador(); } ver(DEMO ? 'v-ficha' : 'v-error'); }
 })();
 
-const APP_VERSION = '2026-10-05-c';
+const APP_VERSION = '2026-10-06-a';
 </script>
 </body>
 </html>
