@@ -1518,8 +1518,13 @@ function videoRow(v, compact=false){
   const sinDrive = !v.driveLink
     ? `<span style="padding:2px 8px;border-radius:20px;font-size:9px;font-family:'Poppins';font-weight:600;border:1px solid rgba(193,97,60,.35);color:#B0512F;background:rgba(193,97,60,.1);" title="Falta el link de Drive">⚠ sin Drive</span>`
     : "";
+  // El chip de CRUDO es el único acceso al video cuando no hay IG ni TikTok: va linkeado al Drive
+  const _crudoUrl = v.driveLink || v.link || "";
+  const _crudoCss = "padding:2px 8px;border-radius:20px;font-size:9px;font-family:'Poppins';font-weight:700;border:1px solid rgba(176,123,46,.35);color:#b45309;background:rgba(176,123,46,.1);";
   const crudoTag = v.crudo
-    ? `<span style="padding:2px 8px;border-radius:20px;font-size:9px;font-family:'Poppins';font-weight:700;border:1px solid rgba(176,123,46,.35);color:#b45309;background:rgba(176,123,46,.1);">🎬 CRUDO</span>`
+    ? (_crudoUrl
+      ? `<a href="${escUrl(_crudoUrl)}" target="_blank" rel="noopener" title="Ver el crudo" style="${_crudoCss}cursor:pointer;text-decoration:none;">🎬 CRUDO</a>`
+      : `<span style="${_crudoCss}">🎬 CRUDO</span>`)
     : "";
   const igBtn = v.linkIg
     ? `<a href="${escUrl(v.linkIg)}" target="_blank" style="padding:2px 8px;border-radius:20px;font-size:9px;font-family:'Poppins';cursor:pointer;border:1px solid var(--border2);color:var(--muted);background:none;text-decoration:none;">📸 IG</a>`
@@ -3107,7 +3112,7 @@ loadConfig();
 <!-- Auto-actualización: GitHub Pages cachea el HTML y los celulares lo retienen mucho más.
      Esto compara la versión publicada con la que está corriendo y refresca sola. -->
 <script>
-const APP_VERSION = '2026-10-05-g';
+const APP_VERSION = '2026-10-06-a';
 (function(){
   var CLAVE='cima_ver_reload';
   function hayAlguienEscribiendo(){
