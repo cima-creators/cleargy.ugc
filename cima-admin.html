@@ -907,9 +907,10 @@ const BRAND_CONFIGS = {
     creators:{
       creadora1:{name:'Flor',avatar:'FL',color:'#161616',phone:'',salary:450000},
       creadora2:{name:'Cate',avatar:'CA',color:'#454545',phone:''},
-      creadora3:{name:'Rocío',avatar:'RO',color:'#2e2e2e',phone:''},
+      creadora3:{name:'Rocío',avatar:'RO',color:'#2e2e2e',phone:'',inactive:true},   // 6/10: se va
       creadora4:{name:'Mora',avatar:'MO',color:'#6b6b6b',phone:''},
       creadora5:{name:'Coni',avatar:'CO',color:'#8c8c8c',phone:''},
+      creadora6:{name:'Nani',avatar:'NA',color:'#3f3f3f',phone:''},   // 6/10: entra por Rocío
     }
   },
   menlab: {
@@ -3374,7 +3375,7 @@ loadConfig();
 <!-- Auto-actualización: GitHub Pages cachea el HTML y los celulares lo retienen mucho más.
      Esto compara la versión publicada con la que está corriendo y refresca sola. -->
 <script>
-const APP_VERSION = '2026-10-06-j';
+const APP_VERSION = '2026-10-06-k';
 (function(){
   var CLAVE='cima_ver_reload';
   function hayAlguienEscribiendo(){
