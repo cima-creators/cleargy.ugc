@@ -1,0 +1,199 @@
+<!doctype html>
+<html lang="es"><head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="robots" content="noindex">
+<title>CIMA · WhatsApp de todas las marcas</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap">
+<style>
+/* Bandeja única de WhatsApp (7/10/2026): todas las collabs en un solo lugar, para Jhose. */
+:root{--bg:#F6F5F2;--card:#fff;--tx:#1f1d1a;--tx2:#6b655d;--mu:#9a9288;--ln:#e7e2da;--ac:#1f1d1a;--in:#fff;--out:#DCF5D6;--auto:#eef0ec;--ok:#2f7a4a;--no:#b3261e;--esp:#b07a12;--esp-s:#fbf1dc;--no-s:#fbe9e7}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#141414;--card:#1d1d1d;--tx:#f1efec;--tx2:#b4aea6;--mu:#857e75;--ln:#2c2a27;--ac:#f1efec;--in:#262626;--out:#1f3a24;--auto:#232623;--esp-s:#3a2f17;--no-s:#3b1f1c}}
+:root[data-theme="dark"]{--bg:#141414;--card:#1d1d1d;--tx:#f1efec;--tx2:#b4aea6;--mu:#857e75;--ln:#2c2a27;--ac:#f1efec;--in:#262626;--out:#1f3a24;--auto:#232623;--esp-s:#3a2f17;--no-s:#3b1f1c}
+*{box-sizing:border-box}html,body{margin:0;height:100%}
+body{background:var(--bg);color:var(--tx);font-family:Manrope,system-ui,sans-serif;font-size:15px}
+.top{display:flex;align-items:center;gap:12px;padding:14px 18px;border-bottom:1px solid var(--ln);background:var(--card);flex-wrap:wrap}
+.top h1{font-size:1.1rem;margin:0;flex:1;min-width:180px}.top h1 small{display:block;font-weight:500;color:var(--mu);font-size:.75rem}
+.btn{border:1px solid var(--ln);background:var(--card);color:var(--tx);border-radius:10px;padding:8px 12px;font:inherit;font-size:.82rem;font-weight:600;cursor:pointer;text-decoration:none;display:inline-flex;align-items:center;gap:6px}
+.btn.pri{background:var(--ac);color:var(--bg);border-color:var(--ac)}.btn:disabled{opacity:.5;cursor:default}
+.filtros{display:flex;gap:6px;flex-wrap:wrap;padding:10px 18px 0}
+.f{border:1px solid var(--ln);background:var(--card);color:var(--tx2);border-radius:99px;padding:6px 11px;font:inherit;font-size:.78rem;font-weight:700;cursor:pointer}
+.f.on{background:var(--ac);color:var(--bg);border-color:var(--ac)}.f .n{margin-left:5px;opacity:.75}
+.f .pt{display:inline-block;width:8px;height:8px;border-radius:50%;margin-right:5px;vertical-align:middle}
+.caja{display:grid;grid-template-columns:340px 1fr;margin:12px 18px 18px;background:var(--card);border:1px solid var(--ln);border-radius:16px;overflow:hidden;height:calc(100vh - 190px);min-height:420px}
+.lista{border-right:1px solid var(--ln);overflow-y:auto;min-height:0}
+.conv{display:block;width:100%;text-align:left;background:none;border:0;border-bottom:1px solid var(--ln);padding:11px 14px;cursor:pointer;font:inherit;color:inherit}
+.conv:hover{background:var(--bg)}.conv.on{background:var(--bg)}
+.conv b{display:flex;justify-content:space-between;gap:8px;font-size:.88rem;align-items:center}.conv b small{font-weight:500;color:var(--mu);font-size:.72rem;white-space:nowrap}
+.conv.nolei b::before{content:'';width:8px;height:8px;border-radius:50%;background:#25D366;flex:0 0 auto}
+.conv .tx{display:block;font-size:.8rem;color:var(--tx2);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;margin-top:3px}
+.mk{display:inline-block;font-size:.68rem;font-weight:700;padding:2px 8px;border-radius:99px;color:#fff;margin-top:6px}
+.pill{display:inline-block;font-size:.7rem;font-weight:700;padding:2px 8px;border-radius:99px;margin:6px 0 0 4px;background:var(--esp-s);color:var(--esp)}.pill.no{background:var(--no-s);color:var(--no)}
+.hilo{display:flex;flex-direction:column;min-width:0;min-height:0;overflow:hidden}
+.cab{padding:12px 16px;border-bottom:1px solid var(--ln);display:flex;gap:10px;flex-wrap:wrap;align-items:flex-start}
+.cab h2{margin:0;font-size:1rem;flex:1;min-width:180px}.cab h2 small{display:block;color:var(--mu);font-weight:500;font-size:.75rem;margin-top:2px}
+.acc{display:flex;gap:6px;flex-wrap:wrap}
+.msgs{flex:1;min-height:0;overflow-y:auto;padding:16px;background:var(--bg);display:flex;flex-direction:column;gap:8px}
+.m{max-width:78%;padding:9px 12px;border-radius:14px;font-size:.86rem;line-height:1.45;white-space:pre-wrap;word-wrap:break-word;position:relative}
+.m.in{align-self:flex-start;background:var(--in);border:1px solid var(--ln);border-bottom-left-radius:4px}
+.m.out{align-self:flex-end;background:var(--out);border-bottom-right-radius:4px}.m.auto{background:var(--auto);color:var(--tx2)}
+.m i{display:block;font-style:normal;font-size:.68rem;color:var(--mu);margin-top:4px;text-align:right}
+.m.cara{margin-bottom:14px}.cara-b{position:absolute;bottom:-13px;left:10px;background:var(--card);border:1px solid var(--ln);border-radius:99px;padding:1px 6px;font-size:.85rem}
+.m.out .cara-b{left:auto;right:10px}
+.pie{border-top:1px solid var(--ln);padding:10px 12px;display:flex;flex-direction:column;gap:6px}
+.pie textarea{width:100%;min-height:56px;resize:vertical;border:1px solid var(--ln);border-radius:10px;padding:9px 11px;font:inherit;font-size:.88rem;background:var(--card);color:var(--tx)}
+.pie .fila{display:flex;gap:8px;align-items:center;justify-content:space-between;flex-wrap:wrap}
+.nota{font-size:.75rem;color:var(--tx2)}.nota.no{color:var(--no)}
+.vacio{margin:auto;color:var(--mu);text-align:center;padding:30px}
+.volver{display:none}
+.login{max-width:360px;margin:12vh auto;background:var(--card);border:1px solid var(--ln);border-radius:16px;padding:24px;text-align:center}
+.login input{width:100%;padding:11px;border:1px solid var(--ln);border-radius:10px;font:inherit;margin:12px 0;background:var(--bg);color:var(--tx)}
+@media (max-width:820px){
+  .caja{grid-template-columns:1fr;margin:10px;height:calc(100vh - 170px)}
+  .caja.abierto .lista{display:none}.caja:not(.abierto) .hilo{display:none}.volver{display:inline-flex}
+  .filtros{padding:8px 10px 0}.top{padding:12px}
+}
+</style></head><body>
+<div id="app"></div>
+<script>
+const API = 'https://us-central1-cleargy-creators.cloudfunctions.net/canje';
+const APP_VERSION = '2026-10-07-a';
+const $ = s => document.querySelector(s);
+const ls = { get(k){ try { return localStorage.getItem(k); } catch { return null; } }, set(k,v){ try { localStorage.setItem(k,v); } catch {} }, del(k){ try { localStorage.removeItem(k); } catch {} } };
+let CLAVE = ls.get('wa_bandeja_clave') || '';
+let S = { mensajes:[], fichas:{}, leidos:{}, resueltos:{}, marcas:{}, sel:null, filtro:'todas', marca:'', timer:null };
+const ETQ = { invitada:'Aceptada · sin ficha', ficha_completa:'Ficha completa', briefing_ok:'En lista de envío', enviado:'Kit en camino', recibido:'Grabando', entregado:'Video entregado', cambios:'Ajuste pedido', publicado:'Publicada', cumplida:'Cumplida', vencida:'Atrasada', descartada:'Descartada', rechazada:'Rechazada', por_revisar:'A revisar', revisar:'A revisar', en_cola:'En cola' };
+const esc = t => String(t ?? '').replace(/[&<>"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+const hora = ts => { const d = new Date(ts), h = new Date(); const hh = d.toLocaleTimeString('es-AR',{hour:'2-digit',minute:'2-digit'}); return d.toDateString() === h.toDateString() ? hh : d.toLocaleDateString('es-AR',{day:'numeric',month:'short'}) + ' ' + hh; };
+const esReac = m => m.tipo === 'reaction' || /^(Reaccionó|\[reaction\])/.test(m.texto || '');
+const waLink = tel => tel ? `https://wa.me/${tel}` : null;
+
+async function api(accion, extra = {}){
+  const r = await fetch(API, { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({ accion, clave: CLAVE, ...extra }) });
+  if (r.status === 403) throw new Error('clave');
+  return r.json();
+}
+
+function login(msg){
+  $('#app').innerHTML = `<div class="login"><h2 style="margin:0">WhatsApp de CIMA</h2><p class="nota">${msg || 'Todas las marcas en un solo lugar.'}</p>
+    <input id="cl" type="password" placeholder="Tu clave" autocomplete="off"><button class="btn pri" id="ent" style="width:100%;justify-content:center">Entrar</button></div>`;
+  const go = () => { CLAVE = $('#cl').value.trim(); if (!CLAVE) return; ls.set('wa_bandeja_clave', CLAVE); armar(); cargar(); };
+  $('#ent').onclick = go; $('#cl').onkeydown = e => { if (e.key === 'Enter') go(); };
+}
+
+function armar(){
+  $('#app').innerHTML = `
+    <div class="top"><h1>WhatsApp de todas las marcas<small>Los avisos que salieron del número de CIMA y lo que respondieron los creadores</small></h1>
+      <button class="btn" id="refrescar">↻ Actualizar</button><button class="btn" id="salir">Salir</button></div>
+    <div class="filtros" id="filtros"></div>
+    <div class="filtros" id="marcas"></div>
+    <div class="caja" id="caja"><div class="lista" id="lista"><div class="vacio">Cargando…</div></div><div class="hilo" id="hilo"><div class="vacio">Elegí una conversación.</div></div></div>`;
+  $('#refrescar').onclick = cargar;
+  $('#salir').onclick = () => { ls.del('wa_bandeja_clave'); CLAVE = ''; login(); };
+}
+
+async function cargar(){
+  try {
+    const d = await api('wa_todas');
+    if (!d.ok) throw new Error('x');
+    Object.assign(S, { mensajes: d.mensajes || [], fichas: d.fichas || {}, leidos: d.leidos || {}, resueltos: d.resueltos || {}, marcas: d.marcas || {} });
+  } catch (e) {
+    if (String(e.message) === 'clave') { ls.del('wa_bandeja_clave'); login('Clave incorrecta.'); return; }
+  }
+  pintar();
+  clearTimeout(S.timer); S.timer = setTimeout(cargar, 60e3);
+}
+
+function convs(){
+  const m = new Map();
+  S.mensajes.forEach(x => { const k = x.marca + '|' + x.tel; if (!m.has(k)) m.set(k, []); m.get(k).push(x); });
+  return [...m.entries()].map(([k, ms]) => {
+    const [marca, tel] = k.split('|'), f = S.fichas[k] || {};
+    const ult = [...ms].reverse().find(x => !esReac(x)) || ms[ms.length - 1];
+    const ultIn = [...ms].reverse().find(x => x.dir === 'in');
+    return { k, marca, tel, ms, f, ult, ultIn,
+      nombre: f.nom || (f.ig ? '@' + f.ig : '') || ms.map(x => x.nombre).find(Boolean) || '+' + tel,
+      ig: f.ig || ms.map(x => x.ig).find(Boolean) || null,
+      nolei: ms.some(x => x.dir === 'in' && !esReac(x) && x.ts > (S.leidos[k] || 0)),
+      responder: ult.dir === 'in' && !esReac(ult) && ult.ts > (S.resueltos[k] || 0),
+      ayuda: !!f.pideHumana, abierta: !!(ultIn && Date.now() - ultIn.ts < 864e5) };
+  }).sort((a, b) => (b.responder - a.responder) || (b.ult.ts - a.ult.ts));
+}
+
+function pintar(){
+  const todas = convs();
+  const F = { todas: () => true, responder: c => c.responder, nolei: c => c.nolei, ayuda: c => c.ayuda };
+  const porMarca = todas.filter(c => !S.marca || c.marca === S.marca);
+  $('#filtros').innerHTML = [['todas','Todas'],['responder','Por responder'],['nolei','No leídas'],['ayuda','Pidieron ayuda']]
+    .map(([k, t]) => `<button class="f${S.filtro === k ? ' on' : ''}" data-f="${k}">${t}<span class="n">${porMarca.filter(F[k]).length}</span></button>`).join('');
+  const marcasCon = [...new Set(todas.map(c => c.marca))];
+  $('#marcas').innerHTML = `<button class="f${!S.marca ? ' on' : ''}" data-m="">Todas las marcas</button>` + marcasCon.map(mk => {
+    const M = S.marcas[mk] || { nombre: mk, acento: '#555' }, n = todas.filter(c => c.marca === mk && (c.responder || c.nolei)).length;
+    return `<button class="f${S.marca === mk ? ' on' : ''}" data-m="${mk}"><span class="pt" style="background:${M.acento}"></span>${esc(M.nombre)}${n ? `<span class="n">${n}</span>` : ''}</button>`; }).join('');
+  document.querySelectorAll('[data-f]').forEach(b => b.onclick = () => { S.filtro = b.dataset.f; pintar(); });
+  document.querySelectorAll('[data-m]').forEach(b => b.onclick = () => { S.marca = b.dataset.m; pintar(); });
+  const cs = porMarca.filter(F[S.filtro]);
+  $('#lista').innerHTML = cs.length ? cs.map(c => { const M = S.marcas[c.marca] || { nombre: c.marca, acento: '#555' }; return `
+    <button class="conv${c.k === S.sel ? ' on' : ''}${c.nolei ? ' nolei' : ''}" data-k="${c.k}">
+      <b><span style="overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${esc(c.nombre)}</span><small>${hora(c.ult.ts)}</small></b>
+      <span class="tx">${c.ult.dir === 'out' ? '↪ ' : ''}${esc(c.ult.texto)}</span>
+      <span class="mk" style="background:${M.acento}">${esc(M.nombre)}</span>${c.ayuda ? '<span class="pill no">Pidió ayuda</span>' : c.responder ? '<span class="pill">Responder</span>' : ''}
+    </button>`; }).join('') : '<div class="vacio">Nada en este filtro. 🎉</div>';
+  document.querySelectorAll('.conv').forEach(b => b.onclick = () => abrir(b.dataset.k));
+  if (S.sel) hilo(todas.find(c => c.k === S.sel), false);
+}
+
+function abrir(k){
+  S.sel = k; $('#caja').classList.add('abierto');
+  const c = convs().find(x => x.k === k);
+  if (c && c.ultIn && c.ultIn.ts > (S.leidos[k] || 0)) { S.leidos[k] = c.ultIn.ts; api('wa_leido', { marca: c.marca, tel: c.tel, ts: c.ultIn.ts }).catch(() => {}); }
+  pintar(); hilo(convs().find(x => x.k === k), true);
+}
+
+function hilo(c, foco){
+  const h = $('#hilo');
+  if (!c) { h.innerHTML = '<div class="vacio">Elegí una conversación.</div>'; return; }
+  const borrador = ($('#txt') || {}).value || '';
+  const M = S.marcas[c.marca] || { nombre: c.marca, acento: '#555' };
+  const quedan = c.ultIn ? Math.max(0, 864e5 - (Date.now() - c.ultIn.ts)) : 0;
+  const caras = new Map(), comunes = c.ms.filter(m => !esReac(m));
+  c.ms.filter(esReac).forEach(r => { const b = (r.aWaId && comunes.find(m => m.waId === r.aWaId)) || [...comunes].reverse().find(m => m.dir === 'out' && m.ts <= r.ts); if (b) caras.set(b, r.emoji || '👍'); });
+  h.innerHTML = `
+    <div class="cab"><button class="btn volver" id="volver">← Volver</button>
+      <h2>${esc(c.nombre)}<small><span class="mk" style="background:${M.acento};margin:0 6px 0 0">${esc(M.nombre)}</span>+${c.tel}${c.ig ? ' · @' + esc(c.ig) : ''}${c.f.estado ? ' · ' + esc(ETQ[c.f.estado] || c.f.estado) : ''}</small></h2>
+      <div class="acc">
+        ${c.f.link ? `<a class="btn" href="${c.f.link}" target="_blank" rel="noopener">Ver su app</a>` : ''}
+        ${c.ig ? `<a class="btn" href="https://instagram.com/${encodeURIComponent(c.ig)}" target="_blank" rel="noopener">Instagram</a>` : ''}
+        <a class="btn" href="https://cima-creators.github.io/${c.marca}/panel" target="_blank" rel="noopener">Panel de ${esc(M.nombre)}</a>
+        <a class="btn" href="${waLink(c.tel)}" target="_blank" rel="noopener">Abrir en mi WhatsApp</a>
+        ${c.responder ? `<button class="btn" id="listo">✓ No hace falta responder</button>` : ''}
+      </div></div>
+    <div class="msgs" id="msgs">${comunes.map(m => `<div class="m ${m.dir}${m.dir === 'out' && !m.manual ? ' auto' : ''}${caras.has(m) ? ' cara' : ''}">${esc(m.texto)}<i>${m.dir === 'out' ? (m.manual ? 'Equipo · ' : m.plantilla ? 'Aviso automático · ' : 'Respuesta automática · ') : ''}${hora(m.ts)}</i>${caras.has(m) ? `<span class="cara-b">${esc(caras.get(m))}</span>` : ''}</div>`).join('')}</div>
+    <div class="pie">
+      ${c.abierta ? `<textarea id="txt" placeholder="Escribile…">${esc(borrador)}</textarea>` : ''}
+      <div class="fila"><span class="nota${c.abierta ? '' : ' no'}">${c.abierta ? `Podés contestarle desde acá ${Math.floor(quedan / 36e5)} h ${Math.floor(quedan % 36e5 / 6e4)} min más.` : 'Pasaron más de 24 h desde su último mensaje: pedile que responda y se abren 24 h.'}</span>
+      ${c.abierta ? '<button class="btn pri" id="env">Enviar</button>' : '<button class="btn pri" id="cons">Pedirle que responda</button>'}</div>
+    </div>`;
+  const ms = $('#msgs'); ms.scrollTop = ms.scrollHeight;
+  $('#volver').onclick = () => { S.sel = null; $('#caja').classList.remove('abierto'); pintar(); };
+  const li = $('#listo'); if (li) li.onclick = () => { S.resueltos[c.k] = c.ult.ts; S.leidos[c.k] = Math.max(S.leidos[c.k] || 0, c.ult.ts); api('wa_leido', { marca: c.marca, tel: c.tel, ts: c.ult.ts, resuelto: true }).catch(() => {}); pintar(); };
+  const co = $('#cons'); if (co) co.onclick = async () => {
+    if (!confirm(`Le llega por WhatsApp: "Collabs de ${M.nombre} 💛 Hola, te escribimos por tu collab. Respondé este mensaje así seguimos la charla por acá." ¿Lo mando?`)) return;
+    co.disabled = true; const r = await api('wa_consulta', { marca: c.marca, tel: c.tel, id: c.f.id || null }).catch(() => ({}));
+    if (!r.ok) { alert(r.msg || 'No se pudo enviar.'); co.disabled = false; return; }
+    S.mensajes.push({ tel: c.tel, marca: c.marca, dir: 'out', texto: `Collabs de ${M.nombre} 💛 Te escribimos por tu collab. Respondé este mensaje así seguimos la charla por acá.`, ts: Date.now(), manual: true, plantilla: 'cima_consulta' }); pintar();
+  };
+  const en = $('#env'); if (en) en.onclick = async () => {
+    const t = $('#txt').value.trim(); if (!t) return;
+    en.disabled = true; en.textContent = 'Enviando…';
+    const r = await api('wa_enviar', { marca: c.marca, tel: c.tel, texto: t, id: c.f.id || null }).catch(() => ({}));
+    if (!r.ok) { alert(r.msg || 'No se pudo enviar.'); en.disabled = false; en.textContent = 'Enviar'; return; }
+    $('#txt').value = ''; S.mensajes.push({ tel: c.tel, marca: c.marca, dir: 'out', texto: t, ts: Date.now(), manual: true });
+    if (S.fichas[c.k]) S.fichas[c.k].pideHumana = null; pintar();
+  };
+  if (foco && $('#txt')) $('#txt').focus();
+}
+
+// en la barra se ve el link corto
+try { if (location.hostname === 'cima-creators.github.io' && /bandeja-wa\.html/.test(location.pathname)) history.replaceState(null, '', '/whatsapp' + location.hash); } catch {}
+if (CLAVE) { armar(); cargar(); } else login();
+</script></body></html>
