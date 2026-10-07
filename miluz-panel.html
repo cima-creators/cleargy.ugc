@@ -1222,10 +1222,30 @@ function pintarEnvios(){
             : `<span class="pill">En camino${e.despachadoEn ? ' · salió ' + new Date(e.despachadoEn).toLocaleDateString('es-AR', {day:'numeric', month:'short'}) : ''}</span>`}${e.seguimiento && e.seguimiento.codigo ? `<a class="n2 verreel" href="${e.seguimiento.url}" target="_blank" rel="noopener" title="Seguir el envío">${e.seguimiento.correo} · ${e.seguimiento.correo === 'Andesmar' ? 'remito ' : ''}${e.seguimiento.codigo} ↗</a>` : ''}</td>
           <td class="dmacc">${e.estado !== 'despachado' ? '' : (e.avisoDespachoEn
             ? `<span class="pill ok" title="Le llegó el DM 'tu kit salió'">DM ✓</span>`
-            : `<span class="pill no" title="No le llegó el DM: hace más de 24 h que no escribe al bot (Instagram lo bloquea)">sin DM</span>${e.tel ? `<a class="mini" target="_blank" href="${waLinkTexto(e.tel, mensajeDespachado(e.nom))}" title="Abre WhatsApp con el aviso armado">WhatsApp</a>` : ''}`)}</td>
+            : `<span class="pill no" title="No le llegó el DM: hace más de 24 h que no escribe al bot (Instagram lo bloquea)">sin DM</span>${e.tel ? `<a class="mini" target="_blank" href="${waLinkTexto(e.tel, mensajeDespachado(e.nom))}" title="Abre WhatsApp con el aviso armado">WhatsApp</a>` : ''}`)}${['admin','equipo'].includes(ROL) ? `<select class="mini cambio-est" data-i="${ix}" title="Dar de baja o corregir el estado">
+              <option value="">Cambiar…</option>
+              ${e.estado === 'despachado' ? '<option value="briefing_ok">Volver a «Para enviar»</option>' : '<option value="enviado">Marcar despachado</option>'}
+              ${!e.recibido ? '<option value="recibido">Marcar recibido</option>' : ''}
+              <option value="baja">Dar de baja</option>
+            </select>` : ''}</td>
         </tr>`).join('')}
       </tbody>
     </table>`;
+  document.querySelectorAll('.cambio-est').forEach(sel => sel.onchange = async () => {
+    const e = ENVIOS[+sel.dataset.i], a = sel.value; if (!a) return;
+    const txt = { baja: `¿Dar de baja a ${e.nom}? Sale de Envíos y no ocupa cupo.`, briefing_ok: `¿Volver a ${e.nom} a «Para enviar»?`, enviado: `¿Marcar el kit de ${e.nom} como despachado? (no le avisa por WhatsApp)`, recibido: `¿Marcar que ${e.nom} ya recibió el kit? Arranca su plazo.` }[a];
+    if (!confirm(txt)) { sel.value = ''; return; }
+    const motivo = a === 'baja' ? (prompt('Motivo (opcional):', 'Se bajó') || '') : '';
+    try {
+      const r = DEMO ? { ok: true } : await api('estado_panel', { id: e.id, a, motivo });
+      if (!r.ok) throw new Error(r.error || 'error');
+      if (a === 'baja') ENVIOS.splice(+sel.dataset.i, 1);
+      else if (a === 'briefing_ok') Object.assign(e, { estado: 'listo', recibido: false });
+      else if (a === 'enviado') Object.assign(e, { estado: 'despachado', despachadoEn: e.despachadoEn || Date.now() });
+      else if (a === 'recibido') Object.assign(e, { estado: 'despachado', recibido: true, recibidoEn: Date.now() });
+      pintarEnvios();
+    } catch (err) { alert('No se pudo cambiar: ' + err.message); sel.value = ''; }
+  });
   contar();
 }
 
@@ -1885,6 +1905,7 @@ const ETIQUETA = {
   revisar:['A revisar','esp'], por_revisar:['A revisar','esp'],
   descartada:['Descartada por filtro','no'], rechazada:['Rechazada','no'],
   entregado:['Video entregado','esp'], cambios:['Ajuste pedido','esp'],
+  baja:['Dada de baja','no'],
 };
 const MOTIVO = {
   unas:'no apta para el producto', privada:'cuenta privada', pocos_seguidores:'menos de 1.000 seguidores',
@@ -2186,7 +2207,7 @@ function aplicarRol(){
     pintarTodo();
   }
 })();
-const APP_VERSION = '2026-10-05-d';
+const APP_VERSION = '2026-10-07-a';
 </script>
 </body>
 </html>
