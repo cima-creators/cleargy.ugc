@@ -56,13 +56,16 @@ select.linput option{background:white;}
 .gui-top{display:flex;justify-content:space-between;align-items:center;margin-bottom:7px;}
 .gui-lbl{font-family:'Poppins';font-size:8px;letter-spacing:2.5px;text-transform:uppercase;color:var(--muted2);}
 .gui-count{font-family:'Poppins';font-size:11px;font-weight:700;color:var(--accent);}
-.gui-next{font-size:13px;font-weight:600;color:var(--text);line-height:1.45;}
+.gui-next{font-size:12px;font-weight:500;color:var(--muted);line-height:1.45;}
+.gui-sig{display:flex;align-items:flex-start;gap:8px;margin-bottom:5px;}
+.gui-chip{flex:none;font-family:'Poppins';font-size:10px;font-weight:700;padding:2px 9px;border-radius:20px;background:rgba(var(--acc-rgb),.11);color:var(--accent);margin-top:1px;}
+.gui-tt{font-size:14px;font-weight:600;color:var(--text);line-height:1.4;}
 .gui-cta{font-family:'Poppins';font-size:11px;color:var(--accent);margin-top:10px;font-weight:600;}
 .gui-item{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-sm);padding:13px 14px;margin-bottom:9px;}
 .gui-item.hecho{opacity:.52;}
 .gui-code{display:inline-block;font-family:'Poppins';font-size:9.5px;font-weight:700;padding:2px 9px;border-radius:20px;background:rgba(var(--acc-rgb),.1);color:var(--accent);margin-bottom:7px;}
 .gui-code.ok{background:rgba(63,143,107,.13);color:#3F8F6B;}
-.gui-tit{font-size:13.5px;font-weight:600;color:var(--text);line-height:1.4;}
+.gui-tit{font-size:13.5px;font-weight:600;color:var(--text);line-height:1.45;}
 .gui-txt{font-size:12px;color:var(--muted);line-height:1.65;margin-top:8px;white-space:pre-wrap;}
 .gui-link{display:inline-block;margin-top:10px;font-family:'Poppins';font-size:11px;font-weight:600;color:var(--accent);text-decoration:none;}
 .bottom-nav{position:fixed;bottom:14px;left:50%;transform:translateX(-50%);width:calc(100% - 32px);max-width:400px;background:rgba(255,255,255,.97);backdrop-filter:blur(28px);-webkit-backdrop-filter:blur(28px);border-radius:26px;border:1px solid rgba(var(--acc-rgb),.09);padding:8px 6px;display:flex;justify-content:space-around;align-items:center;z-index:50;box-shadow:0 8px 32px rgba(var(--acc-rgb),.14),0 2px 8px rgba(0,0,0,.07);}
@@ -490,6 +493,10 @@ html.sin-redes .solo-redes{display:none !important;}
       <div class="gui-top">
         <span class="gui-lbl">Tus guiones</span>
         <span class="gui-count" id="home-gui-count">—</span>
+      </div>
+      <div class="gui-sig" id="home-gui-sig" style="display:none;">
+        <span class="gui-chip" id="home-gui-cod"></span>
+        <span class="gui-tt" id="home-gui-tit"></span>
       </div>
       <div class="gui-next" id="home-gui-next"></div>
       <div class="gui-cta">Ver todos mis guiones →</div>
@@ -1487,9 +1494,17 @@ function renderHomeGuiones(){
   card.style.display = "block";
   document.getElementById("home-gui-count").textContent =
     pend.length ? `${pend.length} de ${todos.length} sin grabar` : "✓ todos grabados";
-  document.getElementById("home-gui-next").textContent = pend.length
-    ? `Te toca: ${pend[0].code}${pend[0].titulo?" · "+pend[0].titulo:""}`
-    : "Terminaste todos — pedí guiones nuevos para poder seguir subiendo";
+  const sig=document.getElementById("home-gui-sig");
+  if(pend.length){
+    sig.style.display="flex";
+    document.getElementById("home-gui-cod").textContent = pend[0].code;
+    document.getElementById("home-gui-tit").textContent = pend[0].titulo || "—";
+    document.getElementById("home-gui-next").textContent = pend.length>1
+      ? `y ${pend.length-1} más` : "es el último que te queda";
+  } else {
+    sig.style.display="none";
+    document.getElementById("home-gui-next").textContent = "Terminaste todos — pedí guiones nuevos para poder seguir subiendo";
+  }
   card.style.borderColor = pend.length ? "" : "rgba(193,97,60,.45)";
 }
 
@@ -2792,7 +2807,7 @@ loadData();
 <!-- Auto-actualización: GitHub Pages cachea el HTML y los celulares lo retienen mucho más.
      Esto compara la versión publicada con la que está corriendo y refresca sola. -->
 <script>
-const APP_VERSION = '2026-10-06-m';
+const APP_VERSION = '2026-10-07-a';
 (function(){
   var CLAVE='cima_ver_reload';
   function hayAlguienEscribiendo(){
