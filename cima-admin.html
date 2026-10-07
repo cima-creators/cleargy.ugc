@@ -312,6 +312,7 @@ body.archivo .abtn,body.archivo .action-row button,body.archivo #apify-sync-btn,
         <div class="nitem" data-view="finanzas" onclick="nav(this)" id="nav-finanzas"><div class="ndot" style="background:var(--gold)"></div>Pagos</div>
         <div class="nitem" data-view="comprobantes" onclick="nav(this)" id="nav-comprobantes"><div class="ndot" style="background:#3F8F6B"></div>Comprobantes</div>
         <div class="slabel">Config</div>
+        <div class="nitem" data-view="creadoras" onclick="nav(this)" id="nav-creadoras"><div class="ndot" style="background:#7c3aed"></div>Creadoras</div>
         <div class="nitem" data-view="config" onclick="nav(this)"><div class="ndot" style="background:var(--muted)"></div>Configuración</div>
       </div>
     </nav>
@@ -519,6 +520,25 @@ body.archivo .abtn,body.archivo .action-row button,body.archivo #apify-sync-btn,
       </div>
 
       <!-- CONFIG -->
+      <!-- CREADORAS: altas y bajas sin tocar código (7/10/2026) -->
+      <div id="view-creadoras" class="view">
+        <div class="view-title">Creadoras</div>
+        <div class="view-sub">Altas y bajas de esta marca. Entran o salen de la app en el momento, sin deploy.</div>
+        <div style="background:var(--surface);border-radius:var(--radius);padding:24px;box-shadow:var(--shadow);margin-bottom:16px;">
+          <div style="font-size:14px;font-weight:800;margin-bottom:16px;">➕ Dar de alta</div>
+          <div class="frow">
+            <div class="fgroup"><div class="flabel">Nombre</div><input class="fi" id="cr-nombre" placeholder="Ej: Sofía Pérez" oninput="crSugerirPass()"></div>
+            <div class="fgroup"><div class="flabel">Contraseña</div><input class="fi" id="cr-pass" placeholder="Se arma sola con el nombre" autocapitalize="off" autocomplete="off"></div>
+            <div class="fgroup"><div class="flabel">WhatsApp (opcional)</div><input class="fi" id="cr-tel" placeholder="5491122334455" inputmode="numeric"></div>
+          </div>
+          <button class="hbtn primary" id="cr-btn" onclick="crAlta()" style="padding:12px 24px;">Dar de alta</button>
+          <div id="cr-msg" style="margin-top:14px;"></div>
+        </div>
+        <div style="background:var(--surface);border-radius:var(--radius);padding:24px;box-shadow:var(--shadow);margin-bottom:16px;">
+          <div id="cr-lista"></div>
+        </div>
+      </div>
+
       <div id="view-config" class="view">
         <div class="view-title">Configuración</div>
         <div class="view-sub">Ajustes de la campaña y creadoras</div>
@@ -535,7 +555,7 @@ body.archivo .abtn,body.archivo .action-row button,body.archivo #apify-sync-btn,
         <div style="background:var(--surface);border-radius:var(--radius);padding:24px;box-shadow:var(--shadow);margin-bottom:16px;">
           <div style="font-size:14px;font-weight:800;margin-bottom:16px;">👥 Gestión de Creadoras</div>
           <div id="config-creadoras"></div>
-          <button class="hbtn primary" style="margin-top:16px;" onclick="openAddCreadora()">+ Agregar creadora</button>
+          <button class="hbtn primary" style="margin-top:16px;" onclick="nav(document.querySelector('[data-view=creadoras]'))">+ Altas y bajas de creadoras</button>
         </div>
       </div>
 
@@ -1082,17 +1102,25 @@ window.BRAND_COLLECTION = BRAND.collection;
 const TANDA_ARCHIVO = new URLSearchParams(window.location.search).get('tanda')==='1' && !!BRAND.archivoT1;
 if(TANDA_ARCHIVO) window.BRAND_VIDEOS_COL = BRAND.collection + '_videos_t1';
 
-// Rellena todos los selectores de creadoras desde BRAND.creators
-(function populateCreatorSelects(){
+// Rellena todos los selectores de creadoras desde BRAND.creators.
+// Se vuelve a correr cuando llega un alta del panel (pestaña Creadoras).
+function _llenarSelectsCreadoras(){
+  const keys = Object.keys(BRAND.creators);
   const opts = Object.entries(BRAND.creators).map(([k,v])=>`<option value="${k}">${v.name}</option>`).join('');
-  const withAll = Object.entries(BRAND.creators).map(([k,v])=>`<option value="${k}">${v.name}</option>`).join('');
+  ['vf-creator','vir-creator','comp-creator','notif-to'].forEach(id=>{
+    const el = document.getElementById(id);
+    if(!el) return;
+    const val = el.value;
+    [...el.options].forEach(o=>{ if(keys.includes(o.value)) o.remove(); });
+    el.innerHTML += opts;
+    if(val) el.value = val;
+  });
+  const compC = document.getElementById('comp-c');
+  if(compC){ const val = compC.value; compC.innerHTML = opts; if(val) compC.value = val; }
+}
+(function populateCreatorSelects(){
   document.addEventListener('DOMContentLoaded', function(){
-    ['vf-creator','vir-creator','comp-creator','notif-to'].forEach(id=>{
-      const el = document.getElementById(id);
-      if(el) el.innerHTML += withAll;
-    });
-    const compC = document.getElementById('comp-c');
-    if(compC) compC.innerHTML = opts;
+    _llenarSelectsCreadoras();
     const vfp = document.getElementById('vf-product');
     if(vfp && BRAND.products){
       vfp.innerHTML = '<option value="ALL">📦 Todos los productos</option>' + BRAND.products.map(p=>`<option>${p}</option>`).join('');
@@ -1178,6 +1206,38 @@ const WHATICKET_TOKEN = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzY29wZSI6WyJyZW
 const WHATICKET_CONNECTION = "ca448a0f-b10e-4088-8ce2-ef78810cf7d2";
 const ADMIN_PHONE = "5491123538064";
 const PHONES = Object.fromEntries(Object.entries(BRAND.creators).map(([k,v])=>[k,v.phone||'']));
+
+// ═══ Altas y bajas desde el panel (pestaña Creadoras, 7/10/2026) ═══
+// Viven en <marca>/creadoras, APARTE del doc main: así ningún saveData() de una app abierta
+// con datos viejos las puede pisar. La lista del código es la base y esto va encima.
+// altas:  [{key,name,pass,avatar,color,phone,fecha,por}]  (pass en minúscula: el login la baja)
+// estado: {key:{activa:true|false,nombre,fecha,por}}     (sirve también para las del código)
+let CREADORAS_CFG = {altas:[], estado:{}};
+function _aplicarCreadorasCfg(cfg){
+  cfg = cfg || {};
+  (cfg.altas||[]).forEach(a=>{
+    if(!a || !a.key) return;
+    if(!CREATORS.includes(a.key)) CREATORS.push(a.key);
+    BRAND.creators[a.key] = Object.assign(BRAND.creators[a.key]||{}, {name:a.name, avatar:a.avatar, color:a.color, phone:a.phone||''});
+    NAMES[a.key]=a.name; COLORS[a.key]=a.color; AVATARS[a.key]=a.avatar; PHONES[a.key]=a.phone||'';
+  });
+  Object.keys(BRAND.creators).forEach(k=>{
+    const c = BRAND.creators[k];
+    if(c._inactiveCodigo===undefined) c._inactiveCodigo = !!c.inactive;
+    const e = (cfg.estado||{})[k];
+    c.inactive = (e && typeof e.activa==='boolean') ? !e.activa : c._inactiveCodigo;
+  });
+  CREADORAS_CFG = {altas: cfg.altas||[], estado: cfg.estado||{}};
+}
+try{ _aplicarCreadorasCfg(JSON.parse(localStorage.getItem(BRAND_ID+'_creadoras')||'null')); }catch(e){}
+window._onCreadorasCfg = function(cfg){
+  try{ localStorage.setItem(BRAND_ID+'_creadoras', JSON.stringify(cfg||{})); }catch(e){}
+  _aplicarCreadorasCfg(cfg);
+  _llenarSelectsCreadoras();
+  if(typeof _fbDataLoaded!=='undefined' && _fbDataLoaded){ try{ renderAll(); }catch(e){ console.error(e); } }
+  const v = document.querySelector('.view.active');
+  if(v && v.id==='view-creadoras') renderCreadorasAdmin();
+};
 // Inicio de campaña por creadora: 1) fecha de SU PRIMER video, 2) fecha configurada a mano, 3) inicio de marca
 // ¿Esta venta es de la campaña que está corriendo? Misma regla que los videos.
 // Dos cortes: si la creadora ya no está en la marca, la venta es de una tanda anterior
@@ -1346,6 +1406,7 @@ function enterAdmin(){
     document.getElementById('nav-finanzas').style.display='none';
     document.getElementById('nav-comprobantes').style.display='none';
     document.getElementById('nav-bonos').style.display='none';
+    document.getElementById('nav-creadoras').style.display='none';
   }
   renderAll(); renderVideos();
   // Un solo listener que se activa cuando Firebase está listo
@@ -1425,6 +1486,7 @@ function nav(el){
   if(v==="finanzas")renderFinanzas();
   if(v==="shopify")renderShopify();
   if(v==="config"){loadConfig();setTimeout(renderConfigCreadoras,100);}
+  if(v==="creadoras")renderCreadorasAdmin();
   if(v==="comprobantes"){renderComprobantes();}
 }
 
@@ -2029,11 +2091,11 @@ function renderViral(){
   const cf=document.getElementById("vir-creator")?.value||"ALL";
   const plat=document.getElementById("vir-plat")?.value||"ALL";
   const vsort=document.getElementById("vir-sort")?.value||"views_desc";
-  let vids=[...data.videos].filter(v=>v.views>=minV);
+  let vids=[...data.videos].filter(v=>viewsAcum(v)>=minV);
   if(cf!=="ALL") vids=vids.filter(v=>v.creator===cf);
   if(plat==="ig") vids=vids.filter(v=>v.linkIg);
   if(plat==="tt") vids=vids.filter(v=>v.linkTt);
-  vids.sort((a,b)=>vsort==="views_asc"?(a.views||0)-(b.views||0):(b.views||0)-(a.views||0));
+  vids.sort((a,b)=>vsort==="views_asc"?viewsAcum(a)-viewsAcum(b):viewsAcum(b)-viewsAcum(a));
   vids=vids.slice(0,20);
 
   document.getElementById("viral-list").innerHTML=vids.length?vids.map((v,i)=>{
@@ -3032,6 +3094,123 @@ function submitNewCreadora(){
   showToast("✓ "+nombre+" agregada — contraseña: "+pass);
 }
 
+// ═══ Pestaña Creadoras ═══
+const _crEsc = t => String(t==null?'':t).replace(/[&<>"']/g, m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]));
+const _crHoy = () => new Date().toLocaleDateString('en-CA',{timeZone:'America/Argentina/Buenos_Aires'});
+function _crLimpio(t){ return String(t||'').normalize('NFD').replace(/[\u0300-\u036f]/g,'').toLowerCase().replace(/[^a-z0-9]/g,''); }
+function crSugerirPass(){
+  const p = document.getElementById('cr-pass');
+  if(p.dataset.tocada==='1') return;
+  const n = _crLimpio(document.getElementById('cr-nombre').value.trim().split(/\s+/)[0]);
+  p.value = n ? n + (100 + Math.floor(Math.random()*900)) : '';
+}
+document.addEventListener('input', e=>{ if(e.target && e.target.id==='cr-pass') e.target.dataset.tocada='1'; });
+function _crLinkApp(){ return 'https://cima-creators.github.io/' + BRAND_ID + '/videos'; }
+function _crMensaje(nombre, pass){
+  return `¡Hola ${nombre.split(' ')[0]}! Ya tenés tu acceso a ${BRAND.name} 🎬\n\nEntrá acá: ${_crLinkApp()}\nTu contraseña: ${pass}\n\nAhí subís tus videos y ves tus guiones.`;
+}
+function crCopiar(texto){
+  const ok = () => showToast('✓ Mensaje copiado');
+  if(navigator.clipboard && navigator.clipboard.writeText) navigator.clipboard.writeText(texto).then(ok).catch(()=>prompt('Copiá el mensaje:', texto));
+  else prompt('Copiá el mensaje:', texto);
+}
+function crCopiarDe(key){
+  const a = (CREADORAS_CFG.altas||[]).find(x=>x.key===key);
+  if(a) crCopiar(_crMensaje(a.name, a.pass));
+}
+function _crPassesOcupadas(cfg){
+  const s = new Set([ADMIN_PASS, ADMIN_PASS2, ADMIN_PASS3, ADMIN_PASS4, ADMIN_PASS_EDIT].filter(Boolean).map(x=>String(x).toLowerCase()));
+  (cfg.altas||[]).forEach(a=>{ if(a.pass) s.add(String(a.pass).toLowerCase()); });
+  return s;
+}
+// Clave nueva = creadoraN siguiente. Tiene que ser creadoraN: las ventas por link (utm_campaign) se atribuyen así.
+function _crKeyNueva(cfg){
+  const keys = [...Object.keys(BRAND.creators), ...(cfg.altas||[]).map(a=>a.key), ...((data&&data.extraCreators)||[]).map(c=>c.key)];
+  const max = keys.reduce((m,k)=>{ const x=/^creadora(\d+)$/.exec(k||''); return x ? Math.max(m, +x[1]) : m; }, 0);
+  return 'creadora' + (max+1);
+}
+async function crAlta(){
+  const nombre = document.getElementById('cr-nombre').value.trim().replace(/\s+/g,' ');
+  const pass = document.getElementById('cr-pass').value.trim().toLowerCase();
+  const tel = document.getElementById('cr-tel').value.replace(/\D/g,'');
+  if(!nombre){ showToast('Poné el nombre'); return; }
+  if(!/^[a-z0-9._-]{4,30}$/.test(pass)){ showToast('La contraseña: 4 a 30 letras o números, sin espacios'); return; }
+  if(!window._fbCreadorasCambiar){ showToast('Todavía conectando… probá en unos segundos'); return; }
+  const repetida = CREATORS.find(c=>!(BRAND.creators[c]||{}).inactive && String(NAMES[c]||'').toLowerCase()===nombre.toLowerCase());
+  if(repetida && !confirm(nombre+' ya está activa en '+BRAND.name+'. ¿Darla de alta igual?')) return;
+  const btn = document.getElementById('cr-btn'); btn.disabled = true; btn.textContent = 'Guardando…';
+  try{
+    const palette = ['#B07B2E','#10b981','#8b5cf6','#f43f5e','#06b6d4','#84cc16','#ec4899','#14b8a6','#3d7fa3','#a8763a'];
+    const nueva = await window._fbCreadorasCambiar(cfg=>{
+      if(_crPassesOcupadas(cfg).has(pass)) throw new Error('Esa contraseña ya la usa otra persona en esta marca');
+      const key = _crKeyNueva(cfg);
+      const avatar = nombre.split(' ').map(w=>w[0]).join('').substring(0,2).toUpperCase();
+      const a = {key, name:nombre, pass, avatar, color:palette[(cfg.altas||[]).length % palette.length], phone:tel, fecha:_crHoy(), por:window.adminUser||'?'};
+      cfg.altas.push(a);
+      cfg.estado[key] = {activa:true, nombre, fecha:a.fecha, por:a.por};
+      return a;
+    });
+    document.getElementById('cr-nombre').value=''; document.getElementById('cr-tel').value='';
+    const p = document.getElementById('cr-pass'); p.value=''; p.dataset.tocada='';
+    const msg = _crMensaje(nueva.name, nueva.pass);
+    document.getElementById('cr-msg').innerHTML = `<div style="background:rgba(63,143,107,.10);border:1px solid rgba(63,143,107,.35);border-radius:12px;padding:14px;">
+      <div style="font-size:13px;font-weight:800;margin-bottom:8px;">✓ ${_crEsc(nueva.name)} ya puede entrar. Mandale esto:</div>
+      <pre style="white-space:pre-wrap;font-family:'Poppins';font-size:12px;margin:0 0 10px;color:var(--text);">${_crEsc(msg)}</pre>
+      <button class="hbtn primary" onclick="crCopiarDe('${nueva.key}')">Copiar mensaje</button></div>`;
+    showToast('✓ '+nueva.name+' dada de alta');
+  }catch(e){
+    console.error(e); showToast(e && e.message && !/firestore|permission/i.test(e.message) ? e.message : 'No se pudo guardar. Probá de nuevo.');
+  }finally{ btn.disabled=false; btn.textContent='Dar de alta'; }
+}
+// Pasa los guiones sin grabar de una creadora a las activas, parejo por carga
+function _crRepartirSuyos(c){
+  const hechos=_videosPorGuion();
+  const suyos=(data.guiones||[]).filter(g=>g.creadora===c && !hechos[_gCode(g.code)]);
+  const activos=CREATORS.filter(x=>x!==c && !(BRAND.creators[x]||{}).inactive);
+  if(!suyos.length || !activos.length) return 0;
+  const carga={}; activos.forEach(x=>carga[x]=0);
+  (data.guiones||[]).forEach(g=>{ if(g.creadora && carga[g.creadora]!==undefined && !hechos[_gCode(g.code)]) carga[g.creadora]++; });
+  suyos.forEach(g=>{ const q=activos.reduce((a,b)=>carga[a]<=carga[b]?a:b); g.creadora=q; carga[q]++; });
+  return suyos.length;
+}
+async function crCambiarEstado(c, activa){
+  const nombre = NAMES[c] || c;
+  if(!activa && !confirm('¿Dar de baja a '+nombre+' en '+BRAND.name+'?\n\nNo va a poder entrar más a la app. Sus videos y pagos quedan como están, y sus guiones sin grabar se reparten entre las activas.')) return;
+  if(activa && !confirm('¿Reactivar a '+nombre+'?')) return;
+  if(!window._fbCreadorasCambiar){ showToast('Todavía conectando… probá en unos segundos'); return; }
+  try{
+    const cfg = await window._fbCreadorasCambiar(cfg=>{
+      cfg.estado[c] = {activa, nombre, fecha:_crHoy(), por:window.adminUser||'?'};
+      return JSON.parse(JSON.stringify(cfg));
+    });
+    _aplicarCreadorasCfg(cfg);
+    let n = 0;
+    if(!activa && _fbDataLoaded){ n=_crRepartirSuyos(c); if(n) saveData(); }
+    renderCreadorasAdmin(); try{ renderAll(); }catch(e){}
+    showToast(activa ? '✓ '+nombre+' reactivada' : '✓ '+nombre+' dada de baja'+(n?' · '+n+' guiones repartidos':''));
+  }catch(e){ console.error(e); showToast('No se pudo guardar. Probá de nuevo.'); }
+}
+function renderCreadorasAdmin(){
+  const box = document.getElementById('cr-lista'); if(!box) return;
+  const altas = {}; (CREADORAS_CFG.altas||[]).forEach(a=>altas[a.key]=a);
+  const vids = {}; ((data&&data.videos)||[]).forEach(v=>{ if(v.status!=='rejected') vids[v.creator]=(vids[v.creator]||0)+1; });
+  const fila = c => {
+    const baja = !!(BRAND.creators[c]||{}).inactive, a = altas[c], e = CREADORAS_CFG.estado[c];
+    const col = COLORS[c]||'#888';
+    const det = [ (vids[c]||0)+' videos', a ? 'contraseña: <b style="color:var(--text)">'+_crEsc(a.pass)+'</b>' : '', e&&e.fecha ? (baja?'baja ':'alta ')+e.fecha.slice(8,10)+'/'+e.fecha.slice(5,7) : '' ].filter(Boolean).join(' · ');
+    return `<div style="display:flex;align-items:center;gap:12px;padding:10px 12px;background:var(--surface2);border-radius:var(--radius-sm);margin-bottom:8px;${baja?'opacity:.65;':''}flex-wrap:wrap;">
+      <div style="width:34px;height:34px;border-radius:50%;background:${col}22;border:2px solid ${col};display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:800;color:${col};flex-shrink:0;">${_crEsc(AVATARS[c]||'')}</div>
+      <div style="flex:1;min-width:140px;"><div style="font-size:13px;font-weight:800;">${_crEsc(NAMES[c]||c)}</div><div style="font-size:11px;color:var(--muted);font-weight:600;">${det}</div></div>
+      ${a && !baja ? `<button class="hbtn" style="font-size:11px;" onclick="crCopiarDe('${c}')">Copiar acceso</button>` : ''}
+      <button class="hbtn${baja?' primary':''}" style="font-size:11px;${baja?'':'color:#dc2626;border-color:#dc262655;'}" onclick="crCambiarEstado('${c}',${baja})">${baja?'Reactivar':'Dar de baja'}</button>
+    </div>`;
+  };
+  const act = CREATORS.filter(c=>!(BRAND.creators[c]||{}).inactive), bajas = CREATORS.filter(c=>(BRAND.creators[c]||{}).inactive);
+  box.innerHTML = `<div style="font-size:14px;font-weight:800;margin-bottom:12px;">👥 Activas (${act.length})</div>`
+    + (act.map(fila).join('') || '<div style="font-size:12px;color:var(--muted);">Ninguna todavía.</div>')
+    + (bajas.length ? `<div style="font-size:14px;font-weight:800;margin:20px 0 12px;">Dadas de baja (${bajas.length})</div>` + bajas.map(fila).join('') : '');
+}
+
 loadData();
 loadConfig();
 
@@ -3185,6 +3364,15 @@ loadConfig();
     const BRAND_COL_NAME = window.BRAND_COLLECTION || 'cleargy';
     const DATA_DOC = doc(db, BRAND_COL_NAME, 'main');
     const VIDEOS_COL = collection(db, window.BRAND_VIDEOS_COL || (BRAND_COL_NAME + '_videos'));
+    // Altas y bajas de la pestaña Creadoras: doc propio, nunca dentro de main
+    const CREADORAS_DOC = doc(db, BRAND_COL_NAME, 'creadoras');
+    const _parseCfg = snap => { let c={}; if(snap && snap.exists()){ try{ c=JSON.parse(snap.data().data)||{}; }catch(e){} } c.altas=c.altas||[]; c.estado=c.estado||{}; return c; };
+    window._fbCreadorasCambiar = (fn) => runTransaction(db, async (t) => {
+      const cfg = _parseCfg(await t.get(CREADORAS_DOC));
+      const out = fn(cfg);
+      t.set(CREADORAS_DOC, {data: JSON.stringify(cfg), savedAt: Date.now()});
+      return out;
+    });
 
     // Login anónimo: requerido por las reglas para leer/escribir. En conexiones
     // lentas (móvil) puede tardar — reintentamos hasta lograrlo en vez de abandonar.
@@ -3448,6 +3636,10 @@ loadConfig();
       if(activeView && activeView.id === 'view-shopify') renderShopify();
     });
 
+    // Altas y bajas en vivo: si Abril da de alta desde otro lado, aparece acá sin recargar
+    onSnapshot(CREADORAS_DOC, snap => { if(window._onCreadorasCfg) window._onCreadorasCfg(_parseCfg(snap)); },
+      err => console.error('creadoras onSnapshot:', err));
+
     window.dispatchEvent(new CustomEvent('firebase-ready'));
 
     // Carga inicial desde Firebase
@@ -3466,7 +3658,7 @@ loadConfig();
 <!-- Auto-actualización: GitHub Pages cachea el HTML y los celulares lo retienen mucho más.
      Esto compara la versión publicada con la que está corriendo y refresca sola. -->
 <script>
-const APP_VERSION = '2026-10-07-f';
+const APP_VERSION = '2026-10-07-g';
 (function(){
   var CLAVE='cima_ver_reload';
   function hayAlguienEscribiendo(){

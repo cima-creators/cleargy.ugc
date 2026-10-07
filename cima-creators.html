@@ -1285,6 +1285,31 @@ const AVATARS = Object.fromEntries(Object.entries(BRAND.creators).map(([k,v])=>[
 const COLORS = Object.fromEntries(Object.entries(BRAND.creators).map(([k,v])=>[k,v.color]));
 const CREATOR_KEYS = Object.keys(BRAND.creators);
 
+// Altas y bajas hechas desde el panel (pestaña Creadoras, 7/10/2026). Viven en <marca>/creadoras.
+// Primero lo que quedó guardado en el celu; cuando conecta Firebase se actualiza.
+let _CREADORAS_BAJA = {};
+function _aplicarCreadorasCfg(cfg){
+  cfg = cfg || {};
+  (cfg.altas||[]).forEach(a=>{
+    if(!a || !a.key) return;
+    BRAND.creators[a.key] = Object.assign(BRAND.creators[a.key]||{}, {name:a.name, pass:a.pass, avatar:a.avatar, color:a.color});
+    PASSWORDS[a.key]=a.pass; DISPLAY_NAMES[a.key]=a.name; AVATARS[a.key]=a.avatar; COLORS[a.key]=a.color;
+    if(!CREATOR_KEYS.includes(a.key)) CREATOR_KEYS.push(a.key);
+  });
+  _CREADORAS_BAJA = {};
+  Object.entries(cfg.estado||{}).forEach(([k,e])=>{ if(e && e.activa===false) _CREADORAS_BAJA[k]=true; });
+}
+try{ _aplicarCreadorasCfg(JSON.parse(localStorage.getItem(BRAND_ID+'_creadoras')||'null')); }catch(e){}
+window._onCreadorasCfg = function(cfg){
+  try{ localStorage.setItem(BRAND_ID+'_creadoras', JSON.stringify(cfg||{})); }catch(e){}
+  _aplicarCreadorasCfg(cfg);
+  // La dieron de baja con la app abierta: afuera
+  if(typeof currentUser!=='undefined' && currentUser && _CREADORAS_BAJA[currentUser]){
+    alert('Tu acceso a '+BRAND.name+' terminó. Si es un error, escribile a CIMA.');
+    logout();
+  }
+};
+
 // Shared data
 const _emptyObj = k => Object.fromEntries(CREATOR_KEYS.map(c=>[c,0]));
 let sharedData = {
@@ -1467,11 +1492,20 @@ function enterApp(creator){
   },500);
 }
 
-function doLogin(){
+async function doLogin(){
   const passInput = document.getElementById("l-creator").value.trim().toLowerCase();
-  if(!passInput){document.getElementById("lerr").classList.add("show");document.getElementById("lerr").textContent="Ingresá tu contraseña.";return;}
-  const creator = Object.keys(PASSWORDS).find(k=>PASSWORDS[k]===passInput);
-  if(!creator){document.getElementById("lerr").classList.add("show");document.getElementById("lerr").textContent="Contraseña incorrecta.";return;}
+  const err = t => { const e=document.getElementById("lerr"); e.classList.add("show"); e.textContent=t; };
+  if(!passInput){err("Ingresá tu contraseña.");return;}
+  let creator = Object.keys(PASSWORDS).find(k=>PASSWORDS[k]===passInput);
+  // Alta recién hecha desde el panel y este celu todavía no se enteró: preguntarle a Firebase
+  if(!creator && window._fbCreadorasLeer){
+    err("Verificando…");
+    try{ window._onCreadorasCfg(await window._fbCreadorasLeer()); }catch(e){ console.error(e); }
+    creator = Object.keys(PASSWORDS).find(k=>PASSWORDS[k]===passInput);
+  }
+  if(!creator){err("Contraseña incorrecta.");return;}
+  if(_CREADORAS_BAJA[creator]){err("Tu acceso a "+BRAND.name+" terminó. Si es un error, escribile a CIMA.");return;}
+  document.getElementById("lerr").classList.remove("show");
   enterApp(creator);
 }
 
@@ -2622,7 +2656,7 @@ loadData();
   if(!saved) return;
   // Para creadoras dinámicas, la contraseña se carga de Firebase — igual entramos
   const isKnown = PASSWORDS[saved] !== undefined || saved.startsWith("creadora");
-  if(isKnown){
+  if(isKnown && !_CREADORAS_BAJA[saved]){
     document.addEventListener("DOMContentLoaded", function(){
       enterApp(saved);
     });
@@ -2658,6 +2692,10 @@ loadData();
     const BRAND_COL_NAME = window.BRAND_COLLECTION || 'cleargy';
     const DATA_DOC = doc(db, BRAND_COL_NAME, 'main');
     const VIDEOS_COL = collection(db, BRAND_COL_NAME + '_videos');
+    // Altas y bajas de la pestaña Creadoras del panel
+    const CREADORAS_DOC = doc(db, BRAND_COL_NAME, 'creadoras');
+    const _parseCfg = snap => { let c={}; if(snap && snap.exists()){ try{ c=JSON.parse(snap.data().data)||{}; }catch(e){} } return c; };
+    window._fbCreadorasLeer = async () => { await _ensureAuth(); return _parseCfg(await getDoc(CREADORAS_DOC)); };
 
     // Login anónimo: requerido por las reglas para leer/escribir. En conexiones
     // lentas (móvil) puede tardar — reintentamos hasta lograrlo en vez de abandonar.
@@ -2828,6 +2866,9 @@ loadData();
     attachSales();
     window._fbAttachSales = attachSales;
 
+    onSnapshot(CREADORAS_DOC, snap => { if(window._onCreadorasCfg) window._onCreadorasCfg(_parseCfg(snap)); },
+      err => console.error('creadoras onSnapshot:', err));
+
     window.dispatchEvent(new CustomEvent('firebase-ready'));
   </script>
 
@@ -2835,7 +2876,7 @@ loadData();
 <!-- Auto-actualización: GitHub Pages cachea el HTML y los celulares lo retienen mucho más.
      Esto compara la versión publicada con la que está corriendo y refresca sola. -->
 <script>
-const APP_VERSION = '2026-10-07-f';
+const APP_VERSION = '2026-10-07-g';
 (function(){
   var CLAVE='cima_ver_reload';
   function hayAlguienEscribiendo(){
