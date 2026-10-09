@@ -370,6 +370,9 @@ body.archivo .abtn,body.archivo .action-row button,body.archivo #apify-sync-btn,
           <select class="fsel" id="vf-product" onchange="renderVideos()" style="display:none;">
             <option value="ALL">📦 Todos los productos</option>
           </select>
+          <select class="fsel" id="vf-fanpage" onchange="renderVideos()" style="display:none;">
+            <option value="ALL">📣 Todas las fanpages</option>
+          </select>
           <select class="fsel" id="vf-views" onchange="renderVideos()">
             <option value="ALL">Views: todas</option>
             <option value="5000">🔥 +5.000 views</option>
@@ -389,6 +392,7 @@ body.archivo .abtn,body.archivo .action-row button,body.archivo #apify-sync-btn,
           <button class="col-toggle active" data-col="metrics" onclick="toggleCol('metrics',this)">Métricas</button>
           <button class="col-toggle active" data-col="nota" onclick="toggleCol('nota',this)">Nota</button>
           <button class="col-toggle" data-col="plat" onclick="toggleCol('plat',this)">Plataforma</button>
+          <button class="col-toggle active" id="col-btn-fan" data-col="fan" onclick="toggleCol('fan',this)" style="display:none;">Fanpage · dolor</button>
         </div>
         <div class="twrap"><div class="twrap-scroll"><table id="videos-table">
           <thead id="videos-thead"></thead>
@@ -1017,6 +1021,21 @@ const BRAND_CONFIGS = {
     // 2ª tanda desde el 3/10; cada creadora tiene su fecha de arranque en Config → Creadoras
     name:'Lagos', logoText:'LAGOS', collection:'lagos', archivoT1:true, defaultCampaignStart:'2026-10-03',
     dailyVideos:2, videoGoal:65, no100k:true, salary:450000, minVideos:65,
+    // Fanpage + dolor por video (pedido de la marca 9/10): lo usan para subir a Meta. Sale del PDF "Orquestación de dolores"
+    fanpages:[
+      {n:'Volver a Gustarme', d:'Inseguridad en la intimidad'},
+      {n:'Celulitis a los 20s', d:'Celulitis siendo joven'},
+      {n:'No Es Falta de Gym', d:'Entreno y la celulitis sigue'},
+      {n:'Conseguí Firmeza a los 50', d:'La piel cambia con los años'},
+      {n:'Lo Que Nadie Te Dice', d:'Esquivar el espejo y las fotos'},
+      {n:'Mamás con Celulitis', d:'El cuerpo después de los hijos'},
+      {n:'Hablemos de Celulitis', d:'Testimonios del día a día'},
+      {n:'¿Estás Todo el Día Parada?', d:'Piernas cansadas de estar de pie'},
+      {n:'Verano Sin Taparme', d:'Mostrarse en verano'},
+      {n:'Operación Verano', d:'Llegar al verano a tiempo'},
+      {n:'Tu Estética en Casa', d:'Estética en casa (oferta)'},
+      {n:'Tu Kit de Verano Te Espera', d:'Kit de 3 pomos (oferta)'},
+    ],
     logoImg:'data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="300" height="96"><rect width="300" height="96" rx="12" fill="%23F2F3F4"/><g fill="%23A7ACB1"><rect x="36" y="24" width="9" height="40"/><rect x="36" y="55" width="26" height="9"/><rect x="52" y="24" width="9" height="9"/><rect x="66" y="24" width="9" height="22"/></g><text x="185" y="56" font-family="Arial Black,Arial,sans-serif" font-size="38" font-weight="900" fill="%23A7ACB1" text-anchor="middle" letter-spacing="-1">LAGOS</text><rect x="100" y="68" width="170" height="6" fill="%23A7ACB1"/></svg>',
     adminPass:'lagos-admin-2025', adminPass2:'lagos-2025', adminPass4:'abril-2026',
     accent:'#5A626A', accentLight:'#7c858e', bg:'#f4f6f7', surface2:'#eaedef', border:'#d2d6da',
@@ -1125,6 +1144,12 @@ function _llenarSelectsCreadoras(){
     if(vfp && BRAND.products){
       vfp.innerHTML = '<option value="ALL">📦 Todos los productos</option>' + BRAND.products.map(p=>`<option>${p}</option>`).join('');
       vfp.style.display = '';
+    }
+    const vff = document.getElementById('vf-fanpage');
+    if(vff && BRAND.fanpages){
+      vff.innerHTML = '<option value="ALL">📣 Todas las fanpages</option><option value="NONE">Sin fanpage</option>' + BRAND.fanpages.map(f=>`<option value="${esc(f.n)}">${esc(f.n)}</option>`).join('');
+      vff.style.display = '';
+      const cb = document.getElementById('col-btn-fan'); if(cb) cb.style.display = '';
     }
     const evp = document.getElementById('edit-product');
     if(evp && BRAND.products){
@@ -1351,7 +1376,7 @@ function saveData(){
 }
 
 let overviewPeriod=1;
-let vidCols={cat:true,metrics:true,nota:true,plat:false};
+let vidCols={cat:true,metrics:true,nota:true,plat:false,fan:true};
 function toggleCol(col,el){
   vidCols[col]=!vidCols[col];
   el.classList.toggle("active",vidCols[col]);
@@ -1674,8 +1699,29 @@ function viewsAcum(v){
 function esc(s){return String(s==null?'':s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#39;');}
 function escUrl(l){l=(l||'').trim();if(!l)return '';if(!/^https?:\/\//i.test(l))l='https://'+l;return esc(l);}
 
+// Fanpage + dolor (solo marcas con BRAND.fanpages, hoy Lagos): la marca y el equipo la eligen por video
+function fanpageCell(v){
+  const fp=(BRAND.fanpages||[]).find(f=>f.n===v.fanpage);
+  const opts='<option value="">— Elegir —</option>'+BRAND.fanpages.map(f=>`<option value="${esc(f.n)}" ${f.n===v.fanpage?'selected':''}>${esc(f.n)}</option>`).join('')
+    +(v.fanpage&&!fp?`<option selected>${esc(v.fanpage)}</option>`:'');
+  return `<td style="min-width:160px;vertical-align:top;padding-top:8px;">
+    <select onchange="setFanpage('${v.id}',this.value)" style="font-family:'Poppins';font-size:11px;padding:3px 6px;border-radius:var(--radius-xs);border:1px solid ${v.fanpage?'rgba(var(--acc-rgb),.35)':'var(--border2)'};background:${v.fanpage?'rgba(var(--acc-rgb),.06)':'none'};color:var(--text);max-width:170px;">${opts}</select>
+    ${fp?`<div style="font-size:10px;font-family:'Poppins';color:var(--muted);margin-top:3px;max-width:170px;line-height:1.3;">${esc(fp.d)}</div>`:''}
+  </td>`;
+}
+function setFanpage(id, fanpage){
+  const v=data.videos.find(x=>x.id==id);
+  if(!v) return;
+  v.fanpage=fanpage;
+  v.fanpageBy=window.adminUser||'';
+  // Merge: escribe SOLO la fanpage y quién la puso
+  if(window._fbPatchVideo) window._fbPatchVideo(id, {fanpage, fanpageBy:v.fanpageBy});
+  else if(window._fbUpdateVideo) window._fbUpdateVideo(v);
+  renderVideos();
+  showToast(fanpage?"✓ Fanpage guardada":"Fanpage borrada");
+}
 function videoRow(v, compact=false){
-  const cols=compact?{cat:false,metrics:true,nota:false,plat:false}:vidCols;
+  const cols=compact?{cat:false,metrics:true,nota:false,plat:false,fan:false}:vidCols;
   const _igv=Number(v.igViews)||0, _ttv=Number(v.ttViews)||0;
   const metricsStr = (_igv||_ttv)
     ? [_igv?("📸 "+fmtV(_igv)):"", _ttv?("🎵 "+fmtV(_ttv)):""].filter(Boolean).join(" + ") + ((_igv&&_ttv)?(" = "+fmtV(_igv+_ttv)):"")
@@ -1728,6 +1774,7 @@ function videoRow(v, compact=false){
     ${cols.metrics?`<td style="font-family:'Poppins';font-size:10px;color:var(--muted);white-space:nowrap;">${metricsStr}</td>`:""}
     <td><span class="badge badge-${v.status}">${v.status==="approved"?"✓ Ok":v.status==="rejected"?"✗":"⏳"}</span>
       ${v.statusBy&&v.status!=="pending"?`<div style="font-size:9px;font-family:'Poppins';color:var(--muted);margin-top:3px;white-space:nowrap;" title="${esc(nombreAdmin(v.statusBy))}${v.statusAt?' · '+new Date(v.statusAt).toLocaleString('es-AR',{day:'2-digit',month:'2-digit',hour:'2-digit',minute:'2-digit'}):''}">${esc(nombreAdmin(v.statusBy))}${v.statusAt?' · '+new Date(v.statusAt).toLocaleDateString('es-AR',{day:'2-digit',month:'2-digit'}):''}</div>`:""}</td>
+    ${cols.fan&&BRAND.fanpages?fanpageCell(v):""}
     ${cols.nota?`<td style="min-width:150px;vertical-align:top;padding-top:8px;">
       ${v.notes?`<div style="font-size:10px;font-family:'Poppins';color:var(--muted);background:var(--surface2);border-left:2px solid var(--border2);padding:3px 7px;border-radius:0 6px 6px 0;margin-bottom:5px;max-width:145px;word-break:break-word;line-height:1.4;">🏷 ${esc(v.notes)}</div>`:""}
       ${(window.adminRole==='brand'||v.brandNote)?`<input type="text" value="${esc(v.brandNote||'')}" placeholder="Nota marca..." onchange="setAdminNote('${v.id}',this.value)" ${window.adminRole!=='brand'?'readonly':''} style="background:rgba(217,119,6,.07);border:1px solid rgba(217,119,6,.3);padding:3px 7px;border-radius:var(--radius-xs);font-size:11px;font-family:'Poppins';width:140px;color:var(--text);outline:none;margin-bottom:4px;display:block;" title="Nota del dueño de marca">`:""}
@@ -1823,6 +1870,9 @@ function renderVideos(){
   if(cf!=="ALL") vids=vids.filter(v=>v.creator===cf);
   const pf=document.getElementById("vf-product")?.value||"ALL";
   if(pf!=="ALL") vids=vids.filter(v=>v.producto===pf);
+  const ff=BRAND.fanpages?(document.getElementById("vf-fanpage")?.value||"ALL"):"ALL";
+  if(ff==="NONE") vids=vids.filter(v=>!v.fanpage);
+  else if(ff!=="ALL") vids=vids.filter(v=>v.fanpage===ff);
   const wf=document.getElementById("vf-views")?.value||"ALL";
   if(wf!=="ALL") vids=vids.filter(v=>viewsAcum(v)>=Number(wf));
   if(sf==="featured") vids=vids.filter(v=>v.featured||v.featuredAt);
@@ -1842,11 +1892,12 @@ function renderVideos(){
     <th>Links</th>
     ${cols.metrics?`<th>Métricas</th>`:""}
     <th>Estado</th>
+    ${cols.fan&&BRAND.fanpages?`<th>Fanpage · dolor</th>`:""}
     ${cols.nota?`<th>Nota</th>`:""}
     <th>Acciones</th>
   </tr>`;
 
-  document.getElementById("videos-tbody").innerHTML=vids.length?vids.map(v=>videoRow(v)).join(""):`<tr><td colspan="10" style="text-align:center;color:var(--muted);padding:32px;">Sin videos</td></tr>`;
+  document.getElementById("videos-tbody").innerHTML=vids.length?vids.map(v=>videoRow(v)).join(""):`<tr><td colspan="11" style="text-align:center;color:var(--muted);padding:32px;">Sin videos</td></tr>`;
   actualizarSeleccion();
   renderStatusPanel();
 }
@@ -3668,7 +3719,7 @@ loadConfig();
 <!-- Auto-actualización: GitHub Pages cachea el HTML y los celulares lo retienen mucho más.
      Esto compara la versión publicada con la que está corriendo y refresca sola. -->
 <script>
-const APP_VERSION = '2026-10-09-e';
+const APP_VERSION = '2026-10-09-f';
 (function(){
   var CLAVE='cima_ver_reload';
   function hayAlguienEscribiendo(){
