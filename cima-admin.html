@@ -1702,6 +1702,15 @@ function videoRow(v, compact=false){
     ? `<a href="${escUrl(v.linkFb)}" target="_blank" style="padding:2px 8px;border-radius:20px;font-size:9px;font-family:'Poppins';cursor:pointer;border:1px solid var(--border2);color:var(--muted);background:none;text-decoration:none;">👥 FB</a>`
     : "";
   const copyBtn = (sinDrive||crudoTag||igBtn||ttBtn||fbBtn) ? [sinDrive,crudoTag,igBtn,ttBtn,fbBtn].filter(Boolean).join(" ") : `<button onclick="copyLink('${v.id}',event)" style="padding:2px 8px;border-radius:20px;font-size:9px;font-family:'Poppins';cursor:pointer;border:1px solid var(--border2);color:var(--muted);background:none;">📋 Copiar</button>`;
+  // Video ya editado: lo deja la edición automática en v.editado = {link, fecha, archivo}
+  const _edi = v => {
+    const e = v && v.editado;
+    if(!e || !e.link) return "";
+    const f = e.fecha ? new Date(e.fecha).toLocaleDateString("es-AR",{day:"2-digit",month:"2-digit"}) : "";
+    const t = "Descargar editado" + (f?" · "+f:"") + (e.archivo?" · "+e.archivo:"");
+    return `<a href="${escUrl(e.link)}" target="_blank" rel="noopener" class="abtn" title="${esc(t)}"
+      style="border-color:rgba(124,58,237,.35);color:#7c3aed;background:rgba(124,58,237,.07);text-decoration:none;white-space:nowrap;">⬇ Editado</a>`;
+  };
   const guionTag = v.guion
     ? (v.guion==="OTRO"
       ? `<span style="font-family:'Poppins';font-size:9px;font-weight:700;padding:1px 7px;border-radius:20px;background:rgba(176,123,46,.1);border:1px solid rgba(176,123,46,.3);color:#b45309;" title="La creadora dijo que no es ninguno de sus guiones">sin guion</span>`
@@ -1729,6 +1738,7 @@ function videoRow(v, compact=false){
       <button class="abtn abtn-reject" onclick="setStatus('${v.id}','rejected')">✗</button>
       <button class="abtn" style="border-color:rgba(74,143,255,.3);color:var(--accent3);background:rgba(74,143,255,.05);" onclick="openEditVideo('${v.id}')">✏</button>
       ${v.driveLink?`<a href="${escUrl(v.driveLink)}" target="_blank" class="abtn" style="border-color:rgba(13,148,136,.3);color:#3F8F6B;background:rgba(13,148,136,.05);text-decoration:none;" title="Abrir en Drive">⬇</a>`:""}
+      ${_edi(v)}
       <button class="abtn" style="border-color:rgba(193,97,60,.3);color:var(--accent2);background:rgba(193,97,60,.05);" onclick="adminDeleteVideo('${v.id}')">🗑</button>
     </div></td>
   </tr>`;
@@ -3658,7 +3668,7 @@ loadConfig();
 <!-- Auto-actualización: GitHub Pages cachea el HTML y los celulares lo retienen mucho más.
      Esto compara la versión publicada con la que está corriendo y refresca sola. -->
 <script>
-const APP_VERSION = '2026-10-08-c';
+const APP_VERSION = '2026-10-08-d';
 (function(){
   var CLAVE='cima_ver_reload';
   function hayAlguienEscribiendo(){
