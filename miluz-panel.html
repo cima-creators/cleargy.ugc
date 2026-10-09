@@ -1379,6 +1379,12 @@ function tarjetaDrive(e){
   const queMirar = `abrí la carpeta, fijate que el video ${nG ? `abra con uno de los ganchos, ` : ''}dure ${(CFG && CFG.duracionMin) || 30} segundos o más, muestre la cara con el producto${CFG && CFG.tienda ? ' y nombre el código' : ''}.`;
   const ella = CREADORA_PUBLICA();
   const aprobado = ella && !!e.aprobadoVideoEn;
+  // dos videos: cada uno con su kit, su Drive y su botón de aprobar
+  const dos = ella && e.videos === 'dos';
+  const filaVideo = (n, kit, drive, aprob) => `<div class="aviso med" style="background:var(--arena);color:var(--tinta2)"><b>Video ${n}${kit ? ' · ' + nombreKit(kit) : ''}</b> ·
+      ${drive ? `<a class="verreel" href="${drive}" target="_blank" rel="noopener">📁 Abrir Drive</a> · ${aprob ? '✓ aprobado, esperando que lo publique' : `<button class="b ok" style="padding:4px 10px" onclick="aprobarVideo(${ix},${n})">Aprobar video ${n}</button>`}` : 'todavía no lo cargó'}</div>`;
+  const e2 = (e.entregas || [])[1];
+  const videos = dos ? filaVideo(1, e.kit, e.drive, aprobado) + filaVideo(2, e.kit2, e2 && e2.drive, e2 && e2.aprobadoEn) : '';
   return `
     <div class="entrega">
       <div class="prev">
@@ -1398,12 +1404,13 @@ function tarjetaDrive(e){
               ? `<div class="aviso med"><b>Ya le avisamos que lo publique.</b> Cuando cargue los links de Instagram y TikTok, pasa a "publicadas" para aprobar la collab.</div>`
               : `<div class="aviso med"><b>Qué hacer:</b> ${queMirar} Si está bien, tocá ${'<b>Aprobar video</b>'}: le llega el aviso para publicarlo en su Instagram y su TikTok etiquetando a @${CFG.cuentaIg}.</div>`)
             : `<div class="aviso med"><b>Qué hacer:</b> ${queMirar} Si está bien, subilo desde @${CFG.cuentaIg} como collab (Etiquetar personas → Invitar colaborador → @${e.ig}) y pegá acá el link del reel.</div>`)}
+        ${videos}
         <div class="acc">
           ${waEntrega(e)}
           <button class="b duda" onclick="pedirCambios(${ix})">Pedir cambios</button>
           <button class="b no" onclick="resolverEntrega(${ix},0)">Rechazar</button>
           ${ella
-            ? (aprobado ? '' : `<button class="b ok" onclick="aprobarVideo(${ix},1)">Aprobar video → que lo publique</button>`)
+            ? (aprobado || dos ? '' : `<button class="b ok" onclick="aprobarVideo(${ix},1)">Aprobar video → que lo publique</button>`)
             : `<button class="b ok" onclick="marcarPublicado(${ix})">Ya lo publiqué → pegar link</button>`}
         </div>
       </div>
@@ -2207,7 +2214,7 @@ function aplicarRol(){
     pintarTodo();
   }
 })();
-const APP_VERSION = '2026-10-09-a';
+const APP_VERSION = '2026-10-09-b';
 </script>
 </body>
 </html>
