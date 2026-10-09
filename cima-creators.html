@@ -2446,7 +2446,7 @@ function renderBonos(){
     document.getElementById("bonos-list").innerHTML = ya
       ? `<div class="gui-card" style="cursor:default;">
            <div class="gui-top"><span class="gui-lbl">Bonos que ganaste</span></div>
-           <div class="gui-tt" style="font-size:26px;">${fmtP(ya)}</div>
+           <div class="gui-tt" style="font-size:26px;">${fmtPesos(ya)}</div>
            <div class="gui-hk" style="-webkit-line-clamp:4;">Ya están contados en lo que te queda por cobrar. Esta campaña no suma bonos nuevos: el pago es por video.</div>
          </div>`
       : `<div class="empty"><div class="empty-icon">💸</div><div class="empty-text">En esta campaña el pago es por video, sin bonos</div></div>`;
@@ -2929,7 +2929,7 @@ loadData();
 <!-- Auto-actualización: GitHub Pages cachea el HTML y los celulares lo retienen mucho más.
      Esto compara la versión publicada con la que está corriendo y refresca sola. -->
 <script>
-const APP_VERSION = '2026-10-09-c';
+const APP_VERSION = '2026-10-09-d';
 (function(){
   var CLAVE='cima_ver_reload';
   function hayAlguienEscribiendo(){
