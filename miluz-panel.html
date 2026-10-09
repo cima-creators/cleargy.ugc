@@ -820,7 +820,7 @@ async function cargar(){
 
   ENTREGAS = !ent ? [] : ent.fichas.map(f => ({
     id: f.id, nom: f.nombre || (f.datos && f.datos.nombre) || f.ig, ig: f.ig,
-    estado: f.estado, drive: (f.entrega && f.entrega.drive) || '', motivo: f.cambiosMotivo || '',
+    estado: f.estado, drive: (f.entrega && f.entrega.drive) || ((f.entregas || []).find(x => x && x.drive) || {}).drive || '', motivo: f.cambiosMotivo || '',
     entregadoEn: f.entregadoEn || (f.entrega && f.entrega.en) || 0, codigo: f.codigo || '',
     url: (f.reel && f.reel.url) || '#',
     views: ((f.reel && f.reel.views) || 0) + ((f.tiktok && f.tiktok.views) || 0),
@@ -1382,7 +1382,7 @@ function tarjetaDrive(e){
   return `
     <div class="entrega">
       <div class="prev">
-        <a href="${e.drive || '#'}" target="_blank" rel="noopener">📁<span>Abrir Drive</span></a>
+        ${e.drive ? `<a href="${e.drive}" target="_blank" rel="noopener">📁<span>Abrir Drive</span></a>` : `<span style="opacity:.6">📁<span>Sin Drive</span></span>`}
       </div>
       <div class="cuerpo">
         <h3>${e.nom} <span class="hand">@${e.ig}</span></h3>
@@ -2207,7 +2207,7 @@ function aplicarRol(){
     pintarTodo();
   }
 })();
-const APP_VERSION = '2026-10-07-a';
+const APP_VERSION = '2026-10-09-a';
 </script>
 </body>
 </html>
