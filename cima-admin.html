@@ -3668,7 +3668,7 @@ loadConfig();
 <!-- Auto-actualización: GitHub Pages cachea el HTML y los celulares lo retienen mucho más.
      Esto compara la versión publicada con la que está corriendo y refresca sola. -->
 <script>
-const APP_VERSION = '2026-10-09-d';
+const APP_VERSION = '2026-10-09-e';
 (function(){
   var CLAVE='cima_ver_reload';
   function hayAlguienEscribiendo(){
@@ -3707,13 +3707,22 @@ const APP_VERSION = '2026-10-09-d';
 })();
 
 // ═══ Selección múltiple de videos (abrir / copiar / descargar en lote) ═══
+// La selección es SOLO la de la tabla de Videos. El mismo video aparece también en
+// "Últimos videos" del Inicio, que renderiza con el mismo videoRow y por lo tanto con su
+// checkbox: contando sobre todo el documento, los de hoy se contaban dos veces (12 videos
+// reales y la barra decía 15).
+function _tablaSel(){ return document.getElementById('videos-table') || document; }
+
 function selTodos(on){
-  document.querySelectorAll('.vsel').forEach(c=>{ c.checked=on; });
+  _tablaSel().querySelectorAll('.vsel').forEach(c=>{ c.checked=on; });
   const all=document.getElementById('vsel-all'); if(all) all.checked=on;
   actualizarSeleccion();
 }
 function seleccionados(){
-  return [...document.querySelectorAll('.vsel:checked')].map(c=>({id:c.dataset.id, drive:c.dataset.drive}));
+  const vistos=new Set();
+  return [..._tablaSel().querySelectorAll('.vsel:checked')]
+    .filter(c=>{ if(vistos.has(c.dataset.id)) return false; vistos.add(c.dataset.id); return true; })
+    .map(c=>({id:c.dataset.id, drive:c.dataset.drive}));
 }
 function actualizarSeleccion(){
   const sel=seleccionados(), barra=document.getElementById('bulk-bar');
@@ -3724,7 +3733,7 @@ function actualizarSeleccion(){
     (sel.length && conDrive<sel.length ? ' · ' + conDrive + ' con Drive' : '');
   barra.classList.toggle('abierta', sel.length>0);
   const all=document.getElementById('vsel-all');
-  const total=document.querySelectorAll('.vsel').length;
+  const total=_tablaSel().querySelectorAll('.vsel').length;
   if(all) all.checked = total>0 && sel.length===total;
 }
 // Drive: de un link "ver" sacamos el id del archivo para armar la descarga directa
