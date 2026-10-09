@@ -2045,7 +2045,7 @@ function renderBonos(){
     ${CREATORS.map(c=>`<button onclick="resetCreadoraBonos('${c}')" style="padding:5px 12px;border-radius:20px;font-size:10px;font-family:'Poppins';font-weight:700;cursor:pointer;background:rgba(193,97,60,.06);border:1px solid rgba(193,97,60,.2);color:var(--accent2);">↺ ${NAMES[c].split(' ')[0]}</button>`).join('')}
   </div>`;
 
-  const bonoCards=bonoTypes.filter(b=>!((!RACHA_ACTIVA||BRAND.noRacha)&&b.key==="racha")).filter(b=>!(BRAND.no100k&&b.key==="100k")).map(b=>`
+  const bonoCards=(BRAND.sinBonos?[]:bonoTypes).filter(b=>!((!RACHA_ACTIVA||BRAND.noRacha)&&b.key==="racha")).filter(b=>!(BRAND.no100k&&b.key==="100k")).map(b=>`
     <div style="background:white;border-radius:var(--radius);padding:20px;margin-bottom:12px;box-shadow:var(--shadow);">
       <div style="display:flex;align-items:flex-start;justify-content:space-between;gap:12px;margin-bottom:14px;">
         <div>
@@ -3668,7 +3668,7 @@ loadConfig();
 <!-- Auto-actualización: GitHub Pages cachea el HTML y los celulares lo retienen mucho más.
      Esto compara la versión publicada con la que está corriendo y refresca sola. -->
 <script>
-const APP_VERSION = '2026-10-09-b';
+const APP_VERSION = '2026-10-09-c';
 (function(){
   var CLAVE='cima_ver_reload';
   function hayAlguienEscribiendo(){
