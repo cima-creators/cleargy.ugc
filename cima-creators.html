@@ -622,7 +622,7 @@ html.sin-redes .solo-redes{display:none !important;}
         </select>
       </div>
       <div id="up-guion-vacio" style="display:none;background:rgba(193,97,60,.09);border:1px solid rgba(193,97,60,.3);border-radius:var(--radius-sm);padding:13px 15px;margin-bottom:14px;font-size:12px;color:var(--text);line-height:1.6;">
-        📄 <b>Te quedaste sin guiones.</b> Ya grabaste todos los que te cargaron, así que no podés subir más hasta que te pasen los nuevos. Avisale a CIMA.
+        📄 <b>No quedan guiones sin grabar.</b> Se grabaron todos los de la marca, así que no podés subir más hasta que te pasen los nuevos. Avisale a CIMA.
       </div>
       <div class="fgroup" id="up-guion-group" style="display:none;">
         <div class="flabel">📄 ¿Qué guion grabaste? <span style="color:var(--accent2)">*</span></div>
@@ -630,6 +630,10 @@ html.sin-redes .solo-redes{display:none !important;}
           <option value="">Seleccioná...</option>
         </select>
         <div style="font-size:10px;font-family:'Poppins';color:var(--muted);margin-top:4px;">Así la marca sabe cuáles ya están grabados y cuáles faltan.</div>
+        <div id="up-guion-manual" style="display:none;margin-top:9px;">
+          <input class="finput" type="text" id="up-guion-cod" placeholder="Número del guion (ej: 69)" autocomplete="off">
+          <div style="font-size:10px;font-family:'Poppins';color:var(--muted);margin-top:4px;">Poné el número tal cual figura en el doc.</div>
+        </div>
       </div>
       <div class="fgroup">
         <div class="flabel">Categoría</div>
@@ -1536,6 +1540,18 @@ function misGuionesPendientes(){
   return misGuiones().filter(g => !hechos.has(_gCode(g.code)));
 }
 
+// Los de las compañeras que todavía nadie grabó. Pasa seguido que una graba un guion que
+// en la lista figura de otra: si no puede elegirlo, no puede subir el video y hay que
+// destrabarla a mano. Que lo elija ella. Como "grabado" se deduce de que EXISTA un video
+// con ese código, en cuanto lo sube desaparece de la lista de la otra sin tocar nada.
+function otrosGuionesPendientes(){
+  const hechos = guionesGrabados();
+  const mios = new Set(misGuiones().map(g => _gCode(g.code)));
+  return (sharedData.guiones||[])
+    .filter(g => !mios.has(_gCode(g.code)) && !hechos.has(_gCode(g.code)))
+    .sort((a,b)=>String(a.code).localeCompare(String(b.code),"es",{numeric:true}));
+}
+
 function renderHomeGuiones(){
   const card = document.getElementById("home-guiones");
   if(!card) return;
@@ -1608,12 +1624,21 @@ function llenarGuionesUpload(){
     return;
   }
   const pend = misGuionesPendientes();
+  const otros = otrosGuionesPendientes();
   grp.style.display = "block";
+  const opt = g => `<option value="${esc(_gCode(g.code))}">${esc(g.code)}${g.titulo?" · "+esc(g.titulo):""}</option>`;
   sel.innerHTML = `<option value="">Seleccioná...</option>`
-    + pend.map(g=>`<option value="${esc(_gCode(g.code))}">${esc(g.code)}${g.titulo?" · "+esc(g.titulo):""}</option>`).join("");
-  // Si se quedó sin guiones no puede subir: es a propósito, la marca le tiene que cargar más
+    + (pend.length ? `<optgroup label="Los tuyos">${pend.map(opt).join("")}</optgroup>` : "")
+    + (otros.length ? `<optgroup label="Otros de la marca — si grabaste uno que no era tuyo">${otros.map(opt).join("")}</optgroup>` : "")
+    + `<option value="__manual__">No está en la lista — lo escribo yo</option>`;
+  sel.onchange = () => {
+    const m = document.getElementById("up-guion-manual");
+    if(m) m.style.display = sel.value === "__manual__" ? "block" : "none";
+  };
+  sel.onchange();
+  // Solo queda trabada si no hay NINGUNO libre en toda la marca
   const aviso = document.getElementById("up-guion-vacio");
-  if(aviso) aviso.style.display = pend.length ? "none" : "block";
+  if(aviso) aviso.style.display = (pend.length || otros.length) ? "none" : "block";
 }
 
 // ═══════════════════════════════════
@@ -2062,11 +2087,19 @@ function submitVideo(){
   const _gGrp = document.getElementById("up-guion-group");
   const _pideGuion = _gGrp && _gGrp.style.display !== "none";
   let _guionVal = _pideGuion ? document.getElementById("up-guion").value : "";
+  if(_guionVal === "__manual__"){
+    _guionVal = (document.getElementById("up-guion-cod").value||"").trim().toUpperCase();
+    if(!_guionVal){
+      document.getElementById("up-err").style.display="block";
+      document.getElementById("up-err").textContent="Escribí el número del guion que grabaste.";
+      return;
+    }
+  }
   if(_pideGuion && !_guionVal){
     document.getElementById("up-err").style.display="block";
-    document.getElementById("up-err").textContent = misGuionesPendientes().length
+    document.getElementById("up-err").textContent = (misGuionesPendientes().length || otrosGuionesPendientes().length)
       ? "Elegí qué guion grabaste."
-      : "Te quedaste sin guiones: no podés subir más hasta que CIMA te cargue los nuevos.";
+      : "No quedan guiones sin grabar: avisale a CIMA para que te cargue los nuevos.";
     return;
   }
 
@@ -2124,6 +2157,7 @@ function submitVideo(){
     ["up-link-ig","up-link-tt","up-link-fb","up-notes","up-drive"].forEach(id=>document.getElementById(id).value="");
     document.getElementById("up-cat").value="";
     const _ps=document.getElementById("up-product"); if(_ps) _ps.value="";
+    const _gc=document.getElementById("up-guion-cod"); if(_gc) _gc.value="";
     llenarGuionesUpload();   // el guion recién grabado ya no tiene que estar en la lista
   };
 
@@ -2876,7 +2910,7 @@ loadData();
 <!-- Auto-actualización: GitHub Pages cachea el HTML y los celulares lo retienen mucho más.
      Esto compara la versión publicada con la que está corriendo y refresca sola. -->
 <script>
-const APP_VERSION = '2026-10-08-d';
+const APP_VERSION = '2026-10-09-a';
 (function(){
   var CLAVE='cima_ver_reload';
   function hayAlguienEscribiendo(){
