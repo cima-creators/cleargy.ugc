@@ -392,7 +392,7 @@ body.archivo .abtn,body.archivo .action-row button,body.archivo #apify-sync-btn,
           <button class="col-toggle active" data-col="metrics" onclick="toggleCol('metrics',this)">Métricas</button>
           <button class="col-toggle active" data-col="nota" onclick="toggleCol('nota',this)">Nota</button>
           <button class="col-toggle" data-col="plat" onclick="toggleCol('plat',this)">Plataforma</button>
-          <button class="col-toggle active" id="col-btn-fan" data-col="fan" onclick="toggleCol('fan',this)" style="display:none;">Fanpage · dolor</button>
+          <button class="col-toggle active" id="col-btn-fan" data-col="fan" onclick="toggleCol('fan',this)" style="display:none;">Dolor y fanpage</button>
         </div>
         <div class="twrap"><div class="twrap-scroll"><table id="videos-table">
           <thead id="videos-thead"></thead>
@@ -1709,13 +1709,14 @@ function fanpageDe(v){
 }
 function fanpageCell(v){
   const auto=!v.fanpage&&!!fanpageDe(v);
-  v={...v, fanpage:fanpageDe(v)};
-  const fp=(BRAND.fanpages||[]).find(f=>f.n===v.fanpage);
-  const opts='<option value="">— Elegir —</option>'+BRAND.fanpages.map(f=>`<option value="${esc(f.n)}" ${f.n===v.fanpage?'selected':''}>${esc(f.n)}</option>`).join('')
-    +(v.fanpage&&!fp?`<option selected>${esc(v.fanpage)}</option>`:'');
-  return `<td style="min-width:160px;vertical-align:top;padding-top:8px;">
-    <select onchange="setFanpage('${v.id}',this.value)" style="font-family:'Poppins';font-size:11px;padding:3px 6px;border-radius:var(--radius-xs);border:1px solid ${v.fanpage?'rgba(var(--acc-rgb),.35)':'var(--border2)'};background:${v.fanpage?'rgba(var(--acc-rgb),.06)':'none'};color:var(--text);max-width:170px;">${opts}</select>
-    ${fp?`<div style="font-size:10px;font-family:'Poppins';color:var(--muted);margin-top:3px;max-width:170px;line-height:1.3;">${esc(fp.d)}${auto?` <span title="Sale del guion ${esc(v.guion)}">· por guion</span>`:''}</div>`:''}
+  const fpN=fanpageDe(v);
+  const fp=(BRAND.fanpages||[]).find(f=>f.n===fpN);
+  const opts='<option value="">— Elegir —</option>'+BRAND.fanpages.map(f=>`<option value="${esc(f.n)}" ${f.n===fpN?'selected':''}>${esc(f.n)}</option>`).join('')
+    +(fpN&&!fp?`<option selected>${esc(fpN)}</option>`:'');
+  return `<td style="min-width:130px;max-width:170px;vertical-align:top;padding-top:8px;font-size:11px;font-family:'Poppins';line-height:1.35;">${fp?esc(fp.d):'<span style="color:var(--muted);">—</span>'}</td>
+  <td style="min-width:160px;vertical-align:top;padding-top:8px;">
+    <select onchange="setFanpage('${v.id}',this.value)" style="font-family:'Poppins';font-size:11px;padding:3px 6px;border-radius:var(--radius-xs);border:1px solid ${fpN?'rgba(var(--acc-rgb),.35)':'var(--border2)'};background:${fpN?'rgba(var(--acc-rgb),.06)':'none'};color:var(--text);max-width:170px;">${opts}</select>
+    ${auto?`<div style="font-size:9px;font-family:'Poppins';color:var(--muted);margin-top:3px;" title="Sale del guion ${esc(v.guion)}">por guion ${esc(v.guion)}</div>`:''}
   </td>`;
 }
 function setFanpage(id, fanpage){
@@ -1901,12 +1902,12 @@ function renderVideos(){
     <th>Links</th>
     ${cols.metrics?`<th>Métricas</th>`:""}
     <th>Estado</th>
-    ${cols.fan&&BRAND.fanpages?`<th>Fanpage · dolor</th>`:""}
+    ${cols.fan&&BRAND.fanpages?`<th>Dolor</th><th>Correr en fanpage</th>`:""}
     ${cols.nota?`<th>Nota</th>`:""}
     <th>Acciones</th>
   </tr>`;
 
-  document.getElementById("videos-tbody").innerHTML=vids.length?vids.map(v=>videoRow(v)).join(""):`<tr><td colspan="11" style="text-align:center;color:var(--muted);padding:32px;">Sin videos</td></tr>`;
+  document.getElementById("videos-tbody").innerHTML=vids.length?vids.map(v=>videoRow(v)).join(""):`<tr><td colspan="12" style="text-align:center;color:var(--muted);padding:32px;">Sin videos</td></tr>`;
   actualizarSeleccion();
   renderStatusPanel();
 }
@@ -3728,7 +3729,7 @@ loadConfig();
 <!-- Auto-actualización: GitHub Pages cachea el HTML y los celulares lo retienen mucho más.
      Esto compara la versión publicada con la que está corriendo y refresca sola. -->
 <script>
-const APP_VERSION = '2026-10-09-g';
+const APP_VERSION = '2026-10-11-b';
 (function(){
   var CLAVE='cima_ver_reload';
   function hayAlguienEscribiendo(){
