@@ -931,7 +931,7 @@ const BRAND_CONFIGS = {
   drenova: {
     goal:150,
     name:'Drenová', logoText:'DRENOVÁ', collection:'drenova', defaultCampaignStart:'2026-10-12',
-    dailyVideos:2, videoGoal:50, no100k:true, noRacha:true, salary:346150, minVideos:50,
+    dailyVideos:2, videoGoal:50, no100k:true, noRacha:true, salary:350000, minVideos:50,
     adminPass:'drenova-admin-2026', adminPass2:'drenova-2026', adminPass4:'abril-2026',
     accent:'#2F4A3A', accentLight:'#5B7B5A', bg:'#f5f8f3', surface2:'#e8f0e4', border:'#d8e4d2',
     text:'#19261e', muted:'#6b7d6d', shadow:'47,74,58', loginBg:'linear-gradient(135deg,#f5f8f3 0%,#e8f0e4 50%,#d8e4d2 100%)',
@@ -978,7 +978,7 @@ const BRAND_CONFIGS = {
     text:'#111111', muted:'#6b6b6b', shadow:'17,17,17', loginBg:'linear-gradient(135deg,#f4f4f4 0%,#e9e9e9 50%,#d9d9d9 100%)',
     creators:{
       creadora1:{name:'Fernando',avatar:'FE',color:'#111111',phone:'',salary:450000},
-      creadora2:{name:'Fabi',avatar:'FA',color:'#3a3a3a',phone:'',salary:450000},
+      creadora2:{name:'Fabi',avatar:'FA',color:'#3a3a3a',phone:'',salary:525000},   // 12/10: +75.000 por los b-roll, repartido por video
       creadora3:{name:'Sebastián',avatar:'SE',color:'#5c5c5c',phone:'',salary:450000},
       creadora4:{name:'Víctor',avatar:'VI',color:'#7e7e7e',phone:'',salary:450000},
     }
@@ -1062,8 +1062,8 @@ const BRAND_CONFIGS = {
       creadora2:{name:'Dani',avatar:'DA',color:'#3f464d',phone:'',inactive:true},
       creadora3:{name:'Georgina',avatar:'GE',color:'#7c858e',phone:''},
       creadora4:{name:'Lucía',avatar:'LU',color:'#9aa2a9',phone:''},
-      creadora5:{name:'Flor',avatar:'FL',color:'#b4bcc2',phone:''},
-      creadora6:{name:'Fabi',avatar:'FA',color:'#8d959c',phone:''},
+      creadora5:{name:'Flor',avatar:'FL',color:'#b4bcc2',phone:'',salary:500000},   // 12/10: +50.000, repartido por video
+      creadora6:{name:'Fabi',avatar:'FA',color:'#8d959c',phone:'',salary:525000},   // 12/10: +75.000 por los b-roll, repartido por video
     }
   },
   mentralabs: {
@@ -3768,7 +3768,7 @@ loadConfig();
 <!-- Auto-actualización: GitHub Pages cachea el HTML y los celulares lo retienen mucho más.
      Esto compara la versión publicada con la que está corriendo y refresca sola. -->
 <script>
-const APP_VERSION = '2026-10-12-d';
+const APP_VERSION = '2026-10-12-e';
 (function(){
   var CLAVE='cima_ver_reload';
   function hayAlguienEscribiendo(){
