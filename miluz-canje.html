@@ -1724,7 +1724,7 @@ function pintarEstado(){
   $('#hero-sub').textContent = cab[2];
   $('#hero-badge').textContent = cab[3];
 
-  $('#bloque-llego').classList.toggle('oculto', e !== 'enviado');
+  $('#bloque-llego').classList.toggle('oculto', !(e === 'enviado' || (e === 'briefing_ok' && !CFG.sinKit)));   // 12/10: si la marca despachó sin marcarlo, igual puede avisar que le llegó
   // 5/10: nº de seguimiento que la marca carga en su planilla
   const sg = D.seguimiento;
   $('#seg-envio').classList.toggle('oculto', !(sg && sg.codigo));
@@ -1883,7 +1883,7 @@ function pintarMarca(){
   } catch { if (DEMO){ precargar(); traerBorrador(); } ver(DEMO ? 'v-ficha' : 'v-error'); }
 })();
 
-const APP_VERSION = '2026-10-06-c';
+const APP_VERSION = '2026-10-12-a';
 </script>
 </body>
 </html>
