@@ -928,6 +928,19 @@ const BRAND_CONFIGS = {
       creadora4:{name:'Fabi',avatar:'FA',color:'#66CCD6',phone:'',salary:600000},
     }
   },
+  drenova: {
+    goal:150,
+    name:'Drenová', logoText:'DRENOVÁ', collection:'drenova', defaultCampaignStart:'2026-10-12',
+    dailyVideos:2, videoGoal:50, no100k:true, noRacha:true, salary:346150, minVideos:50,
+    adminPass:'drenova-admin-2026', adminPass2:'drenova-2026', adminPass4:'abril-2026',
+    accent:'#2F4A3A', accentLight:'#5B7B5A', bg:'#f5f8f3', surface2:'#e8f0e4', border:'#d8e4d2',
+    text:'#19261e', muted:'#6b7d6d', shadow:'47,74,58', loginBg:'linear-gradient(135deg,#f5f8f3 0%,#e8f0e4 50%,#d8e4d2 100%)',
+    creators:{
+      creadora1:{name:'Ale',avatar:'AL',color:'#2F4A3A',phone:''},
+      creadora2:{name:'Jime',avatar:'JI',color:'#3B5A45',phone:''},
+      creadora3:{name:'Lore',avatar:'LO',color:'#5B7B5A',phone:''},
+    }
+  },
   magnelab: {
     goal:270, // objetivo del mes (3 creadores × 90)
     name:'MagneLab', logoText:'MAGNELAB', collection:'magnelab', defaultCampaignStart:'2026-10-06',
@@ -3755,7 +3768,7 @@ loadConfig();
 <!-- Auto-actualización: GitHub Pages cachea el HTML y los celulares lo retienen mucho más.
      Esto compara la versión publicada con la que está corriendo y refresca sola. -->
 <script>
-const APP_VERSION = '2026-10-12-b';
+const APP_VERSION = '2026-10-12-c';
 (function(){
   var CLAVE='cima_ver_reload';
   function hayAlguienEscribiendo(){
