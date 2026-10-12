@@ -931,15 +931,15 @@ const BRAND_CONFIGS = {
   noxalab: {
     goal:330,
     name:'NoxaLab', logoText:'NOXALAB', collection:'noxalab', defaultCampaignStart:'2026-10-12',
-    dailyVideos:3, videoGoal:83, no100k:true, noRacha:true, salary:518750, minVideos:83,
+    dailyVideos:3, videoGoal:90, no100k:true, noRacha:true, salary:700000, minVideos:90,
     adminPass:'noxalab-admin-2026', adminPass2:'noxalab-2026', adminPass4:'abril-2026',
     accent:'#0D1B2A', accentLight:'#27364B', bg:'#f4f6f8', surface2:'#e8ecf1', border:'#d6dde5',
     text:'#0d1b2a', muted:'#64748b', shadow:'13,27,42', loginBg:'linear-gradient(135deg,#f4f6f8 0%,#e8ecf1 50%,#dbe2ea 100%)',
     creators:{
       creadora1:{name:'Creador 1',avatar:'C1',color:'#D9A94E',phone:''},
       creadora2:{name:'Creador 2',avatar:'C2',color:'#0D1B2A',phone:''},
-      creadora3:{name:'Creador 3',avatar:'C3',color:'#27364B',phone:''},
-      creadora4:{name:'Creador 4',avatar:'C4',color:'#EFC97B',phone:''},
+      creadora3:{name:'Creadora 3',avatar:'C3',color:'#27364B',phone:''},
+      creadora4:{name:'Creador 4',avatar:'C4',color:'#EFC97B',phone:'',minVideos:60,salary:500000,dailyVideos:2},
     }
   },
   drenova: {
@@ -1350,6 +1350,8 @@ const MIN_VIDEOS = BRAND.minVideos || 150;
 const QUINCENA_META = Math.round(MIN_VIDEOS/2); // meta de videos por quincena (mitad del objetivo)
 // Overrides por creador: campañas donde no todos hacen la misma cantidad ni cobran lo mismo
 const minDe = c => ((BRAND.creators[c]||{}).minVideos) || MIN_VIDEOS;
+// Cadencia diaria propia: en NoxaLab tres hacen 90 (3 por día) y uno 60 (2 por día)
+const diaDe = c => ((BRAND.creators[c]||{}).dailyVideos) || (BRAND.dailyVideos||5);
 const salDe = c => ((BRAND.creators[c]||{}).salary) || SALARY;
 const RACHA_MONTO = BRAND.rachaMonto || 0; // 0 = bono de racha desactivado en esa marca
 const RACHA_ACTIVA = RACHA_MONTO > 0;
@@ -1900,7 +1902,7 @@ function renderStatusPanel(){
     const hoy=(data.videos||[]).filter(v=>v.creator===c&&argDate(v.date)===today).length;
     // Alerta: no subió ni hoy ni ayer (nada que ver con el bono de racha)
     const frenada=getVideosOnDay(c,0)===0&&getVideosOnDay(c,1)===0;
-    const _dv=BRAND.dailyVideos||5;
+    const _dv=diaDe(c);
     const _meta=minDe(c);
     const pct=Math.min(100,Math.round(total/_meta*100));
     const color=COLORS[c]||"#6366f1";
@@ -2411,10 +2413,9 @@ function guionesPorCreadora(){
 
 // Umbral: un día de trabajo o menos = rojo, dos días = ámbar
 function alertasGuiones(){
-  const dia=BRAND.dailyVideos||3;
   return guionesPorCreadora()
-    .filter(x=>x.pend<=dia*2)
-    .map(x=>({...x, nivel: x.pend===0 ? "sin" : x.pend<=dia ? "rojo" : "amarillo"}))
+    .filter(x=>x.pend<=diaDe(x.c)*2)
+    .map(x=>({...x, nivel: x.pend===0 ? "sin" : x.pend<=diaDe(x.c) ? "rojo" : "amarillo"}))
     .sort((a,b)=>a.pend-b.pend);
 }
 
@@ -2454,7 +2455,7 @@ function renderGuionesAdmin(){
     </div>
     <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:8px;margin-bottom:16px;">` +
       guionesPorCreadora().map(x=>{
-        const col = x.pend===0 ? "#B0512F" : x.pend<=(BRAND.dailyVideos||3) ? "#b45309" : "var(--muted)";
+        const col = x.pend===0 ? "#B0512F" : x.pend<=diaDe(x.c) ? "#b45309" : "var(--muted)";
         return `<div style="background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:11px 13px;">
           <div style="font-family:'Poppins';font-weight:800;font-size:12px;">${x.nombre}</div>
           <div style="font-family:'Poppins';font-size:11px;color:${col};margin-top:3px;"><b>${x.pend}</b> sin grabar de ${x.total}${x.pend===0?" · no puede subir":""}</div>
@@ -3782,7 +3783,7 @@ loadConfig();
 <!-- Auto-actualización: GitHub Pages cachea el HTML y los celulares lo retienen mucho más.
      Esto compara la versión publicada con la que está corriendo y refresca sola. -->
 <script>
-const APP_VERSION = '2026-10-12-f';
+const APP_VERSION = '2026-10-12-g';
 (function(){
   var CLAVE='cima_ver_reload';
   function hayAlguienEscribiendo(){

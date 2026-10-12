@@ -970,12 +970,12 @@ const BRAND_CONFIGS = {
     cats:['Review / testimonio','Rutina / uso','Antes y después','Beneficios','Trend / challenge','Otro'],
     accent:'#0D1B2A', accentLight:'#27364B', bg:'#f4f6f8', surface2:'#e8ecf1', surface3:'#dde3ea',
     text:'#0d1b2a', muted:'#64748b', shadow:'13,27,42',
-    goal: 330, dailyVideos:3, videoGoal:83, salary:518750, minVideos:83,
+    goal: 330, dailyVideos:3, videoGoal:90, salary:700000, minVideos:90,
     creators:{
       creadora1:{name:'Creador 1',pass:'noxa1',avatar:'C1',color:'#D9A94E'},
       creadora2:{name:'Creador 2',pass:'noxa2',avatar:'C2',color:'#0D1B2A'},
-      creadora3:{name:'Creador 3',pass:'noxa3',avatar:'C3',color:'#27364B'},
-      creadora4:{name:'Creador 4',pass:'noxa4',avatar:'C4',color:'#EFC97B'},
+      creadora3:{name:'Creadora 3',pass:'noxa3',avatar:'C3',color:'#27364B'},
+      creadora4:{name:'Creador 4',pass:'noxa4',avatar:'C4',color:'#EFC97B',minVideos:60,salary:500000,dailyVideos:2},
     }
   },
   drenova: {
@@ -1315,7 +1315,7 @@ function cuentaPago(v){
   if(v.status==='approved') return true;
   return v.date && new Date(v.date) < GRACE_END;
 }
-const DAILY_VIDEOS = BRAND.dailyVideos || 5;
+let DAILY_VIDEOS = BRAND.dailyVideos || 5;   // se recalcula al entrar: puede ser propia de cada creador
 
 // Brand-derived constants
 const PASSWORDS = Object.fromEntries(Object.entries(BRAND.creators).map(([k,v])=>[k,v.pass]));
@@ -1500,6 +1500,7 @@ let selectedPlat = "ig";
 // ═══════════════════════════════════
 function enterApp(creator){
   currentUser = creator;
+  DAILY_VIDEOS = ((BRAND.creators[creator]||{}).dailyVideos) || (BRAND.dailyVideos||5);
   localStorage.setItem((BRAND_ID+"_session"), creator);
   document.getElementById("login-screen").style.display="none";
   document.getElementById("app").classList.add("show");
@@ -2960,7 +2961,7 @@ loadData();
 <!-- Auto-actualización: GitHub Pages cachea el HTML y los celulares lo retienen mucho más.
      Esto compara la versión publicada con la que está corriendo y refresca sola. -->
 <script>
-const APP_VERSION = '2026-10-12-f';
+const APP_VERSION = '2026-10-12-g';
 (function(){
   var CLAVE='cima_ver_reload';
   function hayAlguienEscribiendo(){
