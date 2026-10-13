@@ -1830,7 +1830,7 @@ function videoRow(v, compact=false){
   const startStr = campaignStartFor(v.creator);
   const calcDay = v.date ? Math.max(1,Math.floor((new Date(v.date)-new Date(startStr))/(86400000))+1) : (v.day||1);
   return`<tr>
-    <td style="padding-left:10px;"><input type="checkbox" class="vsel" data-id="${v.id}" data-drive="${escUrl(v.driveLink||'')}" onchange="actualizarSeleccion()" style="width:16px;height:16px;cursor:pointer;accent-color:var(--accent);"></td>
+    <td style="padding-left:10px;"><input type="checkbox" class="vsel" data-id="${v.id}" data-drive="${escUrl(v.driveLink||'')}" data-editado="${escUrl((v.editado&&v.editado.link)||'')}" onchange="actualizarSeleccion()" style="width:16px;height:16px;cursor:pointer;accent-color:var(--accent);"></td>
     <td><div style="display:flex;align-items:center;gap:8px;"><div style="width:26px;height:26px;border-radius:50%;background:${COLORS[v.creator]}22;border:1px solid ${COLORS[v.creator]};display:flex;align-items:center;justify-content:center;font-size:9px;font-weight:800;color:${COLORS[v.creator]}">${AVATARS[v.creator]}</div><span style="font-size:12px;">${NAMES[v.creator].split(' ')[0]}</span></div></td>
     <td style="font-family:'Poppins';font-size:11px;white-space:nowrap;">${v.date?new Date(v.date).toLocaleDateString("es-AR",{day:"2-digit",month:"2-digit"}):"—"} · D${calcDay}</td>
     ${cols.plat?`<td style="font-size:11px;white-space:nowrap;">${v.linkIg&&v.linkTt?'📸🎵':v.linkIg?'📸':'🎵'}</td>`:""}
@@ -3783,7 +3783,7 @@ loadConfig();
 <!-- Auto-actualización: GitHub Pages cachea el HTML y los celulares lo retienen mucho más.
      Esto compara la versión publicada con la que está corriendo y refresca sola. -->
 <script>
-const APP_VERSION = '2026-10-12-g';
+const APP_VERSION = '2026-10-13-a';
 (function(){
   var CLAVE='cima_ver_reload';
   function hayAlguienEscribiendo(){
@@ -3837,15 +3837,21 @@ function seleccionados(){
   const vistos=new Set();
   return [..._tablaSel().querySelectorAll('.vsel:checked')]
     .filter(c=>{ if(vistos.has(c.dataset.id)) return false; vistos.add(c.dataset.id); return true; })
-    .map(c=>({id:c.dataset.id, drive:c.dataset.drive}));
+    .map(c=>({id:c.dataset.id, drive:c.dataset.drive, editado:c.dataset.editado}));
 }
 function actualizarSeleccion(){
   const sel=seleccionados(), barra=document.getElementById('bulk-bar');
   if(!barra) return;
   const conDrive=sel.filter(x=>x.drive).length;
+  const conEdit=sel.filter(x=>x.editado).length;
   document.getElementById('bulk-n').textContent =
     sel.length + ' seleccionado' + (sel.length===1?'':'s') +
-    (sel.length && conDrive<sel.length ? ' · ' + conDrive + ' con Drive' : '');
+    (sel.length && conDrive<sel.length ? ' · ' + conDrive + ' con Drive' : '') +
+    (conEdit ? ' · ' + conEdit + ' editado' + (conEdit===1?'':'s') : '');
+  // El botón de editados sólo aparece si alguno de los seleccionados ya está editado:
+  // así la barra no se llena de botones en las marcas que todavía no editan solas.
+  const bEdit=document.getElementById('bulk-edit');
+  if(bEdit) bEdit.style.display = conEdit ? '' : 'none';
   barra.classList.toggle('abierta', sel.length>0);
   const all=document.getElementById('vsel-all');
   const total=_tablaSel().querySelectorAll('.vsel').length;
@@ -3866,16 +3872,29 @@ function bulkAbrir(){
     else if(abiertas<links.length) toast('Se abrieron '+abiertas+' de '+links.length+'. Permití las ventanas emergentes para abrirlas todas.');
   }, links.length*220+400);
 }
-async function bulkCopiar(){
-  const links=seleccionados().map(x=>x.drive).filter(Boolean);
-  if(!links.length){ toast('Ninguno de los seleccionados tiene link de Drive'); return; }
-  const txt=links.join('\n');
-  try{ await navigator.clipboard.writeText(txt); }
+async function _alPortapapeles(txt){
+  try{ await navigator.clipboard.writeText(txt); return; }
   catch(e){
     const t=document.createElement('textarea'); t.value=txt; t.style.position='fixed'; t.style.opacity='0';
     document.body.appendChild(t); t.select(); try{ document.execCommand('copy'); }catch(_){ } document.body.removeChild(t);
   }
+}
+async function bulkCopiar(){
+  const links=seleccionados().map(x=>x.drive).filter(Boolean);
+  if(!links.length){ toast('Ninguno de los seleccionados tiene link de Drive'); return; }
+  await _alPortapapeles(links.join('\n'));
   toast(links.length+' link'+(links.length===1?'':'s')+' copiado'+(links.length===1?'':'s'));
+}
+// Los links de los videos YA EDITADOS (los deja la edición automática en v.editado.link).
+// Un video puede estar seleccionado y no tener editado todavía: esos se saltean y se avisa.
+async function bulkCopiarEditados(){
+  const sel=seleccionados();
+  const links=sel.map(x=>x.editado).filter(Boolean);
+  if(!links.length){ toast('Ninguno de los seleccionados tiene el editado listo'); return; }
+  await _alPortapapeles(links.join('\n'));
+  const faltan=sel.length-links.length;
+  toast(links.length+' link'+(links.length===1?'':'s')+' de editado'+(links.length===1?'':'s')+' copiado'+(links.length===1?'':'s')
+        + (faltan ? ' · '+faltan+' sin editar todavía' : ''));
 }
 function bulkDescargar(){
   const ids=seleccionados().map(x=>driveId(x.drive)).filter(Boolean);
@@ -3904,6 +3923,7 @@ function toast(msg){
   <span id="bulk-n">0 seleccionados</span>
   <button class="bulk-btn" onclick="bulkAbrir()">Abrir en Drive</button>
   <button class="bulk-btn" onclick="bulkCopiar()">Copiar links</button>
+  <button class="bulk-btn" id="bulk-edit" style="display:none;" onclick="bulkCopiarEditados()" title="Copia los links de Drive de los videos ya editados">Copiar editados</button>
   <button class="bulk-btn primaria" onclick="bulkDescargar()">Descargar</button>
   <button class="bulk-btn fantasma" onclick="selTodos(false)">Cancelar</button>
 </div>
