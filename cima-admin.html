@@ -1165,6 +1165,27 @@ const BRAND = BRAND_CONFIGS[BRAND_ID] || BRAND_CONFIGS.cleargy;
   });
 })();
 
+// La barra del navegador muestra el link CORTO, igual que en las páginas de collab
+// (Nacho, 13/10): el link largo de cleargy.ugc es ilegible, se corta en WhatsApp y muestra
+// el nombre del archivo. Mismo origen, así que replaceState lo permite.
+// Va DESPUÉS del aviso de arriba a propósito: ese lee ?brand= y si se lo sacamos antes,
+// la app creería que el link viene incompleto.
+// Se sacan `brand` y `v` porque los vuelve a poner el redirect de /<marca>/admin/ al recargar;
+// el resto (tanda, ver, creador, t, ref…) y el hash se conservan.
+(function(){
+  try{
+    if(location.hostname!=='cima-creators.github.io') return;
+    var q = new URLSearchParams(location.search);
+    var m = q.get('brand');
+    if(!m || !BRAND_CONFIGS[m]) return;          // link roto: ya saltó el aviso de arriba
+    q.delete('brand'); q.delete('v');
+    var resto = q.toString();
+    var corto = '/' + m + '/admin/' + (resto ? '?' + resto : '') + location.hash;
+    if(location.pathname + location.search + location.hash !== corto)
+      history.replaceState(null, '', corto);
+  }catch(e){}
+})();
+
 window.BRAND_COLLECTION = BRAND.collection;
 // Campaña anterior (archivo): mismos videos de la tanda 1, guardados en <marca>_videos_t1.
 // Se mira y nada más: sin aprobar, sin editar y sin plata.
@@ -3887,7 +3908,7 @@ loadConfig();
 <!-- Auto-actualización: GitHub Pages cachea el HTML y los celulares lo retienen mucho más.
      Esto compara la versión publicada con la que está corriendo y refresca sola. -->
 <script>
-const APP_VERSION = '2026-10-13-l';
+const APP_VERSION = '2026-10-13-m';
 (function(){
   var CLAVE='cima_ver_reload';
   function hayAlguienEscribiendo(){
