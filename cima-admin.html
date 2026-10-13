@@ -1761,18 +1761,21 @@ function fanpageCell(v){
   const fp=(BRAND.fanpages||[]).find(f=>f.n===fpN);
   const opts='<option value="">— Elegir —</option>'+BRAND.fanpages.map(f=>`<option value="${esc(f.n)}" ${f.n===fpN?'selected':''}>${esc(f.n)}</option>`).join('')
     +(fpN&&!fp?`<option selected>${esc(fpN)}</option>`:'');
-  return `<td style="min-width:160px;vertical-align:top;padding-top:8px;">
-    <select onchange="setFanpage('${v.id}',this.value)" style="font-family:'Poppins';font-size:11px;padding:3px 6px;border-radius:var(--radius-xs);border:1px solid ${fpN?'rgba(var(--acc-rgb),.35)':'var(--border2)'};background:${fpN?'rgba(var(--acc-rgb),.06)':'none'};color:var(--text);max-width:170px;">${opts}</select>
-    ${fp?`<div style="font-size:10px;font-family:'Poppins';color:var(--muted);margin-top:3px;max-width:170px;line-height:1.3;">${esc(fp.d)}${auto?` <span title="Sale del guion ${esc(v.guion)}">· por guion</span>`:''}</div>`:''}
-  </td>
-  <td style="min-width:150px;vertical-align:top;padding-top:8px;">${(()=>{
-    const n=listicleDe(v,fp);
-    if(!n) return '<span style="color:var(--muted);font-size:11px;">—</span>';
-    const url=(BRAND.listicleBase||'')+fp.s+'-'+n;
-    return `<select onchange="setListicle('${v.id}',this.value)" style="font-family:'Poppins';font-size:11px;padding:3px 6px;border-radius:var(--radius-xs);border:1px solid rgba(var(--acc-rgb),.35);background:rgba(var(--acc-rgb),.06);color:var(--text);max-width:170px;">${fp.l.map(k=>`<option value="${k}" ${k===n?'selected':''}>${esc(fp.n)} ${k}</option>`).join('')}</select>
-      <div style="margin-top:4px;"><a href="${escUrl(url)}" target="_blank" rel="noopener" style="font-size:10px;font-family:'Poppins';color:var(--accent);">Abrir nota ↗</a>
-      <button onclick="navigator.clipboard.writeText('${escUrl(url)}');showToast('Link copiado')" style="font-size:10px;font-family:'Poppins';border:none;background:none;color:var(--muted);cursor:pointer;">📋 Copiar</button></div>`;
-  })()}</td>`;
+  // 13/10: fanpage y listicle van en UNA sola columna, apiladas. Antes eran dos de ~170px cada
+  // una y había que irse hasta la derecha de todo para verlas. La listicle dice sólo "Nota 3":
+  // el nombre de la fanpage ya está arriba, repetirlo en cada opción estiraba el select al doble.
+  const dolor = fp ? `<div style="font-size:10px;font-family:'Poppins';color:var(--muted);margin-top:3px;line-height:1.3;">${esc(fp.d)}${auto?` <span title="Sale del guion ${esc(v.guion)}">· por guion</span>`:''}</div>` : '';
+  const n = listicleDe(v, fp);
+  const url = n ? (BRAND.listicleBase||'')+fp.s+'-'+n : '';
+  const lis = !n ? '' : `<div style="display:flex;align-items:center;gap:6px;margin-top:5px;flex-wrap:wrap;">
+      <select onchange="setListicle('${v.id}',this.value)" title="Listicle de ${esc(fp.n)}" style="font-family:'Poppins';font-size:11px;padding:3px 6px;border-radius:var(--radius-xs);border:1px solid rgba(var(--acc-rgb),.35);background:rgba(var(--acc-rgb),.06);color:var(--text);">${fp.l.map(k=>`<option value="${k}" ${k===n?'selected':''}>Nota ${k}</option>`).join('')}</select>
+      <a href="${escUrl(url)}" target="_blank" rel="noopener" title="Abrir la listicle" style="font-size:10px;font-family:'Poppins';color:var(--accent);text-decoration:none;">Abrir ↗</a>
+      <button onclick="navigator.clipboard.writeText('${escUrl(url)}');showToast('Link copiado')" title="Copiar el link de la listicle" style="font-size:11px;line-height:1;border:none;background:none;color:var(--muted);cursor:pointer;padding:0;">📋</button>
+    </div>`;
+  return `<td style="width:190px;max-width:190px;vertical-align:top;padding-top:8px;">
+    <select onchange="setFanpage('${v.id}',this.value)" style="font-family:'Poppins';font-size:11px;padding:3px 6px;border-radius:var(--radius-xs);border:1px solid ${fpN?'rgba(var(--acc-rgb),.35)':'var(--border2)'};background:${fpN?'rgba(var(--acc-rgb),.06)':'none'};color:var(--text);width:100%;max-width:182px;">${opts}</select>
+    ${dolor}${lis}
+  </td>`;
 }
 function setFanpage(id, fanpage){
   const v=data.videos.find(x=>x.id==id);
@@ -1957,7 +1960,7 @@ function renderVideos(){
     <th>Links</th>
     ${cols.metrics?`<th>Métricas</th>`:""}
     <th>Estado</th>
-    ${cols.fan&&BRAND.fanpages?`<th>Fanpage · dolor</th><th>Listicle</th>`:""}
+    ${cols.fan&&BRAND.fanpages?`<th>Fanpage · listicle</th>`:""}
     ${cols.nota?`<th>Nota</th>`:""}
     <th>Acciones</th>
   </tr>`;
@@ -3783,7 +3786,7 @@ loadConfig();
 <!-- Auto-actualización: GitHub Pages cachea el HTML y los celulares lo retienen mucho más.
      Esto compara la versión publicada con la que está corriendo y refresca sola. -->
 <script>
-const APP_VERSION = '2026-10-13-b';
+const APP_VERSION = '2026-10-13-c';
 (function(){
   var CLAVE='cima_ver_reload';
   function hayAlguienEscribiendo(){
