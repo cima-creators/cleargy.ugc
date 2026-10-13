@@ -167,6 +167,7 @@ td{padding:11px 14px;font-size:12px;vertical-align:middle;}
 
 /* ACTIONS */
 .action-row{display:flex;gap:4px;flex-wrap:wrap;}
+.action-row .abtn{padding:5px 8px;}
 .abtn{padding:5px 10px;border-radius:20px;font-size:9px;font-family:'Poppins';cursor:pointer;border:1.5px solid;transition:all .12s;font-weight:600;white-space:nowrap;}
 .abtn-approve{border-color:rgba(var(--acc-rgb),.3);color:var(--blue);background:rgba(var(--acc-rgb),.05);}
 .abtn-approve:hover{background:rgba(var(--acc-rgb),.12);}
@@ -1888,7 +1889,7 @@ function videoRow(v, compact=false){
     <td style="font-family:'Poppins';font-size:11px;white-space:nowrap;">${v.date?new Date(v.date).toLocaleDateString("es-AR",{day:"2-digit",month:"2-digit"}):"—"} · D${calcDay}</td>
     ${cols.plat?`<td style="font-size:11px;white-space:nowrap;">${v.linkIg&&v.linkTt?'📸🎵':v.linkIg?'📸':'🎵'}</td>`:""}
     ${cols.cat?`<td style="font-size:11px;color:var(--muted);max-width:120px;">${v.producto?`<div style="font-size:9.5px;font-weight:800;color:#7c3aed;background:rgba(124,58,237,.08);border:1px solid rgba(124,58,237,.25);border-radius:8px;padding:1px 7px;margin-bottom:2px;display:inline-block;white-space:nowrap;">📦 ${esc(v.producto)}</div><br>`:""}<span style="overflow:hidden;text-overflow:ellipsis;white-space:nowrap;display:inline-block;max-width:115px;">${esc(v.cat)}</span></td>`:""}
-    <td style="white-space:nowrap;">${guionTag?guionTag+" ":""}${copyBtn}</td>
+    <td style="max-width:180px;line-height:1.9;">${guionTag?guionTag+" ":""}${copyBtn}</td>
     ${cols.metrics?`<td style="font-family:'Poppins';font-size:10px;color:var(--muted);white-space:nowrap;">${metricsStr}</td>`:""}
     <td><span class="badge badge-${v.status}">${v.status==="approved"?"✓ Ok":v.status==="rejected"?"✗":"⏳"}</span>
       ${v.statusBy&&v.status!=="pending"?`<div style="font-size:9px;font-family:'Poppins';color:var(--muted);margin-top:3px;white-space:nowrap;" title="${esc(nombreAdmin(v.statusBy))}${v.statusAt?' · '+new Date(v.statusAt).toLocaleString('es-AR',{day:'2-digit',month:'2-digit',hour:'2-digit',minute:'2-digit'}):''}">${esc(nombreAdmin(v.statusBy))}${v.statusAt?' · '+new Date(v.statusAt).toLocaleDateString('es-AR',{day:'2-digit',month:'2-digit'}):''}</div>`:""}</td>
@@ -1898,7 +1899,7 @@ function videoRow(v, compact=false){
       ${(window.adminRole==='brand'||v.brandNote)?`<input type="text" value="${esc(v.brandNote||'')}" placeholder="Nota marca..." onchange="setAdminNote('${v.id}',this.value)" ${window.adminRole!=='brand'?'readonly':''} style="background:rgba(217,119,6,.07);border:1px solid rgba(217,119,6,.3);padding:3px 7px;border-radius:var(--radius-xs);font-size:11px;font-family:'Poppins';width:140px;color:var(--text);outline:none;margin-bottom:4px;display:block;" title="Nota del dueño de marca">`:""}
       ${(window.adminRole==='superadmin'||v.adminNote)?`<div style="display:flex;align-items:center;gap:4px;">${v.adminNoteBy?`<span style="flex-shrink:0;font-size:9px;font-weight:800;width:16px;height:16px;line-height:16px;text-align:center;border-radius:50%;color:#fff;background:${colorAdmin(v.adminNoteBy)};" title="Nota de ${esc(nombreAdmin(v.adminNoteBy))}">${v.adminNoteBy}</span>`:''}<input type="text" value="${esc(v.adminNote||'')}" placeholder="Tu nota..." onchange="setAdminNote('${v.id}',this.value)" ${window.adminRole!=='superadmin'?'readonly':''} style="background:rgba(var(--acc-rgb),.06);border:1px solid rgba(var(--acc-rgb),.25);padding:3px 7px;border-radius:var(--radius-xs);font-size:11px;font-family:'Poppins';width:${v.adminNoteBy?'122px':'140px'};color:var(--text);outline:none;" title="Nota del admin"></div>`:""}
     </td>`:""}
-    <td><div class="action-row" style="flex-wrap:nowrap;">
+    <td><div class="action-row" style="max-width:116px;">
       <button class="abtn abtn-approve" onclick="setStatus('${v.id}','approved')">✓</button>
       <button class="abtn abtn-reject" onclick="setStatus('${v.id}','rejected')">✗</button>
       <button class="abtn" style="border-color:rgba(74,143,255,.3);color:var(--accent3);background:rgba(74,143,255,.05);" onclick="openEditVideo('${v.id}')">✏</button>
