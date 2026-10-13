@@ -107,6 +107,7 @@ body{background:var(--bg);color:var(--text);font-family:'Poppins',sans-serif;min
 .ppill:hover{border-color:var(--blue);color:var(--blue);}
 .ppill.active{background:var(--blue);color:white;border-color:var(--blue);}
 .nbadge{margin-left:auto;font-family:'Poppins';font-size:9px;background:rgba(var(--acc-rgb),.1);padding:2px 8px;border-radius:20px;color:var(--blue);}
+.nbadge-alerta{background:rgba(176,123,46,.14);color:#b45309;font-weight:700;}
 
 /* CONTENT */
 .content{flex:1;overflow-y:auto;padding:24px;}
@@ -302,7 +303,7 @@ body.archivo .abtn,body.archivo .action-row button,body.archivo #apify-sync-btn,
       <div class="sidebar-inner">
         <div class="slabel">Principal</div>
         <div class="nitem active" data-view="overview" onclick="nav(this)"><div class="ndot" style="background:var(--blue)"></div>Overview</div>
-        <div class="nitem" data-view="videos" onclick="nav(this)"><div class="ndot" style="background:var(--blue-mid)"></div>Videos <span class="nbadge" id="nb-pending" style="display:none;" title="Videos sin aprobar">0</span></div>
+        <div class="nitem" data-view="videos" onclick="nav(this)"><div class="ndot" style="background:var(--blue-mid)"></div>Videos <span class="nbadge" id="nb-pending" style="display:none;" title="Videos de la campaña">0</span></div>
         <div class="nitem" data-view="guiones" onclick="nav(this)"><div class="ndot" style="background:#7c3aed"></div>Guiones <span class="nbadge" id="nb-guiones">0</span></div>
         <div class="nitem" data-view="bonos" onclick="nav(this)" id="nav-bonos"><div class="ndot" style="background:var(--accent2)"></div>Bonos</div>
         <div class="nitem" data-view="viral" onclick="nav(this)"><div class="ndot" style="background:#3F8F6B)"></div>Videos Virales</div>
@@ -1635,7 +1636,13 @@ function renderAll(){
     renderOverview();
     const pending=data.videos.filter(v=>v.status==="pending").length;
     const nbp=document.getElementById("nb-pending");
-    if(nbp){ nbp.textContent=pending; nbp.style.display=pending?"":"none"; nbp.title=pending+" sin aprobar"; }
+    if(nbp){
+      const _tot=data.videos.filter(v=>v.status!=='rejected').length;   // igual que TOTAL VIDEOS del Overview
+      nbp.textContent=_tot;
+      nbp.style.display=_tot?"":"none";
+      nbp.classList.toggle("nbadge-alerta", pending>0);
+      nbp.title = _tot + " videos en la campaña" + (pending ? " · " + pending + " sin aprobar" : "");
+    }
     const nbm=document.getElementById("nb-msgs");
     if(nbm){ const _m=(data.notifs||[]).length; nbm.textContent=_m; nbm.style.display=_m?"":"none"; nbm.title=_m+" mensajes"; }
     const nbg=document.getElementById("nb-guiones");
@@ -3880,7 +3887,7 @@ loadConfig();
 <!-- Auto-actualización: GitHub Pages cachea el HTML y los celulares lo retienen mucho más.
      Esto compara la versión publicada con la que está corriendo y refresca sola. -->
 <script>
-const APP_VERSION = '2026-10-13-k';
+const APP_VERSION = '2026-10-13-l';
 (function(){
   var CLAVE='cima_ver_reload';
   function hayAlguienEscribiendo(){
