@@ -302,12 +302,12 @@ body.archivo .abtn,body.archivo .action-row button,body.archivo #apify-sync-btn,
       <div class="sidebar-inner">
         <div class="slabel">Principal</div>
         <div class="nitem active" data-view="overview" onclick="nav(this)"><div class="ndot" style="background:var(--blue)"></div>Overview</div>
-        <div class="nitem" data-view="videos" onclick="nav(this)"><div class="ndot" style="background:var(--blue-mid)"></div>Videos <span class="nbadge" id="nb-pending">0</span></div>
+        <div class="nitem" data-view="videos" onclick="nav(this)"><div class="ndot" style="background:var(--blue-mid)"></div>Videos <span class="nbadge" id="nb-pending" style="display:none;" title="Videos sin aprobar">0</span></div>
         <div class="nitem" data-view="guiones" onclick="nav(this)"><div class="ndot" style="background:#7c3aed"></div>Guiones <span class="nbadge" id="nb-guiones">0</span></div>
         <div class="nitem" data-view="bonos" onclick="nav(this)" id="nav-bonos"><div class="ndot" style="background:var(--accent2)"></div>Bonos</div>
         <div class="nitem" data-view="viral" onclick="nav(this)"><div class="ndot" style="background:#3F8F6B)"></div>Videos Virales</div>
         <div class="slabel">Comunicación</div>
-        <div class="nitem" data-view="mensajes" onclick="nav(this)"><div class="ndot" style="background:var(--blue-light)"></div>Mensajes <span class="nbadge" id="nb-msgs">0</span></div>
+        <div class="nitem" data-view="mensajes" onclick="nav(this)"><div class="ndot" style="background:var(--blue-light)"></div>Mensajes <span class="nbadge" id="nb-msgs" style="display:none;" title="Mensajes">0</span></div>
         <div class="slabel">Finanzas</div>
         <div class="nitem" data-view="shopify" onclick="nav(this)"><div class="ndot" style="background:#3F8F6B"></div>Ventas Shopify <span class="nbadge" id="nb-shopify">0</span></div>
         <div class="nitem" data-view="finanzas" onclick="nav(this)" id="nav-finanzas"><div class="ndot" style="background:var(--gold)"></div>Pagos</div>
@@ -1635,9 +1635,9 @@ function renderAll(){
     renderOverview();
     const pending=data.videos.filter(v=>v.status==="pending").length;
     const nbp=document.getElementById("nb-pending");
-    if(nbp) nbp.textContent=pending;
+    if(nbp){ nbp.textContent=pending; nbp.style.display=pending?"":"none"; nbp.title=pending+" sin aprobar"; }
     const nbm=document.getElementById("nb-msgs");
-    if(nbm) nbm.textContent=(data.notifs||[]).length;
+    if(nbm){ const _m=(data.notifs||[]).length; nbm.textContent=_m; nbm.style.display=_m?"":"none"; nbm.title=_m+" mensajes"; }
     const nbg=document.getElementById("nb-guiones");
     if(nbg){ const _gp=guionesPendientes(); nbg.textContent=_gp; nbg.style.display=_gp?"":"none"; }
     const nbs=document.getElementById("nb-shopify");
