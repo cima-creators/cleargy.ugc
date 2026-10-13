@@ -1444,6 +1444,11 @@ let vidCols = (()=>{
 // Marcas donde se entrega el crudo: ningún video tiene views y la columna Métricas son 130px
 // de guiones. Se apaga sola la primera vez, y sólo si el usuario nunca eligió sus columnas.
 let _colsAuto = false;
+// ¿La marca tiene algún video editado? Si sí, la tabla muestra la columna Editado.
+let _colEditado = false;
+function _mirarEditados(){
+  _colEditado = (((data&&data.videos)||[]).some(v=>v && v.editado && v.editado.link));
+}
 function _autoApagarMetricas(){
   if(_colsGuardadas || _colsAuto) return;
   const vids = (data&&data.videos)||[];
@@ -1870,7 +1875,7 @@ function setFanpage(id, fanpage){
   showToast(fanpage?"✓ Fanpage guardada":"Fanpage borrada");
 }
 function videoRow(v, compact=false){
-  const cols=compact?{cat:false,metrics:true,nota:false,plat:false,fan:false}:vidCols;
+  const cols=compact?{cat:false,metrics:true,nota:false,plat:false,fan:false,edi:false}:Object.assign({edi:_colEditado},vidCols);
   const _igv=Number(v.igViews)||0, _ttv=Number(v.ttViews)||0;
   const metricsStr = (_igv||_ttv)
     ? [_igv?("📸 "+fmtV(_igv)):"", _ttv?("🎵 "+fmtV(_ttv)):""].filter(Boolean).join(" + ") + ((_igv&&_ttv)?(" = "+fmtV(_igv+_ttv)):"")
@@ -1899,14 +1904,16 @@ function videoRow(v, compact=false){
   // Video ya editado: lo deja la edición automática en v.editado = {link, fecha, archivo}.
   // 13/10: va como chip al lado del CRUDO y no en Acciones (Nacho) — son las dos versiones
   // del mismo video, se buscan juntas.
-  const ediTag = (()=>{
+  // 13/10 (Nacho): el editado tiene su propia columna, y SIEMPRE dice algo — "EDITADO" o
+  // "sin editar" — así se lee para abajo de un vistazo en vez de buscar el chip entre los otros.
+  const ediCell = (()=>{
     const e = v && v.editado;
-    if(!e || !e.link) return "";
+    if(!e || !e.link) return `<span style="font-family:'Poppins';font-size:10px;color:var(--muted);opacity:.75;white-space:nowrap;">sin editar</span>`;
     const f = e.fecha ? new Date(e.fecha).toLocaleDateString("es-AR",{day:"2-digit",month:"2-digit"}) : "";
     const t = "Abrir el editado" + (f?" · "+f:"") + (e.archivo?" · "+e.archivo:"");
     return `<a href="${escUrl(e.link)}" target="_blank" rel="noopener" title="${esc(t)}" style="padding:3px 10px;border-radius:20px;font-size:10px;font-family:'Poppins';font-weight:800;letter-spacing:.3px;border:1px solid #6d28d9;color:#fff;background:#7c3aed;box-shadow:0 1px 5px rgba(124,58,237,.45);text-decoration:none;white-space:nowrap;">✂ EDITADO</a>`;
   })();
-  const copyBtn = (sinDrive||crudoTag||ediTag||igBtn||ttBtn||fbBtn) ? [sinDrive,crudoTag,ediTag,igBtn,ttBtn,fbBtn].filter(Boolean).join(" ") : `<button onclick="copyLink('${v.id}',event)" style="padding:2px 8px;border-radius:20px;font-size:9px;font-family:'Poppins';cursor:pointer;border:1px solid var(--border2);color:var(--muted);background:none;">📋 Copiar</button>`;
+  const copyBtn = (sinDrive||crudoTag||igBtn||ttBtn||fbBtn) ? [sinDrive,crudoTag,igBtn,ttBtn,fbBtn].filter(Boolean).join(" ") : `<button onclick="copyLink('${v.id}',event)" style="padding:2px 8px;border-radius:20px;font-size:9px;font-family:'Poppins';cursor:pointer;border:1px solid var(--border2);color:var(--muted);background:none;">📋 Copiar</button>`;
   const guionTag = v.guion
     ? (v.guion==="OTRO"
       ? `<span style="font-family:'Poppins';font-size:9px;font-weight:700;padding:1px 7px;border-radius:20px;background:rgba(176,123,46,.1);border:1px solid rgba(176,123,46,.3);color:#b45309;" title="La creadora dijo que no es ninguno de sus guiones">sin guion</span>`
@@ -1922,6 +1929,7 @@ function videoRow(v, compact=false){
     ${cols.cat?`<td style="font-size:11px;color:var(--muted);max-width:120px;">${v.producto?`<div style="font-size:9.5px;font-weight:800;color:#7c3aed;background:rgba(124,58,237,.08);border:1px solid rgba(124,58,237,.25);border-radius:8px;padding:1px 7px;margin-bottom:2px;display:inline-block;white-space:nowrap;">📦 ${esc(v.producto)}</div><br>`:""}<span style="overflow:hidden;text-overflow:ellipsis;white-space:nowrap;display:inline-block;max-width:115px;">${esc(v.cat)}</span></td>`:""}
     <td style="white-space:nowrap;">${guionTag?guionTag+" ":""}${copyBtn}</td>
     ${cols.metrics?`<td style="font-family:'Poppins';font-size:10px;color:var(--muted);white-space:nowrap;">${metricsStr}</td>`:""}
+    ${cols.edi?`<td style="white-space:nowrap;">${ediCell}</td>`:""}
     <td><span class="badge badge-${v.status}">${v.status==="approved"?"✓ Ok":v.status==="rejected"?"✗":"⏳"}</span>
       ${v.statusBy&&v.status!=="pending"?`<div style="font-size:9px;font-family:'Poppins';color:var(--muted);margin-top:3px;white-space:nowrap;" title="${esc(nombreAdmin(v.statusBy))}${v.statusAt?' · '+new Date(v.statusAt).toLocaleString('es-AR',{day:'2-digit',month:'2-digit',hour:'2-digit',minute:'2-digit'}):''}">${esc(nombreAdmin(v.statusBy))}${v.statusAt?' · '+new Date(v.statusAt).toLocaleDateString('es-AR',{day:'2-digit',month:'2-digit'}):''}</div>`:""}</td>
     ${cols.fan&&BRAND.fanpages?fanpageCell(v):""}
@@ -2033,6 +2041,7 @@ function renderVideos(){
   if(dateTo)   vids=vids.filter(v=>v.date&&v.date.slice(0,10)<=dateTo);
 
   _autoApagarMetricas();
+  _mirarEditados();
   const cols=vidCols;
   _pintarChipsCols();
   const thead=document.getElementById("videos-thead");
@@ -2043,6 +2052,7 @@ function renderVideos(){
     ${cols.cat?`<th>Categoría</th>`:""}
     <th>Links</th>
     ${cols.metrics?`<th>Métricas</th>`:""}
+    ${_colEditado?`<th>Editado</th>`:""}
     <th>Estado</th>
     ${cols.fan&&BRAND.fanpages?`<th>Página · dolor · nota</th>`:""}
     ${cols.nota?`<th>Nota</th>`:""}
@@ -3870,7 +3880,7 @@ loadConfig();
 <!-- Auto-actualización: GitHub Pages cachea el HTML y los celulares lo retienen mucho más.
      Esto compara la versión publicada con la que está corriendo y refresca sola. -->
 <script>
-const APP_VERSION = '2026-10-13-i';
+const APP_VERSION = '2026-10-13-j';
 (function(){
   var CLAVE='cima_ver_reload';
   function hayAlguienEscribiendo(){
