@@ -1066,7 +1066,24 @@ const BRAND_CONFIGS = {
     // Fanpage automática según el guion que marcó la creadora (código → índice de fanpages). Se puede pisar a mano.
     // Listicles: shop.lagoslab.com.ar/pages/<s>-<n>. Sin elegir, se reparten en rueda entre los guiones de esa fanpage
     listicleBase:'https://shop.lagoslab.com.ar/pages/',
-    fanpageGuion:{'46':6,'47':8,'48':3,'49':2,'50':1,'51':6,'52':9,'53':9,'54':2,'55':2,'56':3,'57':11,'58':8,'59':6,'60':1,'61':4,'62':4,'63':6,'64':6,'65':3,'66':5,'67':2,'68':10,'69':10,'70':3,'71':8,'72':11,'73':10,'74':11,'75':11,'76':11,'77':10,'78':11,'79':11,'80':11,'81':3,'82':3,'83':3,'84':3,'85':3,'86':4,'87':4,'88':3,'89':3,'90':3,'91':3,'92':8,'93':8,'94':8,'95':3,'96':2,'97':2,'98':3,'99':4,'100':3},
+    // Páginas de Facebook donde se corre cada video (la marca, 13/10). t = dolores (índices de fanpages) que cubre.
+    // Sin elegir, el video va a una de las páginas activas de su dolor, en rueda. pausa/crear: se pueden elegir a mano.
+    paginas:[
+      {n:'Hermanas Post 40', t:[3]},
+      {n:'Longevidad Desde Adentro', t:[3]},
+      {n:'Celulitis Insider', t:[4]},
+      {n:'AC1 Instituto Clínico', t:[6]},
+      {n:'Red del Bienestar', t:[6]},
+      {n:'Lagos Wellness', t:[10]},
+      {n:'Cosmética Marina', t:[10]},
+      {n:'Revista Piel y Cuerpo', t:[0]},
+      {n:'Piernas Felices', t:[7]},
+      {n:'Lagos Body Lab', t:[2]},
+      {n:'Operación Verano', t:[8,9], crear:true},
+      {n:'Dra. Mariana Aguirre', t:[4], pausa:true},
+      {n:'Florencia Ledesma', t:[6], pausa:true},
+    ],
+    fanpageGuion:{'46':6,'47':8,'48':3,'49':2,'50':2,'51':6,'52':9,'53':9,'54':2,'55':2,'56':3,'57':10,'58':8,'59':6,'60':2,'61':4,'62':4,'63':6,'64':6,'65':3,'66':6,'67':2,'68':10,'69':10,'70':3,'71':8,'72':10,'73':10,'74':10,'75':10,'76':10,'77':10,'78':10,'79':10,'80':10,'81':3,'82':3,'83':3,'84':3,'85':3,'86':4,'87':4,'88':3,'89':3,'90':3,'91':3,'92':8,'93':8,'94':8,'95':3,'96':2,'97':2,'98':3,'99':4,'100':3},
     logoImg:'data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="300" height="96"><rect width="300" height="96" rx="12" fill="%23F2F3F4"/><g fill="%23A7ACB1"><rect x="36" y="24" width="9" height="40"/><rect x="36" y="55" width="26" height="9"/><rect x="52" y="24" width="9" height="9"/><rect x="66" y="24" width="9" height="22"/></g><text x="185" y="56" font-family="Arial Black,Arial,sans-serif" font-size="38" font-weight="900" fill="%23A7ACB1" text-anchor="middle" letter-spacing="-1">LAGOS</text><rect x="100" y="68" width="170" height="6" fill="%23A7ACB1"/></svg>',
     adminPass:'lagos-admin-2025', adminPass2:'lagos-2025', adminPass4:'abril-2026',
     accent:'#5A626A', accentLight:'#7c858e', bg:'#f4f6f7', surface2:'#eaedef', border:'#d2d6da',
@@ -1178,7 +1195,7 @@ function _llenarSelectsCreadoras(){
     }
     const vff = document.getElementById('vf-fanpage');
     if(vff && BRAND.fanpages){
-      vff.innerHTML = '<option value="ALL">📣 Todas las fanpages</option><option value="NONE">Sin fanpage</option>' + BRAND.fanpages.map(f=>`<option value="${esc(f.n)}">${esc(f.n)}</option>`).join('');
+      vff.innerHTML = '<option value="ALL">📣 Todas las páginas</option><option value="NONE">Sin página</option>' + (BRAND.paginas||[]).map(p=>`<option value="${esc(p.n)}">${esc(p.n)}</option>`).join('');
       vff.style.display = '';
       const cb = document.getElementById('col-btn-fan'); if(cb) cb.style.display = '';
     }
@@ -1755,6 +1772,32 @@ function setListicle(id, n){
   renderVideos();
   showToast("✓ Listicle guardada");
 }
+function paginaDe(v, fp){
+  const P=BRAND.paginas||[];
+  if(v.pagina && P.some(p=>p.n===v.pagina)) return v.pagina;
+  if(!fp) return '';
+  const ti=BRAND.fanpages.indexOf(fp);
+  const act=P.filter(p=>p.t.includes(ti)&&!p.pausa&&!p.crear);
+  const pool=act.length?act:P.filter(p=>p.t.includes(ti));
+  if(!pool.length) return '';
+  const cods=Object.keys(BRAND.fanpageGuion||{}).filter(k=>BRAND.fanpageGuion[k]===ti).sort((a,b)=>Number(a)-Number(b));
+  const i=cods.indexOf(_gCode(v.guion));
+  return pool[(i<0?0:i)%pool.length].n;
+}
+function setPagina(id, pagina){
+  const v=data.videos.find(x=>x.id==id);
+  if(!v) return;
+  const pg=(BRAND.paginas||[]).find(p=>p.n===pagina);
+  const patch={pagina, paginaBy:window.adminUser||''};
+  // Si la página no cubre el dolor que tenía, el dolor pasa a ser el de la página (y con él la listicle)
+  const ti=BRAND.fanpages.findIndex(f=>f.n===fanpageDe(v));
+  if(pg && !pg.t.includes(ti)){ patch.fanpage=BRAND.fanpages[pg.t[0]].n; patch.fanpageBy=patch.paginaBy; }
+  Object.assign(v,patch);
+  if(window._fbPatchVideo) window._fbPatchVideo(id, patch);
+  else if(window._fbUpdateVideo) window._fbUpdateVideo(v);
+  renderVideos();
+  showToast(pagina?"✓ Página guardada":"Página borrada");
+}
 function fanpageCell(v){
   const auto=!v.fanpage&&!!fanpageDe(v);
   const fpN=fanpageDe(v);
@@ -1772,8 +1815,15 @@ function fanpageCell(v){
       <a href="${escUrl(url)}" target="_blank" rel="noopener" title="Abrir la listicle" style="font-size:10px;font-family:'Poppins';color:var(--accent);text-decoration:none;">Abrir ↗</a>
       <button onclick="navigator.clipboard.writeText('${escUrl(url)}');showToast('Link copiado')" title="Copiar el link de la listicle" style="font-size:11px;line-height:1;border:none;background:none;color:var(--muted);cursor:pointer;padding:0;">📋</button>
     </div>`;
+  // 13/10: arriba la PÁGINA donde se corre (la que pasó la marca); abajo el dolor y la listicle
+  const pgN = paginaDe(v, fp);
+  const P = BRAND.paginas||[];
+  const lab = p => p.n + (p.pausa?' (en pausa)':p.crear?' (por crear)':'');
+  const pgOpts = '<option value="">— Página —</option>' + P.map(p=>`<option value="${esc(p.n)}" ${p.n===pgN?'selected':''}>${esc(lab(p))}</option>`).join('');
+  const pgSel = P.length ? `<select onchange="setPagina('${v.id}',this.value)" title="Página donde se corre el video" style="font-family:'Poppins';font-size:11px;font-weight:700;padding:3px 6px;border-radius:var(--radius-xs);border:1px solid ${pgN?'rgba(var(--acc-rgb),.45)':'var(--border2)'};background:${pgN?'rgba(var(--acc-rgb),.1)':'none'};color:var(--text);width:100%;max-width:182px;margin-bottom:4px;">${pgOpts}</select>` : '';
   return `<td style="width:190px;max-width:190px;vertical-align:top;padding-top:8px;">
-    <select onchange="setFanpage('${v.id}',this.value)" style="font-family:'Poppins';font-size:11px;padding:3px 6px;border-radius:var(--radius-xs);border:1px solid ${fpN?'rgba(var(--acc-rgb),.35)':'var(--border2)'};background:${fpN?'rgba(var(--acc-rgb),.06)':'none'};color:var(--text);width:100%;max-width:182px;">${opts}</select>
+    ${pgSel}
+    <select onchange="setFanpage('${v.id}',this.value)" title="Dolor" style="font-family:'Poppins';font-size:10px;padding:2px 5px;border-radius:var(--radius-xs);border:1px solid var(--border2);background:none;color:var(--muted);width:100%;max-width:182px;">${opts}</select>
     ${dolor}${lis}
   </td>`;
 }
@@ -1939,8 +1989,9 @@ function renderVideos(){
   const pf=document.getElementById("vf-product")?.value||"ALL";
   if(pf!=="ALL") vids=vids.filter(v=>v.producto===pf);
   const ff=BRAND.fanpages?(document.getElementById("vf-fanpage")?.value||"ALL"):"ALL";
-  if(ff==="NONE") vids=vids.filter(v=>!fanpageDe(v));
-  else if(ff!=="ALL") vids=vids.filter(v=>fanpageDe(v)===ff);
+  const _pg=v=>paginaDe(v,(BRAND.fanpages||[]).find(f=>f.n===fanpageDe(v)));
+  if(ff==="NONE") vids=vids.filter(v=>!_pg(v));
+  else if(ff!=="ALL") vids=vids.filter(v=>_pg(v)===ff);
   const wf=document.getElementById("vf-views")?.value||"ALL";
   if(wf!=="ALL") vids=vids.filter(v=>viewsAcum(v)>=Number(wf));
   if(sf==="featured") vids=vids.filter(v=>v.featured||v.featuredAt);
@@ -3786,7 +3837,7 @@ loadConfig();
 <!-- Auto-actualización: GitHub Pages cachea el HTML y los celulares lo retienen mucho más.
      Esto compara la versión publicada con la que está corriendo y refresca sola. -->
 <script>
-const APP_VERSION = '2026-10-13-c';
+const APP_VERSION = '2026-10-13-d';
 (function(){
   var CLAVE='cima_ver_reload';
   function hayAlguienEscribiendo(){
