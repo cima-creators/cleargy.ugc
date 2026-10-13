@@ -1432,14 +1432,26 @@ let overviewPeriod=1;
 // Métricas arranca apagada en las marcas que entregan el crudo: ahí nunca hay views y la
 // columna son 130px de guiones.
 const _COLS_KEY = BRAND_ID + '_vidcols';
+let _colsGuardadas = false;
 let vidCols = (()=>{
-  const porDefecto = {cat:true, metrics:!(BRAND.driveOnly||BRAND.crudoDefault), nota:true, plat:false, fan:true};
+  const porDefecto = {cat:true, metrics:true, nota:true, plat:false, fan:true};
   try{
     const g = JSON.parse(localStorage.getItem(_COLS_KEY)||'null');
-    if(g && typeof g==='object') return Object.assign(porDefecto, g);
+    if(g && typeof g==='object'){ _colsGuardadas = true; return Object.assign(porDefecto, g); }
   }catch(e){}
   return porDefecto;
 })();
+// Marcas donde se entrega el crudo: ningún video tiene views y la columna Métricas son 130px
+// de guiones. Se apaga sola la primera vez, y sólo si el usuario nunca eligió sus columnas.
+let _colsAuto = false;
+function _autoApagarMetricas(){
+  if(_colsGuardadas || _colsAuto) return;
+  const vids = (data&&data.videos)||[];
+  if(!vids.length) return;            // todavía no cargó nada: no decidir
+  _colsAuto = true;
+  const hayViews = vids.some(v => viewsAcum(v) > 0);
+  if(!hayViews) vidCols.metrics = false;
+}
 function _pintarChipsCols(){
   document.querySelectorAll('.col-toggle[data-col]').forEach(b=>{
     b.classList.toggle('active', !!vidCols[b.dataset.col]);
@@ -2020,6 +2032,7 @@ function renderVideos(){
   if(dateFrom) vids=vids.filter(v=>v.date&&v.date.slice(0,10)>=dateFrom);
   if(dateTo)   vids=vids.filter(v=>v.date&&v.date.slice(0,10)<=dateTo);
 
+  _autoApagarMetricas();
   const cols=vidCols;
   _pintarChipsCols();
   const thead=document.getElementById("videos-thead");
@@ -3857,7 +3870,7 @@ loadConfig();
 <!-- Auto-actualización: GitHub Pages cachea el HTML y los celulares lo retienen mucho más.
      Esto compara la versión publicada con la que está corriendo y refresca sola. -->
 <script>
-const APP_VERSION = '2026-10-13-e';
+const APP_VERSION = '2026-10-13-f';
 (function(){
   var CLAVE='cima_ver_reload';
   function hayAlguienEscribiendo(){
