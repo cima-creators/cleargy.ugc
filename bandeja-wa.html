@@ -61,7 +61,8 @@ const $ = s => document.querySelector(s);
 const ls = { get(k){ try { return localStorage.getItem(k); } catch { return null; } }, set(k,v){ try { localStorage.setItem(k,v); } catch {} }, del(k){ try { localStorage.removeItem(k); } catch {} } };
 let CLAVE = ls.get('wa_bandeja_clave') || '';
 let S = { mensajes:[], fichas:{}, leidos:{}, resueltos:{}, marcas:{}, sel:null, filtro:'todas', marca:'', timer:null };
-const ETQ = { invitada:'Aceptada · sin ficha', ficha_completa:'Ficha completa', briefing_ok:'En lista de envío', enviado:'Kit en camino', recibido:'Grabando', entregado:'Video entregado', cambios:'Ajuste pedido', publicado:'Publicada', cumplida:'Cumplida', vencida:'Atrasada', descartada:'Descartada', rechazada:'Rechazada', por_revisar:'A revisar', revisar:'A revisar', en_cola:'En cola' };
+const ETQ = { invitada:'Aceptada · sin ficha', ficha_completa:'Ficha completa', briefing_ok:'En lista de envío', enviado:'Kit en camino', recibido:'Grabando', entregado:'Video entregado', cambios:'Ajuste pedido', publicado:'Publicada', cumplida:'Cumplida', vencida:'Atrasada', sin_respuesta:'Sin respuesta · bloqueada', devolucion:'Devuelve el kit', descartada:'Descartada', rechazada:'Rechazada', por_revisar:'A revisar', revisar:'A revisar', en_cola:'En cola' };
+const CORREGIBLES = ['briefing_ok','enviado','recibido','vencida','entregado','cambios'];   // 13/10: Jhose corrige estados desde acá
 const esc = t => String(t ?? '').replace(/[&<>"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
 const hora = ts => { const d = new Date(ts), h = new Date(); const hh = d.toLocaleTimeString('es-AR',{hour:'2-digit',minute:'2-digit'}); return d.toDateString() === h.toDateString() ? hh : d.toLocaleDateString('es-AR',{day:'numeric',month:'short'}) + ' ' + hh; };
 const esReac = m => m.tipo === 'reaction' || /^(Reaccionó|\[reaction\])/.test(m.texto || '');
@@ -166,6 +167,7 @@ function hilo(c, foco){
         <a class="btn" href="https://cima-creators.github.io/${c.marca}/panel" target="_blank" rel="noopener">Panel de ${esc(M.nombre)}</a>
         <a class="btn" href="${waLink(c.tel)}" target="_blank" rel="noopener">Abrir en mi WhatsApp</a>
         ${c.responder ? `<button class="btn" id="listo">✓ No hace falta responder</button>` : ''}
+        ${c.f.id && CORREGIBLES.includes(c.f.estado) ? `<select class="btn" id="corr" title="Corregir el estado de su collab"><option value="">Corregir estado…</option><option value="recibido">Le llegó el kit…</option>${c.f.estado !== 'enviado' ? '<option value="enviado">No le llegó · kit en camino</option>' : ''}<option value="baja">Se baja</option></select>` : ''}
       </div></div>
     <div class="msgs" id="msgs">${comunes.map(m => `<div class="m ${m.dir}${m.dir === 'out' && !m.manual ? ' auto' : ''}${caras.has(m) ? ' cara' : ''}">${esc(m.texto)}<i>${m.dir === 'out' ? (m.manual ? 'Equipo · ' : m.plantilla ? 'Aviso automático · ' : 'Respuesta automática · ') : ''}${hora(m.ts)}</i>${caras.has(m) ? `<span class="cara-b">${esc(caras.get(m))}</span>` : ''}</div>`).join('')}</div>
     <div class="pie">
@@ -175,6 +177,17 @@ function hilo(c, foco){
     </div>`;
   const ms = $('#msgs'); ms.scrollTop = ms.scrollHeight;
   $('#volver').onclick = () => { S.sel = null; $('#caja').classList.remove('abierto'); pintar(); };
+  const cr = $('#corr'); if (cr) cr.onchange = async () => {
+    const a = cr.value; if (!a) return; const extra = {};
+    if (a === 'recibido') {
+      const d = prompt('¿Hace cuántos días le llegó el kit? (0 = hoy)\nSu plazo se cuenta desde ese día.', '0');
+      if (d === null || !/^\d{1,2}$/.test(d.trim())) { cr.value = ''; return; } extra.dias = Number(d.trim());
+    } else if (a === 'enviado') { if (!confirm('¿Volver a «kit en camino»? Se borra el plazo; cuando le llegue, responde LLEGÓ.')) { cr.value = ''; return; } }
+    else { const m = prompt('¿Por qué se baja? (opcional)', 'Se bajó'); if (m === null) { cr.value = ''; return; } extra.motivo = m; }
+    const r = await api('estado_panel', { marca: c.marca, id: c.f.id, a, ...extra }).catch(e => ({ error: e.message }));
+    if (!r.ok) { alert('No se pudo cambiar: ' + (r.error || 'error')); cr.value = ''; return; }
+    if (S.fichas[c.k]) S.fichas[c.k].estado = r.estado; pintar();
+  };
   const li = $('#listo'); if (li) li.onclick = () => { S.resueltos[c.k] = c.ult.ts; S.leidos[c.k] = Math.max(S.leidos[c.k] || 0, c.ult.ts); api('wa_leido', { marca: c.marca, tel: c.tel, ts: c.ult.ts, resuelto: true }).catch(() => {}); pintar(); };
   const co = $('#cons'); if (co) co.onclick = async () => {
     if (!confirm(`Le llega por WhatsApp: "Collabs de ${M.nombre} 💛 Hola, te escribimos por tu collab. Respondé este mensaje así seguimos la charla por acá." ¿Lo mando?`)) return;

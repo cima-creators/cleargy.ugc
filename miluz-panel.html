@@ -1838,6 +1838,37 @@ function queFalta(c){
     default: return '';
   }
 }
+/* 13/10: Jhose (y el equipo) corrigen el estado desde la ficha: le llegó (con hace cuántos días), no le llegó, se baja */
+const ESTADOS_CORREGIBLES = ['briefing_ok','enviado','recibido','vencida','entregado','cambios','sin_respuesta','devolucion'];
+function corregirEstadoHtml(c){
+  if (!['admin','equipo','avisos'].includes(ROL) || !ESTADOS_CORREGIBLES.includes(c.estado)) return '';
+  if (c.bloqueada && ROL !== 'admin') return '<div class="cre-box" style="margin-top:10px"><h4>Corregir estado</h4>Está bloqueada: solo Nacho la puede mover.</div>';
+  return `<div class="cre-box" style="margin-top:10px"><h4>Corregir estado</h4>
+    <div style="display:flex;gap:6px;flex-wrap:wrap">
+      <button class="bsec corr-est" data-id="${c.id}" data-a="recibido">Le llegó el kit…</button>
+      ${c.estado !== 'enviado' ? `<button class="bsec corr-est" data-id="${c.id}" data-a="enviado">No le llegó · kit en camino</button>` : ''}
+      <button class="bsec corr-est" data-id="${c.id}" data-a="baja">Se baja</button>
+    </div></div>`;
+}
+document.addEventListener('click', async e => {
+  const b = e.target.closest && e.target.closest('.corr-est'); if (!b) return;
+  const a = b.dataset.a, extra = {};
+  if (a === 'recibido') {
+    const d = prompt('¿Hace cuántos días le llegó el kit? (0 = hoy)\nSu plazo se cuenta desde ese día.', '0');
+    if (d === null) return; if (!/^\d{1,2}$/.test(d.trim())) { alert('Poné un número de días.'); return; }
+    extra.dias = Number(d.trim());
+  } else if (a === 'enviado') {
+    if (!confirm('¿Volver a «kit en camino»? Se borra el plazo; cuando le llegue, responde LLEGÓ.')) return;
+  } else {
+    const m = prompt('¿Por qué se baja? (opcional)', 'Se bajó'); if (m === null) return; extra.motivo = m;
+  }
+  b.disabled = true;
+  try {
+    const r = DEMO ? { ok: true } : await api('estado_panel', { id: b.dataset.id, a, ...extra });
+    if (!r.ok) throw new Error(r.error || 'error');
+    if (!DEMO) { abrirCreadora(b.dataset.id); cargar().then(() => typeof pintarTodo === 'function' && pintarTodo()).catch(() => {}); }
+  } catch (err) { alert('No se pudo cambiar: ' + err.message); b.disabled = false; }
+});
 async function abrirCreadora(id){
   const dlg = $('#dlg-cre'), cu = $('#cre-cuerpo');
   cu.innerHTML = '<div class="wa-vacio">Cargando…</div>'; dlg.showModal();
@@ -1899,6 +1930,7 @@ async function abrirCreadora(id){
       ${env ? `<div class="cre-box"><h4>Envío</h4><div style="line-height:1.5">${env}</div>${c.email ? `<div style="margin-top:6px;color:var(--tinta2)">${escH(c.email)}</div>` : ''}</div>` : ''}
     </div>
     ${hist ? `<div class="cre-box cre-hist" style="margin-top:10px"><h4>Historial</h4>${hist}</div>` : ''}
+    ${corregirEstadoHtml(c)}
     <div class="cre-acc">
       <a class="bsec" href="${c.link}" target="_blank" rel="noopener">Ver su app</a>
       <a class="bsec" href="https://instagram.com/${encodeURIComponent(c.ig)}" target="_blank" rel="noopener">Instagram</a>
@@ -2251,7 +2283,7 @@ function aplicarRol(){
     pintarTodo();
   }
 })();
-const APP_VERSION = '2026-10-13-a';
+const APP_VERSION = '2026-10-13-b';
 </script>
 </body>
 </html>
