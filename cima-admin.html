@@ -1904,7 +1904,7 @@ function videoRow(v, compact=false){
     if(!e || !e.link) return "";
     const f = e.fecha ? new Date(e.fecha).toLocaleDateString("es-AR",{day:"2-digit",month:"2-digit"}) : "";
     const t = "Abrir el editado" + (f?" · "+f:"") + (e.archivo?" · "+e.archivo:"");
-    return `<a href="${escUrl(e.link)}" target="_blank" rel="noopener" title="${esc(t)}" style="padding:2px 8px;border-radius:20px;font-size:9px;font-family:'Poppins';font-weight:700;border:1px solid rgba(124,58,237,.35);color:#7c3aed;background:rgba(124,58,237,.1);text-decoration:none;white-space:nowrap;">✂ EDITADO</a>`;
+    return `<a href="${escUrl(e.link)}" target="_blank" rel="noopener" title="${esc(t)}" style="padding:3px 10px;border-radius:20px;font-size:10px;font-family:'Poppins';font-weight:800;letter-spacing:.3px;border:1px solid #6d28d9;color:#fff;background:#7c3aed;box-shadow:0 1px 5px rgba(124,58,237,.45);text-decoration:none;white-space:nowrap;">✂ EDITADO</a>`;
   })();
   const copyBtn = (sinDrive||crudoTag||ediTag||igBtn||ttBtn||fbBtn) ? [sinDrive,crudoTag,ediTag,igBtn,ttBtn,fbBtn].filter(Boolean).join(" ") : `<button onclick="copyLink('${v.id}',event)" style="padding:2px 8px;border-radius:20px;font-size:9px;font-family:'Poppins';cursor:pointer;border:1px solid var(--border2);color:var(--muted);background:none;">📋 Copiar</button>`;
   const guionTag = v.guion
@@ -3870,7 +3870,7 @@ loadConfig();
 <!-- Auto-actualización: GitHub Pages cachea el HTML y los celulares lo retienen mucho más.
      Esto compara la versión publicada con la que está corriendo y refresca sola. -->
 <script>
-const APP_VERSION = '2026-10-13-h';
+const APP_VERSION = '2026-10-13-i';
 (function(){
   var CLAVE='cima_ver_reload';
   function hayAlguienEscribiendo(){
