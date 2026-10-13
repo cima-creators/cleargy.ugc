@@ -1448,7 +1448,7 @@ function precargarEntrega(){
     $('#btn-drive').textContent = tieneLinks ? 'Actualizar links' : 'Cargar mis links';
   } else {
     const yaMando = !!(x && x.drive);
-    $('#subir-tit').textContent = e === 'cambios' ? 'Volvé a mandar tu video' : e === 'vencida' ? 'Mandanos tu video hoy' : (yaMando ? '¿Cambiaste el video?' : (ENTREGA_N === 2 ? 'Mandanos tu segundo video' : 'Mandanos tu video'));
+    $('#subir-tit').textContent = e === 'cambios' ? 'Volvé a mandar tu video' : ['vencida','sin_respuesta','devolucion'].includes(e) ? 'Mandanos tu video hoy' : (yaMando ? '¿Cambiaste el video?' : (ENTREGA_N === 2 ? 'Mandanos tu segundo video' : 'Mandanos tu video'));
     $('#subir-txt').textContent = yaMando ? 'Lo estamos revisando. Todavía no lo publiques: te avisamos apenas esté aprobado.' : 'Pegá el link de la carpeta con el video y las fotos. Todavía no lo publiques: primero lo revisamos.';
     $('#btn-drive').textContent = yaMando ? 'Actualizar link' : 'Entregar';
   }
@@ -1591,7 +1591,7 @@ const FLUJO = () => [
 const ORDEN = ['aprobada','briefing_ok','enviado','recibido','entregado','publicado','cumplida'];
 // 'cambios' es una vuelta atrás dentro de la entrega: para el recorrido vale como 'recibido'
 // Estados que no tienen fila propia se muestran sobre la fila que les corresponde
-const FILA_DE = { invitada:'aprobada', ficha_completa:'briefing_ok', cambios:'recibido', vencida:'recibido' };
+const FILA_DE = { invitada:'aprobada', ficha_completa:'briefing_ok', cambios:'recibido', vencida:'recibido', sin_respuesta:'recibido', devolucion:'recibido' };
 const ORDEN_DE = e => ORDEN.indexOf(FILA_DE[e] || e);
 
 function cabecera(){
@@ -1690,6 +1690,8 @@ function pintarEstado(){
         ? ['Tu collab','¡Collab<br>aceptada!','Ya aparece en tu perfil. Resubilo a tus historias: esas views suman para tus bonos.','Publicado']
         : ['Tu collab','¡Ya está<br>publicado!','Aceptá la invitación de colaboración en Instagram y resubilo a tus historias.','Publicado']),
     cumplida:   ['Tu collab','¡Listo!','Ya podés pedir tu próximo kit.','Completada'],
+    sin_respuesta:['Tu collab','Cerramos<br>tu collab', `Como no supimos nada de vos, tu cuenta quedó bloqueada en las campañas de CIMA y te pedimos el kit de vuelta${CFG.devolucion ? ' (mandalo a ' + CFG.devolucion + ' con tu nombre adentro)' : ''}. Si igual subís tu video acá abajo, la cerramos como cumplida.`,'Cerrada'],
+    devolucion: ['Tu collab','Devolvés<br>el kit', `Nos avisaste que no vas a hacer el video. ${CFG.devolucion ? 'Mandá el kit a ' + CFG.devolucion + ' con tu nombre adentro (el envío va por tu cuenta).' : 'Te pasamos por WhatsApp la dirección para devolver el kit.'} Si cambiaste de idea, todavía podés subir tu video acá abajo.`,'Devolución'],
     vencida:    ['Tu plazo','Se te pasó<br>el plazo', CREADORA_PUBLICA() ? 'El kit ya lo tenés: mandanos tu video hoy acá abajo. Sin video no podemos mandarte más kits.' : 'El kit ya lo tenés: entregá tu video hoy acá abajo. Sin video no podemos mandarte más kits.','Atrasada']
   }[e] || ['Tu estado','—','','En curso'];
 
@@ -1740,7 +1742,7 @@ function pintarEstado(){
   $('#bloque-recorrido').classList.toggle('oculto', !!CFG.sinKit);   // CIMA Club: no hay kit que seguir
   // cuando publica la creadora, el bloque sigue abierto en `publicado` (ajustar links, cargar el 2º video)
   // `vencida` sigue pudiendo entregar: el plazo la apura, no la deja afuera
-  const conSubir = CREADORA_PUBLICA() ? ['enviado','recibido','cambios','entregado','publicado','vencida'] : ['enviado','recibido','cambios','entregado','vencida'];
+  const conSubir = CREADORA_PUBLICA() ? ['enviado','recibido','cambios','entregado','publicado','vencida','sin_respuesta','devolucion'] : ['enviado','recibido','cambios','entregado','vencida','sin_respuesta','devolucion'];
   $('#bloque-subir').classList.toggle('oculto', !conSubir.includes(e));
   if (conSubir.includes(e)){
     if (CREADORA_PUBLICA()){
@@ -1754,7 +1756,7 @@ function pintarEstado(){
       } else ENTREGA_N = 1;
       precargarEntrega();
     } else {
-      $('#subir-tit').textContent = e === 'entregado' ? '¿Cambiaste el video?' : (e === 'cambios' ? 'Volvé a entregar' : (e === 'vencida' ? 'Entregá hoy' : 'Entregá tu contenido'));
+      $('#subir-tit').textContent = e === 'entregado' ? '¿Cambiaste el video?' : (e === 'cambios' ? 'Volvé a entregar' : (['vencida','sin_respuesta','devolucion'].includes(e) ? 'Entregá hoy' : 'Entregá tu contenido'));
       $('#btn-drive').textContent = e === 'entregado' ? 'Actualizar link' : 'Entregar';
       if (D.entrega && D.entrega.drive && !$('#in-drive').value) $('#in-drive').value = D.entrega.drive;
       pintarCandado();
@@ -1883,7 +1885,7 @@ function pintarMarca(){
   } catch { if (DEMO){ precargar(); traerBorrador(); } ver(DEMO ? 'v-ficha' : 'v-error'); }
 })();
 
-const APP_VERSION = '2026-10-12-a';
+const APP_VERSION = '2026-10-13-a';
 </script>
 </body>
 </html>

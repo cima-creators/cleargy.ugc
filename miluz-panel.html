@@ -568,6 +568,8 @@ dialog.dlg.dlg-cre{max-width:680px}
       <button class="bsec fcre" data-f="enviar">2 · Ficha lista, hay que enviar <span class="n" data-n="enviar">0</span></button>
       <button class="bsec fcre" data-f="enviados">3 · Kit enviado <span class="n" data-n="enviados">0</span></button>
       <button class="bsec fcre" data-f="recibieron">4 · Ya lo recibieron <span class="n" data-n="recibieron">0</span></button>
+      <button class="bsec fcre" data-f="vencidas" title="Se les pasó el plazo: la escalera les escribe un mensaje por día hasta que respondan o entreguen">⏰ Vencidas <span class="n" data-n="vencidas">0</span></button>
+      <button class="bsec fcre" data-f="devolver" title="No entregaron: tienen que devolver el kit. Tildá cuando llegue al depósito.">📦 A devolver <span class="n" data-n="devolver">0</span></button>
       <button class="bsec fcre" data-f="mano">⚠ Mandar link a mano <span class="n" data-n="mano">0</span></button>
       <button class="bsec fcre oculto" data-f="repetidos" title="Eligieron dos videos y les quedaron los dos kits iguales: hay que avisarles que elijan el segundo en su app">🔁 Kits repetidos <span class="n" data-n="repetidos">0</span></button>
       <button class="bsec fcre" data-f="afuera" title="Las que el filtro automático dejó afuera. Podés aceptar a mano las que valgan la pena.">✕ Afuera por el filtro <span class="n" data-n="afuera">0</span></button>
@@ -846,6 +848,9 @@ async function cargar(){
     avisadaEn: f.avisadaEn || null, avisadaManual: !!f.avisadaManual, decididaEn: f.decididaEn || null,
     tel: f.tel || null, referidaPor: f.referidaPor || null, referidasCumplidas: f.referidasCumplidas || 0,
     views: f.views || 0, ventas: f.ventas || 0, monto: f.facturado || 0, bono: f.bono, reel: f.reel || null,
+    vencidaEn: f.vencidaEn || null, deadline: f.deadline || null, escalon: f.escalon ?? null, escalonEn: f.escalonEn || null,
+    respuestaVencida: f.respuestaVencida || null, pausaHasta: f.pausaHasta || null, kitDevueltoEn: f.kitDevueltoEn || null,
+    bloqueada: !!f.bloqueada, faltaDevolucion: !!f.faltaDevolucion, devolucion: f.devolucion || null,
   }));
 
   PLATA = !pl ? [] : pl.fichas.map(f => ({
@@ -1913,6 +1918,7 @@ const ETIQUETA = {
   descartada:['Descartada por filtro','no'], rechazada:['Rechazada','no'],
   entregado:['Video entregado','esp'], cambios:['Ajuste pedido','esp'],
   baja:['Dada de baja','no'],
+  sin_respuesta:['Sin respuesta · bloqueada','no'], devolucion:['Devuelve el kit · bloqueada','no'],
 };
 const MOTIVO = {
   unas:'no apta para el producto', privada:'cuenta privada', pocos_seguidores:'menos de 1.000 seguidores',
@@ -1936,6 +1942,34 @@ function mensajeKit2(c){
   const n = String(c.nom || '').split(' ')[0];
   return `Hola ${n}! Te escribimos de ${CFG.nombre} 💛 Por un error del formulario te quedaron los dos kits iguales (${nombreKit(c.kit)} y ${nombreKit(c.kit)}). Entrá a tu app y elegí el producto de tu segundo video, o quedate con uno solo: ${LINK_APP(c.id)}\n\nLo necesitamos antes de despachar 🙌`;
 }
+/* 13/10 · escalera de vencidas: día de la escalera, atraso, respuesta, WhatsApp a mano y devolución del kit */
+function celdaVencida(c){
+  const atraso = c.deadline ? Math.max(0, Math.floor((Date.now() - c.deadline) / 864e5)) : null;
+  const resp = c.respuestaVencida ? `<span class="pill ${c.respuestaVencida === 'DEVUELVO' ? 'no' : 'ok'}" title="Lo que respondió">${c.respuestaVencida}</span>` : '<span class="pill no" title="No respondió nada">sin respuesta</span>';
+  const paso = c.escalon != null ? `<span class="n2">mensaje ${Math.min(c.escalon, 4) + 1} de 5${atraso != null ? ` · ${atraso} d de atraso` : ''}</span>` : (atraso != null ? `<span class="n2">${atraso} d de atraso</span>` : '');
+  const n = String(c.nom || '').split(' ')[0];
+  const txt = c.estado === 'vencida'
+    ? `Hola ${n}! Te escribimos de ${CFG.nombre} 💛 Se te pasó el plazo de tu video y no supimos nada de vos. ¿Lo podés subir hoy? Acá está tu app: ${LINK_APP(c.id)}`
+    : `Hola ${n}! Te escribimos de ${CFG.nombre}. Como no entregaste el video, necesitamos el kit de vuelta${c.devolucion ? ': mandalo a ' + c.devolucion + ' con tu nombre adentro' : ''}. Si igual querés subir el video, tu app sigue abierta: ${LINK_APP(c.id)}`;
+  const wa = c.tel ? `<a class="mini" target="_blank" href="${waLinkTexto(c.tel, txt)}" title="Abre WhatsApp con el mensaje armado">WhatsApp</a>` : '';
+  const dev = ['sin_respuesta','devolucion'].includes(c.estado) && ROL !== 'avisos'
+    ? `<label class="mini" style="display:inline-flex;gap:4px;align-items:center;cursor:pointer" title="Tildá cuando el kit llegue al depósito"><input type="checkbox" class="kitdev" data-id="${c.id}" ${c.kitDevueltoEn ? 'checked' : ''}> kit recibido</label>` : '';
+  const falta = c.faltaDevolucion ? '<span class="pill no" title="Esta marca no tiene cargada la dirección de devolución: pasásela a mano">falta dirección</span>' : '';
+  const desb = c.bloqueada && ROL === 'admin' ? `<button class="mini desbloq" data-id="${c.id}" title="Solo Nacho: vuelve a poder postularse">desbloquear</button>` : '';
+  return `<div>${resp}${falta}${paso}</div><div style="margin-top:4px">${wa}${dev}${desb}</div>`;
+}
+document.addEventListener('change', e => {
+  const k = e.target.closest && e.target.closest('.kitdev'); if (!k) return;
+  const c = CREADORAS.find(x => x.id === k.dataset.id); if (c) c.kitDevueltoEn = k.checked ? Date.now() : null;
+  if (!DEMO) api('kit_devuelto', { id: k.dataset.id, si: k.checked }).catch(() => { alert('No se pudo guardar. Reintentá.'); k.checked = !k.checked; });
+});
+document.addEventListener('click', e => {
+  const b = e.target.closest && e.target.closest('.desbloq'); if (!b) return;
+  const c = CREADORAS.find(x => x.id === b.dataset.id);
+  if (!confirm(`¿Desbloquear a @${c ? c.ig : ''}? Va a poder postularse de nuevo en todas las marcas.`)) return;
+  if (c) c.bloqueada = false; pintarCreadoras();
+  if (!DEMO) api('desbloquear', { id: b.dataset.id }).catch(() => alert('No se pudo desbloquear.'));
+});
 function pintarCreadoras(){
   const q = ($('#buscar')?.value || '').trim().toLowerCase();
   const PREVIAS = ['iniciada','enviada','en_cola','revisar','por_revisar','descartada','rechazada'];
@@ -1950,6 +1984,8 @@ function pintarCreadoras(){
     mano:       SIN_AVISO,
     afuera:     c => c.estado === 'descartada',
     repetidos:  KIT_REPETIDO,
+    vencidas:   c => ['vencida','sin_respuesta'].includes(c.estado),
+    devolver:   c => ['devolucion','sin_respuesta'].includes(c.estado),
     aceptadas:  c => !PREVIAS.includes(c.estado),
   };
   const pasaFiltro = FILTROS[filtroCre] || FILTROS.todas;
@@ -2007,7 +2043,8 @@ function pintarCreadoras(){
             ? `<span class="pill ok" title="${c.avisadaManual?'Se le mandó el link a mano':'El DM de aceptación salió solo'}">${c.avisadaManual?'a mano ✓':'DM ✓'}</span><button class="mini copiar" data-id="${c.id}" data-nom="${(c.nom||'').replace(/"/g,'')}">copiar</button>`
             : `<span class="pill no" title="No le llegó el DM automático: hace más de 24 h que no interactúa con el bot">sin DM</span><button class="mini copiar" data-id="${c.id}" data-nom="${(c.nom||'').replace(/"/g,'')}" title="Copia el mensaje completo con su link para pegarlo por Instagram">copiar</button>${c.tel?`<a class="mini" target="_blank" href="${waLink(c.tel, c.nom, LINK_APP(c.id))}" title="Abre WhatsApp con el mensaje armado">WhatsApp</a>`:''}<button class="mini yamande" data-id="${c.id}" title="Marcar que ya se lo mandaste">listo</button>`)
           : (['ficha_completa','briefing_ok'].includes(c.estado)&&c.id ? `<button class="mini copiar" data-id="${c.id}" data-nom="${(c.nom||'').replace(/"/g,'')}">copiar</button>`
-            : (['descartada','rechazada'].includes(c.estado)&&c.id&&ROL!=='avisos' ? `<button class="mini rescatar" data-id="${c.id}" title="La acepta igual: pasa a “Aceptadas, falta la ficha” y le sale el aviso">aceptar igual</button>` : ''))}</td>
+            : (['vencida','sin_respuesta','devolucion'].includes(c.estado)&&c.id ? celdaVencida(c)
+            : (['descartada','rechazada'].includes(c.estado)&&c.id&&ROL!=='avisos' ? `<button class="mini rescatar" data-id="${c.id}" title="La acepta igual: pasa a “Aceptadas, falta la ficha” y le sale el aviso">aceptar igual</button>` : '')))}</td>
           <td class="num">${c.seguidores!=null ? c.seguidores.toLocaleString('es-AR') : '—'}</td>
           <td class="num">${c.posts90!=null ? c.posts90 : '—'}</td>
           <td class="num">${c.vistas!=null ? c.vistas.toLocaleString('es-AR') : '—'}</td>
@@ -2214,7 +2251,7 @@ function aplicarRol(){
     pintarTodo();
   }
 })();
-const APP_VERSION = '2026-10-09-b';
+const APP_VERSION = '2026-10-13-a';
 </script>
 </body>
 </html>
