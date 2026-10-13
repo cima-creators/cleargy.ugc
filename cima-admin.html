@@ -1427,10 +1427,28 @@ function saveData(){
 }
 
 let overviewPeriod=1;
-let vidCols={cat:true,metrics:true,nota:true,plat:false,fan:true};
+// Qué columnas se ven en la tabla de videos. Se guardan POR MARCA: antes volvían a salir
+// todas en cada recarga y había que apagarlas de nuevo cada vez (Nacho, 13/10).
+// Métricas arranca apagada en las marcas que entregan el crudo: ahí nunca hay views y la
+// columna son 130px de guiones.
+const _COLS_KEY = BRAND_ID + '_vidcols';
+let vidCols = (()=>{
+  const porDefecto = {cat:true, metrics:!(BRAND.driveOnly||BRAND.crudoDefault), nota:true, plat:false, fan:true};
+  try{
+    const g = JSON.parse(localStorage.getItem(_COLS_KEY)||'null');
+    if(g && typeof g==='object') return Object.assign(porDefecto, g);
+  }catch(e){}
+  return porDefecto;
+})();
+function _pintarChipsCols(){
+  document.querySelectorAll('.col-toggle[data-col]').forEach(b=>{
+    b.classList.toggle('active', !!vidCols[b.dataset.col]);
+  });
+}
 function toggleCol(col,el){
   vidCols[col]=!vidCols[col];
   el.classList.toggle("active",vidCols[col]);
+  try{ localStorage.setItem(_COLS_KEY, JSON.stringify(vidCols)); }catch(e){}
   renderVideos();
 }
 function setOverviewPeriod(days,el){
@@ -2003,6 +2021,7 @@ function renderVideos(){
   if(dateTo)   vids=vids.filter(v=>v.date&&v.date.slice(0,10)<=dateTo);
 
   const cols=vidCols;
+  _pintarChipsCols();
   const thead=document.getElementById("videos-thead");
   if(thead) thead.innerHTML=`<tr>
     <th style="width:34px;padding-left:10px;"><input type="checkbox" id="vsel-all" onchange="selTodos(this.checked)" title="Seleccionar todos" style="width:16px;height:16px;cursor:pointer;accent-color:var(--accent);"></th>
@@ -3838,7 +3857,7 @@ loadConfig();
 <!-- Auto-actualización: GitHub Pages cachea el HTML y los celulares lo retienen mucho más.
      Esto compara la versión publicada con la que está corriendo y refresca sola. -->
 <script>
-const APP_VERSION = '2026-10-13-d';
+const APP_VERSION = '2026-10-13-e';
 (function(){
   var CLAVE='cima_ver_reload';
   function hayAlguienEscribiendo(){
