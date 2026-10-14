@@ -1582,6 +1582,16 @@ function logout(){
 // El catálogo lo carga la marca desde el panel. Un guion está grabado cuando existe
 // un video con ese código: el video es la prueba, así no hay dos fuentes de verdad.
 function _gCode(c){ return String(c==null?"":c).trim().toUpperCase(); }
+// Cuando escriben el guion a mano cada una lo pone como le sale: "B4", "B4 - NO ES
+// SEMIPERMANENTE", "B10- LA COBERTURA". Son el mismo guion, pero contados aparte no se puede
+// leer el rendimiento por guion. Se guarda sólo el código ("B4") y el texto tal cual va en
+// guionOriginal. Los códigos del sistema nuevo (MLZ-P-F01-N2-61) salen de la lista, no de acá,
+// y además no matchean: después de las letras tiene que venir un número.
+function _normGuion(c){
+  const s = String(c==null?"":c).trim().toUpperCase();
+  const m = s.match(/^\s*([A-Z]{0,3}\s*\d{1,3})\b/);
+  return m ? m[1].replace(/\s+/g,"") : s;
+}
 
 // Los míos: los que me asignaron + los que quedaron libres para cualquiera
 function misGuiones(){
@@ -2147,8 +2157,10 @@ function submitVideo(){
   const _gGrp = document.getElementById("up-guion-group");
   const _pideGuion = _gGrp && _gGrp.style.display !== "none";
   let _guionVal = _pideGuion ? document.getElementById("up-guion").value : "";
+  let _guionCrudo = "";   // lo que escribió tal cual, cuando no eligió de la lista
   if(_guionVal === "__manual__"){
-    _guionVal = (document.getElementById("up-guion-cod").value||"").trim().toUpperCase();
+    _guionCrudo = (document.getElementById("up-guion-cod").value||"").trim();
+    _guionVal = _normGuion(_guionCrudo);
     if(!_guionVal){
       document.getElementById("up-err").style.display="block";
       document.getElementById("up-err").textContent="Escribí el número del guion que grabaste.";
@@ -2194,6 +2206,7 @@ function submitVideo(){
     producto,
     crudo: _crudo && !BRAND.driveOnly,
     guion: _guionVal,
+    guionOriginal: _guionCrudo && _guionCrudo.toUpperCase()!==_guionVal ? _guionCrudo : "",
     notes: _notaVal,
     driveLink: document.getElementById("up-drive").value.trim(),
     day,
@@ -2982,7 +2995,7 @@ loadData();
 <!-- Auto-actualización: GitHub Pages cachea el HTML y los celulares lo retienen mucho más.
      Esto compara la versión publicada con la que está corriendo y refresca sola. -->
 <script>
-const APP_VERSION = '2026-10-13-m';
+const APP_VERSION = '2026-10-14-a';
 (function(){
   var CLAVE='cima_ver_reload';
   function hayAlguienEscribiendo(){
