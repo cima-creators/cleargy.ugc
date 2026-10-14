@@ -1387,7 +1387,6 @@ function campaignStartFor(c){
 const SALARY = BRAND.salary || 650000;
 const COMISION_POR_VENTA = 2500;
 const MIN_VIDEOS = BRAND.minVideos || 150;
-const QUINCENA_META = Math.round(MIN_VIDEOS/2); // meta de videos por quincena (mitad del objetivo)
 // Overrides por creador: campañas donde no todos hacen la misma cantidad ni cobran lo mismo
 const minDe = c => ((BRAND.creators[c]||{}).minVideos) || MIN_VIDEOS;
 // Cadencia diaria propia: en NoxaLab tres hacen 90 (3 por día) y uno 60 (2 por día)
@@ -2229,20 +2228,26 @@ async function notifyNoVideos(){
 async function sendAdminReport(){
   const hoy=Object.keys(PHONES).filter(c=>getVideosOnDay(c,0)<5);
   const racha=Object.keys(PHONES).filter(c=>getVideosOnDay(c,0)===0&&getVideosOnDay(c,1)===0);
-  // Quincenas recién cerradas (día 15-17 o 30-32 desde SU video 1) → recordatorio de pago
-  const quincenasListas=[];
+  // Hitos de pago por VIDEOS (Nacho, 14/10): la mitad de la campaña y la campaña completa.
+  // Sólo avisa si de verdad queda plata sin pagar y si esa cuota todavía no se cobró.
+  const paraPagar=[];
   CREATORS.forEach(c=>{
-    const startMs=new Date(campaignStartFor(c)+"T00:00:00").getTime();
-    const dia=Math.floor((Date.now()-startMs)/86400000)+1;
-    const myVids=(data.videos||[]).filter(v=>v.creator===c&&v.date);
-    if(!myVids.length) return;
-    const enQ=(d0,d1)=>myVids.filter(v=>{const d=Math.floor((new Date(v.date).getTime()-startMs)/86400000)+1;return d>=d0&&d<=d1;}).length;
-    if(dia>=15&&dia<=17) quincenasListas.push({c,q:'Q1',n:enQ(1,15)});
-    if(dia>=30&&dia<=32) quincenasListas.push({c,q:'Q2',n:enQ(16,30)});
+    const metaC=minDe(c);
+    if(!metaC) return;
+    const vids=(data.videos||[]).filter(v=>v.creator===c&&cuentaPago(v)).length;
+    const pct=Math.round(vids/metaC*100);
+    if(pct<50) return;
+    const cuotas=(data.pagos||[]).filter(p=>p.creator===c&&String(p.fecha||'')>=campaignStartFor(c)).length;
+    const hito=pct>=100?100:50;
+    if(cuotas>=(hito===50?1:2)) return;
+    const ganado=Math.round(salDe(c)*vids/metaC)+((data.ventas||{})[c]||0)*COMISION_POR_VENTA+((data.bonos||{})[c]||0);
+    const debe=Math.max(0,ganado-(data.pagos||[]).filter(p=>p.creator===c).reduce((a,p)=>a+p.monto,0));
+    if(debe<=0) return;
+    paraPagar.push({c,hito,vids,metaC,debe});
   });
-  if(hoy.length===0&&racha.length===0&&quincenasListas.length===0)return;
+  if(hoy.length===0&&racha.length===0&&paraPagar.length===0)return;
   let msg="📊 *Reporte "+BRAND.name+" — "+new Date().toLocaleDateString("es-AR")+"*\n\n";
-  if(quincenasListas.length>0){msg+="💰 *Quincenas para pagar:*\n";quincenasListas.forEach(x=>{msg+="• "+NAMES[x.c]+" cerró "+x.q+" con "+x.n+"/"+QUINCENA_META+" videos "+(x.n>=QUINCENA_META?"✅":"⚠️")+"\n";});msg+="\n";}
+  if(paraPagar.length>0){msg+="💰 *Para pagar:*\n";paraPagar.forEach(x=>{msg+="• "+NAMES[x.c]+" — "+(x.hito===100?"campaña completa":"mitad de campaña")+" ("+x.vids+"/"+x.metaC+" videos) · $"+x.debe.toLocaleString("es-AR")+"\n";});msg+="\n";}
   if(hoy.length>0){msg+="⚠️ *Sin 5 videos hoy:*\n";hoy.forEach(c=>{const cant=getVideosOnDay(c,0);msg+="• "+NAMES[c]+" ("+cant+"/5)\n";});msg+="\n";}
   if(racha.length>0){msg+="🔴 *Racha — 2 días sin subir:*\n";racha.forEach(c=>{msg+="• "+NAMES[c]+"\n";});}
   try{
@@ -3019,21 +3024,24 @@ function renderFinanzas(){
     // Más ventas semana
     const ventasCount = (data.bonoGranted['ventasCount']||{})[c] || (((data.bonosGanados||{})[c]||{})['ventas']?1:0);
 
-    // Quincenas: pagos cada 15 días (Q1 = días 1-15, meta 75 videos; Q2 = días 16-30)
+    // Hitos de pago (Nacho, 14/10): se paga A LA MITAD DE LA CAMPAÑA EN VIDEOS y al
+    // completarla — no por quincena de días. Es la misma regla con la que avisa la Vista
+    // General. El monto no es "medio sueldo" fijo: es lo ganado hasta hoy menos lo pagado
+    // (`deuda` de acá arriba), así nunca se le paga por videos que todavía no entregó.
     const startMs = new Date(campaignStartFor(c)+"T00:00:00").getTime();
-    // Math.max(1,…): un video subido antes del día 1 manual cuenta en la primera quincena
-    const diaDe = fecha => Math.max(1, Math.floor((new Date(fecha).getTime()-startMs)/86400000)+1);
-    const quincena = q => {
-      const d0=(q-1)*15+1, d1=q*15;
-      const qv = myAprob.filter(v=>v.date && diaDe(v.date)>=d0 && diaDe(v.date)<=d1).length;
-      const qventas = (salesData||[]).filter(s=>s.creator===c && s.date && diaDe(s.date)>=d0 && diaDe(s.date)<=d1).length;
-      const qbase = Math.round(salDe(c)*Math.min(qv,Math.round(minDe(c)/2))/minDe(c));
-      return {qv, qventas, sugerido: qbase + qventas*COMISION_POR_VENTA, completa: qv>=QUINCENA_META};
-    };
-    const q1 = quincena(1), q2 = quincena(2);
     const diaHoy = Math.floor((Date.now()-startMs)/86400000)+1;
+    const metaC = minDe(c);
+    const pctC = metaC ? Math.round(vids/metaC*100) : 0;
+    // Cuotas ya cobradas EN ESTA campaña: es lo que decide si un hito ya se pagó.
+    const cuotas = data.pagos.filter(p=>p.creator===c && String(p.fecha||'') >= campaignStartFor(c)).length;
+    const hitos = [50,100].map(h=>({
+      h,
+      videos: Math.ceil(metaC*h/100),
+      alcanzado: pctC >= h,
+      cobrado: cuotas >= (h===50?1:2),
+    }));
 
-    return {c, vids, base, comVentas, bonos, total, pagado, deuda, vids10k, got100k, rachaCount, rachaMontoReal, viralCount, ventasCount, q1, q2, diaHoy};
+    return {c, vids, base, comVentas, bonos, total, pagado, deuda, vids10k, got100k, rachaCount, rachaMontoReal, viralCount, ventasCount, metaC, pctC, cuotas, hitos, diaHoy};
   });
 
   // Orden: mayor deuda arriba (los $0 quedan al final)
@@ -3078,21 +3086,18 @@ function renderFinanzas(){
           </div>
           <div style="border-top:1px solid var(--surface2);margin-top:8px;padding-top:8px;">
             <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px;">
-              <span style="font-size:9px;font-family:'Poppins';letter-spacing:1.5px;color:var(--muted);text-transform:uppercase;">Pagos quincenales</span>
-              <span style="font-size:9px;font-family:'Poppins';color:var(--muted);">📅 video 1: ${r.vids>0?new Date(campaignStartFor(r.c)+'T12:00:00').toLocaleDateString('es-AR',{day:'2-digit',month:'2-digit'})+' · día '+Math.max(1,r.diaHoy):'sin videos aún'}</span>
+              <span style="font-size:9px;font-family:'Poppins';letter-spacing:1.5px;color:var(--muted);text-transform:uppercase;">Pagos por videos</span>
+              <span style="font-size:9px;font-family:'Poppins';color:var(--muted);">${r.vids}/${r.metaC} videos · ${r.pctC}%</span>
             </div>
-            ${[['Q1 · días 1-15', r.q1, r.diaHoy>=15], ['Q2 · días 16-30', r.q2, r.diaHoy>=30]].map(([lbl,q,cerrada])=>`
+            ${r.hitos.map(x=>`
             <div style="display:flex;justify-content:space-between;align-items:center;gap:6px;margin-bottom:5px;">
               <div>
-                <div style="font-size:10px;font-weight:800;color:var(--text);">${lbl} ${q.completa?'✅':cerrada?'⚠️':''}</div>
-                <div style="font-size:9px;font-family:'Poppins';color:var(--muted);">${q.qv}/${QUINCENA_META} videos · ${q.qventas} ventas</div>
+                <div style="font-size:10px;font-weight:800;color:var(--text);">${x.h===50?'Mitad de la campaña':'Campaña completa'} · ${x.videos} videos ${x.cobrado?'✅':x.alcanzado?'💰':''}</div>
+                <div style="font-size:9px;font-family:'Poppins';color:var(--muted);">${x.cobrado?'ya cobrada':x.alcanzado?'le toca cobrar':'le faltan '+(x.videos-r.vids)+' video'+((x.videos-r.vids)===1?'':'s')}</div>
               </div>
-              <div style="display:flex;align-items:center;gap:6px;">
-                <span style="font-size:11px;font-weight:800;color:${q.completa||cerrada?'var(--accent)':'var(--muted)'};">$${q.sugerido.toLocaleString("es-AR")}</span>
-                ${(q.completa||cerrada)&&q.sugerido>0?`<button onclick="openPago('${r.c}',${q.sugerido})" title="Registrar pago de esta quincena" style="padding:4px 9px;background:var(--accent);color:white;border:none;border-radius:8px;font-family:'Poppins';font-size:10px;font-weight:800;cursor:pointer;">💰 Pagar</button>`:''}
-              </div>
+              ${x.alcanzado&&!x.cobrado&&r.deuda>0?`<button onclick="openPago('${r.c}',${r.deuda})" title="Registrar el pago de este hito" style="padding:4px 9px;background:var(--accent);color:white;border:none;border-radius:8px;font-family:'Poppins';font-size:10px;font-weight:800;cursor:pointer;white-space:nowrap;">💰 Pagar $${r.deuda.toLocaleString("es-AR")}</button>`:''}
             </div>`).join('')}
-            <div style="font-size:8.5px;font-family:'Poppins';color:var(--muted2);line-height:1.4;">Sugerido = base por videos de la quincena + ventas de la quincena. Los bonos van aparte (acumulados arriba).</div>
+            <div style="font-size:8.5px;font-family:'Poppins';color:var(--muted2);line-height:1.4;">Se paga lo ganado hasta hoy (sueldo × videos aprobados ÷ meta) + ventas + bonos, menos lo ya pagado. Nunca por videos que todavía no entregó.</div>
           </div>
           <button onclick="openPago('${r.c}',${r.deuda})" style="width:100%;margin-top:8px;padding:8px;background:var(--accent);color:white;border:none;border-radius:var(--radius-xs);font-family:'Poppins';font-size:12px;font-weight:700;cursor:pointer;">+ Registrar pago</button>
           <button onclick="resetPagosCreadora('${r.c}')" style="width:100%;margin-top:6px;padding:6px;background:none;border:1px solid var(--border);border-radius:var(--radius-xs);font-family:'Poppins';font-size:10px;color:var(--muted);cursor:pointer;">↺ Resetear pagos</button>
@@ -3908,7 +3913,7 @@ loadConfig();
 <!-- Auto-actualización: GitHub Pages cachea el HTML y los celulares lo retienen mucho más.
      Esto compara la versión publicada con la que está corriendo y refresca sola. -->
 <script>
-const APP_VERSION = '2026-10-14-a';
+const APP_VERSION = '2026-10-14-b';
 (function(){
   var CLAVE='cima_ver_reload';
   function hayAlguienEscribiendo(){
