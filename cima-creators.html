@@ -1594,8 +1594,10 @@ function _normGuion(c){
 }
 
 // Los míos: los que me asignaron + los que quedaron libres para cualquiera
+// Nacho (14/10/2026): cada creadora ve SOLO sus guiones (los asignados a ella). Los que
+// quedaron sin dueña ya no se le mezclan a todas: se eligen en el selector al subir, nada más.
 function misGuiones(){
-  return (sharedData.guiones||[]).filter(g => !g.creadora || g.creadora===currentUser);
+  return (sharedData.guiones||[]).filter(g => g.creadora===currentUser);
 }
 function guionesGrabados(){
   const s = new Set();
@@ -1658,17 +1660,16 @@ function renderGuiones(){
     return;
   }
   const hechos = guionesGrabados();
-  const orden = [...todos].sort((a,b)=>{
-    const ha = hechos.has(_gCode(a.code)) ? 1 : 0, hb = hechos.has(_gCode(b.code)) ? 1 : 0;
-    return ha-hb || String(a.code).localeCompare(String(b.code), "es", {numeric:true});
-  });
-  const pend = orden.filter(g=>!hechos.has(_gCode(g.code))).length;
-  cont.innerHTML = `<div style="font-family:'Poppins';font-size:11px;color:var(--muted);margin-bottom:12px;font-weight:600;">${pend ? pend+" sin grabar de "+orden.length : "Grabaste los "+orden.length+" 🎉"}</div>` +
+  // Nacho (14/10/2026): en cuanto sube el video, el guion desaparece de la lista. Solo ve lo que le falta.
+  const orden = [...todos].filter(g=>!hechos.has(_gCode(g.code)))
+    .sort((a,b)=>String(a.code).localeCompare(String(b.code), "es", {numeric:true}));
+  const pend = orden.length;
+  cont.innerHTML = `<div style="font-family:'Poppins';font-size:11px;color:var(--muted);margin-bottom:12px;font-weight:600;">${pend ? pend+" sin grabar · ya grabaste "+(todos.length-pend)+" de "+todos.length : "Grabaste los "+todos.length+" 🎉"}</div>` +
     orden.map(g=>{
-      const hecho = hechos.has(_gCode(g.code));
-      return `<div class="gui-item${hecho?" hecho":""}">
+      const hecho = false;
+      return `<div class="gui-item">
         <div class="gui-row">
-          <span class="gui-code${hecho?" ok":""}">${hecho?"✓":esc(g.code)}</span>
+          <span class="gui-code">${esc(g.code)}</span>
           <div class="gui-sig-txt">
             ${g.titulo?`<div class="gui-tit">${esc(g.titulo)}</div>`:""}
             ${g.texto?`<div class="gui-hk">${esc(g.texto)}</div>`:""}
@@ -1684,7 +1685,7 @@ function llenarGuionesUpload(){
   const grp = document.getElementById("up-guion-group");
   const sel = document.getElementById("up-guion");
   if(!grp || !sel) return;
-  const todos = misGuiones();
+  const todos = (sharedData.guiones||[]);
   if(!todos.length){
     grp.style.display="none"; sel.innerHTML=`<option value="">—</option>`;
     const av=document.getElementById("up-guion-vacio"); if(av) av.style.display="none";
@@ -2995,7 +2996,7 @@ loadData();
 <!-- Auto-actualización: GitHub Pages cachea el HTML y los celulares lo retienen mucho más.
      Esto compara la versión publicada con la que está corriendo y refresca sola. -->
 <script>
-const APP_VERSION = '2026-10-14-c';
+const APP_VERSION = '2026-10-14-d';
 (function(){
   var CLAVE='cima_ver_reload';
   function hayAlguienEscribiendo(){
