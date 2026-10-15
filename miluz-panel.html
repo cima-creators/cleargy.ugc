@@ -573,6 +573,8 @@ dialog.dlg.dlg-cre{max-width:680px}
       <button class="bsec fcre" data-f="mano">⚠ Mandar link a mano <span class="n" data-n="mano">0</span></button>
       <button class="bsec fcre oculto" data-f="repetidos" title="Eligieron dos videos y les quedaron los dos kits iguales: hay que avisarles que elijan el segundo en su app">🔁 Kits repetidos <span class="n" data-n="repetidos">0</span></button>
       <button class="bsec fcre" data-f="afuera" title="Las que el filtro automático dejó afuera. Podés aceptar a mano las que valgan la pena.">✕ Afuera por el filtro <span class="n" data-n="afuera">0</span></button>
+      <button class="bsec fcre" data-f="rechazadas" title="Las que se rechazaron a mano desde Admisión">✕ Rechazadas <span class="n" data-n="rechazadas">0</span></button>
+      <button class="bsec fcre" data-f="incompletas" title="Pusieron su usuario pero no terminaron el formulario">… No terminaron <span class="n" data-n="incompletas">0</span></button>
     </div>
     <div id="tabla-creadoras"></div>
   </section>
@@ -2015,6 +2017,8 @@ function pintarCreadoras(){
     recibieron: c => ['recibido','publicado','cumplida'].includes(c.estado),
     mano:       SIN_AVISO,
     afuera:     c => c.estado === 'descartada',
+    rechazadas: c => c.estado === 'rechazada',
+    incompletas: c => ['iniciada','enviada'].includes(c.estado),
     repetidos:  KIT_REPETIDO,
     vencidas:   c => ['vencida','sin_respuesta'].includes(c.estado),
     devolver:   c => ['devolucion','sin_respuesta'].includes(c.estado),
@@ -2283,7 +2287,7 @@ function aplicarRol(){
     pintarTodo();
   }
 })();
-const APP_VERSION = '2026-10-13-b';
+const APP_VERSION = '2026-10-15-a';
 </script>
 </body>
 </html>
