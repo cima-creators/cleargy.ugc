@@ -2577,7 +2577,12 @@ function renderGuionesAdmin(){
   const pend=orden.filter(g=>!hechos[_gCode(g.code)]).length;
   cont.innerHTML=`
     <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px;">
-      <div style="font-family:'Poppins';font-size:12px;color:var(--muted);font-weight:600;">${pend} sin grabar · ${orden.length-pend} grabados · ${orden.length} en total</div>
+      <div style="font-family:'Poppins';font-size:12px;color:var(--muted);font-weight:600;">${pend} sin grabar · ${orden.length-pend} grabados · ${orden.length} en total${(()=>{
+        // Un guion sin creadora no le aparece a nadie en su lista (la app le muestra sólo los
+        // suyos). El 15/10 había 11 así en MagneLab, invisibles. Que se vea y se reparta.
+        const _s=(data.guiones||[]).filter(g=>!g.creadora).length;
+        return _s?` · <span style="color:#B0512F;font-weight:800;">⚠ ${_s} sin creadora: no se los ve nadie, repartilos</span>`:"";
+      })()}</div>
       <div style="display:flex;gap:8px;">
         <button class="hbtn" onclick="repartirGuiones()" style="font-size:11px;">Repartir los sueltos</button>
         <button class="hbtn" onclick="vaciarGuiones()" style="font-size:11px;">Vaciar lista</button>
@@ -3913,7 +3918,7 @@ loadConfig();
 <!-- Auto-actualización: GitHub Pages cachea el HTML y los celulares lo retienen mucho más.
      Esto compara la versión publicada con la que está corriendo y refresca sola. -->
 <script>
-const APP_VERSION = '2026-10-14-d';
+const APP_VERSION = '2026-10-15-a';
 (function(){
   var CLAVE='cima_ver_reload';
   function hayAlguienEscribiendo(){
