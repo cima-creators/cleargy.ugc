@@ -87,8 +87,10 @@ function armar(){
       <button class="btn" id="refrescar">↻ Actualizar</button><button class="btn" id="salir">Salir</button></div>
     <div class="filtros" id="filtros"></div>
     <div class="filtros" id="marcas"></div>
+    <input id="buscar" type="search" placeholder="Buscar por nombre, @ o teléfono…" autocomplete="off" style="width:100%;box-sizing:border-box;margin:0 0 10px;padding:10px 12px;border:1px solid #ddd;border-radius:10px;font:inherit">
     <div class="caja" id="caja"><div class="lista" id="lista"><div class="vacio">Cargando…</div></div><div class="hilo" id="hilo"><div class="vacio">Elegí una conversación.</div></div></div>`;
   $('#refrescar').onclick = cargar;
+  $('#buscar').oninput = () => pintar();
   $('#salir').onclick = () => { ls.del('wa_bandeja_clave'); CLAVE = ''; login(); };
 }
 
@@ -132,7 +134,9 @@ function pintar(){
     return `<button class="f${S.marca === mk ? ' on' : ''}" data-m="${mk}"><span class="pt" style="background:${M.acento}"></span>${esc(M.nombre)}${n ? `<span class="n">${n}</span>` : ''}</button>`; }).join('');
   document.querySelectorAll('[data-f]').forEach(b => b.onclick = () => { S.filtro = b.dataset.f; pintar(); });
   document.querySelectorAll('[data-m]').forEach(b => b.onclick = () => { S.marca = b.dataset.m; pintar(); });
-  const cs = porMarca.filter(F[S.filtro]);
+  const norm = t => String(t || '').toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '');
+  const qb = norm(($('#buscar') || {}).value || '').trim().replace(/^@/, '');
+  const cs = porMarca.filter(F[S.filtro]).filter(c => !qb || [c.nombre, c.ig, c.tel, ...c.ms.map(x => x.nombre)].some(v => norm(v).includes(qb)));
   $('#lista').innerHTML = cs.length ? cs.map(c => { const M = S.marcas[c.marca] || { nombre: c.marca, acento: '#555' }; return `
     <button class="conv${c.k === S.sel ? ' on' : ''}${c.nolei ? ' nolei' : ''}" data-k="${c.k}">
       <b><span style="overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${esc(c.nombre)}</span><small>${hora(c.ult.ts)}</small></b>

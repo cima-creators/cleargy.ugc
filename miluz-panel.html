@@ -595,6 +595,7 @@ dialog.dlg.dlg-cre{max-width:680px}
       <button class="bsec fwa" data-f="responder">Por responder <span class="n" data-n="responder">0</span></button>
       <button class="bsec fwa" data-f="nolei">No leídas <span class="n" data-n="nolei">0</span></button>
       <button class="bsec fwa" data-f="ayuda">Pidieron ayuda <span class="n" data-n="ayuda">0</span></button>
+      <input id="wa-buscar" type="search" placeholder="Buscar por nombre, @ o teléfono…" autocomplete="off" style="flex:1;min-width:180px;padding:8px 12px;border:1px solid var(--linea);border-radius:10px;font:inherit;background:var(--blanco,#fff);color:inherit">
     </div>
     <div class="wa-caja" id="wa-caja">
       <div class="wa-lista" id="wa-lista"></div>
@@ -1712,7 +1713,11 @@ function pintarWa(){
   const F = { todas: () => true, responder: c => c.responder, nolei: c => c.nolei, ayuda: c => c.ayuda };
   document.querySelectorAll('#wa-filtros [data-n]').forEach(el => el.textContent = todas.filter(F[el.dataset.n]).length);
   document.querySelectorAll('#wa-filtros .fwa').forEach(b => { b.classList.toggle('activo', b.dataset.f === WA.filtro); b.onclick = () => { WA.filtro = b.dataset.f; pintarWa(); }; });
-  const cs = todas.filter(F[WA.filtro] || F.todas);
+  // 16/10: buscador por nombre, @ o teléfono (sin acentos ni mayúsculas)
+  const norm = t => String(t || '').toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '');
+  const qb = norm(($('#wa-buscar') || {}).value || '').trim();
+  const pasaBusqueda = c => !qb || [c.nombre, c.ig, c.tel, ...c.ms.map(x => x.nombre)].some(v => norm(v).includes(qb.replace(/^@/, '')));
+  const cs = todas.filter(F[WA.filtro] || F.todas).filter(pasaBusqueda);
   setN('n-wa', todas.filter(c => c.nolei || c.responder).length);
   const lista = $('#wa-lista');
   if (!lista) return;
@@ -1720,10 +1725,11 @@ function pintarWa(){
       <b>${escH(c.nombre)}<small>${horaWa(c.ult.ts)}</small></b>
       <span>${c.ult.dir === 'out' ? '↪ ' : ''}${escH(c.ult.texto)}</span>
       ${c.ayuda ? '<em class="pill no">Pidió ayuda</em>' : c.responder ? '<em class="pill esp">Responder</em>' : ''}
-    </button>`).join('') : (todas.length ? '<div class="wa-vacio">Ninguna conversación en este filtro. 🎉</div>' : '<div class="wa-vacio">Todavía no hay mensajes.<br>Acá van a aparecer los avisos que salgan por WhatsApp y lo que respondan las creadoras.</div>');
+    </button>`).join('') : (todas.length ? (qb ? '<div class="wa-vacio">Nadie con ese nombre.</div>' : '<div class="wa-vacio">Ninguna conversación en este filtro. 🎉</div>') : '<div class="wa-vacio">Todavía no hay mensajes.<br>Acá van a aparecer los avisos que salgan por WhatsApp y lo que respondan las creadoras.</div>');
   lista.querySelectorAll('.wa-conv').forEach(b => b.onclick = () => abrirWa(b.dataset.tel));
-  if (WA.sel) pintarHiloWa(cs.find(c => c.tel === WA.sel), false);
+  if (WA.sel) pintarHiloWa(todas.find(c => c.tel === WA.sel), false);
 }
+document.addEventListener('input', e => { if (e.target && e.target.id === 'wa-buscar') pintarWa(); });
 function abrirWa(tel){
   WA.sel = tel; $('#wa-caja').classList.add('abierto');
   const ultIn = [...WA.mensajes].reverse().find(x => x.tel === tel && x.dir === 'in');
@@ -2287,7 +2293,7 @@ function aplicarRol(){
     pintarTodo();
   }
 })();
-const APP_VERSION = '2026-10-15-a';
+const APP_VERSION = '2026-10-16-a';
 </script>
 </body>
 </html>
