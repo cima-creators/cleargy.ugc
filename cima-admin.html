@@ -1441,8 +1441,21 @@ async function loadData(){
   const s=localStorage.getItem(BRAND_ID+"_data");
   if(s){ data=JSON.parse(s); }
 }
+window._fbDataLoadedFlag = () => _fbDataLoaded;
+// Si la base no cargó, guardar pisaría los datos reales con la copia vieja de localStorage:
+// por eso no se guarda. Pero antes era MUDO y uno aprobaba videos creyendo que se guardaban.
+window._avisarSinConexion = function(){
+  if(document.getElementById('sin-conexion')) return;
+  const d=document.createElement('div'); d.id='sin-conexion';
+  d.style.cssText='position:fixed;left:0;right:0;top:0;z-index:99999;background:#B0512F;color:#fff;'+
+    "padding:11px 16px;font-family:'Poppins',sans-serif;font-size:12.5px;font-weight:700;text-align:center;line-height:1.5;";
+  d.innerHTML='⚠️ No se pudo conectar con la base: lo que ves puede estar viejo y los cambios NO se guardan. '+
+    '<button onclick="location.reload()" style="margin-left:8px;padding:4px 12px;border:0;border-radius:8px;background:#fff;color:#B0512F;font-family:Poppins;font-size:11.5px;font-weight:800;cursor:pointer;">Recargar</button>';
+  document.body.appendChild(d);
+};
 function saveData(){
-  if(!_fbDataLoaded) return;
+  if(!_fbDataLoaded){ if(window._avisarSinConexion) window._avisarSinConexion(); return; }
+  const _b=document.getElementById('sin-conexion'); if(_b) _b.remove();
   localStorage.setItem(BRAND_ID+"_data",JSON.stringify(data));
   if(window._fbSave) window._fbSave(data);
 }
@@ -3653,7 +3666,7 @@ loadConfig();
     await _ensureAuth();
     // Red de seguridad: si la sesión llega tarde y la app cargó vacía, recargar los datos
     _auth.onAuthStateChanged(u=>{
-      if(u && window._fbLoad && typeof data!=='undefined' && (data.videos||[]).length===0){
+      if(u && window._fbLoad && typeof data!=='undefined' && !window._fbDataLoadedFlag()){
         window._fbLoad().then(d=>{ if(d && (d.videos||[]).length){ data=d; if(window._markFbLoaded)window._markFbLoaded(); if(typeof renderAll==='function')renderAll(); if(typeof renderVideos==='function')renderVideos(); } }).catch(()=>{});
       }
     });
@@ -3807,13 +3820,13 @@ loadConfig();
       const attachState = () => {
         unsubState = onSnapshot(DATA_DOC, {includeMetadataChanges: false},
           (snap) => {
-            if(!snap.exists()) return;
+            if(!snap.exists()){ _stateData = {}; _stateReady = true; fire(); return; }
             try{
               const {videos: _, ...state} = JSON.parse(snap.data().data);
               _stateData = state;
-              _stateReady = true;
-              fire();
             } catch(e){ console.error('state parse error:', e); }
+            _stateReady = true;   // pase lo que pase: si no marcamos, fire() no corre nunca
+            fire();
           },
           (err) => {
             console.error('state onSnapshot error:', err);
@@ -3902,15 +3915,24 @@ loadConfig();
 
     window.dispatchEvent(new CustomEvent('firebase-ready'));
 
-    // Carga inicial desde Firebase
+    // Carga inicial desde Firebase, con reintentos: si la primera falla (token que todavía
+    // no está, cache de IndexedDB a medio abrir tras un F5) la app quedaba leyendo localStorage
+    // y sin poder guardar. Reintenta hasta que entra.
     (async () => {
-      const fbData = await window._fbLoad();
-      if(fbData && typeof data !== 'undefined'){
-        data = fbData;
-        if(window._markFbLoaded) window._markFbLoaded();
-        if(typeof renderAll === 'function') renderAll();
-        if(typeof renderVideos === 'function') renderVideos();
+      for(let intento=0; intento<12; intento++){
+        const fbData = await window._fbLoad();
+        if(fbData && typeof data !== 'undefined'){
+          data = fbData;
+          if(window._markFbLoaded) window._markFbLoaded();
+          if(typeof renderAll === 'function') renderAll();
+          if(typeof renderVideos === 'function') renderVideos();
+          return;
+        }
+        if(window._fbDataLoadedFlag && window._fbDataLoadedFlag()) return;   // entró por el listener
+        await new Promise(r=>setTimeout(r, 1500 + intento*500));
       }
+      console.error('No se pudo cargar de Firebase después de 12 intentos');
+      if(window._avisarSinConexion) window._avisarSinConexion();
     })();
   </script>
 
@@ -3918,7 +3940,7 @@ loadConfig();
 <!-- Auto-actualización: GitHub Pages cachea el HTML y los celulares lo retienen mucho más.
      Esto compara la versión publicada con la que está corriendo y refresca sola. -->
 <script>
-const APP_VERSION = '2026-10-15-a';
+const APP_VERSION = '2026-10-17-a';
 (function(){
   var CLAVE='cima_ver_reload';
   function hayAlguienEscribiendo(){

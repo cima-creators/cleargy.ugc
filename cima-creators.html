@@ -2923,13 +2923,15 @@ loadData();
 
       const unsubState = onSnapshot(DATA_DOC, {includeMetadataChanges: false},
         (snap) => {
-          if(!snap.exists()) return;
+          // Si no marcamos listo, fire() no corre NUNCA y la app queda vacía (pasaba al
+          // refrescar, 17/10). Pase lo que pase con el parseo, el estado queda marcado.
+          if(!snap.exists()){ _stateData = {}; _stateReady = true; fire(); return; }
           try{
             const {videos: _, ...state} = JSON.parse(snap.data().data);
             _stateData = state;
-            _stateReady = true;
-            fire();
           } catch(e){ console.error('state parse error:', e); }
+          _stateReady = true;
+          fire();
         },
         (err) => {
           console.error('state onSnapshot error:', err);
@@ -2996,7 +2998,7 @@ loadData();
 <!-- Auto-actualización: GitHub Pages cachea el HTML y los celulares lo retienen mucho más.
      Esto compara la versión publicada con la que está corriendo y refresca sola. -->
 <script>
-const APP_VERSION = '2026-10-15-a';
+const APP_VERSION = '2026-10-17-a';
 (function(){
   var CLAVE='cima_ver_reload';
   function hayAlguienEscribiendo(){
