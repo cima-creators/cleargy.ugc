@@ -2841,7 +2841,11 @@ loadData();
       }
       return false;
     }
-    await _ensureAuth();
+    // 🛑 17/10: NO esperar acá. El login anónimo puede tardar hasta ~40 s tras un F5
+    // (3 intentos × 12 s), y mientras tanto el módulo no define _fbListen ni dispara
+    // 'firebase-ready': la app quedaba renderizada en 0 esperando. Los listeners de abajo
+    // ya se re-enganchan solos si el token todavía no está (permiso denegado → reintento).
+    const _authListo = _ensureAuth();
     // Red de seguridad: si la sesión llega tarde y la app cargó vacía, recargar
     _auth.onAuthStateChanged(u=>{
       if(u && window._fbLoad && typeof sharedData!=='undefined' && (sharedData.videos||[]).length===0 && typeof currentUser!=='undefined' && currentUser){
@@ -3006,7 +3010,7 @@ loadData();
 <!-- Auto-actualización: GitHub Pages cachea el HTML y los celulares lo retienen mucho más.
      Esto compara la versión publicada con la que está corriendo y refresca sola. -->
 <script>
-const APP_VERSION = '2026-10-17-b';
+const APP_VERSION = '2026-10-17-c';
 (function(){
   var CLAVE='cima_ver_reload';
   function hayAlguienEscribiendo(){
