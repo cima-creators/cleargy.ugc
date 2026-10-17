@@ -1432,8 +1432,17 @@ let _fbDataLoaded = false;
 window._markFbLoaded = function(){ _fbDataLoaded = true; };
 
 async function loadData(){
+  // 🛑 17/10: tras un F5, getDoc/getDocs se pueden colgar PARA SIEMPRE (cache persistente
+  // multi-pestaña de Firestore, y Nacho tiene muchas abiertas). Como el arranque esperaba
+  // acá, nunca se enganchaba el listener y la app quedaba en 0 — abriéndola de nuevo andaba
+  // porque el módulo tardaba más y este await se salteaba. Con tope: si no contesta,
+  // seguimos y los datos los trae el listener, que sí funciona.
+  const _conTope = (p, ms) => Promise.race([
+    Promise.resolve(p).catch(()=>null),
+    new Promise(r=>setTimeout(()=>r(null), ms))
+  ]);
   if(window._fbLoad){
-    const fbData = await window._fbLoad();
+    const fbData = await _conTope(window._fbLoad(), 6000);
     if(fbData){ data=fbData; _fbDataLoaded=true; return; }
   }
   // Fallback de localStorage: SOLO LECTURA — jamás habilita guardados
@@ -3920,7 +3929,10 @@ loadConfig();
     // y sin poder guardar. Reintenta hasta que entra.
     (async () => {
       for(let intento=0; intento<12; intento++){
-        const fbData = await window._fbLoad();
+        const fbData = await Promise.race([
+          window._fbLoad().catch(()=>null),
+          new Promise(r=>setTimeout(()=>r(null), 8000))
+        ]);
         if(fbData && typeof data !== 'undefined'){
           data = fbData;
           if(window._markFbLoaded) window._markFbLoaded();
@@ -3940,7 +3952,7 @@ loadConfig();
 <!-- Auto-actualización: GitHub Pages cachea el HTML y los celulares lo retienen mucho más.
      Esto compara la versión publicada con la que está corriendo y refresca sola. -->
 <script>
-const APP_VERSION = '2026-10-17-a';
+const APP_VERSION = '2026-10-17-b';
 (function(){
   var CLAVE='cima_ver_reload';
   function hayAlguienEscribiendo(){
