@@ -1485,6 +1485,7 @@ window.addEventListener('beforeunload', (e)=>{
 });
 
 // Load from localStorage
+let _fbLlego = false;   // ¿el listener ya trajo datos de Firebase al menos una vez?
 async function loadData(){
   // 🛑 17/10: tras un F5, getDoc/getDocs se pueden colgar PARA SIEMPRE (cache persistente
   // multi-pestaña de Firestore, y Nacho tiene muchas abiertas). Como el arranque esperaba
@@ -1541,6 +1542,7 @@ function enterApp(creator){
 
   function startListen(){
     window._fbUnlisten = window._fbListen((newData)=>{
+      _fbLlego = true;
       sharedData = _mergePending(newData);
       _resetHeartbeat();
       renderAll();
@@ -1549,6 +1551,24 @@ function enterApp(creator){
   }
   if(window._fbListen) startListen();
   else window.addEventListener('firebase-ready', startListen, {once:true});
+
+  // 🛑 Red de seguridad (17/10, "al refrescar me queda todo en 0"): a veces el primer
+  // enganche queda muerto — el token anónimo todavía no estaba, o la cache persistente de
+  // Firestore se traba tras un F5 y getDoc no vuelve nunca. Comprobado en vivo: una
+  // invocación NUEVA de _fbListen responde al instante. Así que si a los 5 s no llegaron
+  // datos, se vuelve a enganchar, hasta 6 veces; si ni así, se avisa en pantalla.
+  let _reVeces = 0;
+  const _vigilante = setInterval(() => {
+    if(_fbLlego){ clearInterval(_vigilante); return; }
+    if(_reVeces >= 6){
+      clearInterval(_vigilante);
+      if(window._avisarSinConexion) window._avisarSinConexion();
+      return;
+    }
+    _reVeces++;
+    if(window._fbListen){ try{ startListen(); }catch(e){ console.error('reenganche:', e); } }
+  }, 5000);
+
   document.getElementById("topbar-name").textContent=DISPLAY_NAMES[creator];
   document.getElementById("topbar-avatar").textContent=AVATARS[creator];
   document.getElementById("topbar-avatar").style.background=COLORS[creator];
@@ -3010,7 +3030,7 @@ loadData();
 <!-- Auto-actualización: GitHub Pages cachea el HTML y los celulares lo retienen mucho más.
      Esto compara la versión publicada con la que está corriendo y refresca sola. -->
 <script>
-const APP_VERSION = '2026-10-17-c';
+const APP_VERSION = '2026-10-17-d';
 (function(){
   var CLAVE='cima_ver_reload';
   function hayAlguienEscribiendo(){
