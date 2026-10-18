@@ -548,6 +548,7 @@ dialog.dlg.dlg-cre{max-width:680px}
     <p class="sub">Los bonos se acreditan solos todos los días a las 9. Acá solo transferís y marcás pagado.</p>
     <div class="barrasup">
       <button class="bsec pri" id="btn-csv-pag">Exportar para transferir</button>
+      <button class="bsec" id="btn-pedir-alias" hidden title="Les manda un WhatsApp a las que tienen saldo y no cargaron su alias">Pedir alias por WhatsApp</button>
     </div>
     <div id="tabla-pagos"></div>
   </section>
@@ -859,6 +860,9 @@ async function cargar(){
   PLATA = !pl ? [] : pl.fichas.map(f => ({
     id: f.id, nom: f.nombre || f.ig, ig: f.ig,
     ganado: f.ganado, pagado: f.pagado, viral: f.viral,
+    // 18/10: de qué es cada peso + alias para transferir
+    codigo: f.codigo || null, ventas: f.ventas || 0, facturado: f.facturado || 0, porCodigo: f.porCodigo || 0, porLink: f.porLink || 0,
+    pedidos: f.pedidos || [], movimientos: f.movimientos || [], cobro: f.cobro || null, aliasPedidoEn: f.aliasPedidoEn || null, pct: pl.pct || 0,
   }));
 }
 
@@ -2196,7 +2200,24 @@ $('#imp-ok').onclick = async () => {
   b.disabled = false; b.textContent = 'Importar';
 };
 
+/* 18/10: el detalle de cada saldo — movimientos (comisión, bonos, pagos) y los pedidos que dieron la comisión */
+const NOMBRE_MOV = { comision: 'Comisión por ventas', bono_viral: 'Bono viral', viral: 'Bono viral', podio: 'Podio del mes', referida: 'Bono por referida', bono: 'Bono', pago: 'Pago' };
+function detallePlata(c){
+  const f = t => t ? new Date(t).toLocaleDateString('es-AR') : '';
+  const mov = (c.movimientos || []).map(m => `<div>${f(m.en)} · <b>${NOMBRE_MOV[m.tipo] || m.tipo}</b>${m.tipo === 'comision' && m.facturado != null ? ` (${m.pct || c.pct}% de ${pesos(m.facturado)} vendidos acumulados, ${m.ventas} venta${m.ventas === 1 ? '' : 's'})` : ''}${m.concepto && m.tipo !== 'comision' ? ' · ' + escH(m.concepto) : ''} · ${m.tipo === 'pago' ? '−' : '+'}${pesos(m.monto)}</div>`).join('');
+  const ped = (c.pedidos || []).length ? `<div style="margin-top:6px"><b>Pedidos con su ${c.codigo ? 'código ' + escH(c.codigo) : 'código'}</b> (${c.porCodigo} con código · ${c.porLink} por su link)</div>` +
+    (c.pedidos || []).map(p => `<div>Pedido ${escH(p.n || '')} · ${f(p.fecha)} · ${pesos(p.monto)} · ${p.via === 'link' ? 'por link' : 'con código'} → ${pesos(Math.round(p.monto * (c.pct || 0) / 100))}</div>`).join('') : '';
+  return `<div style="font-size:.85rem;line-height:1.6;margin-top:4px">${mov || '—'}${ped}</div>`;
+}
+$('#btn-pedir-alias') && ($('#btn-pedir-alias').onclick = async () => {
+  const sin = PLATA.filter(c => c.ganado - c.pagado > 0 && !(c.cobro && c.cobro.alias));
+  if (!sin.length) { alert('Todas las que tienen saldo ya cargaron su alias.'); return; }
+  if (!confirm(`Le llega un WhatsApp a ${sin.length} creadora(s) con su saldo y el link para cargar el alias en la app. ¿Lo mando?`)) return;
+  try { const r = await api('pedir_alias', {}); alert(`Listo: ${r.cuantas} mensaje(s). ${r.lista.filter(x => !x.ok).length ? r.lista.filter(x => !x.ok).length + ' no salieron (sin teléfono o plantilla en revisión).' : ''}`); sin.forEach(c => c.aliasPedidoEn = Date.now()); pintarPagos(); }
+  catch (e) { alert('No se pudo mandar: ' + e.message); }
+});
 function pintarPagos(){
+  if ($('#btn-pedir-alias')) $('#btn-pedir-alias').hidden = ROL !== 'admin';
   const filas = PLATA.map(c => ({...c, saldo: c.ganado - c.pagado}))
     .sort((x,y) => y.saldo - x.saldo);
   const deben = filas.filter(c => c.saldo > 0);
@@ -2207,14 +2228,18 @@ function pintarPagos(){
     : `<table>
       <thead><tr>
         <th>Creadora</th><th class="num">Ganado</th><th class="num">Pagado</th>
-        <th class="num">Saldo</th><th></th>
+        <th class="num">Saldo</th><th>Alias</th><th></th>
       </tr></thead>
       <tbody>${filas.map(c => `
         <tr>
-          <td><b>${c.nom}</b><span class="n2">@${c.ig}${c.viral ? ' · <span class="pill ok">bono viral</span>' : ''}</span></td>
+          <td><b>${c.nom}</b><span class="n2">@${c.ig}${c.viral ? ' · <span class="pill ok">bono viral</span>' : ''}</span>
+            <details style="margin-top:4px"><summary style="cursor:pointer;font-size:.85rem;color:var(--tinta2)">De qué es</summary>${detallePlata(c)}</details></td>
           <td class="num">${pesos(c.ganado)}</td>
           <td class="num">${c.pagado ? pesos(c.pagado) : '—'}</td>
           <td class="num"><b style="color:${c.saldo > 0 ? 'var(--no)' : 'var(--ok)'}">${pesos(c.saldo)}</b></td>
+          <td>${c.cobro && c.cobro.alias
+            ? `<b style="font-family:monospace">${escH(c.cobro.alias)}</b><span class="n2">${escH(c.cobro.titular || '')}</span><button class="mini" onclick="navigator.clipboard.writeText('${escH(c.cobro.alias)}');this.textContent='copiado ✓'">copiar</button>`
+            : `<span class="pill no">sin alias</span>${c.aliasPedidoEn ? `<span class="n2">pedido ${new Date(c.aliasPedidoEn).toLocaleDateString('es-AR')}</span>` : ''}`}</td>
           <td>${c.saldo > 0
             ? `<button class="bsec" onclick="pagarSaldo('${c.ig}')">Pagué</button>`
             : '<span class="pill ok">Al día</span>'}</td>
@@ -2224,7 +2249,7 @@ function pintarPagos(){
         <td><b>${deben.length} con saldo</b></td>
         <td class="num">${pesos(tot.g)}</td>
         <td class="num">${pesos(tot.p)}</td>
-        <td class="num"><b>${pesos(tot.s)}</b></td><td></td>
+        <td class="num"><b>${pesos(tot.s)}</b></td><td>${deben.filter(c => !(c.cobro && c.cobro.alias)).length} sin alias</td><td></td>
       </tr></tfoot>
     </table>`;
   setN('n-pag', deben.length);
@@ -2245,8 +2270,8 @@ window.pagarSaldo = ig => {
 };
 
 $('#btn-csv-pag').onclick = () => {
-  bajarCsv('pagos', [['Creadora','Instagram','Ganado','Pagado','Saldo']]
-    .concat(PLATA.map(c => [c.nom,'@'+c.ig,c.ganado,c.pagado,c.ganado-c.pagado])));
+  bajarCsv('pagos', [['Creadora','Instagram','Ganado','Pagado','Saldo','Alias o CBU','Titular']]
+    .concat(PLATA.map(c => [c.nom,'@'+c.ig,c.ganado,c.pagado,c.ganado-c.pagado,(c.cobro && c.cobro.alias) || '',(c.cobro && c.cobro.titular) || ''])));
 };
 
 function pintarTodo(){
@@ -2293,7 +2318,7 @@ function aplicarRol(){
     pintarTodo();
   }
 })();
-const APP_VERSION = '2026-10-16-a';
+const APP_VERSION = '2026-10-18-a';
 </script>
 </body>
 </html>

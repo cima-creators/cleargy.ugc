@@ -713,6 +713,23 @@ body.condemo .wrap{padding-bottom:84px}
       </div>
     </div>
 
+    <!-- 18/10: lo que ganó, de qué es, y su alias para cobrar -->
+    <div class="card oculto" id="bloque-cobro">
+      <h2>Tu plata</h2>
+      <div style="display:flex;gap:10px;margin:6px 0 12px;flex-wrap:wrap">
+        <div style="flex:1;min-width:90px"><small>Ganado</small><b id="pl-ganado" style="display:block;font-size:1.2rem">$0</b></div>
+        <div style="flex:1;min-width:90px"><small>Cobrado</small><b id="pl-pagado" style="display:block;font-size:1.2rem">$0</b></div>
+        <div style="flex:1;min-width:90px"><small>Para cobrar</small><b id="pl-saldo" style="display:block;font-size:1.2rem;color:var(--ok)">$0</b></div>
+      </div>
+      <details id="pl-detalle" style="margin:0 0 14px"><summary style="cursor:pointer;font-weight:600">Ver de qué es cada venta</summary><div id="pl-pedidos" style="margin-top:8px;font-size:.92rem;line-height:1.6"></div></details>
+      <h3 style="margin:6px 0 4px;font-size:1rem">¿A dónde te transferimos?</h3>
+      <small style="margin-bottom:10px">Tu alias o CBU y el nombre del titular de la cuenta.</small>
+      <input id="pl-alias" placeholder="Alias o CBU" autocomplete="off" style="width:100%;box-sizing:border-box;margin:0 0 8px">
+      <input id="pl-titular" placeholder="Nombre y apellido del titular" autocomplete="off" style="width:100%;box-sizing:border-box;margin:0 0 10px">
+      <button class="btn" id="btn-cobro">Guardar mis datos</button>
+      <small id="pl-ok" class="oculto" style="margin-top:8px;color:var(--ok)">✓ Guardado. Te transferimos ahí.</small>
+    </div>
+
     <div class="card" id="bloque-codigo">
       <h2>Tu código de descuento</h2>
       <small style="margin-bottom:14px">Nombralo en el video y dejalo fijado en los comentarios. Tus seguidoras compran con descuento y vos ganás comisión por cada venta.</small>
@@ -1145,6 +1162,7 @@ function demo(accion, datos){
   };
   if (accion === 'ficha'){ Object.assign(g, datos.ficha, {estado:'ficha_completa'}); }
   if (accion === 'briefing'){ g.estado = 'briefing_ok'; }
+  if (accion === 'cobro'){ g.cobro = { alias: datos.alias, titular: datos.titular }; }
   if (accion === 'llego'){ g.estado = 'recibido'; g.deadline = Date.now()+CFG.diasParaPublicar*864e5; }
   if (accion === 'reel'){ g.estado = 'publicado'; g.reel = datos.url; }
   if (accion === 'entregar'){
@@ -1374,6 +1392,15 @@ $('#btn-brief').addEventListener('click', async () => {
   b.disabled = true; b.textContent = 'Confirmando…';
   try { D = (await api('briefing', {})).creadora; pintarEstado(); ver('v-estado'); }
   catch { b.disabled = false; b.textContent = 'Confirmar y activar mi envío'; }
+});
+
+$('#btn-cobro').addEventListener('click', async () => {
+  const b = $('#btn-cobro'), alias = $('#pl-alias').value.trim(), titular = $('#pl-titular').value.trim();
+  if (!alias || titular.length < 3) { alert('Completá tu alias o CBU y el nombre del titular.'); return; }
+  b.disabled = true; b.textContent = 'Guardando…';
+  try { D = (await api('cobro', { alias, titular })).creadora; $('#pl-ok').classList.remove('oculto'); pintarPlata(); }
+  catch { alert('Revisá el alias (6 a 20 letras, números o puntos) o el CBU (22 números).'); }
+  b.disabled = false; b.textContent = 'Guardar mis datos';
 });
 
 $('#btn-llego').addEventListener('click', async () => {
@@ -1651,6 +1678,15 @@ function pintarPlata(){
     ? `Vas ${D.posicionMes}° este mes.` + (D.posicionMes <= 3 ? ` Estás cobrando ${pesos(B.podio[D.posicionMes-1])}.` : '')
     : 'Las tres collabs con más views del mes cobran premio.';
 
+  // 18/10: tu plata (lo acreditado de verdad, no una estimación) + alias para cobrar
+  const ganado = D.ganado || 0, pagado = D.pagado || 0;
+  $('#bloque-cobro').classList.toggle('oculto', !(ganado > 0 || ventas > 0 || (D.cobro && D.cobro.alias)));
+  $('#pl-ganado').textContent = pesos(ganado); $('#pl-pagado').textContent = pesos(pagado); $('#pl-saldo').textContent = pesos(Math.max(0, ganado - pagado));
+  const peds = D.pedidos || [];
+  $('#pl-detalle').classList.toggle('oculto', !peds.length);
+  $('#pl-pedidos').innerHTML = peds.map(p => `<div>Pedido ${p.n || ''} · ${p.fecha ? new Date(p.fecha).toLocaleDateString('es-AR') : ''} · ${pesos(p.monto)} · ${p.via === 'link' ? 'por tu link' : 'con tu código'} → <b>${pesos(Math.round(p.monto * B.comision / 100))}</b></div>`).join('');
+  if (D.cobro && D.cobro.alias && !$('#pl-alias').value) { $('#pl-alias').value = D.cobro.alias; $('#pl-titular').value = D.cobro.titular || ''; $('#pl-ok').classList.remove('oculto'); }
+
   $('#bono-comision-pct').textContent = B.comision + '%';
   // sin tienda no hay código ni comisión por ventas: se esconde el bono
   $('#bono-comision-pct').closest('.bono').classList.toggle('oculto', !CFG.cupon);
@@ -1885,7 +1921,7 @@ function pintarMarca(){
   } catch { if (DEMO){ precargar(); traerBorrador(); } ver(DEMO ? 'v-ficha' : 'v-error'); }
 })();
 
-const APP_VERSION = '2026-10-13-a';
+const APP_VERSION = '2026-10-18-a';
 </script>
 </body>
 </html>
