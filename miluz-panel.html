@@ -1570,7 +1570,7 @@ function pintarResumen(){
 
     <div class="kpis">
       <div class="kpi">
-        <b>${num(m.publicadas)}</b><span>collabs publicadas</span>
+        <b>${num(m.publicadas)}</b><span>${m.cuentaEntregadas ? 'collabs completas (Drive entregado)' : 'collabs publicadas'}</span>
         <i>meta ${num(e.metaMes)} · ${e.metaMes ? Math.round(m.publicadas / e.metaMes * 100) : 0}%</i>
         <span class="mini"><u style="width:${e.metaMes ? Math.min(100, m.publicadas / e.metaMes * 100) : 0}%"></u></span>
       </div>
@@ -2327,7 +2327,7 @@ function aplicarRol(){
     pintarTodo();
   }
 })();
-const APP_VERSION = '2026-10-18-b';
+const APP_VERSION = '2026-10-18-c';
 </script>
 </body>
 </html>
