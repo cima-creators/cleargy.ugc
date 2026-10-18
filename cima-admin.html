@@ -1314,7 +1314,7 @@ function _aplicarCreadorasCfg(cfg){
   (cfg.altas||[]).forEach(a=>{
     if(!a || !a.key) return;
     if(!CREATORS.includes(a.key)) CREATORS.push(a.key);
-    BRAND.creators[a.key] = Object.assign(BRAND.creators[a.key]||{}, {name:a.name, avatar:a.avatar, color:a.color, phone:a.phone||''});
+    BRAND.creators[a.key] = Object.assign(BRAND.creators[a.key]||{}, {name:a.name, avatar:a.avatar, color:a.color, phone:a.phone||''}, a.salary?{salary:a.salary}:{});   // 18/10: sueldo propio de una alta del panel
     NAMES[a.key]=a.name; COLORS[a.key]=a.color; AVATARS[a.key]=a.avatar; PHONES[a.key]=a.phone||'';
   });
   Object.keys(BRAND.creators).forEach(k=>{
@@ -3973,7 +3973,7 @@ loadConfig();
 <!-- Auto-actualización: GitHub Pages cachea el HTML y los celulares lo retienen mucho más.
      Esto compara la versión publicada con la que está corriendo y refresca sola. -->
 <script>
-const APP_VERSION = '2026-10-18-y';
+const APP_VERSION = '2026-10-18-x';
 (function(){
   var CLAVE='cima_ver_reload';
   function hayAlguienEscribiendo(){

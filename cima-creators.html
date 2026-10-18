@@ -1352,7 +1352,7 @@ function _aplicarCreadorasCfg(cfg){
   cfg = cfg || {};
   (cfg.altas||[]).forEach(a=>{
     if(!a || !a.key) return;
-    BRAND.creators[a.key] = Object.assign(BRAND.creators[a.key]||{}, {name:a.name, pass:a.pass, avatar:a.avatar, color:a.color});
+    BRAND.creators[a.key] = Object.assign(BRAND.creators[a.key]||{}, {name:a.name, pass:a.pass, avatar:a.avatar, color:a.color}, a.salary?{salary:a.salary}:{});   // 18/10: sueldo propio de una alta del panel
     PASSWORDS[a.key]=a.pass; DISPLAY_NAMES[a.key]=a.name; AVATARS[a.key]=a.avatar; COLORS[a.key]=a.color;
     if(!CREATOR_KEYS.includes(a.key)) CREATOR_KEYS.push(a.key);
   });
@@ -3030,7 +3030,7 @@ loadData();
 <!-- Auto-actualización: GitHub Pages cachea el HTML y los celulares lo retienen mucho más.
      Esto compara la versión publicada con la que está corriendo y refresca sola. -->
 <script>
-const APP_VERSION = '2026-10-18-y';
+const APP_VERSION = '2026-10-18-x';
 (function(){
   var CLAVE='cima_ver_reload';
   function hayAlguienEscribiendo(){
