@@ -569,6 +569,7 @@ dialog.dlg.dlg-cre{max-width:680px}
       <button class="bsec fcre" data-f="enviar">2 · Ficha lista, hay que enviar <span class="n" data-n="enviar">0</span></button>
       <button class="bsec fcre" data-f="enviados">3 · Kit enviado <span class="n" data-n="enviados">0</span></button>
       <button class="bsec fcre" data-f="recibieron">4 · Ya lo recibieron <span class="n" data-n="recibieron">0</span></button>
+      <button class="bsec fcre" data-f="apurar" title="Les llegó el kit hace 3 días o más y todavía no entregaron: escribiles">⏳ Kit hace 3+ días <span class="n" data-n="apurar">0</span></button>
       <button class="bsec fcre" data-f="vencidas" title="Se les pasó el plazo: la escalera les escribe un mensaje por día hasta que respondan o entreguen">⏰ Vencidas <span class="n" data-n="vencidas">0</span></button>
       <button class="bsec fcre" data-f="devolver" title="No entregaron: tienen que devolver el kit. Tildá cuando llegue al depósito.">📦 A devolver <span class="n" data-n="devolver">0</span></button>
       <button class="bsec fcre" data-f="mano">⚠ Mandar link a mano <span class="n" data-n="mano">0</span></button>
@@ -596,6 +597,7 @@ dialog.dlg.dlg-cre{max-width:680px}
       <button class="bsec fwa" data-f="responder">Por responder <span class="n" data-n="responder">0</span></button>
       <button class="bsec fwa" data-f="nolei">No leídas <span class="n" data-n="nolei">0</span></button>
       <button class="bsec fwa" data-f="ayuda">Pidieron ayuda <span class="n" data-n="ayuda">0</span></button>
+      <button class="bsec fwa" data-f="apurar" title="Les llegó el kit hace 3 días o más y todavía no entregaron">⏳ Kit hace 3+ días <span class="n" data-n="apurar">0</span></button>
       <input id="wa-buscar" type="search" placeholder="Buscar por nombre, @ o teléfono…" autocomplete="off" style="flex:1;min-width:180px;padding:8px 12px;border:1px solid var(--linea);border-radius:10px;font:inherit;background:var(--blanco,#fff);color:inherit">
     </div>
     <div class="wa-caja" id="wa-caja">
@@ -852,7 +854,7 @@ async function cargar(){
     avisadaEn: f.avisadaEn || null, avisadaManual: !!f.avisadaManual, decididaEn: f.decididaEn || null,
     tel: f.tel || null, referidaPor: f.referidaPor || null, referidasCumplidas: f.referidasCumplidas || 0,
     views: f.views || 0, ventas: f.ventas || 0, monto: f.facturado || 0, bono: f.bono, reel: f.reel || null,
-    vencidaEn: f.vencidaEn || null, deadline: f.deadline || null, escalon: f.escalon ?? null, escalonEn: f.escalonEn || null,
+    vencidaEn: f.vencidaEn || null, recibidoEn: f.recibidoEn || null, deadline: f.deadline || null, escalon: f.escalon ?? null, escalonEn: f.escalonEn || null,
     respuestaVencida: f.respuestaVencida || null, pausaHasta: f.pausaHasta || null, kitDevueltoEn: f.kitDevueltoEn || null,
     bloqueada: !!f.bloqueada, faltaDevolucion: !!f.faltaDevolucion, devolucion: f.devolucion || null,
   }));
@@ -1692,6 +1694,11 @@ const escH = t => String(t ?? '').replace(/[&<>"]/g, c => ({'&':'&amp;','<':'&lt
 const horaWa = ts => { const d = new Date(ts), hoy = new Date(); const hh = d.toLocaleTimeString('es-AR',{hour:'2-digit',minute:'2-digit'});
   return d.toDateString() === hoy.toDateString() ? hh : d.toLocaleDateString('es-AR',{day:'numeric',month:'short'}) + ' ' + hh; };
 const esReaccion = m => m.tipo === 'reaction' || /^(Reaccionó|\[reaction\])/.test(m.texto || '');
+/* 18/10: cuántos días hace que le llegó el kit (null si no está grabando) y cuánto le queda */
+const KIT_HACE = f => f && f.estado === 'recibido' && f.recibidoEn ? Math.floor((Date.now() - f.recibidoEn) / 864e5) : null;
+const plazoTxt = f => { const h = KIT_HACE(f); if (h == null) return ''; const q = f.deadline ? Math.ceil((f.deadline - Date.now()) / 864e5) : null;
+  return `kit hace ${h} d` + (q == null ? '' : q > 0 ? ` · le quedan ${q} d` : q === 0 ? ' · vence hoy' : ' · vencido'); };
+const mensajeApurar = c => `Hola ${String(c.nom || '').split(' ')[0]}! ¿Cómo venís con el video de ${CFG.nombre}? 💛 Te llegó el kit hace ${KIT_HACE(c)} días${c.deadline ? ' y tenés hasta el ' + new Date(c.deadline).toLocaleDateString('es-AR') : ''}. Si te trabaste con algo decime y te ayudo. Lo subís desde tu app: ${LINK_APP(c.id)}`;
 function convsWa(){
   const m = new Map();
   WA.mensajes.forEach(x => { if (!m.has(x.tel)) m.set(x.tel, []); m.get(x.tel).push(x); });
@@ -1714,7 +1721,7 @@ async function cargarWa(){
 }
 function pintarWa(){
   const todas = convsWa();
-  const F = { todas: () => true, responder: c => c.responder, nolei: c => c.nolei, ayuda: c => c.ayuda };
+  const F = { todas: () => true, responder: c => c.responder, nolei: c => c.nolei, ayuda: c => c.ayuda, apurar: c => KIT_HACE(c.f) >= 3 };
   document.querySelectorAll('#wa-filtros [data-n]').forEach(el => el.textContent = todas.filter(F[el.dataset.n]).length);
   document.querySelectorAll('#wa-filtros .fwa').forEach(b => { b.classList.toggle('activo', b.dataset.f === WA.filtro); b.onclick = () => { WA.filtro = b.dataset.f; pintarWa(); }; });
   // 16/10: buscador por nombre, @ o teléfono (sin acentos ni mayúsculas)
@@ -1728,7 +1735,7 @@ function pintarWa(){
   lista.innerHTML = cs.length ? cs.map(c => `<button class="wa-conv${c.tel === WA.sel ? ' on' : ''}${c.nolei ? ' nolei' : ''}" data-tel="${c.tel}">
       <b>${escH(c.nombre)}<small>${horaWa(c.ult.ts)}</small></b>
       <span>${c.ult.dir === 'out' ? '↪ ' : ''}${escH(c.ult.texto)}</span>
-      ${c.ayuda ? '<em class="pill no">Pidió ayuda</em>' : c.responder ? '<em class="pill esp">Responder</em>' : ''}
+      ${c.ayuda ? '<em class="pill no">Pidió ayuda</em>' : c.responder ? '<em class="pill esp">Responder</em>' : ''}${KIT_HACE(c.f) >= 3 ? `<em class="pill">${plazoTxt(c.f)}</em>` : ''}
     </button>`).join('') : (todas.length ? (qb ? '<div class="wa-vacio">Nadie con ese nombre.</div>' : '<div class="wa-vacio">Ninguna conversación en este filtro. 🎉</div>') : '<div class="wa-vacio">Todavía no hay mensajes.<br>Acá van a aparecer los avisos que salgan por WhatsApp y lo que respondan las creadoras.</div>');
   lista.querySelectorAll('.wa-conv').forEach(b => b.onclick = () => abrirWa(b.dataset.tel));
   if (WA.sel) pintarHiloWa(todas.find(c => c.tel === WA.sel), false);
@@ -2030,6 +2037,7 @@ function pintarCreadoras(){
     rechazadas: c => c.estado === 'rechazada',
     incompletas: c => ['iniciada','enviada'].includes(c.estado),
     repetidos:  KIT_REPETIDO,
+    apurar:     c => KIT_HACE(c) >= 3,
     vencidas:   c => ['vencida','sin_respuesta'].includes(c.estado),
     devolver:   c => ['devolucion','sin_respuesta'].includes(c.estado),
     aceptadas:  c => !PREVIAS.includes(c.estado),
@@ -2089,8 +2097,9 @@ function pintarCreadoras(){
             ? `<span class="pill ok" title="${c.avisadaManual?'Se le mandó el link a mano':'El DM de aceptación salió solo'}">${c.avisadaManual?'a mano ✓':'DM ✓'}</span><button class="mini copiar" data-id="${c.id}" data-nom="${(c.nom||'').replace(/"/g,'')}">copiar</button>`
             : `<span class="pill no" title="No le llegó el DM automático: hace más de 24 h que no interactúa con el bot">sin DM</span><button class="mini copiar" data-id="${c.id}" data-nom="${(c.nom||'').replace(/"/g,'')}" title="Copia el mensaje completo con su link para pegarlo por Instagram">copiar</button>${c.tel?`<a class="mini" target="_blank" href="${waLink(c.tel, c.nom, LINK_APP(c.id))}" title="Abre WhatsApp con el mensaje armado">WhatsApp</a>`:''}<button class="mini yamande" data-id="${c.id}" title="Marcar que ya se lo mandaste">listo</button>`)
           : (['ficha_completa','briefing_ok'].includes(c.estado)&&c.id ? `<button class="mini copiar" data-id="${c.id}" data-nom="${(c.nom||'').replace(/"/g,'')}">copiar</button>`
+            : (KIT_HACE(c) >= 3 && c.id ? `<div><span class="pill ${KIT_HACE(c) >= 5 ? 'no' : 'esp'}">${plazoTxt(c)}</span></div>${c.tel ? `<a class="mini" target="_blank" href="${waLinkTexto(c.tel, mensajeApurar(c))}" title="Abre WhatsApp con un mensaje para apurarla">WhatsApp</a>` : ''}`
             : (['vencida','sin_respuesta','devolucion'].includes(c.estado)&&c.id ? celdaVencida(c)
-            : (['descartada','rechazada'].includes(c.estado)&&c.id&&ROL!=='avisos' ? `<button class="mini rescatar" data-id="${c.id}" title="La acepta igual: pasa a “Aceptadas, falta la ficha” y le sale el aviso">aceptar igual</button>` : '')))}</td>
+            : (['descartada','rechazada'].includes(c.estado)&&c.id&&ROL!=='avisos' ? `<button class="mini rescatar" data-id="${c.id}" title="La acepta igual: pasa a “Aceptadas, falta la ficha” y le sale el aviso">aceptar igual</button>` : ''))))}</td>
           <td class="num">${c.seguidores!=null ? c.seguidores.toLocaleString('es-AR') : '—'}</td>
           <td class="num">${c.posts90!=null ? c.posts90 : '—'}</td>
           <td class="num">${c.vistas!=null ? c.vistas.toLocaleString('es-AR') : '—'}</td>
@@ -2318,7 +2327,7 @@ function aplicarRol(){
     pintarTodo();
   }
 })();
-const APP_VERSION = '2026-10-18-a';
+const APP_VERSION = '2026-10-18-b';
 </script>
 </body>
 </html>

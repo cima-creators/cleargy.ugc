@@ -124,9 +124,10 @@ function convs(){
 
 function pintar(){
   const todas = convs();
-  const F = { todas: () => true, responder: c => c.responder, nolei: c => c.nolei, ayuda: c => c.ayuda };
+  const KH = f => f && f.estado === 'recibido' && f.recibidoEn ? Math.floor((Date.now() - f.recibidoEn) / 864e5) : null;
+  const F = { todas: () => true, responder: c => c.responder, nolei: c => c.nolei, ayuda: c => c.ayuda, apurar: c => KH(c.f) >= 3 };
   const porMarca = todas.filter(c => !S.marca || c.marca === S.marca);
-  $('#filtros').innerHTML = [['todas','Todas'],['responder','Por responder'],['nolei','No leídas'],['ayuda','Pidieron ayuda']]
+  $('#filtros').innerHTML = [['todas','Todas'],['responder','Por responder'],['nolei','No leídas'],['ayuda','Pidieron ayuda'],['apurar','⏳ Kit hace 3+ días']]
     .map(([k, t]) => `<button class="f${S.filtro === k ? ' on' : ''}" data-f="${k}">${t}<span class="n">${porMarca.filter(F[k]).length}</span></button>`).join('');
   const marcasCon = [...new Set(todas.map(c => c.marca))];
   $('#marcas').innerHTML = `<button class="f${!S.marca ? ' on' : ''}" data-m="">Todas las marcas</button>` + marcasCon.map(mk => {
@@ -141,7 +142,7 @@ function pintar(){
     <button class="conv${c.k === S.sel ? ' on' : ''}${c.nolei ? ' nolei' : ''}" data-k="${c.k}">
       <b><span style="overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${esc(c.nombre)}</span><small>${hora(c.ult.ts)}</small></b>
       <span class="tx">${c.ult.dir === 'out' ? '↪ ' : ''}${esc(c.ult.texto)}</span>
-      <span class="mk" style="background:${M.acento}">${esc(M.nombre)}</span>${c.ayuda ? '<span class="pill no">Pidió ayuda</span>' : c.responder ? '<span class="pill">Responder</span>' : ''}
+      <span class="mk" style="background:${M.acento}">${esc(M.nombre)}</span>${c.ayuda ? '<span class="pill no">Pidió ayuda</span>' : c.responder ? '<span class="pill">Responder</span>' : ''}${KH(c.f) >= 3 ? `<span class="pill">kit hace ${KH(c.f)} d</span>` : ''}
     </button>`; }).join('') : '<div class="vacio">Nada en este filtro. 🎉</div>';
   document.querySelectorAll('.conv').forEach(b => b.onclick = () => abrir(b.dataset.k));
   if (S.sel) hilo(todas.find(c => c.k === S.sel), false);
