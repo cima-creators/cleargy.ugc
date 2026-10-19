@@ -685,7 +685,16 @@ async function api(accion, extra = {}){
   });
   if (r.status === 403) throw new Error('clave');
   if (!r.ok) throw new Error('http ' + r.status);
-  return r.json();
+  return limpiarCampos(await r.json());
+}
+// Seguridad 19/10/2026: lo que escribe la creadora en el formulario público (nombre, IG, dirección…)
+// se pinta con innerHTML en muchos lugares. Se le sacan los caracteres que permiten inyectar código.
+const CAMPOS_LIBRES = /^(nom|nombre|apellido|ig|tt|tiktok|email|mail|tel|telefono|dir|direccion|calle|prov|provincia|ciudad|localidad|cp|dni|alias|cbu|nota|notas|obs|barrio|piso|depto)$/i;
+function limpiarCampos(o, clave){
+  if (typeof o === 'string') return (clave && CAMPOS_LIBRES.test(clave)) ? o.replace(/[<>"'`]/g, '') : o;
+  if (Array.isArray(o)) return o.map(x => limpiarCampos(x, clave));
+  if (o && typeof o === 'object') { for (const k of Object.keys(o)) o[k] = limpiarCampos(o[k], k); }
+  return o;
 }
 
 /* ── config de la marca: cacheada por marca en sessionStorage ── */

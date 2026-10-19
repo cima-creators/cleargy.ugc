@@ -2069,6 +2069,10 @@ async function copiarMiLink(){
 }
 
 // Escape de contenido cargado por usuarios (notas, links) — evita XSS y roturas de atributos
+// Seguridad 19/10/2026: las notificaciones traen <strong>/<b>/<em>/<br> a propósito; todo lo demás se escapa.
+function msgSeguro(m){return esc(m).replace(/&lt;(\/?)(strong|b|em|br)\s*\/?&gt;/gi,'<$1$2>')
+  .replace(/&lt;span style=&quot;color:var\(--muted\)&quot;&gt;/g,'<span style="color:var(--muted)">').replace(/&lt;\/(span|a)&gt;/g,'</$1>')
+  .replace(/&lt;a href=&quot;(https?:\/\/(?:(?!&quot;)[^<>\s])+)&quot; target=&quot;_blank&quot; style=&quot;color:var\(--accent3\);font-size:11px;&quot;&gt;/g,'<a href="$1" target="_blank" rel="noopener" style="color:var(--accent3);font-size:11px;">');}
 function esc(s){return String(s==null?'':s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#39;');}
 function escUrl(l){l=(l||'').trim();if(!l)return '';if(!/^https?:\/\//i.test(l))l='https://'+l;return esc(l);}
 
@@ -2627,7 +2631,7 @@ function renderNotifs(){
           ${isNew?`<span style="font-size:8px;font-family:'Poppins';background:${tipoColor[n.tipo]||"var(--accent)"};color:white;padding:2px 6px;border-radius:10px;">NUEVO</span>`:""}
           <span style="font-size:10px;font-family:'Poppins';color:var(--muted);margin-left:auto;">${new Date(n.date).toLocaleString("es-AR",{day:"2-digit",month:"2-digit",hour:"2-digit",minute:"2-digit"})}</span>
         </div>
-        <div style="font-size:14px;line-height:1.6;">${n.msg}</div>
+        <div style="font-size:14px;line-height:1.6;">${msgSeguro(n.msg)}</div>
       </div>`;
     }).join("") :
     `<div class="empty"><div class="empty-icon">🔔</div><div class="empty-text">Sin mensajes todavía</div></div>`;
@@ -3030,7 +3034,7 @@ loadData();
 <!-- Auto-actualización: GitHub Pages cachea el HTML y los celulares lo retienen mucho más.
      Esto compara la versión publicada con la que está corriendo y refresca sola. -->
 <script>
-const APP_VERSION = '2026-10-18-x';
+const APP_VERSION = '2026-10-19-seg';
 (function(){
   var CLAVE='cima_ver_reload';
   function hayAlguienEscribiendo(){
