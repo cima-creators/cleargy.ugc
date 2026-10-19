@@ -957,7 +957,7 @@ function seccionesKit(kitId, numero, br){
   const guion = numero === 1 ? guionDe(kitId) : null;
   if (guion) out.push(seccionGuion(guion));
   out.push(seccionGanchos(bk.ganchos || [], br, !!guion));
-  if (conEstructura(bk)) out.push(numero === 1 ? seccionEstructura() : '', seccionEjemplos(bk), seccionBroll(bk), seccionGpt(bk, kitId));
+  if (conEstructura(bk)) out.push(numero === 1 ? seccionEstructura() : '', seccionEditados(bk), seccionEjemplos(bk), seccionBroll(bk), seccionGpt(bk, kitId));
   if (bk.casos) out.push(`<h3>Casos reales</h3>${bk.casos.html}${bk.casos.drive
     ? `<p><a href="${bk.casos.drive}" target="_blank" rel="noopener">Abrir la carpeta con los casos →</a></p>`
     : `<p class="guion-nota">La carpeta con los casos la compartimos en la comunidad. Si no la ves, pedila ahí.</p>`}`);
@@ -1042,7 +1042,7 @@ function fotosEjemplo(bk){
 /* ═══ Estructura CIMA en el briefing (Nacho 18/10/2026: «los videos vienen muy de venta») ═══
    Se activa sola cuando el kit (o la marca) trae `guionesEjemplo`. Sin eso, queda el «Cómo armar» viejo.
    Datos: briefingPorKit[kit].{ganchos, guionesEjemplo, broll, gpt}  (Valca: creativos/marcas/valca/briefing-guiones/valca-briefing.json) */
-const PASOS_CIMA = [
+const PASOS_CIMA_F = [
   ['Hook', '0 a 3 s', 'Tu dolor, que se vea. Uno de la lista, <b>tal cual</b>.'],
   ['Lo que te pasaba', '', 'Qué te pasaba y qué probaste sin resultado, o qué creías que era.'],
   ['Quién te lo pasó', '', 'Una persona de tu vida (amiga, hermana, compañera) que estaba igual o peor, <b>apareció con el resultado</b> y le preguntaste.'],
@@ -1051,13 +1051,16 @@ const PASOS_CIMA = [
   ['Qué cambió', '', 'Dos momentos: lo primero que notaste (con plazo) y el resultado: plazo + zona + <b>alguien que te dijo algo</b>, con sus palabras.'],
   ['El cierre', '', 'Retomás el hook: «Si a vos también…, probalo». Y dónde se compra.'],
 ];
+const pasosCima = () => CFG.genero !== 'm' ? PASOS_CIMA_F : PASOS_CIMA_F.map(p =>
+  p[0] === 'Quién te lo pasó' ? [p[0], p[1], 'Una persona de tu vida (un amigo, tu hermano, tu cuñado, un compañero) que estaba igual o peor, <b>apareció con el resultado</b> y le preguntaste.']
+  : p[0] === 'El producto' ? [p[0], p[1], p[2].replace('Lo que usa ella es', 'Lo que toma él es')] : p);
 const datoKit = (bk, k) => (bk && bk[k]) || (CFG.briefing || {})[k] || null;
 const conEstructura = bk => !!(datoKit(bk, 'guionesEjemplo') || []).length;
 
 function seccionEstructura(){
   return `<h3>Cómo armar tu video</h3>
      <div class="principio"><p>${B('No es una publicidad: es una historia.')} Los videos que venden no arrancan con el producto: arrancan con lo que te pasaba. ${B('El nombre del producto no se dice antes del segundo 20.')} Si aparece antes, parece un aviso y la gente sigue de largo.</p></div>
-     <ul class="limpia pasos-cima">${PASOS_CIMA.map((p, n) => `<li><span class="si">${n+1}</span> ${B(p[0])}${p[1] ? ` <em class="g-nuevo">${p[1]}</em>` : ''}<br>${p[2]}</li>`).join('')}</ul>
+     <ul class="limpia pasos-cima">${pasosCima().map((p, n) => `<li><span class="si">${n+1}</span> ${B(p[0])}${p[1] ? ` <em class="g-nuevo">${p[1]}</em>` : ''}<br>${p[2]}</li>`).join('')}</ul>
      <p>Abajo tenés ${B('3 guiones completos')} armados así. El hook se dice tal cual; lo demás podés decirlo con tus palabras, ${B('sin cambiar el orden')}.</p>`;
 }
 
@@ -1069,7 +1072,18 @@ function seccionEjemplos(bk){
      <p>Tocá cada uno para verlo entero. ${B('«📝»')} es el texto en pantalla y ${B('«🎬»')} lo que se ve en ese momento.</p>
      ${gs.map((g, n) => `<details class="ej"${n === 0 ? ' open' : ''}><summary>${B(`Ejemplo ${n+1}`)} · «${g.t}» · ${g.seg} s</summary>
        ${g.nota ? `<p class="guion-nota">⚠️ ${g.nota[0].toUpperCase() + g.nota.slice(1)}.</p>` : ''}
+       ${botonVideo(g.video)}
        <div class="ej-filas">${g.filas.map(fila).join('')}</div></details>`).join('')}`;
+}
+
+/* Los videos que ya editamos con este mismo guion (MagneLab 18/10): se ve cómo tiene que quedar. */
+const botonVideo = v => v && v.u ? `<a class="g-ref" href="${v.u}" target="_blank" rel="noopener"><span class="play">▶</span><span><b>${v.t || 'Mirá cómo quedó editado'}</b><small>Grabado con este guion</small></span></a>` : '';
+function seccionEditados(bk){
+  const vs = datoKit(bk, 'editados') || [];
+  if (!vs.length) return '';
+  return `<h3>Así quedan editados</h3>
+     <p>Estos los grabaron creadores nuestros ${B('con esta misma estructura')} y ya están editados. Mirá al menos uno ${B('antes de grabar')}: fijate cuándo aparece el producto y cómo cuenta quién se lo pasó.</p>
+     ${vs.map(v => `<a class="g-ref" href="${v.u}" target="_blank" rel="noopener"><span class="play">▶</span><span><b>${v.t}</b><small>${v.quien ? `Lo grabó ${v.quien}` : 'Editado por CIMA'}</small></span></a>`).join('')}`;
 }
 
 function seccionBroll(bk){
@@ -1087,7 +1101,7 @@ function promptGpt(bk, kitId){
   const gu = kitId ? guionDe(kitId) : null;
   const hook = gu && gu.filas ? gu.filas[0].dice : null;
   const sinPunto = t => String(t).trim().replace(/[.]+$/, '');
-  const lista = [hook, ...(datoKit(bk, 'ganchos') || []).map(h => h.dice)].filter(Boolean).map(sinPunto);
+  const lista = [hook, ...(datoKit(bk, 'ganchos') || CFG.ganchos || []).map(h => h.dice)].filter(Boolean).map(sinPunto);
   const hooks = [...new Set(lista)].map(h => `«${h}»`).join(' · ');
   const limpio = s => String(s).replace(/<[^>]+>/g, '');
   return limpio(`Sos guionista de videos UGC para Instagram y TikTok. Escribime el guion de MI video de ${g.producto} (${g.que}), contando mi caso real.
@@ -1097,7 +1111,7 @@ MI CASO: [contá acá, con tus palabras: qué te pasaba, hace cuánto, qué prob
 REGLAS
 1. Hook (primeros 3 segundos, máximo 9 palabras): elegí el que más se parezca a lo que te pasó y usalo tal cual: ${hooks}.
 2. Este orden, sin saltear pasos:
-   HOOK → DOLOR (qué me pasaba, algo que se vea) → CULPA (qué creía que era o qué probé) → VALIDADOR (una persona de mi vida —amiga, hermana, compañera— que estaba igual o peor, apareció con el resultado y le pregunté; máximo 30 palabras) → CONCIENTIZACIÓN («Me explicó que…», el porqué, una sola cosa) → PROBLEMA (cierra con «por eso nada de lo que probaba funcionaba») → PRESENTACIÓN («Lo que usa ella es ${g.producto}», una frase) → SOLUCIÓN (qué hace, con «por eso» o «para que», + el modo de uso: ${g.uso}) → TRANSFORMACIÓN 1 (lo primero que noté, con plazo) → TRANSFORMACIÓN 2 (plazo + número + zona + alguien que me dijo algo, con sus palabras) → CIERRE (alivio, una frase) → CTA (retoma el hook: «Si a vos también…, probalo: está en ${g.sitio}»).
+   HOOK → DOLOR (qué me pasaba, algo que se vea) → CULPA (qué creía que era o qué probé) → VALIDADOR (una persona de mi vida —${g.validador || 'amiga, hermana, compañera'}— que estaba igual o peor, apareció con el resultado y le pregunté; máximo 30 palabras) → CONCIENTIZACIÓN («Me explicó que…», el porqué, una sola cosa) → PROBLEMA (cierra con «por eso nada de lo que probaba funcionaba») → PRESENTACIÓN («Lo que ${g.ella === false ? 'toma él' : 'usa ella'} es ${g.producto}», una frase) → SOLUCIÓN (qué hace, con «por eso» o «para que», + el modo de uso: ${g.uso}) → TRANSFORMACIÓN 1 (lo primero que noté, con plazo) → TRANSFORMACIÓN 2 (plazo + número + zona + alguien que me dijo algo, con sus palabras) → CIERRE (alivio, una frase) → CTA (retoma el hook: «Si a vos también…, probalo: está en ${g.sitio}»).
 3. El nombre del producto NO se dice antes del segundo 20. Se dice dos veces: en PRESENTACIÓN y en TRANSFORMACIÓN 1.
 4. Largo: ${g.ritmo}. Frases cortas, como hablo yo, en argentino (con «vos»).
 5. Que NO parezca publicidad: nada de «increíble», «no te lo pierdas», «te lo recomiendo 100%», ni hablar como vendedora.
@@ -1148,7 +1162,7 @@ function armarBriefing(){
 
   if ((CFG.reglas || []).length && !(bk && bk.reglas && bk.reglas.length)) secciones.push(`<h3>Reglas técnicas</h3><ul class="limpia">${CFG.reglas.map(r => `<li>${r}</li>`).join('')}</ul>`);
   if (!(bk && CFG.kitPorRespuesta)) secciones.push(seccionGanchos(ganchos, br));
-  if (!(bk && CFG.kitPorRespuesta) && conEstructura(bk)) secciones.push(seccionEstructura(), seccionEjemplos(bk), seccionBroll(bk), seccionGpt(bk));
+  if (!(bk && CFG.kitPorRespuesta) && conEstructura(bk)) secciones.push(seccionEstructura(), seccionEditados(bk), seccionEjemplos(bk), seccionBroll(bk), seccionGpt(bk));
   if (dosKits) seccionesKit(D.kit2, 2, br).forEach(x => secciones.push(x));
   if ((CFG.noDecir || []).length) secciones.push(`<h3>Lo que NO se puede decir</h3><ul class="limpia">${CFG.noDecir.map(r => `<li>${r}</li>`).join('')}</ul>`);
   // qué fotos: el texto propio de la marca (fotosProcesoNota) reemplaza el bloque Escena/Gesto/Detalle
@@ -2023,7 +2037,7 @@ function pintarMarca(){
   } catch { if (DEMO){ precargar(); traerBorrador(); } ver(DEMO ? 'v-ficha' : 'v-error'); }
 })();
 
-const APP_VERSION = '2026-10-19-a';
+const APP_VERSION = '2026-10-19-b';
 </script>
 </body>
 </html>
