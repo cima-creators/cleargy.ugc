@@ -1231,7 +1231,7 @@ function pintarEnvios(){
   $('#tabla-envios').innerHTML = `
     <table>
       <thead><tr>
-        <th style="width:34px"></th><th>Creadora</th><th>Dirección</th>
+        <th style="width:34px">${filtroEnv === 'listo' ? '<input type="checkbox" id="sel-todas" title="Seleccionar todas las pendientes">' : ''}</th><th>Creadora</th><th>Dirección</th>
         ${conOpciones ? `<th>${colOpciones}</th>` : ''}<th>Estado</th><th>Aviso</th>
       </tr></thead>
       <tbody>${!vista.length ? `<tr><td colspan="7" class="n2" style="padding:24px;text-align:center">${filtroEnv === 'listo' ? 'No queda nadie por enviar 🎉' : 'Todavía no se despachó ningún kit.'}</td></tr>` : ''}${vista.map(({e, ix}) => `
@@ -1335,6 +1335,14 @@ $('#btn-masiva').onclick = async () => {
   b.disabled = false; b.textContent = txt;
 };
 
+// 19/10: seleccionar todas las pendientes de una + el botón dice cuántas van
+function contarSel(){ const n = document.querySelectorAll('.sel:checked').length, b = $('#btn-desp');
+  if (b) b.textContent = n ? `Marcar ${n} como despachada${n === 1 ? '' : 's'}` : 'Marcar seleccionadas como despachadas';
+  const t = $('#sel-todas'), tot = document.querySelectorAll('.sel').length; if (t) { t.checked = !!n && n === tot; t.indeterminate = !!n && n < tot; } }
+document.addEventListener('change', e => {
+  if (e.target && e.target.id === 'sel-todas') document.querySelectorAll('.sel').forEach(c => c.checked = e.target.checked);
+  if (e.target && (e.target.id === 'sel-todas' || e.target.classList.contains('sel'))) contarSel();
+});
 $('#btn-desp').onclick = () => {
   const sel = [...document.querySelectorAll('.sel:checked')].map(c => +c.dataset.i);
   if (!sel.length){ alert('Marcá al menos una.'); return; }
@@ -1355,7 +1363,7 @@ $('#btn-desp').onclick = () => {
       if (saltadas || sinDm) alert(msg);
     }).catch(() => alert('No se pudo marcar el despacho. Reintentá.'));
   } else { sel.forEach(ix => ENVIOS[ix].estado = 'despachado'); }
-  pintarEnvios();
+  pintarEnvios(); contarSel();
 };
 
 /* ── entregas ── */
@@ -2336,7 +2344,7 @@ function aplicarRol(){
     pintarTodo();
   }
 })();
-const APP_VERSION = '2026-10-18-c';
+const APP_VERSION = '2026-10-19-a';
 </script>
 </body>
 </html>
