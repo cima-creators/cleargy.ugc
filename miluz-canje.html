@@ -351,6 +351,17 @@ body.condemo .wrap{padding-bottom:84px}
 .demo-kits button.on{background:var(--rosa);border-color:var(--rosa);color:#fff}
 .principio{background:var(--sup2,rgba(0,0,0,.035));border-left:3px solid var(--rosa);border-radius:12px;padding:12px 14px;margin-bottom:6px}
 .principio h3{margin-top:0}
+.pasos-cima li{line-height:1.5}
+details.ej{border:1px solid var(--linea);border-radius:14px;padding:10px 13px;margin:0 0 10px;background:var(--sup)}
+details.ej summary{cursor:pointer;font-size:.9rem;color:var(--tx)}
+.ej-filas{margin-top:10px;display:flex;flex-direction:column;gap:9px}
+.ej-f{border-left:3px solid var(--rosa);padding:2px 0 2px 10px}
+.ej-f i{display:block;font-style:normal;font-size:.62rem;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--rosa);margin-bottom:2px}
+.ej-f b{display:block;font-weight:600;color:var(--tx);font-size:.9rem;line-height:1.45}
+.ej-f small{margin-top:2px}
+.gpt-prompt{width:100%;box-sizing:border-box;font:inherit;font-size:.78rem;line-height:1.45;color:var(--tx2);background:var(--sup2);border:1px solid var(--linea);border-radius:12px;padding:11px 12px;resize:vertical}
+.gpt-btns{display:flex;gap:8px;flex-wrap:wrap;margin:8px 0 4px}
+.gpt-btns .btn{flex:1;min-width:140px;text-align:center;text-decoration:none}
 .g-nuevo{font-style:normal;font-size:.66rem;font-weight:700;letter-spacing:.04em;text-transform:uppercase;color:var(--tx3);background:var(--bg,#fff);border:1px solid var(--linea);border-radius:999px;padding:2px 7px;margin-left:4px;vertical-align:middle}
 .brief ul:not(.limpia){margin:6px 0 6px 18px}
 .row.calle-nro{grid-template-columns:1fr 110px}
@@ -946,6 +957,7 @@ function seccionesKit(kitId, numero, br){
   const guion = numero === 1 ? guionDe(kitId) : null;
   if (guion) out.push(seccionGuion(guion));
   out.push(seccionGanchos(bk.ganchos || [], br, !!guion));
+  if (conEstructura(bk)) out.push(numero === 1 ? seccionEstructura() : '', seccionEjemplos(bk), seccionBroll(bk), seccionGpt(bk, kitId));
   if (bk.casos) out.push(`<h3>Casos reales</h3>${bk.casos.html}${bk.casos.drive
     ? `<p><a href="${bk.casos.drive}" target="_blank" rel="noopener">Abrir la carpeta con los casos →</a></p>`
     : `<p class="guion-nota">La carpeta con los casos la compartimos en la comunidad. Si no la ves, pedila ahí.</p>`}`);
@@ -958,7 +970,8 @@ function seccionCta(){
   const c = CFG.cta || {};
   const cod = (D && D.codigo) || '';
   const ej = (c.ejemplos || []).slice(0, 2).map(x => x.replace(/\{codigo\}/g, cod || 'TUCÓDIGO'));
-  return `<h3>Cómo armar tu video</h3>
+  const viejo = !conEstructura(briefKit());
+  return (viejo ? `<h3>Cómo armar tu video</h3>
      <p>No hace falta un guion. Contalo como se lo contarías ${CFG.genero === 'm' ? 'a un amigo' : 'a una amiga'}, en este orden:</p>
      <ul class="limpia">
        <li><span class="si">1</span> ${(CFG.briefing || {}).paso1 || `${B('El hook')}: uno de los de arriba, tal cual, en los primeros 3 segundos, con tu cara y el producto.`}</li>
@@ -967,7 +980,7 @@ function seccionCta(){
        <li><span class="si">4</span> ${B('Qué cambió')}: lo que notaste y en cuánto tiempo.</li>
        <li><span class="si">5</span> ${B('El cierre')}: recomendalo y decí dónde se compra.</li>
      </ul>
-     ${((CFG.briefing || {}).tips || []).length ? `<p>${B('Podés sumar:')}</p><ul class="limpia">${CFG.briefing.tips.map(t => `<li><span class="si">+</span> ${t}</li>`).join('')}</ul>` : ''}
+     ${((CFG.briefing || {}).tips || []).length ? `<p>${B('Podés sumar:')}</p><ul class="limpia">${CFG.briefing.tips.map(t => `<li><span class="si">+</span> ${t}</li>`).join('')}</ul>` : ''}` : '') + `
      <h3>El cierre</h3>
      <p>Recomendalo como ${CFG.genero === 'm' ? 'a un amigo' : 'a una amiga'} (${B('probalo, pedilo')}) y decí dónde: ${CFG.cupon ? ((CFG.briefing || {}).codigoHablado === false ? `${c.donde || B('el link de tu perfil')} (tu código va ${B('escrito en la descripción')}, no lo digas)` : B('con tu código')) : (c.donde || B('el link de tu perfil'))}${(c.ofertas || []).length ? ` · ${c.ofertas.join(' · ')}` : ''}.</p>
      ${ej.length ? `<div class="angulos">${ej.map(x => `<div class="angulo"><div class="l"><span>🗣️</span><i>Ejemplo</i>«${x}»</div></div>`).join('')}</div>` : ''}`;
@@ -982,6 +995,7 @@ function itemsChecklist(){
     br.checkInicio || `¿Aparece ${B('tu cara al inicio, con el producto')}?`,
     `¿Dura ${B(`${CFG.duracionMin || 30} segundos o más`)}?`,
     `¿Dijiste ${B('el nombre del producto')} en voz alta?`,
+    ...(conEstructura(briefKit()) ? [`¿El nombre aparece ${B('recién después del segundo 20')}?`, `¿Contaste ${B('quién te lo pasó y qué te explicó')}, antes del producto?`, `¿Pusiste ${B('b-roll')} arriba de lo que decís?`] : []),
     ...(br.checksExtra || []),
     ((((CFG.briefingPorKit || {})[kitActual()]) || {}).checkUso) || `¿Mostraste ${B('cómo lo usás')}?`,
     `¿Cerraste ${B('como te recomendamos')}, diciendo dónde se compra?`,
@@ -1025,6 +1039,93 @@ function fotosEjemplo(bk){
   return `<div class="fotos3">${fotos.slice(0, 3).map((f, n) => `<figure><img src="${f}" alt="${caps[n][0]}" loading="lazy"><figcaption><b>${caps[n][0]}</b><span>${caps[n][1]}</span></figcaption></figure>`).join('')}</div>`;
 }
 
+/* ═══ Estructura CIMA en el briefing (Nacho 18/10/2026: «los videos vienen muy de venta») ═══
+   Se activa sola cuando el kit (o la marca) trae `guionesEjemplo`. Sin eso, queda el «Cómo armar» viejo.
+   Datos: briefingPorKit[kit].{ganchos, guionesEjemplo, broll, gpt}  (Valca: creativos/marcas/valca/briefing-guiones/valca-briefing.json) */
+const PASOS_CIMA = [
+  ['Hook', '0 a 3 s', 'Tu dolor, que se vea. Uno de la lista, <b>tal cual</b>.'],
+  ['Lo que te pasaba', '', 'Qué te pasaba y qué probaste sin resultado, o qué creías que era.'],
+  ['Quién te lo pasó', '', 'Una persona de tu vida (amiga, hermana, compañera) que estaba igual o peor, <b>apareció con el resultado</b> y le preguntaste.'],
+  ['Lo que te explicó', '', '«Me explicó que…»: el porqué, <b>una sola cosa</b>. Cerrás con «por eso nada de lo que probaba funcionaba».'],
+  ['El producto', 'después del segundo 20', '«Lo que usa ella es…», en una frase. <b>Recién acá</b> se dice el nombre. Después, qué hace y cómo se usa.'],
+  ['Qué cambió', '', 'Dos momentos: lo primero que notaste (con plazo) y el resultado: plazo + zona + <b>alguien que te dijo algo</b>, con sus palabras.'],
+  ['El cierre', '', 'Retomás el hook: «Si a vos también…, probalo». Y dónde se compra.'],
+];
+const datoKit = (bk, k) => (bk && bk[k]) || (CFG.briefing || {})[k] || null;
+const conEstructura = bk => !!(datoKit(bk, 'guionesEjemplo') || []).length;
+
+function seccionEstructura(){
+  return `<h3>Cómo armar tu video</h3>
+     <div class="principio"><p>${B('No es una publicidad: es una historia.')} Los videos que venden no arrancan con el producto: arrancan con lo que te pasaba. ${B('El nombre del producto no se dice antes del segundo 20.')} Si aparece antes, parece un aviso y la gente sigue de largo.</p></div>
+     <ul class="limpia pasos-cima">${PASOS_CIMA.map((p, n) => `<li><span class="si">${n+1}</span> ${B(p[0])}${p[1] ? ` <em class="g-nuevo">${p[1]}</em>` : ''}<br>${p[2]}</li>`).join('')}</ul>
+     <p>Abajo tenés ${B('3 guiones completos')} armados así. El hook se dice tal cual; lo demás podés decirlo con tus palabras, ${B('sin cambiar el orden')}.</p>`;
+}
+
+function seccionEjemplos(bk){
+  const gs = datoKit(bk, 'guionesEjemplo') || [];
+  if (!gs.length) return '';
+  const fila = f => `<div class="ej-f"><i>${f.e.replace(/ ← PICO| · alivio/g, '')}</i><b>«${f.dice}»</b>${f.lee ? `<small>📝 ${f.lee}</small>` : ''}${f.ve ? `<small>🎬 ${f.ve}</small>` : ''}</div>`;
+  return `<h3>3 guiones de ejemplo</h3>
+     <p>Tocá cada uno para verlo entero. ${B('«📝»')} es el texto en pantalla y ${B('«🎬»')} lo que se ve en ese momento.</p>
+     ${gs.map((g, n) => `<details class="ej"${n === 0 ? ' open' : ''}><summary>${B(`Ejemplo ${n+1}`)} · «${g.t}» · ${g.seg} s</summary>
+       ${g.nota ? `<p class="guion-nota">⚠️ ${g.nota[0].toUpperCase() + g.nota.slice(1)}.</p>` : ''}
+       <div class="ej-filas">${g.filas.map(fila).join('')}</div></details>`).join('')}`;
+}
+
+function seccionBroll(bk){
+  const tomas = datoKit(bk, 'broll') || [];
+  if (!tomas.length) return '';
+  return `<h3>B-roll: lo que se ve mientras hablás</h3>
+     <p>Un video de una sola toma a cámara se cae. Grabá ${B('tomas cortas de 3 a 5 segundos')} y ponelas ${B('arriba de lo que estás diciendo')}: lo que se ve y lo que se escucha cuentan lo mismo. Estas son las que más sirven:</p>
+     <ul class="limpia">${tomas.map((t, n) => `<li><span class="si">${n+1}</span> ${B(t.t)}: ${t.ve}${t.fila && t.fila !== '—' ? ` <small>Va en: ${t.fila.toLowerCase()}</small>` : ''}</li>`).join('')}</ul>`;
+}
+
+/* El prompt para que lo armen con su ChatGPT: la estructura + el producto + lo que no se dice + un ejemplo. */
+function promptGpt(bk, kitId){
+  const g = datoKit(bk, 'gpt'); if (!g) return '';
+  const ej = (datoKit(bk, 'guionesEjemplo') || [])[0];
+  const gu = kitId ? guionDe(kitId) : null;
+  const hook = gu && gu.filas ? gu.filas[0].dice : null;
+  const sinPunto = t => String(t).trim().replace(/[.]+$/, '');
+  const lista = [hook, ...(datoKit(bk, 'ganchos') || []).map(h => h.dice)].filter(Boolean).map(sinPunto);
+  const hooks = [...new Set(lista)].map(h => `«${h}»`).join(' · ');
+  const limpio = s => String(s).replace(/<[^>]+>/g, '');
+  return limpio(`Sos guionista de videos UGC para Instagram y TikTok. Escribime el guion de MI video de ${g.producto} (${g.que}), contando mi caso real.
+
+MI CASO: [contá acá, con tus palabras: qué te pasaba, hace cuánto, qué probaste antes, quién te lo recomendó y qué notaste]
+
+REGLAS
+1. Hook (primeros 3 segundos, máximo 9 palabras): elegí el que más se parezca a lo que te pasó y usalo tal cual: ${hooks}.
+2. Este orden, sin saltear pasos:
+   HOOK → DOLOR (qué me pasaba, algo que se vea) → CULPA (qué creía que era o qué probé) → VALIDADOR (una persona de mi vida —amiga, hermana, compañera— que estaba igual o peor, apareció con el resultado y le pregunté; máximo 30 palabras) → CONCIENTIZACIÓN («Me explicó que…», el porqué, una sola cosa) → PROBLEMA (cierra con «por eso nada de lo que probaba funcionaba») → PRESENTACIÓN («Lo que usa ella es ${g.producto}», una frase) → SOLUCIÓN (qué hace, con «por eso» o «para que», + el modo de uso: ${g.uso}) → TRANSFORMACIÓN 1 (lo primero que noté, con plazo) → TRANSFORMACIÓN 2 (plazo + número + zona + alguien que me dijo algo, con sus palabras) → CIERRE (alivio, una frase) → CTA (retoma el hook: «Si a vos también…, probalo: está en ${g.sitio}»).
+3. El nombre del producto NO se dice antes del segundo 20. Se dice dos veces: en PRESENTACIÓN y en TRANSFORMACIÓN 1.
+4. Largo: ${g.ritmo}. Frases cortas, como hablo yo, en argentino (con «vos»).
+5. Que NO parezca publicidad: nada de «increíble», «no te lo pierdas», «te lo recomiendo 100%», ni hablar como vendedora.
+6. Nunca: ${g.noDecir}.${g.extra ? `\n7. ${g.extra}` : ''}
+
+LO QUE TENÉS QUE SABER DEL PRODUCTO
+${g.mecanismo}
+A quién le hablo: ${g.publico}.
+
+FORMATO
+Una tabla de 4 columnas: Paso · Lo que digo · Texto en pantalla (máximo 5 palabras, solo en algunas filas) · Qué se ve (tomas cortas de b-roll arriba de lo que digo).
+${ej ? `\nEJEMPLO de cómo tiene que quedar («${ej.t}»):\n${ej.filas.map(f => `${f.e}: ${f.dice}`).join('\n')}` : ''}`);
+}
+
+function seccionGpt(bk, kitId){
+  const p = promptGpt(bk, kitId); if (!p) return '';
+  const id = 'gpt-' + (kitId || 'marca');
+  return `<h3>Armá tu guion con ChatGPT</h3>
+     <p>Copiá esto, pegalo en tu ChatGPT y ${B('completá «MI CASO»')} con tu historia. Te devuelve el guion con esta misma estructura. ${B('Leelo antes de grabar')}: si el producto aparece antes del segundo 20, pedile que lo corra.</p>
+     <textarea class="gpt-prompt" id="${id}" readonly rows="9">${p.replace(/</g, '&lt;')}</textarea>
+     <div class="gpt-btns"><button type="button" class="btn gpt-copiar" data-p="${id}">Copiar el prompt</button>
+       <a class="btn sec" href="https://chatgpt.com/" target="_blank" rel="noopener">Abrir ChatGPT</a></div>`;
+}
+document.addEventListener('click', e => {
+  if (!e.target.classList.contains('gpt-copiar')) return;
+  copiar(document.getElementById(e.target.dataset.p).value, e.target, '¡Copiado! Pegalo en ChatGPT');
+});
+
 /* ── briefing armado desde la config ── */
 const B = t => `<b style="color:var(--tx)">${t}</b>`;
 function armarBriefing(){
@@ -1047,6 +1148,7 @@ function armarBriefing(){
 
   if ((CFG.reglas || []).length && !(bk && bk.reglas && bk.reglas.length)) secciones.push(`<h3>Reglas técnicas</h3><ul class="limpia">${CFG.reglas.map(r => `<li>${r}</li>`).join('')}</ul>`);
   if (!(bk && CFG.kitPorRespuesta)) secciones.push(seccionGanchos(ganchos, br));
+  if (!(bk && CFG.kitPorRespuesta) && conEstructura(bk)) secciones.push(seccionEstructura(), seccionEjemplos(bk), seccionBroll(bk), seccionGpt(bk));
   if (dosKits) seccionesKit(D.kit2, 2, br).forEach(x => secciones.push(x));
   if ((CFG.noDecir || []).length) secciones.push(`<h3>Lo que NO se puede decir</h3><ul class="limpia">${CFG.noDecir.map(r => `<li>${r}</li>`).join('')}</ul>`);
   // qué fotos: el texto propio de la marca (fotosProcesoNota) reemplaza el bloque Escena/Gesto/Detalle
@@ -1921,7 +2023,7 @@ function pintarMarca(){
   } catch { if (DEMO){ precargar(); traerBorrador(); } ver(DEMO ? 'v-ficha' : 'v-error'); }
 })();
 
-const APP_VERSION = '2026-10-18-a';
+const APP_VERSION = '2026-10-19-a';
 </script>
 </body>
 </html>
