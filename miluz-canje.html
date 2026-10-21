@@ -1293,6 +1293,7 @@ function demo(accion, datos){
   if (accion === 'ficha'){ Object.assign(g, datos.ficha, {estado:'ficha_completa'}); }
   if (accion === 'briefing'){ g.estado = 'briefing_ok'; }
   if (accion === 'cobro'){ g.cobro = { alias: datos.alias, titular: datos.titular }; }
+  if (accion === 'entregar_cyber'){ g.cyberVideos = (g.cyberVideos || []).concat([{ n: (g.cyberVideos || []).length + 1, drive: datos.drive, reel: datos.ig ? { url: datos.ig, views: 0 } : null, tiktok: datos.tiktok ? { url: datos.tiktok, views: 0 } : null }]); }
   if (accion === 'llego'){ g.estado = 'recibido'; g.deadline = Date.now()+CFG.diasParaPublicar*864e5; }
   if (accion === 'reel'){ g.estado = 'publicado'; g.reel = datos.url; }
   if (accion === 'entregar'){
@@ -1685,8 +1686,31 @@ function pintarCyber(){
   if ((C.referencias || []).length) out.push(`<h3>Los anuncios que más vendieron</h3><p>Elegí uno y grabá tu versión con la oferta de Cyber.</p><div class="refs">${C.referencias.map(r => `<a class="ref" href="${r.u}" target="_blank" rel="noopener"><span class="play">▶</span><span><b>${esc(r.t)}</b><small>${r.n ? esc(r.n) : 'Ver anuncio'}</small></span></a>`).join('')}</div>`);
   if ((C.reglas || []).length) out.push(`<h3>Cómo tiene que ser el video</h3><ul class="limpia">${C.reglas.map(r => `<li><span class="si">→</span> ${r}</li>`).join('')}</ul>`);
   if ((C.guiones || []).length) out.push(`<h3>Guiones para esta fecha</h3><p>Elegí uno. El hook se dice tal cual; lo demás, con tus palabras.</p>` + C.guiones.map((g, i) => `<details class="ej"${i === 0 ? ' open' : ''}><summary><b>${esc(g.t || 'Guion ' + (i + 1))}</b>${g.seg ? ` · ${esc(g.seg)}` : ''}</summary><div class="ej-filas">${(g.filas || []).map(f => `<div class="ej-f">${f.e ? `<i>${esc(f.e)}</i>` : ''}<b>«${esc(f.dice)}»</b>${f.pantalla ? `<small>📝 ${esc(f.pantalla)}</small>` : ''}${f.filma ? `<small>🎬 ${esc(f.filma)}</small>` : ''}</div>`).join('')}</div></details>`).join(''));
+  if (C.gpt) out.push(`<h3>Armá tu guion de Cyber con ChatGPT</h3><p>Copiá esto, pegalo en tu ChatGPT y completá tu caso. Te devuelve el guion con esta misma estructura.</p>
+     <textarea class="gpt-prompt" id="gpt-cyber" readonly rows="9">${String(C.gpt).replace(/</g, '&lt;')}</textarea>
+     <div class="gpt-btns"><button type="button" class="btn gpt-copiar" data-p="gpt-cyber">Copiar el prompt</button>
+       <a class="btn sec" href="https://chatgpt.com/" target="_blank" rel="noopener">Abrir ChatGPT</a></div>`);
+  // 21/10: subir el video de Cyber (aunque ya haya cumplido su collab): hasta 2, dentro de la fecha
+  const mios = (D && D.cyberVideos) || [];
+  const puede = D && ['recibido','entregado','cambios','publicado','cumplida','vencida','sin_respuesta','devolucion'].includes(D.estado) && (enVentana(C) || DEMO);
+  out.push(`<h3>Tus videos de Cyber</h3>` + (mios.length ? mios.map(v => `<div class="bono"><div class="bono-cab"><b>Video ${v.n} de Cyber</b><span>${((v.reel ? v.reel.views : 0) + (v.tiktok ? v.tiktok.views : 0)).toLocaleString('es-AR')} vistas</span></div><small>${v.drive ? `<a href="${v.drive}" target="_blank" rel="noopener">Drive</a>` : ''}${v.reel ? ` · <a href="${v.reel.url}" target="_blank" rel="noopener">Reel</a>` : ''}${v.tiktok ? ` · <a href="${v.tiktok.url}" target="_blank" rel="noopener">TikTok</a>` : ''}</small></div>`).join('') : '<p>Todavía no subiste ninguno. Con 2 videos que sumen las vistas del bono, cobrás el bono doble.</p>') +
+    (puede && mios.length < 2 ? `<div id="cy-subir" style="margin-top:12px"><p style="margin:0 0 8px"><b>Subir mi video ${mios.length + 1} de Cyber</b></p>
+       <input id="cy-drive" placeholder="Link de Drive con el video" style="width:100%;box-sizing:border-box;margin:0 0 8px">
+       <input id="cy-ig" placeholder="Link del reel en Instagram (si ya lo publicaste)" style="width:100%;box-sizing:border-box;margin:0 0 8px">
+       <input id="cy-tt" placeholder="Link de TikTok (si ya lo publicaste)" style="width:100%;box-sizing:border-box;margin:0 0 10px">
+       <button class="btn" id="cy-enviar">Subir mi video de Cyber</button>
+       <small style="margin-top:6px">${['recibido','vencida','sin_respuesta','devolucion'].includes(D.estado) && !mios.length ? 'Este video cuenta también como el de tu collab.' : 'Es un video extra: suma para el bono doble.'}</small></div>`
+     : (!puede && mios.length < 2 ? `<small>${enVentana(C) ? 'Lo podés subir cuando te llegue el kit.' : 'La carga se habilita del ' + C.desde.split('-').reverse().slice(0,2).join('/') + ' al ' + C.hasta.split('-').reverse().slice(0,2).join('/') + '.'}</small>` : '')));
   $('#cy-cuerpo').innerHTML = out.join('') || '<p>Muy pronto vas a tener acá todo lo de la fecha.</p>';
 }
+document.addEventListener('click', async e => {
+  if (!e.target || e.target.id !== 'cy-enviar') return;
+  const b = e.target, drive = $('#cy-drive').value.trim(), ig = $('#cy-ig').value.trim(), tiktok = $('#cy-tt').value.trim();
+  if (!drive) { alert('Pegá el link de Drive con tu video.'); return; }
+  b.disabled = true; b.textContent = 'Subiendo…';
+  try { D = (await api('entregar_cyber', { drive, ig, tiktok })).creadora; pintarCyber(); if (typeof pintarEstado === 'function') pintarEstado(); ver('v-cyber'); alert('¡Listo! Recibimos tu video de Cyber.'); }
+  catch (er) { alert('No se pudo subir. Revisá los links (Drive, y si los ponés, el reel y el TikTok).'); b.disabled = false; b.textContent = 'Subir mi video de Cyber'; }
+});
 $('#a-codigo').addEventListener('click', () => $('#bloque-codigo').scrollIntoView({behavior:'smooth',block:'center'}));
 $('#a-brief').addEventListener('click', () => { modoBriefing(); ver('v-brief'); });
 $('#a-chk').addEventListener('click', () => { modoBriefing(); ver('v-brief'); setTimeout(() => { const c = $('#checklist'); if (c) c.scrollIntoView({ behavior: 'smooth', block: 'start' }); }, 80); });
@@ -2081,7 +2105,7 @@ function pintarMarca(){
   } catch { if (DEMO){ precargar(); traerBorrador(); } ver(DEMO ? 'v-ficha' : 'v-error'); }
 })();
 
-const APP_VERSION = '2026-10-21-c';
+const APP_VERSION = '2026-10-21-d';
 </script>
 </body>
 </html>
