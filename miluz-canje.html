@@ -572,6 +572,15 @@ details.ej summary{cursor:pointer;font-size:.9rem;color:var(--tx)}
     </div>
   </section>
 
+  <!-- ══ CYBER MONDAY (21/10): briefing, ofertas y bonos especiales de la fecha — sale de CFG.cyber ══ -->
+  <section id="v-cyber" class="oculto">
+    <p class="eyebrow" id="cy-fechas">Cyber Monday</p>
+    <h1 id="cy-tit">Cyber Monday</h1>
+    <p class="lead" id="cy-intro"></p>
+    <div class="card brief" id="cy-cuerpo"></div>
+    <button class="btn sec" id="cy-volver">Volver</button>
+  </section>
+
   <!-- ══ 3 · ESTADO ══ -->
   <section id="v-estado" class="oculto">
 
@@ -611,6 +620,7 @@ details.ej summary{cursor:pointer;font-size:.9rem;color:var(--tx)}
       <a class="acceso" id="a-grupo" target="_blank" rel="noopener"><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M9 17a8 8 0 1 0-5.3-2L3 21l5.4-1.6A8 8 0 0 0 9 17z"/><circle cx="9" cy="12" r=".9" fill="currentColor" stroke="none"/><circle cx="12.5" cy="12" r=".9" fill="currentColor" stroke="none"/></svg><span>Comunidad</span></a>
       <a class="acceso" id="a-llamada"><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="6.5" width="12.5" height="11" rx="2.5"/><path d="M15.5 11l5-2.6v7.2l-5-2.6z"/></svg><span>Llamada</span></a>
       <a class="acceso" id="a-bonos"><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2.8l2.7 5.9 6.4.7-4.8 4.4 1.3 6.4L12 17l-5.6 3.2 1.3-6.4L2.9 9.4l6.4-.7z"/></svg><span>Bonos</span></a>
+      <a class="acceso" id="a-cyber" style="display:none"><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M13 2.5 4.5 13.5H11l-1 8 8.5-11H12z"/></svg><span>Cyber</span></a>
       <a class="acceso" id="a-codigo"><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M4 10.5h16V19a1.5 1.5 0 0 1-1.5 1.5h-13A1.5 1.5 0 0 1 4 19z"/><rect x="2.8" y="7" width="18.4" height="3.5" rx="1.2"/><path d="M12 7v13.5"/><path d="M12 7c-2 0-3.4-.8-3.4-2.1S9.9 3.2 12 7zM12 7c2 0 3.4-.8 3.4-2.1S14.1 3.2 12 7z"/></svg><span>Código</span></a>
     </div>
 
@@ -1220,7 +1230,7 @@ function armarBriefing(){
 let D = null;
 const $ = s => document.querySelector(s);
 const ver = id => {
-  ['v-load','v-error','v-ficha','v-brief','v-estado'].forEach(v =>
+  ['v-load','v-error','v-ficha','v-brief','v-estado','v-cyber'].forEach(v =>
     $('#'+v).classList.toggle('oculto', v !== id));
   window.scrollTo(0,0);
 };
@@ -1646,6 +1656,21 @@ function copiarCodigo(){
   navigator.clipboard ? navigator.clipboard.writeText(t).then(fin).catch(fin) : fin();
 }
 $('#codigo').addEventListener('click', copiarCodigo);
+$('#a-cyber').addEventListener('click', () => { pintarCyber(); ver('v-cyber'); });
+$('#cy-volver').addEventListener('click', () => { if (typeof pintarEstado === 'function') pintarEstado(); ver('v-estado'); });
+/* 21/10: la sección especial de Cyber Monday. CFG.cyber = { titulo, fechas, intro, ofertas[], bonos[{t,d,monto}], guiones[{t,seg,filas[{e,dice,pantalla,filma}]}], reglas[] } */
+function pintarCyber(){
+  const C = CFG.cyber || {}, esc = t => String(t ?? '').replace(/[&<>]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;'}[c]));
+  $('#cy-tit').textContent = C.titulo || 'Cyber Monday';
+  $('#cy-fechas').textContent = C.fechas || 'Cyber Monday';
+  $('#cy-intro').innerHTML = C.intro || '';
+  const out = [];
+  if ((C.ofertas || []).length) out.push(`<h3>Las ofertas</h3><p>Lo que tenés que decir en tu video (y que está en la web esos días):</p><ul class="limpia">${C.ofertas.map(o => `<li><span class="si">✓</span> ${o}</li>`).join('')}</ul>`);
+  if ((C.bonos || []).length) out.push(`<h3>Tus bonos especiales</h3>${C.bonos.map(b => `<div class="bono"><div class="bono-cab"><b>${esc(b.t)}</b>${b.monto ? `<span>${esc(b.monto)}</span>` : ''}</div>${b.d ? `<small>${b.d}</small>` : ''}</div>`).join('')}`);
+  if ((C.reglas || []).length) out.push(`<h3>Cómo tiene que ser el video</h3><ul class="limpia">${C.reglas.map(r => `<li><span class="si">→</span> ${r}</li>`).join('')}</ul>`);
+  if ((C.guiones || []).length) out.push(`<h3>Guiones para esta fecha</h3><p>Elegí uno. El hook se dice tal cual; lo demás, con tus palabras.</p>` + C.guiones.map((g, i) => `<details class="ej"${i === 0 ? ' open' : ''}><summary><b>${esc(g.t || 'Guion ' + (i + 1))}</b>${g.seg ? ` · ${esc(g.seg)}` : ''}</summary><div class="ej-filas">${(g.filas || []).map(f => `<div class="ej-f">${f.e ? `<i>${esc(f.e)}</i>` : ''}<b>«${esc(f.dice)}»</b>${f.pantalla ? `<small>📝 ${esc(f.pantalla)}</small>` : ''}${f.filma ? `<small>🎬 ${esc(f.filma)}</small>` : ''}</div>`).join('')}</div></details>`).join(''));
+  $('#cy-cuerpo').innerHTML = out.join('') || '<p>Muy pronto vas a tener acá todo lo de la fecha.</p>';
+}
 $('#a-codigo').addEventListener('click', () => $('#bloque-codigo').scrollIntoView({behavior:'smooth',block:'center'}));
 $('#a-brief').addEventListener('click', () => { modoBriefing(); ver('v-brief'); });
 $('#a-chk').addEventListener('click', () => { modoBriefing(); ver('v-brief'); setTimeout(() => { const c = $('#checklist'); if (c) c.scrollIntoView({ behavior: 'smooth', block: 'start' }); }, 80); });
@@ -2019,6 +2044,7 @@ function pintarMarca(){
     $('#a-llamada').addEventListener('click', () => $('#pop-llamada').showModal());
   } else $('#a-llamada').style.display = 'none';
   if (!CFG.cupon) $('#a-codigo').style.display = 'none';
+  if (CFG.cyber) $('#a-cyber').style.display = '';
   ajustarAccesos();
   $('#ll-cerrar').addEventListener('click', () => $('#pop-llamada').close());
 
@@ -2037,7 +2063,7 @@ function pintarMarca(){
   } catch { if (DEMO){ precargar(); traerBorrador(); } ver(DEMO ? 'v-ficha' : 'v-error'); }
 })();
 
-const APP_VERSION = '2026-10-19-b';
+const APP_VERSION = '2026-10-21-a';
 </script>
 </body>
 </html>

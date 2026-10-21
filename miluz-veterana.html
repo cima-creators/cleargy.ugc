@@ -1,0 +1,147 @@
+<!doctype html>
+<html lang="es"><head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="robots" content="noindex">
+<title>Sumate a la app de creadoras</title>
+<style>
+/* 21/10/2026: link especial para las que ya hicieron collab con la marca antes del sistema (Valca: las de Ferni).
+   Se anotan con su dirección y entran directo como collab cumplida, con su código y su link. */
+:root{--ac:#2f7d8c;--ac2:#e6f2f4;--bg:#f7f5f2;--tx:#1f1d1b;--tx2:#6b655f;--ln:#e7e1d9;--ok:#2e7d4f;--no:#b3412f}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--tx);font:16px/1.5 system-ui,-apple-system,"Segoe UI",sans-serif}
+main{max-width:520px;margin:0 auto;padding:28px 16px 48px}
+.logo{font-weight:800;font-size:1.3rem;letter-spacing:-.01em;color:var(--ac);margin:0 0 18px}
+.logo img{max-height:46px;display:block}
+h1{font-size:1.6rem;line-height:1.2;margin:0 0 8px}
+.lead{color:var(--tx2);margin:0 0 20px}
+.card{background:#fff;border:1px solid var(--ln);border-radius:18px;padding:18px;margin:0 0 14px}
+.card h2{font-size:1rem;margin:0 0 10px}
+label{display:block;font-size:.85rem;font-weight:600;margin:10px 0 4px}
+input,select{width:100%;padding:12px 13px;border:1px solid var(--ln);border-radius:12px;font:inherit;background:#fff;color:var(--tx)}
+input:focus,select:focus{outline:2px solid var(--ac2);border-color:var(--ac)}
+.fila{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.fila>div label{margin-top:10px}
+.btn{display:block;width:100%;padding:15px;border:0;border-radius:14px;background:var(--ac);color:#fff;font:inherit;font-weight:700;font-size:1.02rem;cursor:pointer;text-align:center;text-decoration:none}
+.btn:disabled{opacity:.6}
+.nota{font-size:.82rem;color:var(--tx2);margin:8px 0 0}
+.err{color:var(--no);font-size:.88rem;margin:10px 0 0}
+.oculto{display:none}
+.ok{text-align:center}
+.ok .tilde{font-size:2.6rem;margin:0 0 6px}
+.cod{display:inline-block;margin:8px 0 14px;padding:8px 16px;border-radius:12px;background:var(--ac2);font-weight:800;letter-spacing:.06em;font-size:1.2rem}
+ul.v{margin:0;padding:0 0 0 18px;color:var(--tx2);font-size:.92rem}
+</style>
+</head><body><main>
+  <div class="logo" id="logo">…</div>
+
+  <section id="v-form">
+    <h1 id="tit">Sumate a la app de creadoras</h1>
+    <p class="lead" id="lead">Ya hiciste una collab con nosotros. Sumate a la app para tener tu código de descuento, tu link de ventas, los bonos y las próximas campañas.</p>
+
+    <div class="card">
+      <h2>Lo que vas a tener</h2>
+      <ul class="v">
+        <li>Tu <b>código de descuento</b> y tu <b>link</b>: cobrás comisión por cada venta.</li>
+        <li>Los <b>bonos</b> por views y los premios del mes.</li>
+        <li>Prioridad en las <b>próximas campañas</b> (te mandamos el kit a esta dirección).</li>
+      </ul>
+    </div>
+
+    <form id="f" class="card" autocomplete="on" novalidate>
+      <h2>Tus datos</h2>
+      <label for="ig">Tu Instagram</label>
+      <input id="ig" placeholder="@tu.usuario" autocomplete="off" required>
+      <label for="tiktok" id="l-tiktok">Tu TikTok (si tenés)</label>
+      <input id="tiktok" placeholder="@tu.usuario" autocomplete="off">
+      <label for="nombre">Nombre y apellido</label>
+      <input id="nombre" autocomplete="name" required>
+      <div class="fila">
+        <div><label for="tel">WhatsApp</label><input id="tel" inputmode="tel" placeholder="11 2345 6789" autocomplete="tel" required></div>
+        <div><label for="dni">DNI</label><input id="dni" inputmode="numeric" required></div>
+      </div>
+      <label for="email">Mail</label>
+      <input id="email" type="email" autocomplete="email">
+
+      <h2 style="margin-top:20px">Tu dirección</h2>
+      <p class="nota" style="margin:-6px 0 4px">A dónde te mandamos los kits de las próximas campañas.</p>
+      <div class="fila">
+        <div><label for="calle">Calle</label><input id="calle" autocomplete="address-line1" required></div>
+        <div><label for="numero">Número</label><input id="numero" inputmode="numeric" required></div>
+      </div>
+      <div class="fila">
+        <div><label for="piso">Piso / depto</label><input id="piso"></div>
+        <div><label for="cp">Código postal</label><input id="cp" inputmode="numeric" autocomplete="postal-code" required></div>
+      </div>
+      <label for="localidad">Localidad</label>
+      <input id="localidad" autocomplete="address-level2" required>
+      <label for="provincia">Provincia</label>
+      <select id="provincia" required><option value="">Elegí…</option></select>
+
+      <button class="btn" id="enviar" type="submit" style="margin-top:18px">Entrar a la app</button>
+      <p class="err oculto" id="err"></p>
+    </form>
+  </section>
+
+  <section id="v-ok" class="oculto">
+    <div class="card ok">
+      <div class="tilde">🎉</div>
+      <h1>¡Ya estás adentro!</h1>
+      <p class="lead" style="margin:0">Tu código de descuento es</p>
+      <div class="cod" id="cod">—</div>
+      <p class="nota" style="margin:0 0 16px">Guardate el link de tu app: ahí ves tu código, tu link de ventas, tus bonos y las próximas campañas.</p>
+      <a class="btn" id="ir" href="#">Abrir mi app</a>
+    </div>
+  </section>
+
+  <section id="v-error" class="oculto">
+    <div class="card"><h1>Este link no es válido</h1><p class="lead" style="margin:0">Pedile el link de nuevo a quien te lo pasó.</p></div>
+  </section>
+</main>
+<script>
+const API = 'https://us-central1-cleargy-creators.cloudfunctions.net/canje';
+const QS = new URLSearchParams(location.search);
+const MARCA = (QS.get('marca') || '').toLowerCase(), K = QS.get('k') || '';
+const $ = s => document.querySelector(s);
+const api = async (accion, extra) => { const r = await fetch(API, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ accion, marca: MARCA, ...extra }) }); const j = await r.json().catch(() => ({})); if (!r.ok || !j.ok) throw new Error(j.error || ('http ' + r.status)); return j; };
+const ver = id => ['v-form', 'v-ok', 'v-error'].forEach(v => $('#' + v).classList.toggle('oculto', v !== id));
+
+(async function () {
+  if (!MARCA || !K) { ver('v-error'); return; }
+  try {
+    const { marca: C } = await api('config', {});
+    document.title = `${C.nombre} · Sumate a la app de creadoras`;
+    const e = C.estilo || {};
+    if (e.acento) document.documentElement.style.setProperty('--ac', e.acento);
+    if (e.acentoClaro) document.documentElement.style.setProperty('--ac2', e.acentoClaro);
+    $('#logo').innerHTML = e.logoImg ? `<img src="${e.logoImg}" alt="${C.nombre}">` : (e.logoTexto || C.nombre);
+    $('#tit').textContent = `Sumate a la app de creadoras de ${C.nombre}`;
+    (C.provincias || []).forEach(p => { const o = document.createElement('option'); o.value = o.textContent = p; $('#provincia').appendChild(o); });
+    if (!(C.redes || []).includes('tiktok')) { $('#l-tiktok').classList.add('oculto'); $('#tiktok').classList.add('oculto'); }
+  } catch { ver('v-error'); return; }
+})();
+
+$('#f').addEventListener('submit', async ev => {
+  ev.preventDefault();
+  const v = id => $('#' + id).value.trim();
+  const datos = { ig: v('ig'), tiktok: v('tiktok'), nombre: v('nombre'), tel: v('tel'), dni: v('dni'), email: v('email'),
+                  calle: v('calle'), numero: v('numero'), piso: v('piso'), cp: v('cp'), localidad: v('localidad'), provincia: v('provincia') };
+  const falta = ['ig', 'nombre', 'tel', 'dni', 'calle', 'numero', 'cp', 'localidad', 'provincia'].filter(k => !datos[k]);
+  const err = $('#err');
+  if (falta.length) { err.textContent = 'Completá todos los datos (el piso y el mail son opcionales).'; err.classList.remove('oculto'); return; }
+  err.classList.add('oculto');
+  const b = $('#enviar'); b.disabled = true; b.textContent = 'Entrando…';
+  try {
+    const r = await api('veterana', { k: K, datos });
+    $('#cod').textContent = r.codigo || '—';
+    if (!r.codigo) $('#cod').parentElement.querySelector('p').textContent = 'Ya quedaste en la app.';
+    $('#ir').href = r.link;
+    ver('v-ok');
+    setTimeout(() => { location.href = r.link; }, 6000);
+  } catch (e) {
+    err.textContent = e.message === 'link inválido' ? 'Este link no es válido. Pedilo de nuevo.' : 'No se pudo guardar. Revisá los datos y probá de nuevo.';
+    err.classList.remove('oculto'); b.disabled = false; b.textContent = 'Entrar a la app';
+  }
+});
+</script>
+</body></html>
