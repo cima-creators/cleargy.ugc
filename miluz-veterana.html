@@ -104,8 +104,8 @@ const QS = new URLSearchParams(location.search);
 const MARCA = (QS.get('marca') || '').toLowerCase(), K = QS.get('k') || '';
 const $ = s => document.querySelector(s);
 const api = async (accion, extra) => { const r = await fetch(API, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ accion, marca: MARCA, ...extra }) }); const j = await r.json().catch(() => ({})); if (!r.ok || !j.ok) throw new Error(j.error || ('http ' + r.status)); return j; };
-// en la barra se ve el link corto (regla de CIMA): /<marca>/veteranas
-try { if (location.hostname === 'cima-creators.github.io' && MARCA && K) history.replaceState(null, '', `/${MARCA}/veteranas/`); } catch {}
+// en la barra se ve el link corto (regla de CIMA): /<marca>/sumate
+try { if (location.hostname === 'cima-creators.github.io' && MARCA && K) history.replaceState(null, '', `/${MARCA}/sumate/`); } catch {}
 const ver = id => ['v-form', 'v-ok', 'v-error'].forEach(v => $('#' + v).classList.toggle('oculto', v !== id));
 
 (async function () {
