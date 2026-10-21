@@ -1778,7 +1778,8 @@ const numero = n => Math.round(n).toLocaleString('es-AR');
    antes no hay nada que mostrar y una tarjeta en cero desmotiva. */
 function pintarPlata(){
   const B = CFG.plata;
-  const publicado = ['publicado','cumplida'].includes(D.estado);
+  // 21/10: las que entraron por /sumate ya hicieron su collab antes del sistema: no hay reel que medir acá
+  const publicado = ['publicado','cumplida'].includes(D.estado) && !(D.veterana && !(D.reel && D.reel.url));
   const viewsIg = (D.reel && D.reel.views) || 0;
   const viewsTt = (D.tiktok && D.tiktok.views) || 0;
   const views  = (typeof D.views === 'number' ? D.views : viewsIg + viewsTt);
@@ -1866,7 +1867,7 @@ function pintarEstado(){
       : (D.reel && D.reel.collab
         ? ['Tu collab','¡Collab<br>aceptada!','Ya aparece en tu perfil. Resubilo a tus historias: esas views suman para tus bonos.','Publicado']
         : ['Tu collab','¡Ya está<br>publicado!','Aceptá la invitación de colaboración en Instagram y resubilo a tus historias.','Publicado']),
-    cumplida:   ['Tu collab','¡Listo!','Ya podés pedir tu próximo kit.','Completada'],
+    cumplida:   ['Tu collab','¡Listo!', (D && D.veterana && !(D.reel && D.reel.url)) ? 'Ya estás en la app. Compartí tu código y tu link: cobrás comisión por cada venta. Te avisamos por WhatsApp cuando arranque la próxima campaña.' : 'Ya podés pedir tu próximo kit.','Completada'],
     sin_respuesta:['Tu collab','Cerramos<br>tu collab', `Como no supimos nada de vos, tu cuenta quedó bloqueada en las campañas de CIMA y te pedimos el kit de vuelta${CFG.devolucion ? ' (mandalo a ' + CFG.devolucion + ' con tu nombre adentro)' : ''}. Si igual subís tu video acá abajo, la cerramos como cumplida.`,'Cerrada'],
     devolucion: ['Tu collab','Devolvés<br>el kit', `Nos avisaste que no vas a hacer el video. ${CFG.devolucion ? 'Mandá el kit a ' + CFG.devolucion + ' con tu nombre adentro (el envío va por tu cuenta).' : 'Te pasamos por WhatsApp la dirección para devolver el kit.'} Si cambiaste de idea, todavía podés subir tu video acá abajo.`,'Devolución'],
     vencida:    ['Tu plazo','Se te pasó<br>el plazo', CREADORA_PUBLICA() ? 'El kit ya lo tenés: mandanos tu video hoy acá abajo. Sin video no podemos mandarte más kits.' : 'El kit ya lo tenés: entregá tu video hoy acá abajo. Sin video no podemos mandarte más kits.','Atrasada']
@@ -2063,7 +2064,7 @@ function pintarMarca(){
   } catch { if (DEMO){ precargar(); traerBorrador(); } ver(DEMO ? 'v-ficha' : 'v-error'); }
 })();
 
-const APP_VERSION = '2026-10-21-a';
+const APP_VERSION = '2026-10-21-b';
 </script>
 </body>
 </html>
