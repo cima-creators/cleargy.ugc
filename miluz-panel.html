@@ -2232,7 +2232,7 @@ function detallePlata(c){
   const f = t => t ? new Date(t).toLocaleDateString('es-AR') : '';
   const mov = (c.movimientos || []).map(m => `<div>${f(m.en)} · <b>${NOMBRE_MOV[m.tipo] || m.tipo}</b>${m.tipo === 'comision' && m.facturado != null ? ` (${m.pct || c.pct}% de ${pesos(m.facturado)} vendidos acumulados, ${m.ventas} venta${m.ventas === 1 ? '' : 's'})` : ''}${m.concepto && m.tipo !== 'comision' ? ' · ' + escH(m.concepto) : ''} · ${m.tipo === 'pago' ? '−' : '+'}${pesos(m.monto)}</div>`).join('');
   const ped = (c.pedidos || []).length ? `<div style="margin-top:6px"><b>Pedidos con su ${c.codigo ? 'código ' + escH(c.codigo) : 'código'}</b> (${c.porCodigo} con código · ${c.porLink} por su link)</div>` +
-    (c.pedidos || []).map(p => `<div>Pedido ${escH(p.n || '')} · ${f(p.fecha)} · ${pesos(p.monto)} · ${p.via === 'link' ? 'por link' : 'con código'} → ${pesos(Math.round(p.monto * (c.pct || 0) / 100))}</div>`).join('') : '';
+    (c.pedidos || []).map(p => `<div>Pedido ${escH(p.n || '')} · ${f(p.fecha)} · ${pesos(p.monto)} · ${p.via === 'link' ? 'por link' : 'con código'} → ${pesos(Math.round(p.monto * (p.pct || c.pct || 0) / 100))}${p.pct && p.pct !== c.pct ? ' (' + p.pct + '% Cyber)' : ''}</div>`).join('') : '';
   return `<div style="font-size:.85rem;line-height:1.6;margin-top:4px">${mov || '—'}${ped}</div>`;
 }
 $('#btn-pedir-alias') && ($('#btn-pedir-alias').onclick = async () => {
@@ -2344,7 +2344,7 @@ function aplicarRol(){
     pintarTodo();
   }
 })();
-const APP_VERSION = '2026-10-21-a';
+const APP_VERSION = '2026-10-21-b';
 </script>
 </body>
 </html>

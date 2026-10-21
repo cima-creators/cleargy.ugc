@@ -307,6 +307,9 @@ dialog.pop::backdrop{background:rgba(42,35,29,.45)}
 }
 @keyframes g{to{transform:rotate(360deg)}}
 ul.limpia{margin:0;padding-left:1.05rem}
+#cy-cuerpo ul.limpia{list-style:none;padding-left:0}
+.cy-banner{display:flex;align-items:center;gap:10px;width:100%;margin:0 0 14px;padding:13px 15px;border:0;border-radius:16px;background:#111;color:#fff;font:inherit;text-align:left;cursor:pointer}
+.cy-banner b{font-size:.9rem;line-height:1.35}.cy-banner span{margin-left:auto;font-weight:700;white-space:nowrap;font-size:.85rem}
 ul.limpia li{margin-bottom:.5rem;font-size:.88rem;color:var(--tx2)}
 .brief h3{font-size:.96rem;font-weight:700;margin:1.5rem 0 .5rem;color:var(--tx)}
 .brief h3:first-child{margin-top:0}
@@ -583,6 +586,7 @@ details.ej summary{cursor:pointer;font-size:.9rem;color:var(--tx)}
 
   <!-- ══ 3 · ESTADO ══ -->
   <section id="v-estado" class="oculto">
+    <button class="cy-banner oculto" id="cy-banner">⚡ <b id="cy-banner-tx">Cyber Monday</b><span>Ver cómo →</span></button>
 
     <div class="hero" id="hero">
       <div class="hero-anillo" id="hero-anillo">
@@ -1657,6 +1661,17 @@ function copiarCodigo(){
 }
 $('#codigo').addEventListener('click', copiarCodigo);
 $('#a-cyber').addEventListener('click', () => { pintarCyber(); ver('v-cyber'); });
+$('#cy-banner').addEventListener('click', () => { pintarCyber(); ver('v-cyber'); });
+/* 21/10: ¿estamos dentro de la fecha? (en Argentina) */
+const hoyAR = () => new Date(Date.now() - 3 * 36e5).toISOString().slice(0, 10);
+const enVentana = v => !!(v && v.desde && v.hasta && hoyAR() >= v.desde && hoyAR() <= v.hasta);
+const pctHoy = () => { const c = CFG.cyber && CFG.cyber.comision; return enVentana(c) ? c.pct : (CFG.plata || {}).comision; };
+function pintarCyberBanner(){
+  const C = CFG.cyber, b = $('#cy-banner'); if (!b) return;
+  const vivo = !!(C && (enVentana(C) || DEMO));   // en la demo se ve siempre, para mostrarlo
+  b.classList.toggle('oculto', !vivo);
+  if (vivo) $('#cy-banner-tx').textContent = `Cyber Monday: ${C.comision ? C.comision.pct + '% de comisión' : 'bonos especiales'}${C.bonoDoble ? ' y bono de $' + Number(C.bonoDoble.monto).toLocaleString('es-AR') : ''}.`;
+}
 $('#cy-volver').addEventListener('click', () => { if (typeof pintarEstado === 'function') pintarEstado(); ver('v-estado'); });
 /* 21/10: la sección especial de Cyber Monday. CFG.cyber = { titulo, fechas, intro, ofertas[], bonos[{t,d,monto}], guiones[{t,seg,filas[{e,dice,pantalla,filma}]}], reglas[] } */
 function pintarCyber(){
@@ -1667,6 +1682,7 @@ function pintarCyber(){
   const out = [];
   if ((C.ofertas || []).length) out.push(`<h3>Las ofertas</h3><p>Lo que tenés que decir en tu video (y que está en la web esos días):</p><ul class="limpia">${C.ofertas.map(o => `<li><span class="si">✓</span> ${o}</li>`).join('')}</ul>`);
   if ((C.bonos || []).length) out.push(`<h3>Tus bonos especiales</h3>${C.bonos.map(b => `<div class="bono"><div class="bono-cab"><b>${esc(b.t)}</b>${b.monto ? `<span>${esc(b.monto)}</span>` : ''}</div>${b.d ? `<small>${b.d}</small>` : ''}</div>`).join('')}`);
+  if ((C.referencias || []).length) out.push(`<h3>Los anuncios que más vendieron</h3><p>Elegí uno y grabá tu versión con la oferta de Cyber.</p><div class="refs">${C.referencias.map(r => `<a class="ref" href="${r.u}" target="_blank" rel="noopener"><span class="play">▶</span><span><b>${esc(r.t)}</b><small>${r.n ? esc(r.n) : 'Ver anuncio'}</small></span></a>`).join('')}</div>`);
   if ((C.reglas || []).length) out.push(`<h3>Cómo tiene que ser el video</h3><ul class="limpia">${C.reglas.map(r => `<li><span class="si">→</span> ${r}</li>`).join('')}</ul>`);
   if ((C.guiones || []).length) out.push(`<h3>Guiones para esta fecha</h3><p>Elegí uno. El hook se dice tal cual; lo demás, con tus palabras.</p>` + C.guiones.map((g, i) => `<details class="ej"${i === 0 ? ' open' : ''}><summary><b>${esc(g.t || 'Guion ' + (i + 1))}</b>${g.seg ? ` · ${esc(g.seg)}` : ''}</summary><div class="ej-filas">${(g.filas || []).map(f => `<div class="ej-f">${f.e ? `<i>${esc(f.e)}</i>` : ''}<b>«${esc(f.dice)}»</b>${f.pantalla ? `<small>📝 ${esc(f.pantalla)}</small>` : ''}${f.filma ? `<small>🎬 ${esc(f.filma)}</small>` : ''}</div>`).join('')}</div></details>`).join(''));
   $('#cy-cuerpo').innerHTML = out.join('') || '<p>Muy pronto vas a tener acá todo lo de la fecha.</p>';
@@ -1826,10 +1842,11 @@ function pintarPlata(){
   $('#pl-ganado').textContent = pesos(ganado); $('#pl-pagado').textContent = pesos(pagado); $('#pl-saldo').textContent = pesos(Math.max(0, ganado - pagado));
   const peds = D.pedidos || [];
   $('#pl-detalle').classList.toggle('oculto', !peds.length);
-  $('#pl-pedidos').innerHTML = peds.map(p => `<div>Pedido ${p.n || ''} · ${p.fecha ? new Date(p.fecha).toLocaleDateString('es-AR') : ''} · ${pesos(p.monto)} · ${p.via === 'link' ? 'por tu link' : 'con tu código'} → <b>${pesos(Math.round(p.monto * B.comision / 100))}</b></div>`).join('');
+  $('#pl-pedidos').innerHTML = peds.map(p => `<div>Pedido ${p.n || ''} · ${p.fecha ? new Date(p.fecha).toLocaleDateString('es-AR') : ''} · ${pesos(p.monto)} · ${p.via === 'link' ? 'por tu link' : 'con tu código'} → <b>${pesos(Math.round(p.monto * (p.pct || B.comision) / 100))}</b>${p.pct && p.pct !== B.comision ? ' <small>(' + p.pct + '% Cyber)</small>' : ''}</div>`).join('');
   if (D.cobro && D.cobro.alias && !$('#pl-alias').value) { $('#pl-alias').value = D.cobro.alias; $('#pl-titular').value = D.cobro.titular || ''; $('#pl-ok').classList.remove('oculto'); }
 
-  $('#bono-comision-pct').textContent = B.comision + '%';
+  { const c = CFG.cyber && CFG.cyber.comision; $('#bono-comision-pct').textContent = (enVentana(c) ? c.pct + '% · Cyber' : B.comision + '%'); }
+  pintarCyberBanner();
   // sin tienda no hay código ni comisión por ventas: se esconde el bono
   $('#bono-comision-pct').closest('.bono').classList.toggle('oculto', !CFG.cupon);
 }
@@ -2064,7 +2081,7 @@ function pintarMarca(){
   } catch { if (DEMO){ precargar(); traerBorrador(); } ver(DEMO ? 'v-ficha' : 'v-error'); }
 })();
 
-const APP_VERSION = '2026-10-21-b';
+const APP_VERSION = '2026-10-21-c';
 </script>
 </body>
 </html>
