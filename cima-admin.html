@@ -1595,6 +1595,11 @@ function enterAdmin(){
         if(id==='view-mensajes') renderMensajes();
         if(id==='view-finanzas') renderFinanzas();
         if(id==='view-comprobantes') renderComprobantes();
+        // 21/10: faltaba Guiones. Abril cargaba una tanda y, con la vista abierta, el panel
+        // seguía mostrando los números viejos (el globito del menú sí se actualizaba, porque
+        // lo pinta renderAll): decía 105 guiones cuando ya había 145.
+        if(id==='view-guiones') renderGuionesAdmin();
+        if(id==='view-creadoras' && typeof renderCreadorasAdmin==='function') renderCreadorasAdmin();
       }
       // Auto-sync solo en la primera carga y solo si pasaron 24hs
       if(isFirstLoad) checkAutoSync();
@@ -3992,7 +3997,7 @@ loadConfig();
 <!-- Auto-actualización: GitHub Pages cachea el HTML y los celulares lo retienen mucho más.
      Esto compara la versión publicada con la que está corriendo y refresca sola. -->
 <script>
-const APP_VERSION = '2026-10-19-b';
+const APP_VERSION = '2026-10-21-b';
 (function(){
   var CLAVE='cima_ver_reload';
   function hayAlguienEscribiendo(){
