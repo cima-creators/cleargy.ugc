@@ -1878,7 +1878,6 @@ function queFalta(c){
 const ESTADOS_CORREGIBLES = ['briefing_ok','enviado','recibido','vencida','entregado','cambios','sin_respuesta','devolucion'];
 function corregirEstadoHtml(c){
   if (!['admin','equipo','avisos'].includes(ROL) || !ESTADOS_CORREGIBLES.includes(c.estado)) return '';
-  if (c.bloqueada && ROL !== 'admin') return '<div class="cre-box" style="margin-top:10px"><h4>Corregir estado</h4>Está bloqueada: solo Nacho la puede mover.</div>';
   return `<div class="cre-box" style="margin-top:10px"><h4>Corregir estado</h4>
     <div style="display:flex;gap:6px;flex-wrap:wrap">
       <button class="bsec corr-est" data-id="${c.id}" data-a="recibido">Le llegó el kit…</button>
@@ -2023,7 +2022,7 @@ function celdaVencida(c){
   const dev = ['sin_respuesta','devolucion'].includes(c.estado) && ROL !== 'avisos'
     ? `<label class="mini" style="display:inline-flex;gap:4px;align-items:center;cursor:pointer" title="Tildá cuando el kit llegue al depósito"><input type="checkbox" class="kitdev" data-id="${c.id}" ${c.kitDevueltoEn ? 'checked' : ''}> kit recibido</label>` : '';
   const falta = c.faltaDevolucion ? '<span class="pill no" title="Esta marca no tiene cargada la dirección de devolución: pasásela a mano">falta dirección</span>' : '';
-  const desb = c.bloqueada && ROL === 'admin' ? `<button class="mini desbloq" data-id="${c.id}" title="Solo Nacho: vuelve a poder postularse">desbloquear</button>` : '';
+  const desb = c.bloqueada && ['admin','equipo','avisos'].includes(ROL) ? `<button class="mini desbloq" data-id="${c.id}" title="Vuelve a poder postularse">desbloquear</button>` : '';
   return `<div>${resp}${falta}${paso}</div><div style="margin-top:4px">${wa}${dev}${desb}</div>`;
 }
 document.addEventListener('change', e => {
@@ -2344,7 +2343,7 @@ function aplicarRol(){
     pintarTodo();
   }
 })();
-const APP_VERSION = '2026-10-21-c';
+const APP_VERSION = '2026-10-23-a';
 </script>
 </body>
 </html>

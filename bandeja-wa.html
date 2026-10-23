@@ -62,7 +62,7 @@ const ls = { get(k){ try { return localStorage.getItem(k); } catch { return null
 let CLAVE = ls.get('wa_bandeja_clave') || '';
 let S = { mensajes:[], fichas:{}, leidos:{}, resueltos:{}, marcas:{}, sel:null, filtro:'todas', marca:'', timer:null };
 const ETQ = { invitada:'Aceptada · sin ficha', ficha_completa:'Ficha completa', briefing_ok:'En lista de envío', enviado:'Kit en camino', recibido:'Grabando', entregado:'Video entregado', cambios:'Ajuste pedido', publicado:'Publicada', cumplida:'Cumplida', vencida:'Atrasada', sin_respuesta:'Sin respuesta · bloqueada', devolucion:'Devuelve el kit', descartada:'Descartada', rechazada:'Rechazada', por_revisar:'A revisar', revisar:'A revisar', en_cola:'En cola' };
-const CORREGIBLES = ['briefing_ok','enviado','recibido','vencida','entregado','cambios'];   // 13/10: Jhose corrige estados desde acá
+const CORREGIBLES = ['briefing_ok','enviado','recibido','vencida','entregado','cambios','sin_respuesta','devolucion'];   // 13/10: Jhose corrige estados desde acá
 const esc = t => String(t ?? '').replace(/[&<>"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
 const hora = ts => { const d = new Date(ts), h = new Date(); const hh = d.toLocaleTimeString('es-AR',{hour:'2-digit',minute:'2-digit'}); return d.toDateString() === h.toDateString() ? hh : d.toLocaleDateString('es-AR',{day:'numeric',month:'short'}) + ' ' + hh; };
 const esReac = m => m.tipo === 'reaction' || /^(Reaccionó|\[reaction\])/.test(m.texto || '');
