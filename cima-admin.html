@@ -836,7 +836,7 @@ const BRAND_CONFIGS = {
   },
   miluz: {
     goal:300, // objetivo total de la campaña
-    name:'MiLuz', collection:'miluz', defaultCampaignStart:'2026-06-10',
+    name:'MiLuz', collection:'miluz', defaultCampaignStart:'2026-06-10', dailyVideos:2,   // 22/10 (Nacho): 2 por día por creadora; antes caía al default de 5
     rachaMonto:30000, adminPass:'miluz-admin-2025', adminPass2:'miluz-2025', adminPass4:'abril-2026',
     adminPass3:'vane-2026', adminUser3:'V', adminNombre3:'Vane',   // Vane: acceso total, pero SOLO en Mi Luz
     accent:'#111111', accentLight:'#333333', bg:'#f0f0f0', surface2:'#e8e8e8', border:'#d0d0d0',
@@ -892,7 +892,7 @@ const BRAND_CONFIGS = {
   },
   paperblank: {
     goal:300, // objetivo total de la campaña
-    name:'Paperblank', logoText:'PAPERBLANK', collection:'paperblank', driveObligatorio:true, defaultCampaignStart:'2026-09-01', dailyVideos:3, videoGoal:75, no100k:true, noRacha:true, salary:500000, minVideos:75,
+    name:'Paperblank', logoText:'PAPERBLANK', collection:'paperblank', driveObligatorio:true, defaultCampaignStart:'2026-09-01', dailyVideos:1, videoGoal:75, no100k:true, noRacha:true, salary:500000, minVideos:75,
     logoImg:'data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="320" height="110"><rect width="320" height="110" rx="12" fill="%23000000"/><circle cx="56" cy="55" r="31" fill="none" stroke="%23EFEDE4" stroke-width="6" stroke-linecap="round" stroke-dasharray="150 45" transform="rotate(118 56 55)"/><path d="M50 86 h12 l-6 11 z" fill="%23EFEDE4"/><text x="56" y="76" font-family="Georgia,serif" font-size="60" font-weight="700" fill="%23EFEDE4" text-anchor="middle">P</text><text x="108" y="65" font-family="Georgia,serif" font-size="25" fill="%23EFEDE4" letter-spacing="1">Paperblank</text></svg>',
     adminPass:'paperblank-admin-2025', adminPass2:'paperblank-2025', adminPass4:'abril-2026',
     accent:'#23262A', accentLight:'#4E545C', bg:'#f5f5f4', surface2:'#ececeb', border:'#e0e0de',
@@ -2268,12 +2268,12 @@ async function notifyNoVideos(){
   btn.textContent="Enviando...";btn.disabled=true;
   const sinVideos=Object.keys(PHONES).filter(c=>{
     if(!PHONES[c]) return false;
-    return getVideosOnDay(c,0)<5;
+    return getVideosOnDay(c,0)<diaDe(c);
   });
   if(sinVideos.length===0){showToast("✅ Todas tienen 5 videos");btn.textContent="📲 Avisar sin videos";btn.disabled=false;return;}
   const messages=sinVideos.map(c=>{
     const cant=getVideosOnDay(c,0);
-    const faltan=5-cant;
+    const faltan=diaDe(c)-cant;
     return{number:PHONES[c],name:NAMES[c],
       body:"Hola "+NAMES[c].split(" ")[0]+"! 🌟 ¿Cómo vas? Te escribimos desde "+BRAND.name+" porque todavía "+(faltan===5?"no subiste ningún video hoy":(faltan===1?"te falta 1 video":"te faltan "+faltan+" videos"))+". Ya sabés que el límite es las 21hs y queremos que llegues con todo 💪 ¡Cualquier cosa nos avisás!"};
   });
@@ -2289,7 +2289,7 @@ async function notifyNoVideos(){
 }
 
 async function sendAdminReport(){
-  const hoy=Object.keys(PHONES).filter(c=>getVideosOnDay(c,0)<5);
+  const hoy=Object.keys(PHONES).filter(c=>getVideosOnDay(c,0)<diaDe(c));   // 22/10: era un 5 fijo, ahora el cupo de cada uno
   const racha=Object.keys(PHONES).filter(c=>getVideosOnDay(c,0)===0&&getVideosOnDay(c,1)===0);
   // Hitos de pago por VIDEOS (Nacho, 14/10): la mitad de la campaña y la campaña completa.
   // Sólo avisa si de verdad queda plata sin pagar y si esa cuota todavía no se cobró.
@@ -2311,7 +2311,7 @@ async function sendAdminReport(){
   if(hoy.length===0&&racha.length===0&&paraPagar.length===0)return;
   let msg="📊 *Reporte "+BRAND.name+" — "+new Date().toLocaleDateString("es-AR")+"*\n\n";
   if(paraPagar.length>0){msg+="💰 *Para pagar:*\n";paraPagar.forEach(x=>{msg+="• "+NAMES[x.c]+" — "+(x.hito===100?"campaña completa":"mitad de campaña")+" ("+x.vids+"/"+x.metaC+" videos) · $"+x.debe.toLocaleString("es-AR")+"\n";});msg+="\n";}
-  if(hoy.length>0){msg+="⚠️ *Sin 5 videos hoy:*\n";hoy.forEach(c=>{const cant=getVideosOnDay(c,0);msg+="• "+NAMES[c]+" ("+cant+"/5)\n";});msg+="\n";}
+  if(hoy.length>0){msg+="⚠️ *Sin su cupo de hoy:*\n";hoy.forEach(c=>{msg+="• "+NAMES[c]+" ("+getVideosOnDay(c,0)+"/"+diaDe(c)+")\n";});msg+="\n";}
   if(racha.length>0){msg+="🔴 *Racha — 2 días sin subir:*\n";racha.forEach(c=>{msg+="• "+NAMES[c]+"\n";});}
   try{
     await fetch("https://api.whaticket.com/api/v1/messages",{method:"POST",
@@ -3997,7 +3997,7 @@ loadConfig();
 <!-- Auto-actualización: GitHub Pages cachea el HTML y los celulares lo retienen mucho más.
      Esto compara la versión publicada con la que está corriendo y refresca sola. -->
 <script>
-const APP_VERSION = '2026-10-21-b';
+const APP_VERSION = '2026-10-22-a';
 (function(){
   var CLAVE='cima_ver_reload';
   function hayAlguienEscribiendo(){
