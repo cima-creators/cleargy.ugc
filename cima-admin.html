@@ -3800,8 +3800,37 @@ loadConfig();
         });
       } catch(e){
         if(String(e.message)==='STALE_STATE'){
-          console.warn('[FB save] Otra pestaña guardó datos más nuevos — recargando estado en vez de pisar');
-          if(typeof showToast==='function') showToast('⚠️ Datos actualizados en otra pestaña — recargá la página', 6000);
+          // 🛑 24/10: acá ANTES se tiraba el guardado a la basura con un cartelito de 6 s.
+          // Nacho marcó varios pagos de noche y "se salieron": los primeros entraron y los
+          // de después se descartaron en silencio, porque otra pestaña había subido la
+          // versión. No se pisa el estado nuevo (eso estaba bien) pero TAMPOCO se pierde lo
+          // que acaba de cargar: se reinjerta sobre lo que hay en el servidor y se reintenta.
+          try{
+            await runTransaction(db, async (t) => {
+              const snap = await t.get(DATA_DOC);
+              const remoto = snap.exists() ? (JSON.parse(snap.data().data)||{}) : {};
+              let sumados = 0;
+              // Sólo listas que se AGREGAN y tienen id propio: nunca se borra nada del servidor
+              for(const campo of ['pagos','comprobantes']){
+                const r = Array.isArray(remoto[campo]) ? remoto[campo] : [];
+                const l = Array.isArray(stateOnly[campo]) ? stateOnly[campo] : [];
+                const ids = new Set(r.map(x => String(x && x.id)));
+                const nuevos = l.filter(x => x && x.id!=null && !ids.has(String(x.id)));
+                if(nuevos.length){ remoto[campo] = r.concat(nuevos); sumados += nuevos.length; }
+              }
+              remoto._version = (remoto._version||0) + 1;
+              t.set(DATA_DOC, {data: JSON.stringify(remoto)});
+              window.__fbMerge = sumados;
+            });
+            const n = window.__fbMerge||0;
+            if(typeof showToast==='function') showToast(n
+              ? `✓ Se guardó lo que cargaste (${n}). El resto de la pantalla puede estar viejo: recargá.`
+              : '⚠️ Otra pestaña guardó algo más nuevo — recargá la página', 8000);
+          }catch(me){
+            console.error('FB merge:', me);
+            if(typeof showToast==='function') showToast('❌ NO se guardó. Recargá la página y cargalo de nuevo.', 12000);
+            if(typeof window._avisarSinConexion==='function') window._avisarSinConexion();
+          }
           return;
         }
         console.error('FB save:', e); localStorage.setItem(BRAND_ID+'_data', JSON.stringify(data));
@@ -3997,7 +4026,7 @@ loadConfig();
 <!-- Auto-actualización: GitHub Pages cachea el HTML y los celulares lo retienen mucho más.
      Esto compara la versión publicada con la que está corriendo y refresca sola. -->
 <script>
-const APP_VERSION = '2026-10-22-a';
+const APP_VERSION = '2026-10-24-a';
 (function(){
   var CLAVE='cima_ver_reload';
   function hayAlguienEscribiendo(){
