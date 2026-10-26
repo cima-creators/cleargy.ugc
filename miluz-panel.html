@@ -803,6 +803,7 @@ const SOLAPAS = {
   equipo: ['resumen','admision','envios','entregas','creadoras','pagos','cupos','wa'],
   marca:  ['admision','envios','entregas','creadoras','cupos'],   // 29/9: ve Envíos; despachar queda para logística
   envios: ['envios'],
+  abril:  ['resumen','admision','envios','entregas','creadoras','cupos','wa'],   // 26/10: como el equipo, sin Pagos
   avisos: ['creadoras','wa'],   // 29/9: solo mandar el link a mano a las aceptadas (Jhose) · 1/10: y atender WhatsApp
 };
 const puede = t => (SOLAPAS[ROL] || SOLAPAS.equipo).includes(t) && (t !== 'cupos' || conCupos());
@@ -1245,7 +1246,7 @@ function pintarEnvios(){
             : `<span class="pill">En camino${e.despachadoEn ? ' · salió ' + new Date(e.despachadoEn).toLocaleDateString('es-AR', {day:'numeric', month:'short'}) : ''}</span>`}${e.seguimiento && e.seguimiento.codigo ? `<a class="n2 verreel" href="${e.seguimiento.url}" target="_blank" rel="noopener" title="Seguir el envío">${e.seguimiento.correo} · ${e.seguimiento.correo === 'Andesmar' ? 'remito ' : ''}${e.seguimiento.codigo} ↗</a>` : ''}</td>
           <td class="dmacc">${e.estado !== 'despachado' ? '' : (e.avisoDespachoEn
             ? `<span class="pill ok" title="Le llegó el DM 'tu kit salió'">DM ✓</span>`
-            : `<span class="pill no" title="No le llegó el DM: hace más de 24 h que no escribe al bot (Instagram lo bloquea)">sin DM</span>${e.tel ? `<a class="mini" target="_blank" href="${waLinkTexto(e.tel, mensajeDespachado(e.nom))}" title="Abre WhatsApp con el aviso armado">WhatsApp</a>` : ''}`)}${['admin','equipo'].includes(ROL) ? `<select class="mini cambio-est" data-i="${ix}" title="Dar de baja o corregir el estado">
+            : `<span class="pill no" title="No le llegó el DM: hace más de 24 h que no escribe al bot (Instagram lo bloquea)">sin DM</span>${e.tel ? `<a class="mini" target="_blank" href="${waLinkTexto(e.tel, mensajeDespachado(e.nom))}" title="Abre WhatsApp con el aviso armado">WhatsApp</a>` : ''}`)}${['admin','equipo','abril'].includes(ROL) ? `<select class="mini cambio-est" data-i="${ix}" title="Dar de baja o corregir el estado">
               <option value="">Cambiar…</option>
               ${e.estado === 'despachado' ? '<option value="briefing_ok">Volver a «Para enviar»</option>' : '<option value="enviado">Marcar despachado</option>'}
               ${!e.recibido ? '<option value="recibido">Marcar recibido</option>' : ''}
@@ -1877,7 +1878,7 @@ function queFalta(c){
 /* 13/10: Jhose (y el equipo) corrigen el estado desde la ficha: le llegó (con hace cuántos días), no le llegó, se baja */
 const ESTADOS_CORREGIBLES = ['briefing_ok','enviado','recibido','vencida','entregado','cambios','sin_respuesta','devolucion'];
 function corregirEstadoHtml(c){
-  if (!['admin','equipo','avisos'].includes(ROL) || !ESTADOS_CORREGIBLES.includes(c.estado)) return '';
+  if (!['admin','equipo','avisos','abril'].includes(ROL) || !ESTADOS_CORREGIBLES.includes(c.estado)) return '';
   return `<div class="cre-box" style="margin-top:10px"><h4>Corregir estado</h4>
     <div style="display:flex;gap:6px;flex-wrap:wrap">
       <button class="bsec corr-est" data-id="${c.id}" data-a="recibido">Le llegó el kit…</button>
@@ -2022,7 +2023,7 @@ function celdaVencida(c){
   const dev = ['sin_respuesta','devolucion'].includes(c.estado) && ROL !== 'avisos'
     ? `<label class="mini" style="display:inline-flex;gap:4px;align-items:center;cursor:pointer" title="Tildá cuando el kit llegue al depósito"><input type="checkbox" class="kitdev" data-id="${c.id}" ${c.kitDevueltoEn ? 'checked' : ''}> kit recibido</label>` : '';
   const falta = c.faltaDevolucion ? '<span class="pill no" title="Esta marca no tiene cargada la dirección de devolución: pasásela a mano">falta dirección</span>' : '';
-  const desb = c.bloqueada && ['admin','equipo','avisos'].includes(ROL) ? `<button class="mini desbloq" data-id="${c.id}" title="Vuelve a poder postularse">desbloquear</button>` : '';
+  const desb = c.bloqueada && ['admin','equipo','avisos','abril'].includes(ROL) ? `<button class="mini desbloq" data-id="${c.id}" title="Vuelve a poder postularse">desbloquear</button>` : '';
   return `<div>${resp}${falta}${paso}</div><div style="margin-top:4px">${wa}${dev}${desb}</div>`;
 }
 document.addEventListener('change', e => {
@@ -2343,7 +2344,7 @@ function aplicarRol(){
     pintarTodo();
   }
 })();
-const APP_VERSION = '2026-10-23-a';
+const APP_VERSION = '2026-10-26-a';
 </script>
 </body>
 </html>
