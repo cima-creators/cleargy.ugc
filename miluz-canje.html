@@ -744,7 +744,7 @@ details.ej summary{cursor:pointer;font-size:.9rem;color:var(--tx)}
           <b>Comisión por ventas</b>
           <span id="bono-comision-pct">10%</span>
         </div>
-        <small>De todo lo que se venda con tu código. Se liquida a fin de mes.</small>
+        <small id="bono-comision-txt">De todo lo que se venda con tu código. Se liquida a fin de mes.</small>
       </div>
     </div>
 
@@ -1908,7 +1908,8 @@ function pintarPlata(){
   const views  = (typeof D.views === 'number' ? D.views : viewsIg + viewsTt);
   const ventas = D.ventas || 0;
   const facturado = D.facturado || 0;
-  const comision = Math.round(facturado * B.comision / 100);
+  // 27/10: con escala, la comisión es la suma de cada venta a su %
+  const comision = (B.escala || []).length ? Math.round((D.pedidos || []).reduce((t, o) => t + (o.monto || 0) * (o.pct || 0) / 100, 0)) : Math.round(facturado * B.comision / 100);
 
   $('#bloque-rendimiento').classList.toggle('oculto', !publicado);
   if (publicado){
@@ -1949,13 +1950,23 @@ function pintarPlata(){
   $('#pl-ganado').textContent = pesos(ganado); $('#pl-pagado').textContent = pesos(pagado); $('#pl-saldo').textContent = pesos(Math.max(0, ganado - pagado));
   const peds = D.pedidos || [];
   $('#pl-detalle').classList.toggle('oculto', !peds.length);
-  $('#pl-pedidos').innerHTML = peds.map(p => `<div>Pedido ${p.n || ''} · ${p.fecha ? new Date(p.fecha).toLocaleDateString('es-AR') : ''} · ${pesos(p.monto)} · ${p.via === 'link' ? 'por tu link' : 'con tu código'} → <b>${pesos(Math.round(p.monto * (p.pct || B.comision) / 100))}</b>${p.pct && p.pct !== B.comision ? ' <small>(' + p.pct + '% Cyber)</small>' : ''}</div>`).join('');
+  $('#pl-pedidos').innerHTML = peds.map(p => `<div>Pedido ${p.n || ''} · ${p.fecha ? new Date(p.fecha).toLocaleDateString('es-AR') : ''} · ${pesos(p.monto)} · ${p.via === 'link' ? 'por tu link' : 'con tu código'} → <b>${pesos(Math.round(p.monto * (p.pct || B.comision) / 100))}</b>${p.pct && p.pct !== B.comision ? ' <small>(' + p.pct + '%' + ((B.escala || []).length ? '' : ' Cyber') + ')</small>' : ''}</div>`).join('');
   if (D.cobro && D.cobro.alias && !$('#pl-alias').value) { $('#pl-alias').value = D.cobro.alias; $('#pl-titular').value = D.cobro.titular || ''; $('#pl-ok').classList.remove('oculto'); }
 
   { const c = CFG.cyber && CFG.cyber.comision; $('#bono-comision-pct').textContent = (enVentana(c) ? c.pct + '% · Cyber' : B.comision + '%'); }
+  // 27/10 (Pulso): comisión escalonada por ventas del mes — los escalones y cuánto le falta para el siguiente
+  if ((B.escala || []).length){
+    const E = B.escala, n = (D && D.ventasMes) || 0;
+    const actual = E.filter(e => n >= e.desde).pop(), sig = E.find(e => e.desde > n);
+    $('#bono-comision-pct').textContent = `${E[0].pct}% a ${E[E.length - 1].pct}%`;
+    $('#bono-comision-txt').innerHTML = `Por cada venta con tu código o tu link. Sube según tus ventas del mes: ` +
+      E.map((e, k) => `<b>${e.pct}%</b> ${k === 0 ? 'desde la primera' : 'desde la venta ' + e.desde}`).join(' · ') + '.' +
+      `<br>Este mes llevás <b>${n} ${n === 1 ? 'venta' : 'ventas'}</b>${actual ? ` (vas al <b>${actual.pct}%</b>)` : ''}` +
+      (sig ? `: te ${sig.desde - n === 1 ? 'falta 1' : 'faltan ' + (sig.desde - n)} para el <b>${sig.pct}%</b>.` : '. Llegaste al máximo 🔥');
+  }
   pintarCyberBanner();
   // sin tienda no hay código ni comisión por ventas: se esconde el bono
-  $('#bono-comision-pct').closest('.bono').classList.toggle('oculto', !CFG.cupon);
+  $('#bono-comision-pct').closest('.bono').classList.toggle('oculto', !CFG.cupon && !(B.escala || []).length);   // 27/10: con escala se muestra aunque la tienda no esté conectada
 }
 
 function pintarEstado(){
@@ -2195,7 +2206,7 @@ function pintarMarca(){
   } catch { if (DEMO){ precargar(); traerBorrador(); } ver(DEMO ? 'v-ficha' : 'v-error'); }
 })();
 
-const APP_VERSION = '2026-10-27-e';
+const APP_VERSION = '2026-10-27-f';
 </script>
 </body>
 </html>
