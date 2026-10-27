@@ -1666,10 +1666,11 @@ $('#cy-banner').addEventListener('click', () => { pintarCyber(); ver('v-cyber');
 /* 21/10: ¿estamos dentro de la fecha? (en Argentina) */
 const hoyAR = () => new Date(Date.now() - 3 * 36e5).toISOString().slice(0, 10);
 const enVentana = v => !!(v && v.desde && v.hasta && hoyAR() >= v.desde && hoyAR() <= v.hasta);
+const subeCyber = C => !!(C && enVentana({ desde: C.subidaDesde || C.desde, hasta: C.hasta }));   // 27/10: la carga de videos de Cyber arranca antes que la comisión
 const pctHoy = () => { const c = CFG.cyber && CFG.cyber.comision; return enVentana(c) ? c.pct : (CFG.plata || {}).comision; };
 function pintarCyberBanner(){
   const C = CFG.cyber, b = $('#cy-banner'); if (!b) return;
-  const vivo = !!(C && (enVentana(C) || DEMO));   // en la demo se ve siempre, para mostrarlo
+  const vivo = !!(C && (subeCyber(C) || DEMO));   // en la demo se ve siempre, para mostrarlo
   b.classList.toggle('oculto', !vivo);
   if (vivo) $('#cy-banner-tx').textContent = `Cyber Monday: ${C.comision ? C.comision.pct + '% de comisión' : 'bonos especiales'}${C.bonoDoble ? ' y bono de $' + Number(C.bonoDoble.monto).toLocaleString('es-AR') : ''}.`;
 }
@@ -1692,7 +1693,7 @@ function pintarCyber(){
        <a class="btn sec" href="https://chatgpt.com/" target="_blank" rel="noopener">Abrir ChatGPT</a></div>`);
   // 21/10: subir el video de Cyber (aunque ya haya cumplido su collab): hasta 2, dentro de la fecha
   const mios = (D && D.cyberVideos) || [];
-  const puede = D && ['recibido','entregado','cambios','publicado','cumplida','vencida','sin_respuesta','devolucion'].includes(D.estado) && (enVentana(C) || DEMO);
+  const puede = D && ['recibido','entregado','cambios','publicado','cumplida','vencida','sin_respuesta','devolucion'].includes(D.estado) && (subeCyber(C) || DEMO);
   out.push(`<h3>Tus videos de Cyber</h3>` + (mios.length ? mios.map(v => `<div class="bono"><div class="bono-cab"><b>Video ${v.n} de Cyber</b><span>${((v.reel ? v.reel.views : 0) + (v.tiktok ? v.tiktok.views : 0)).toLocaleString('es-AR')} vistas</span></div><small>${v.drive ? `<a href="${v.drive}" target="_blank" rel="noopener">Drive</a>` : ''}${v.reel ? ` · <a href="${v.reel.url}" target="_blank" rel="noopener">Reel</a>` : ''}${v.tiktok ? ` · <a href="${v.tiktok.url}" target="_blank" rel="noopener">TikTok</a>` : ''}</small></div>`).join('') : '<p>Todavía no subiste ninguno. Con 2 videos que sumen las vistas del bono, cobrás el bono doble.</p>') +
     (puede && mios.length < 2 ? `<div id="cy-subir" style="margin-top:12px"><p style="margin:0 0 8px"><b>Subir mi video ${mios.length + 1} de Cyber</b></p>
        <input id="cy-drive" placeholder="Link de Drive con el video" style="width:100%;box-sizing:border-box;margin:0 0 8px">
@@ -1700,7 +1701,7 @@ function pintarCyber(){
        <input id="cy-tt" placeholder="Link del video en TikTok" style="width:100%;box-sizing:border-box;margin:0 0 10px">
        <button class="btn" id="cy-enviar">Subir mi video de Cyber</button>
        <small style="margin-top:6px">${['recibido','vencida','sin_respuesta','devolucion'].includes(D.estado) && !mios.length ? 'Subilo a Instagram y a TikTok y pegá los dos links. Este video cuenta también como el de tu collab.' : 'Subilo a Instagram y a TikTok y pegá los dos links: el bono suma las vistas de las dos.'}</small></div>`
-     : (!puede && mios.length < 2 ? `<small>${enVentana(C) ? 'Lo podés subir cuando te llegue el kit.' : 'La carga se habilita del ' + C.desde.split('-').reverse().slice(0,2).join('/') + ' al ' + C.hasta.split('-').reverse().slice(0,2).join('/') + '.'}</small>` : '')));
+     : (!puede && mios.length < 2 ? `<small>${subeCyber(C) ? 'Lo podés subir cuando te llegue el kit.' : 'La carga se habilita del ' + C.desde.split('-').reverse().slice(0,2).join('/') + ' al ' + C.hasta.split('-').reverse().slice(0,2).join('/') + '.'}</small>` : '')));
   $('#cy-cuerpo').innerHTML = out.join('') || '<p>Muy pronto vas a tener acá todo lo de la fecha.</p>';
 }
 document.addEventListener('click', async e => {
@@ -2109,7 +2110,7 @@ function pintarMarca(){
   } catch { if (DEMO){ precargar(); traerBorrador(); } ver(DEMO ? 'v-ficha' : 'v-error'); }
 })();
 
-const APP_VERSION = '2026-10-27-a';
+const APP_VERSION = '2026-10-27-b';
 </script>
 </body>
 </html>
