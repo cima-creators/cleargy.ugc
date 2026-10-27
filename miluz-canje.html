@@ -2124,7 +2124,9 @@ function barraDemo(){
   const nav = document.createElement('nav');
   nav.id = 'demonav';
   nav.innerHTML = '<span class="lbl">Demo</span>';
-  [['Ficha',()=>ver('v-ficha')],['Briefing',()=>ver('v-brief')],
+  // 27/10 (Nacho): el inicio del registro también desde la demo (modo demo: no guarda nada)
+  [['Registro',()=>{ location.href = `https://cima-creators.github.io/cleargy.ugc/miluz-aplicar.html?marca=${MARCA}&demo=1`; }],
+   ['Ficha',()=>ver('v-ficha')],['Briefing',()=>ver('v-brief')],
    ['En lista',()=>irA('briefing_ok')],['Despachado',()=>irA('enviado')],
    ['Te llegó',()=>irA('recibido')],['Entregó',()=>irA('entregado')],['Aprobado',()=>api('aprobar_video',{}).then(r=>{D=r.creadora;pintarEstado();ver('v-estado');})],['Publicado',()=>irA('publicado')],
    ['Cumplida',()=>irA('cumplida')],['Vencida',()=>irA('vencida')]
@@ -2193,7 +2195,7 @@ function pintarMarca(){
   } catch { if (DEMO){ precargar(); traerBorrador(); } ver(DEMO ? 'v-ficha' : 'v-error'); }
 })();
 
-const APP_VERSION = '2026-10-27-d';
+const APP_VERSION = '2026-10-27-e';
 </script>
 </body>
 </html>

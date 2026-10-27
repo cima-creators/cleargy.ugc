@@ -433,7 +433,10 @@ function achicar(file, lado = 900, calidad = .82){
 /* ── verificación en paralelo ──────────────────────────────────
    Se dispara apenas tenemos el @usuario. Para cuando termina el
    formulario, el perfil ya está medido. */
+// 27/10: modo demo (?demo=1, botón «Registro» de la demo de la app): se recorre igual pero no se guarda nada
+const DEMO_REG = new URLSearchParams(location.search).has('demo');
 function registrarIg(ig){
+  if (DEMO_REG) return;
   fetch(API, {
     method:'POST', headers:{'Content-Type':'application/json'},
     body: JSON.stringify({ accion:'registrar', marca:MARCA, ig, ref: R.ref })
@@ -726,6 +729,7 @@ $('#volver').onclick = () => { if (i > 0){ i = anterior(i); pintar(); } };
 
 /* ── envío ─────────────────────────────────────────────────────*/
 async function enviar(){
+  if (DEMO_REG){ i = PASOS.length - 1; pintar(); return; }
   const btn = document.querySelector('[data-sig]');
   btn.disabled = true; btn.textContent = 'Enviando…';
   // el 2º kit (kitPorRespuesta) viaja en `tonos` solo si marcó dos videos
@@ -760,6 +764,9 @@ async function enviar(){
     return;
   }
   aplicarEstilo(CFG.estilo);
+  if (DEMO_REG){ const d = document.createElement('div'); d.textContent = 'Demo del registro · no se guarda nada';
+    d.style.cssText = 'position:fixed;left:50%;bottom:12px;transform:translateX(-50%);background:#222;color:#fff;font:600 12px system-ui;padding:7px 13px;border-radius:99px;z-index:99;opacity:.85';
+    document.body.appendChild(d); }
   document.title = `${CFG.nombre} · Sumate como ${CFG.genero === 'm' ? 'creador' : CFG.slug === 'cima' ? 'creador/a' : 'creadora'}`;
   if (CFG.estilo && CFG.estilo.logoImg) $('#marca-nombre').innerHTML = `<img src="${CFG.estilo.logoImg}" alt="${CFG.nombre}" class="logo-img">`;
   else $('#marca-nombre').textContent = (CFG.estilo && CFG.estilo.logoTexto) || CFG.nombre;
@@ -767,7 +774,7 @@ async function enviar(){
   armarPasos();
   pintar();
 })();
-const APP_VERSION = '2026-10-27-c';
+const APP_VERSION = '2026-10-27-d';
 </script>
 </body>
 </html>
