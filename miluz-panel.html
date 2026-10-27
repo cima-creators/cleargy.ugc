@@ -785,8 +785,10 @@ function ENVIOS_desde(env){
     dni: f.dni || '—', tel: f.tel || (f.datos && f.datos.tel) || '', email: f.email || (f.datos && f.datos.email) || '',
     avisoDespachoEn: f.avisoDespachoEn || null, despachadoEn: f.despachadoEn || 0, seguimiento: f.seguimiento || null,
     // kits (kitPorRespuesta, Valca): "Ceras + Capilar" · si no, los colores elegidos (Mi Luz)
+    // 27/10 (Pulso): `envioDato` = la respuesta que define qué se manda (el sabor) cuando el «kit» es el ángulo
     tonos: CFG && CFG.kitPorRespuesta
-      ? nombresKits(f.kit || (f.datos && f.datos.kit), f.kit2 || (f.datos && f.datos.kit2))
+      ? nombresKits(f.kit || (f.datos && f.datos.kit), f.kit2 || (f.datos && f.datos.kit2)) +
+        (CFG.envioDato && f.datos && f.datos[CFG.envioDato] ? ' · ' + (((CFG.formulario || {}).etiquetas || {})[f.datos[CFG.envioDato]] || f.datos[CFG.envioDato]) : '')
       : (f.tonos || (f.datos && f.datos.tonos) || []).map(t => NOMBRE_TONO[t] || t).join(' · '),
     estado: ['ficha_completa','briefing_ok'].includes(f.estado) ? 'listo' : 'despachado',
     recibido: !['ficha_completa','briefing_ok','enviado'].includes(f.estado), recibidoEn: f.recibidoEn || 0,
@@ -2385,7 +2387,7 @@ function aplicarRol(){
     pintarTodo();
   }
 })();
-const APP_VERSION = '2026-10-27-b';
+const APP_VERSION = '2026-10-27-c';
 </script>
 </body>
 </html>
