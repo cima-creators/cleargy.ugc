@@ -216,6 +216,17 @@ td .n2{color:var(--topo);font-size:.78rem;display:block;margin-top:2px}
 .bsec.pri{background:var(--acento);color:#fff;border-color:var(--acento)}
 .bsec.pri:hover{filter:brightness(1.08);color:#fff}
 
+/* ── segunda collab (27/10) ── */
+.r2-caja{background:#fff;border:1px solid var(--linea);border-radius:18px;padding:16px;margin:0 0 22px}
+.r2-caja h2{font-size:1.05rem;margin:0 0 4px}
+.r2-it{display:grid;grid-template-columns:auto 1fr auto;gap:14px;align-items:center;padding:12px 0;border-top:1px solid var(--linea)}
+.r2-it:first-of-type{border-top:0}
+.r2-fs{display:flex;gap:6px}
+.r2-fs img{width:96px;height:96px;object-fit:cover;border-radius:10px;cursor:zoom-in}
+.r2-fs img.grande{width:320px;height:auto;cursor:zoom-out}
+.r2-bt{display:flex;gap:8px}
+@media (max-width:700px){.r2-it{grid-template-columns:1fr}.r2-fs img{width:44vw;height:44vw}}
+
 /* ── dashboard ── */
 .estrella .ars{margin-left:auto;font-size:.92rem;font-weight:700;color:rgba(255,255,255,.9);position:relative;z-index:1;white-space:nowrap}
 .linea{margin:0 0 14px;font-size:.9rem;color:var(--tinta2);line-height:1.55;max-width:62ch}
@@ -523,6 +534,7 @@ dialog.dlg.dlg-cre{max-width:680px}
       <span class="txt" id="prog-t">0 de 0</span>
     </div>
 
+    <div id="r2-cont"></div>
     <div id="ficha-cont"></div>
   </section>
 
@@ -2300,7 +2312,36 @@ $('#btn-csv-pag').onclick = () => {
     .concat(PLATA.map(c => [c.nom,'@'+c.ig,c.ganado,c.pagado,c.ganado-c.pagado,(c.cobro && c.cobro.alias) || '',(c.cobro && c.cobro.titular) || ''])));
 };
 
+/* 27/10: segunda collab (Mi Luz) — las que ya cumplieron mandan sus uñas de hoy y eligen colores; acá se decide */
+let R2COLA = [];
+async function cargarRonda2(){
+  if (!CFG || !CFG.ronda2 || DEMO || !puede('admision')) return;
+  try { R2COLA = (await api('ronda2_cola')).fichas || []; } catch { R2COLA = []; }
+  pintarRonda2();
+}
+function pintarRonda2(){
+  const c = $('#r2-cont'); if (!c) return;
+  if (!R2COLA.length){ c.innerHTML = ''; return; }
+  const nom = id => ((CFG.opciones || []).find(o => o.id === id) || {}).nom || id;
+  c.innerHTML = `<div class="r2-caja"><h2>Segunda collab · ${R2COLA.length} ${R2COLA.length === 1 ? 'pidió' : 'pidieron'}</h2>
+    <p class="n2" style="margin:0 0 6px">Ya cumplieron la primera. Mirá cómo tienen las uñas hoy: con «Sí» vuelven a <b>Para enviar</b> con estos colores y el briefing del testimonio.</p>
+    ${R2COLA.map(f => `<div class="r2-it" data-id="${f.id}">
+      <div class="r2-fs">${(f.fotos || []).map(u => `<img src="${u}" alt="Uñas de ${f.ig}" onclick="this.classList.toggle('grande')">`).join('') || '<span class="n2">sin foto</span>'}</div>
+      <div><b>${f.nombre || '—'}</b> · <a href="https://instagram.com/${f.ig}" target="_blank" rel="noopener">@${f.ig}</a>
+        <div class="n2">${f.provincia || ''}${f.views ? ' · ' + Number(f.views).toLocaleString('es-AR') + ' views en su collab' : ''}${f.reel ? ` · <a href="${f.reel}" target="_blank" rel="noopener">ver su reel ↗</a>` : ''}</div>
+        <div class="n2">Colores: <b>${(f.tonos || []).map(nom).join(' + ') || '—'}</b></div></div>
+      <div class="r2-bt"><button class="bsec pri" data-r2="si">Sí</button><button class="bsec" data-r2="no">No</button></div>
+    </div>`).join('')}</div>`;
+  c.querySelectorAll('[data-r2]').forEach(b => b.addEventListener('click', async () => {
+    const it = b.closest('.r2-it'), id = it.dataset.id, si = b.dataset.r2 === 'si';
+    it.querySelectorAll('button').forEach(x => x.disabled = true);
+    try { await api('ronda2_decidir', { id, si }); R2COLA = R2COLA.filter(f => f.id !== id); pintarRonda2(); if (si) cargar().then(pintarTodo).catch(() => {}); }
+    catch { alert('No se pudo guardar. Probá de nuevo.'); it.querySelectorAll('button').forEach(x => x.disabled = false); }
+  }));
+}
+
 function pintarTodo(){
+  if (puede('admision')) pintarRonda2();
   if (puede('resumen')) pintarResumen();
   if (puede('admision')) pintarFicha();
   if (puede('envios')) pintarEnvios();
@@ -2337,14 +2378,14 @@ function aplicarRol(){
   try { ROL = (await api('rol')).rol; }
   catch (e) { _ss.del(K_CLAVE); alert('Clave incorrecta o sin permiso.'); location.reload(); return; }
   aplicarRol();
-  try { await cargar(); pintarTodo(); }
+  try { await cargar(); pintarTodo(); cargarRonda2(); }
   catch (e) {
     if (String(e.message) === 'clave'){ _ss.del(K_CLAVE); alert('Clave incorrecta.'); location.reload(); return; }
     alert('No se pudo conectar con el sistema. Se muestran datos de EJEMPLO.');
     pintarTodo();
   }
 })();
-const APP_VERSION = '2026-10-27-a';
+const APP_VERSION = '2026-10-27-b';
 </script>
 </body>
 </html>

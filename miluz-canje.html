@@ -229,6 +229,13 @@ dialog.pop::backdrop{background:rgba(42,35,29,.45)}
 .pop .nota{font-size:.85rem;color:var(--tx3);margin:0 0 18px;line-height:1.5}
 .pop .cerrar{margin-top:9px}
 
+/* ── segunda collab ── */
+.r2-fotos{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin:10px 0 6px}
+.r2-slot{aspect-ratio:1;border:2px dashed var(--linea);border-radius:14px;display:grid;place-items:center;cursor:pointer;overflow:hidden;color:var(--tx2);font-size:.85rem;text-align:center;padding:6px}
+.r2-slot img{width:100%;height:100%;object-fit:cover}
+.r2-slot input{display:none}
+.r2-err{color:#b3412f;font-size:.88rem;margin:8px 0 0}
+
 /* ── paleta ── */
 .tonos{display:grid;grid-template-columns:repeat(4,1fr);gap:11px;margin-top:6px}
 .tono{cursor:pointer;text-align:center}
@@ -647,6 +654,9 @@ details.ej summary{cursor:pointer;font-size:.9rem;color:var(--tx)}
       <small style="margin-bottom:14px" id="collab-txt">En Instagram: Notificaciones → «te invitó a colaborar» → Aceptar. Cuando lo hagas, tocá acá y lo verificamos al toque.</small>
       <button class="btn" id="btn-collab">Ya la acepté</button>
     </div>
+
+    <!-- 27/10: segunda collab (Mi Luz) — foto de las uñas de hoy + colores; la decide el panel -->
+    <div class="card oculto" id="bloque-ronda2"></div>
 
     <div id="kit2-estado"></div>
 
@@ -1166,6 +1176,13 @@ function armarBriefing(){
   const ganchos = (bk && bk.ganchos && bk.ganchos.length) ? bk.ganchos : (CFG.ganchos || []);
   const referencias = (bk && bk.referencias && bk.referencias.length) ? bk.referencias : (CFG.referencias || []);
   const secciones = [];
+  // 27/10: en la segunda collab (Mi Luz) el video es un TESTIMONIO: va esa estructura, sin hooks ni guion
+  if (D && (D.ronda || 1) >= 2 && CFG.ronda2 && (CFG.ronda2.briefing || []).length){
+    secciones.push(`<div class="principio"><h3>Tu segunda collab: un testimonio</h3><p>Ya hiciste el tratamiento: ahora contás tu experiencia real, con tus palabras. No hay guion.</p></div>`);
+    CFG.ronda2.briefing.forEach(x => secciones.push(`<h3>${x.t}</h3>${x.html}`));
+    if ((CFG.reglas || []).length) secciones.push(`<h3>Reglas técnicas</h3><ul class="limpia">${CFG.reglas.map(r => `<li>${r}</li>`).join('')}</ul>`);
+    return secciones.join('\n');
+  }
   if (br.principio) secciones.push(`<div class="principio"><h3>Lo más importante</h3><p>${br.principio}</p></div>`);
   const dosKits = !!(bk && CFG.kitPorRespuesta && D && D.kit2 && CFG.briefingPorKit && CFG.briefingPorKit[D.kit2]);
   if (bk && CFG.kitPorRespuesta){
@@ -1244,6 +1261,69 @@ const SOPORTE_WA = '5491170823624';
 const soporteLink = (motivo) => 'https://wa.me/' + SOPORTE_WA + '?text=' + encodeURIComponent(`Hola! Vengo de la app de collabs de ${(CFG && CFG.nombre) || 'la marca'}${D && D.ig ? ' (soy @' + D.ig + ')' : ''}. Necesito ayuda con: ${motivo || ''}`);
 
 /* 2/10: ella avisa que aceptó la collab y lo re-verificamos en el momento */
+/* 27/10: segunda collab — las que ya cumplieron mandan sus uñas de hoy y eligen colores; CIMA decide */
+const R2 = { fotos: [], tonos: [] };
+function achicarR2(file, lado = 900, calidad = .82){
+  return new Promise((ok, mal) => {
+    const fr = new FileReader(); fr.onerror = () => mal(new Error('leer'));
+    fr.onload = () => { const img = new Image(); img.onerror = () => mal(new Error('imagen'));
+      img.onload = () => { const k = Math.min(1, lado / Math.max(img.width, img.height)), c = document.createElement('canvas');
+        c.width = Math.round(img.width * k); c.height = Math.round(img.height * k); c.getContext('2d').drawImage(img, 0, 0, c.width, c.height);
+        ok(c.toDataURL('image/jpeg', calidad)); };
+      img.src = fr.result; };
+    fr.readAsDataURL(file);
+  });
+}
+function pintarRonda2(e){
+  const b = $('#bloque-ronda2'), C = CFG.ronda2;
+  const r = D && D.ronda2;
+  const ver = !!(C && D && (e === 'cumplida' || (r && r.estado === 'pedida')));
+  b.classList.toggle('oculto', !ver);
+  if (!ver) return;
+  if (r && r.estado === 'pedida'){
+    b.innerHTML = `<h2>${C.titulo} 💛</h2><small>Recibimos tus fotos y tus colores. Las revisamos y te avisamos por WhatsApp si quedaste.</small>`;
+    return;
+  }
+  if (r && r.estado === 'rechazada'){
+    b.innerHTML = `<h2>${C.titulo}</h2><small>Esta vez no quedaste para la segunda collab. Gracias por mandarnos tus fotos 💛 Te avisamos cuando abramos otra campaña.</small>`;
+    return;
+  }
+  const ops = CFG.opciones || [], elegir = CFG.elegir || 0;
+  b.innerHTML = `<h2>${C.titulo} ✨</h2>
+    <small style="margin-bottom:10px">${C.intro}</small>
+    <p style="margin:12px 0 0;font-weight:700">${C.fotos.q}</p><small>${C.fotos.a}</small>
+    <div class="r2-fotos">${[0,1].map(n => `<label class="r2-slot" data-n="${n}">${R2.fotos[n] ? `<img src="${R2.fotos[n]}" alt="Foto ${n+1}">` : (n === 0 ? '📷 Tocá para subir tu foto' : '📷 Otra foto (opcional)')}<input type="file" accept="image/*"></label>`).join('')}</div>
+    ${elegir ? `<p style="margin:14px 0 0;font-weight:700">Elegí tus ${elegir} colores</p>
+    <div class="tonos" id="r2-tonos">${ops.map(t => `<label class="tono"><input type="checkbox" value="${t.id}" ${R2.tonos.includes(t.id) ? 'checked' : ''}><span class="sw" style="background:${t.hex || '#ddd'}"></span><small>${t.nom}</small></label>`).join('')}</div>` : ''}
+    <button class="btn" id="r2-enviar" style="margin-top:16px">Quiero mi segunda collab</button>
+    <p class="r2-err oculto" id="r2-err"></p>`;
+  b.querySelectorAll('.r2-slot input').forEach(inp => inp.addEventListener('change', async ev => {
+    const fl = ev.target.files && ev.target.files[0]; if (!fl) return;
+    const n = Number(ev.target.closest('.r2-slot').dataset.n);
+    try { R2.fotos[n] = await achicarR2(fl); } catch { alert('No pudimos leer esa foto. Probá con otra.'); }
+    pintarRonda2(e);
+  }));
+  const tz = b.querySelector('#r2-tonos');
+  if (tz) tz.addEventListener('change', () => {
+    let sel = [...tz.querySelectorAll('input:checked')].map(i => i.value);
+    if (sel.length > elegir){ sel = sel.slice(-elegir); tz.querySelectorAll('input').forEach(i => { i.checked = sel.includes(i.value); }); }
+    R2.tonos = sel;
+  });
+  b.querySelector('#r2-enviar').addEventListener('click', async ev => {
+    const err = b.querySelector('#r2-err'), fotos = R2.fotos.filter(Boolean);
+    const mal = t => { err.textContent = t; err.classList.remove('oculto'); };
+    if (!fotos.length) return mal('Subí al menos una foto de tus uñas.');
+    if (elegir && R2.tonos.length !== elegir) return mal(`Elegí ${elegir} colores.`);
+    ev.target.disabled = true; ev.target.textContent = 'Enviando…';
+    try {
+      const j = await api('pedir_ronda2', { fotos, tonos: R2.tonos });
+      if (!j.ok) throw new Error(j.error || 'error');
+      if (j.creadora) D = Object.assign(D, j.creadora); else D.ronda2 = { estado: 'pedida', tonos: R2.tonos };
+      pintarRonda2(e);
+    } catch (x) { ev.target.disabled = false; ev.target.textContent = 'Quiero mi segunda collab'; mal('No se pudo enviar. Probá de nuevo en un ratito.'); }
+  });
+}
+
 function pintarCollab(e){
   const b = $('#bloque-collab');
   const ver = !CREADORA_PUBLICA() && e === 'publicado' && D.reel && D.reel.url && !D.reel.collab;
@@ -1963,6 +2043,7 @@ function pintarEstado(){
     $('#seg-link').href = sg.url;
   }
   pintarCollab(e);
+  pintarRonda2(e);
   $('#bloque-recorrido').classList.toggle('oculto', !!CFG.sinKit);   // CIMA Club: no hay kit que seguir
   // cuando publica la creadora, el bloque sigue abierto en `publicado` (ajustar links, cargar el 2º video)
   // `vencida` sigue pudiendo entregar: el plazo la apura, no la deja afuera
@@ -2112,7 +2193,7 @@ function pintarMarca(){
   } catch { if (DEMO){ precargar(); traerBorrador(); } ver(DEMO ? 'v-ficha' : 'v-error'); }
 })();
 
-const APP_VERSION = '2026-10-27-c';
+const APP_VERSION = '2026-10-27-d';
 </script>
 </body>
 </html>
