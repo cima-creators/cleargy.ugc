@@ -250,7 +250,7 @@ async function cargarConfig(){
   const k = 'canje_cfg_' + MARCA;
   try {
     const c = JSON.parse(sessionStorage.getItem(k) || 'null');
-    if (c && c.cfg && Date.now() - c.t < 10 * 60e3) return c.cfg;
+    if (c && c.cfg && Date.now() - c.t < 10 * 60e3 && !new URLSearchParams(location.search).has('demo')) return c.cfg;   // la demo siempre trae lo último
   } catch {}
   const r = await fetch(API, { method:'POST', headers:{'Content-Type':'application/json'},
     body: JSON.stringify({ accion:'config', marca:MARCA }) });
@@ -765,7 +765,7 @@ async function enviar(){
   }
   aplicarEstilo(CFG.estilo);
   if (DEMO_REG){ const d = document.createElement('div'); d.textContent = 'Demo del registro · no se guarda nada';
-    d.style.cssText = 'position:fixed;left:50%;bottom:12px;transform:translateX(-50%);background:#222;color:#fff;font:600 12px system-ui;padding:7px 13px;border-radius:99px;z-index:99;opacity:.85';
+    d.style.cssText = 'position:fixed;left:50%;top:8px;transform:translateX(-50%);white-space:nowrap;background:#222;color:#fff;font:600 12px system-ui;padding:7px 13px;border-radius:99px;z-index:99;opacity:.85';
     document.body.appendChild(d); }
   document.title = `${CFG.nombre} · Sumate como ${CFG.genero === 'm' ? 'creador' : CFG.slug === 'cima' ? 'creador/a' : 'creadora'}`;
   if (CFG.estilo && CFG.estilo.logoImg) $('#marca-nombre').innerHTML = `<img src="${CFG.estilo.logoImg}" alt="${CFG.nombre}" class="logo-img">`;
@@ -774,7 +774,7 @@ async function enviar(){
   armarPasos();
   pintar();
 })();
-const APP_VERSION = '2026-10-27-d';
+const APP_VERSION = '2026-10-27-e';
 </script>
 </body>
 </html>
