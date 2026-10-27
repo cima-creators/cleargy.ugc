@@ -1962,7 +1962,7 @@ function pintarPlata(){
     $('#bono-comision-txt').innerHTML = `Por cada venta con tu código o tu link. Sube según tus ventas del mes: ` +
       E.map((e, k) => `<b>${e.pct}%</b> ${k === 0 ? 'desde la primera' : 'desde la venta ' + e.desde}`).join(' · ') + '.' +
       `<br>Este mes llevás <b>${n} ${n === 1 ? 'venta' : 'ventas'}</b>${actual ? ` (vas al <b>${actual.pct}%</b>)` : ''}` +
-      (sig ? `: te ${sig.desde - n === 1 ? 'falta 1' : 'faltan ' + (sig.desde - n)} para el <b>${sig.pct}%</b>.` : '. Llegaste al máximo 🔥');
+      (!n ? `: con la primera arrancás en el <b>${E[0].pct}%</b>.` : sig ? `: te ${sig.desde - n === 1 ? 'falta 1' : 'faltan ' + (sig.desde - n)} para el <b>${sig.pct}%</b>.` : '. Llegaste al máximo 🔥');
   }
   pintarCyberBanner();
   // sin tienda no hay código ni comisión por ventas: se esconde el bono
@@ -2206,7 +2206,7 @@ function pintarMarca(){
   } catch { if (DEMO){ precargar(); traerBorrador(); } ver(DEMO ? 'v-ficha' : 'v-error'); }
 })();
 
-const APP_VERSION = '2026-10-27-f';
+const APP_VERSION = '2026-10-27-g';
 </script>
 </body>
 </html>
