@@ -156,6 +156,7 @@ main{flex:1;display:flex;align-items:center;justify-content:center;padding:24px 
 /* ── portada y cierre ── */
 .centro{text-align:center}
 .benefs{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin:0 0 18px}   /* 27/10: beneficios en tarjetitas (Pulso) */
+.benefs.de4{grid-template-columns:1fr 1fr}
 .benef{background:#fff;border:1px solid rgba(0,0,0,.07);border-radius:14px;padding:10px 6px;text-align:center;font-size:.8rem;line-height:1.25;font-weight:600}
 .benef-i{display:block;font-size:1.25rem;margin-bottom:4px}
 .foto-kit{display:block;width:100%;max-width:440px;margin:0 auto 18px;border-radius:20px;height:auto;box-shadow:0 10px 30px rgba(0,0,0,.12)}   /* 27/10: foto del kit arriba de todo (Pulso) */
@@ -502,7 +503,7 @@ function plantilla(p){
       <h1 class="hero-t">${F.titulo || 'Te mandamos el kit.<br>Vos hacés un video.'}</h1>
       <p class="ayuda">${F.intro || `${CFG.kit}, sin costo. A cambio, un reel en colaboración con ${CFG.nombre}.`}</p>
     </div>
-    ${(F.beneficios || []).length ? `<div class="benefs">${F.beneficios.map(b => `<div class="benef"><span class="benef-i">${b.i || '✓'}</span><span>${b.t}</span></div>`).join('')}</div>` : ''}
+    ${(F.beneficios || []).length ? `<div class="benefs${F.beneficios.length === 4 ? ' de4' : ''}">${F.beneficios.map(b => `<div class="benef"><span class="benef-i">${b.i || '✓'}</span><span>${b.t}</span></div>`).join('')}</div>` : ''}
     <div class="reqs">
       ${(F.requisitos || []).map(t => `
         <div class="req">
@@ -774,7 +775,7 @@ async function enviar(){
   armarPasos();
   pintar();
 })();
-const APP_VERSION = '2026-10-27-e';
+const APP_VERSION = '2026-10-27-f';
 </script>
 </body>
 </html>
