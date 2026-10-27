@@ -1952,11 +1952,13 @@ function pintarEstado(){
   const sg = D.seguimiento;
   $('#seg-envio').classList.toggle('oculto', !(sg && sg.codigo));
   if (sg && sg.codigo) {
-    const remito = sg.tipo === 'remito' || sg.correo === 'Andesmar';
+    // 27/10: Andesmar va con su número de guía (el link ya abre el envío); el remito queda solo si todavía no aparece
+    const guia = sg.tipo === 'guia', remito = !guia && (sg.tipo === 'remito' || sg.correo === 'Andesmar');
     $('#seg-correo').textContent = sg.correo || 'correo';
-    $('#seg-tipo').textContent = remito ? 'número de remito' : 'número de seguimiento';
+    $('#seg-tipo').textContent = guia ? 'número de guía' : remito ? 'número de remito' : 'número de seguimiento';
     $('#seg-codigo').textContent = sg.codigo;
-    $('#seg-nota').innerHTML = remito ? `Andesmar se busca por <b>número de remito</b>: en su página elegí la opción <b>"Remito"</b> y pegá <b>${sg.codigo}</b>.` : '';
+    $('#seg-nota').innerHTML = guia ? `El botón ya te abre tu envío. Si lo buscás a mano en Andesmar, elegí la opción <b>"Guía"</b> y pegá <b>${sg.codigo}</b>.`
+      : remito ? `Andesmar se busca por <b>número de remito</b>: en su página elegí la opción <b>"Remito"</b> y pegá <b>${sg.codigo}</b>. Si todavía no aparece, puede tardar un día en cargarse.` : '';
     $('#seg-link').href = sg.url;
   }
   pintarCollab(e);
@@ -2107,7 +2109,7 @@ function pintarMarca(){
   } catch { if (DEMO){ precargar(); traerBorrador(); } ver(DEMO ? 'v-ficha' : 'v-error'); }
 })();
 
-const APP_VERSION = '2026-10-21-e';
+const APP_VERSION = '2026-10-27-a';
 </script>
 </body>
 </html>
