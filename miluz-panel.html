@@ -1453,7 +1453,8 @@ const ENT_FILTROS = {
   publicar:    e => e.estado === 'entregado' && CREADORA_PUBLICA() && !!e.aprobadoVideoEn,
   decidir:     e => e.estado === 'publicado' && !ENT_VERIF(e),
   verificadas: ENT_VERIF,
-  aprobadas:   e => e.estado === 'cumplida',
+  // las veteranas (anotadas por el link especial, collab de antes del sistema) sin ningún video no son entregas
+  aprobadas:   e => e.estado === 'cumplida' && !(e.veterana && !embedVideo(e) && !(e.url && e.url !== '#') && !e.drive && !e.tiktok),
   rechazadas:  e => e.estado === 'rechazada',
 };
 let filtroEnt = 'pendientes', buscaEnt = '', ordenEnt = 'fecha';
@@ -2558,7 +2559,7 @@ function aplicarRol(){
     pintarTodo();
   }
 })();
-const APP_VERSION = '2026-10-30-d';
+const APP_VERSION = '2026-10-30-e';
 </script>
 </body>
 </html>
