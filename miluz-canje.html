@@ -1782,6 +1782,7 @@ function pintarCyberBanner(){
 }
 /* 30/10 · Inspiración. CFG.inspiracion = { titulo, intro, videos: [{ url, marca, producto, angulo, vistas, ventas, gancho, porque, comoHacerlo }] } */
 let inFiltro = null, inVolverA = 'v-estado';
+const escI = t => String(t == null ? '' : t).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 function pintarInspiBanner(){
   const hay = !!(CFG.inspiracion && (CFG.inspiracion.videos || []).length);
   ['#in-banner', '#in-banner2'].forEach(id => { const b = $(id); if (b) b.classList.toggle('oculto', !hay); });
@@ -1794,17 +1795,17 @@ function pintarInspi(){
   const angs = [...new Set(I.videos.map(v => v.angulo).filter(Boolean))];
   if (inFiltro === null) inFiltro = (D && D.kit && angs.includes(D.kit)) ? D.kit : '';
   $('#in-filtros').innerHTML = angs.length > 1 ? [['', 'Todos'], ...angs.map(a => [a, nomKit(a)])]
-    .map(([k, t]) => `<button type="button" data-a="${esc(k)}" class="${inFiltro === k ? 'on' : ''}">${esc(String(t).replace(/^.*·\s*/, ''))}</button>`).join('') : '';
+    .map(([k, t]) => `<button type="button" data-a="${escI(k)}" class="${inFiltro === k ? 'on' : ''}">${escI(String(t).replace(/^.*·\s*/, ''))}</button>`).join('') : '';
   const lista = I.videos.filter(v => !inFiltro || v.angulo === inFiltro || !v.angulo);
   $('#in-lista').innerHTML = lista.map((v, i) => `
     <div class="card in-card">
-      <a class="in-vid" href="${esc(v.url)}" target="_blank" rel="noopener">${v.img ? `<img src="${esc(v.img)}" alt="" loading="lazy">` : ''}<span class="play">▶ Ver en TikTok</span></a>
+      <a class="in-vid" href="${escI(v.url)}" target="_blank" rel="noopener">${v.img ? `<img src="${escI(v.img)}" alt="" loading="lazy">` : ''}<span class="play">▶ Ver en TikTok</span></a>
       <div class="in-cuerpo">
-        <small style="text-transform:uppercase;letter-spacing:.06em;font-weight:700;opacity:.65">${esc(v.marca || '')}${v.producto ? ' · ' + esc(v.producto) : ''}</small>
-        <div class="in-cifras">${v.vistas ? `<span>👀 ${esc(v.vistas)} views</span>` : ''}${v.ventas ? `<span>💰 ${esc(v.ventas)} en ventas</span>` : ''}${v.angulo ? `<span>${esc(String(nomKit(v.angulo)).replace(/^.*·\s*/, ''))}</span>` : ''}</div>
-        ${v.gancho ? `<p class="gancho">«${esc(v.gancho)}»</p>` : ''}
-        ${v.porque ? `<p><b>Por qué funcionó:</b> ${esc(v.porque)}</p>` : ''}
-        ${v.comoHacerlo ? `<p><b>Cómo hacer tu versión:</b> ${esc(v.comoHacerlo)}</p>` : ''}
+        <small style="text-transform:uppercase;letter-spacing:.06em;font-weight:700;opacity:.65">${escI(v.marca || '')}${v.producto ? ' · ' + escI(v.producto) : ''}</small>
+        <div class="in-cifras">${v.vistas ? `<span>👀 ${escI(v.vistas)} views</span>` : ''}${v.ventas ? `<span>💰 ${escI(v.ventas)} en ventas</span>` : ''}${v.angulo ? `<span>${escI(String(nomKit(v.angulo)).replace(/^.*·\s*/, ''))}</span>` : ''}</div>
+        ${v.gancho ? `<p class="gancho">«${escI(v.gancho)}»</p>` : ''}
+        ${v.porque ? `<p><b>Por qué funcionó:</b> ${escI(v.porque)}</p>` : ''}
+        ${v.comoHacerlo ? `<p><b>Cómo hacer tu versión:</b> ${escI(v.comoHacerlo)}</p>` : ''}
       </div>
     </div>`).join('') || '<p class="lead">Todavía no hay videos para este ángulo.</p>';
 }
@@ -2268,7 +2269,7 @@ function pintarMarca(){
   } catch { if (DEMO){ precargar(); traerBorrador(); } ver(DEMO ? 'v-ficha' : 'v-error'); }
 })();
 
-const APP_VERSION = '2026-10-30-a';
+const APP_VERSION = '2026-10-30-b';
 </script>
 </body>
 </html>
