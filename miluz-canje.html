@@ -1828,7 +1828,8 @@ function pintarInspi(){
 }
 function guionInspi(v, nomKit){
   if (!v.guiones) return '';
-  const gs = inGuiones && inGuiones[v.url];
+  const orden = a => { const i = (CFG.opciones || []).findIndex(o => o.id === a); return i < 0 ? 99 : i; };
+  const gs = inGuiones && inGuiones[v.url] && [...inGuiones[v.url]].sort((x, y) => orden(x.angulo) - orden(y.angulo));
   if (!gs) return `<div class="in-guion"><h4>Tu guion, escena por escena</h4><p class="lead">Cargando los guiones…</p></div>`;
   const pref = [inAng[v.url], D && D.kit, inFiltro, v.angulo].find(a => a && gs.some(g => g.angulo === a));
   const g = gs.find(x => x.angulo === pref) || gs[0];
@@ -2305,7 +2306,7 @@ function pintarMarca(){
   } catch { if (DEMO){ precargar(); traerBorrador(); } ver(DEMO ? 'v-ficha' : 'v-error'); }
 })();
 
-const APP_VERSION = '2026-10-30-e';
+const APP_VERSION = '2026-10-30-f';
 </script>
 </body>
 </html>
