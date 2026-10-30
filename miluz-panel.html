@@ -597,6 +597,17 @@ dialog.dlg.dlg-cre{max-width:680px}
   <section id="t-entregas" class="oculto">
     <h1>Entregas</h1>
     <p class="sub" id="entregas-sub">Los videos que mandaron por Drive: revisalos, subilos como collab desde la cuenta de la marca y pegá el link del reel. Después el sistema verifica solo que acepten la invitación.</p>
+    <div class="barrasup" id="filtro-ent" style="gap:6px;flex-wrap:wrap">
+      <button class="bsec fent activo" data-f="pendientes" title="Todo lo que espera algo: revisar, ajustes y publicadas por decidir">Pendientes <span class="n" data-ne="pendientes">0</span></button>
+      <button class="bsec fent" data-f="revisar" title="Mandaron el video y nadie lo miró todavía">📥 Para revisar <span class="n" data-ne="revisar">0</span></button>
+      <button class="bsec fent" data-f="ajuste" title="Le pediste un cambio y todavía no mandó el video corregido">✏️ Ajuste pedido <span class="n" data-ne="ajuste">0</span></button>
+      <button class="bsec fent" data-f="publicar" title="Aprobaste el video y falta que lo publique en su Instagram y su TikTok">⏳ Aprobado, falta publicar <span class="n" data-ne="publicar">0</span></button>
+      <button class="bsec fent" data-f="decidir" title="Ya está publicado pero falta la etiqueta/collab o tiene menos de 1.000 views">🔎 Publicadas por decidir <span class="n" data-ne="decidir">0</span></button>
+      <button class="bsec fent" data-f="verificadas" title="Publicadas, con la collab aceptada y más de 1.000 views">✓ Verificadas <span class="n" data-ne="verificadas">0</span></button>
+      <button class="bsec fent" data-f="aprobadas" title="Collabs terminadas y aprobadas">✅ Aprobadas <span class="n" data-ne="aprobadas">0</span></button>
+      <button class="bsec fent" data-f="rechazadas" title="Videos que se rechazaron">✕ Rechazadas <span class="n" data-ne="rechazadas">0</span></button>
+      <input id="buscar-ent" type="search" placeholder="Buscar @usuaria o nombre" style="flex:1 1 180px;min-width:150px;padding:9px 12px;border:1px solid var(--linea,#ddd);border-radius:999px;font:inherit;font-size:.85rem">
+    </div>
     <div id="lista-entregas"></div>
   </section>
 
@@ -850,7 +861,7 @@ async function cargar(){
 
   if (env) ENVIOS_desde(env); else ENVIOS = [];
 
-  ENTREGAS = !ent ? [] : ent.fichas.map(f => ({
+  ENTREGAS = !ent ? [] : ent.fichas.concat(ent.historial || []).map(f => ({
     id: f.id, nom: f.nombre || (f.datos && f.datos.nombre) || f.ig, ig: f.ig,
     estado: f.estado, drive: (f.entrega && f.entrega.drive) || ((f.entregas || []).find(x => x && x.drive) || {}).drive || '', motivo: f.cambiosMotivo || '',
     entregadoEn: f.entregadoEn || (f.entrega && f.entrega.en) || 0, codigo: f.codigo || '',
@@ -866,6 +877,7 @@ async function cargar(){
     tiktokUser: (f.datos && f.datos.tiktok) || null,
     aprobadoVideoEn: f.aprobadoVideoEn || null,
     tel: f.tel || (f.datos && f.datos.tel) || '',
+    cerradaEn: f.estado === 'cumplida' ? (f.cumplidaEn || 0) : f.estado === 'rechazada' ? (f.decididaEn || 0) : 0,
   }));
 
   CREADORAS = !todas ? [] : todas.fichas.map(f => ({
@@ -926,10 +938,14 @@ let ENVIOS = [
 ];
 
 let ENTREGAS = [
-  {nom:'Camila Ruiz',  ig:'cami.ruiz', url:'https://instagram.com/reel/abc123', views:14200, collab:true,  dias:4, nro:1},
-  {nom:'Belén Ortiz',  ig:'bel.ortiz', url:'https://instagram.com/reel/ghi789', views:31500, collab:true,  dias:3, nro:2},
-  {nom:'Rocío Paz',    ig:'ro.paz',    url:'https://instagram.com/reel/def456', views:2800,  collab:false, dias:6, nro:1},
-  {nom:'Tamara Ledesma',ig:'tami.led', url:'https://instagram.com/reel/jkl012', views:640,   collab:true,  dias:7, nro:1}
+  {nom:'Camila Ruiz',  ig:'cami.ruiz', estado:'publicado', url:'https://instagram.com/reel/abc123', views:14200, collab:true,  dias:4, nro:1},
+  {nom:'Belén Ortiz',  ig:'bel.ortiz', estado:'publicado', url:'https://instagram.com/reel/ghi789', views:31500, collab:true,  dias:3, nro:2},
+  {nom:'Rocío Paz',    ig:'ro.paz',    estado:'publicado', url:'https://instagram.com/reel/def456', views:2800,  collab:false, dias:6, nro:1},
+  {nom:'Tamara Ledesma',ig:'tami.led', estado:'publicado', url:'https://instagram.com/reel/jkl012', views:640,   collab:true,  dias:7, nro:1},
+  {nom:'Sofía Méndez', ig:'sofi.mendez', estado:'entregado', drive:'#', entregadoEn: Date.now() - 864e5, views:0, nro:1},
+  {nom:'Lara Gómez',   ig:'lara.gomez', estado:'cambios', drive:'#', motivo:'Arrancá con uno de los ganchos', views:0, nro:1},
+  {nom:'Julieta Ríos', ig:'juli.rios', estado:'cumplida', url:'https://instagram.com/reel/mno345', views:22800, collab:true, nro:2, cerradaEn: Date.now() - 3*864e5},
+  {nom:'Agus Ferrer',  ig:'agus.ferrer', estado:'rechazada', drive:'#', views:0, nro:1, cerradaEn: Date.now() - 5*864e5}
 ];
 
 /* ═══ ECONOMÍA — viene de la config de la marca (MARCAS[marca].economia) ═══ */
@@ -1010,7 +1026,7 @@ const setN = (id, v) => { const el = document.getElementById(id); if (el) el.tex
 const contar = () => {
   setN('n-adm', APLICANTES.length - i);
   setN('n-env', ENVIOS.filter(e => e.estado === 'listo').length);
-  setN('n-ent', ENTREGAS.length);
+  setN('n-ent', ENTREGAS.filter(e => !ENT_CERRADA(e)).length);
 };
 
 /* etiqueta legible de una respuesta del formulario de la marca: el texto
@@ -1382,14 +1398,78 @@ $('#btn-desp').onclick = () => {
 };
 
 /* ── entregas ── */
+/* 30/10: filtros de Entregas (pendientes · para revisar · ajuste · falta publicar · publicadas · aprobadas · rechazadas) */
+const ENT_CERRADA = e => e.estado === 'cumplida' || e.estado === 'rechazada';
+const ENT_VERIF = e => e.estado === 'publicado' && e.collab && e.views >= 1000;
+const ENT_FILTROS = {
+  pendientes:  e => !ENT_CERRADA(e),
+  revisar:     e => e.estado === 'entregado' && !(CREADORA_PUBLICA() && e.aprobadoVideoEn),
+  ajuste:      e => e.estado === 'cambios',
+  publicar:    e => e.estado === 'entregado' && CREADORA_PUBLICA() && !!e.aprobadoVideoEn,
+  decidir:     e => e.estado === 'publicado' && !ENT_VERIF(e),
+  verificadas: ENT_VERIF,
+  aprobadas:   e => e.estado === 'cumplida',
+  rechazadas:  e => e.estado === 'rechazada',
+};
+let filtroEnt = 'pendientes', buscaEnt = '';
+document.addEventListener('click', ev => {
+  const b = ev.target.closest('.fent'); if (!b) return;
+  filtroEnt = b.dataset.f;
+  document.querySelectorAll('.fent').forEach(x => x.classList.toggle('activo', x === b));
+  pintarEntregas();
+});
+document.addEventListener('input', ev => {
+  if (ev.target.id !== 'buscar-ent') return;
+  buscaEnt = ev.target.value.trim().toLowerCase().replace(/^@/, '');
+  pintarEntregas();
+});
+
+function tarjetaCerrada(e){
+  const ok = e.estado === 'cumplida';
+  const fecha = e.cerradaEn ? new Date(e.cerradaEn).toLocaleDateString('es-AR', { day: 'numeric', month: 'numeric' }) : '';
+  const link = e.url && e.url !== '#' ? e.url : e.drive;
+  return `
+    <div class="entrega">
+      <div class="prev">
+        ${link ? `<a href="${link}" target="_blank" rel="noopener">${e.url && e.url !== '#' ? '▶<span>Ver el reel</span>' : '📁<span>Abrir Drive</span>'}</a>` : `<span style="opacity:.6">—</span>`}
+      </div>
+      <div class="cuerpo">
+        <h3>${e.nom} <span class="hand">@${e.ig}${e.tiktokUser ? ` · TikTok @${e.tiktokUser}` : ''}</span></h3>
+        <div class="pills">
+          <span class="pill ${ok ? 'ok' : 'no'}">${ok ? '✓ Aprobada' : '✕ Video rechazado'}${fecha ? ' el ' + fecha : ''}</span>
+          ${ok ? `<span class="pill">${(e.views || 0).toLocaleString('es-AR')} views</span>` : ''}
+          ${e.tiktok ? `<a class="pill" href="${e.tiktok}" target="_blank" rel="noopener" style="text-decoration:none">ver TikTok</a>` : ''}
+          ${e.drive && e.url && e.url !== '#' ? `<a class="pill" href="${e.drive}" target="_blank" rel="noopener" style="text-decoration:none">📁 Drive</a>` : ''}
+          ${e.kit ? `<span class="pill">kit ${nombresKits(e.kit, e.videos === 'dos' ? e.kit2 : null)}</span>` : ''}
+          ${e.codigo ? `<span class="pill">código ${e.codigo}</span>` : ''}
+        </div>
+        <div class="acc">${waEntrega(e)}</div>
+      </div>
+    </div>`;
+}
+
 function pintarEntregas(){
-  const porRevisar = ENTREGAS.filter(e => e.estado === 'entregado');
-  const enAjuste   = ENTREGAS.filter(e => e.estado === 'cambios');
-  const publicadas = ENTREGAS.filter(e => e.estado === 'publicado');
+  document.querySelectorAll('[data-ne]').forEach(x => { x.textContent = ENTREGAS.filter(ENT_FILTROS[x.dataset.ne]).length; });
+  const bPub = document.querySelector('.fent[data-f="publicar"]'); if (bPub) bPub.classList.toggle('oculto', !CREADORA_PUBLICA());
+  const busca = e => !buscaEnt || (e.ig || '').toLowerCase().includes(buscaEnt) || (e.nom || '').toLowerCase().includes(buscaEnt);
+  if (filtroEnt !== 'pendientes') {
+    const lista = ENTREGAS.filter(ENT_FILTROS[filtroEnt]).filter(busca)
+      .sort((a, b) => (b.cerradaEn || b.entregadoEn || 0) - (a.cerradaEn || a.entregadoEn || 0));
+    $('#lista-entregas').innerHTML = !lista.length
+      ? `<div class="vacio"><b class="serif" style="font-size:1.1rem">No hay ninguna${buscaEnt ? ' con esa búsqueda' : ''}</b></div>`
+      : lista.map(e => ENT_CERRADA(e) ? tarjetaCerrada(e)
+          : (e.estado === 'publicado' ? tarjetaEntrega(e, !ENT_VERIF(e)) : tarjetaDrive(e))).join('');
+    contar();
+    return;
+  }
+  const abiertas = ENTREGAS.filter(e => !ENT_CERRADA(e)).filter(busca);
+  const porRevisar = abiertas.filter(e => e.estado === 'entregado');
+  const enAjuste   = abiertas.filter(e => e.estado === 'cambios');
+  const publicadas = abiertas.filter(e => e.estado === 'publicado');
   const ok  = publicadas.filter(e => e.collab && e.views >= 1000);
   const rev = publicadas.filter(e => !(e.collab && e.views >= 1000));
 
-  $('#lista-entregas').innerHTML = !ENTREGAS.length
+  $('#lista-entregas').innerHTML = !abiertas.length
     ? `<div class="vacio"><div class="big">✓</div>
        <b class="serif" style="font-size:1.2rem">Nada pendiente</b></div>`
     : `
@@ -1527,7 +1607,7 @@ window.aprobarLote = () => {
   const limpias = ENTREGAS.filter(e => e.estado === 'publicado' && e.collab && e.views >= 1000);
   if (!DEMO) limpias.forEach(e =>
     api('resolver', { id: e.id, decision: 'aprobar' }).catch(() => {}));
-  ENTREGAS = ENTREGAS.filter(e => !(e.estado === 'publicado' && e.collab && e.views >= 1000));
+  limpias.forEach(e => { e.estado = 'cumplida'; e.cerradaEn = Date.now(); });
   pintarEntregas();
 };
 window.pedirCollab = ix => {
@@ -1562,7 +1642,7 @@ window.marcarPublicado = ix => {
 };
 window.resolverEntrega = (ix, ok) => {
   if (!DEMO) api('resolver', { id: ENTREGAS[ix].id, decision: ok ? 'aprobar' : 'rechazar' }).catch(() => {});
-  ENTREGAS.splice(ix,1); pintarEntregas();
+  ENTREGAS[ix].estado = ok ? 'cumplida' : 'rechazada'; ENTREGAS[ix].cerradaEn = Date.now(); pintarEntregas();
 };
 
 
@@ -2387,7 +2467,7 @@ function aplicarRol(){
     pintarTodo();
   }
 })();
-const APP_VERSION = '2026-10-27-c';
+const APP_VERSION = '2026-10-30-a';
 </script>
 </body>
 </html>
