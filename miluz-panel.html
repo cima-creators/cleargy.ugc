@@ -613,14 +613,14 @@ dialog.dlg.dlg-cre{max-width:680px}
     <h1>Entregas</h1>
     <p class="sub" id="entregas-sub">Los videos que mandaron por Drive: revisalos, subilos como collab desde la cuenta de la marca y pegá el link del reel. Después el sistema verifica solo que acepten la invitación.</p>
     <div class="barrasup" id="filtro-ent" style="gap:6px;flex-wrap:wrap">
-      <button class="bsec fent activo" data-f="pendientes" title="Todo lo que espera algo: revisar, ajustes y publicadas por decidir">Pendientes <span class="n" data-ne="pendientes">0</span></button>
-      <button class="bsec fent" data-f="revisar" title="Mandaron el video y nadie lo miró todavía">📥 Para revisar <span class="n" data-ne="revisar">0</span></button>
-      <button class="bsec fent" data-f="ajuste" title="Le pediste un cambio y todavía no mandó el video corregido">✏️ Ajuste pedido <span class="n" data-ne="ajuste">0</span></button>
-      <button class="bsec fent" data-f="publicar" title="Aprobaste el video y falta que lo publique en su Instagram y su TikTok">⏳ Aprobado, falta publicar <span class="n" data-ne="publicar">0</span></button>
-      <button class="bsec fent" data-f="decidir" title="Ya está publicado pero falta la etiqueta/collab o tiene menos de 1.000 views">🔎 Publicadas por decidir <span class="n" data-ne="decidir">0</span></button>
-      <button class="bsec fent" data-f="verificadas" title="Publicadas, con la collab aceptada y más de 1.000 views">✓ Verificadas <span class="n" data-ne="verificadas">0</span></button>
-      <button class="bsec fent" data-f="aprobadas" title="Collabs terminadas y aprobadas">✅ Aprobadas <span class="n" data-ne="aprobadas">0</span></button>
-      <button class="bsec fent" data-f="rechazadas" title="Videos que se rechazaron">✕ Rechazadas <span class="n" data-ne="rechazadas">0</span></button>
+      <button class="bsec fent activo" data-f="pendientes" title="Todo lo que espera algo: revisar, ajustes y publicadas por decidir">Todo lo pendiente <span class="n" data-ne="pendientes">0</span></button>
+      <button class="bsec fent" data-f="revisar" title="Mandaron el video y nadie lo miró todavía">📥 Mandó el video · falta revisarlo <span class="n" data-ne="revisar">0</span></button>
+      <button class="bsec fent" data-f="ajuste" title="Le pediste un cambio y todavía no mandó el video corregido">✏️ Le pedimos un cambio <span class="n" data-ne="ajuste">0</span></button>
+      <button class="bsec fent" data-f="publicar" title="Aprobaste el video y falta que lo publique en su Instagram y su TikTok">⏳ Video aprobado · falta que lo suba a IG <span class="n" data-ne="publicar">0</span></button>
+      <button class="bsec fent" data-f="decidir" title="Ya está publicado pero falta la etiqueta/collab o tiene menos de 1.000 views">🔎 Subido a IG · falta aprobar <span class="n" data-ne="decidir">0</span></button>
+      <button class="bsec fent" data-f="verificadas" title="Publicadas, con la collab aceptada y más de 1.000 views">✓ Subido a IG y chequeado · aprobar <span class="n" data-ne="verificadas">0</span></button>
+      <button class="bsec fent" data-f="aprobadas" title="Collabs terminadas y aprobadas">✅ Terminadas · subidas a IG y aprobadas <span class="n" data-ne="aprobadas">0</span></button>
+      <button class="bsec fent" data-f="rechazadas" title="Videos que se rechazaron">✕ Video rechazado <span class="n" data-ne="rechazadas">0</span></button>
       <select id="orden-ent" title="Ordenar" style="padding:9px 12px;border:1px solid var(--linea,#ddd);border-radius:999px;font:inherit;font-size:.85rem;background:#fff">
         <option value="fecha">Más recientes</option>
         <option value="views">Más views</option>
@@ -629,6 +629,7 @@ dialog.dlg.dlg-cre{max-width:680px}
       </select>
       <input id="buscar-ent" type="search" placeholder="Buscar @usuaria o nombre" style="flex:1 1 180px;min-width:150px;padding:9px 12px;border:1px solid var(--linea,#ddd);border-radius:999px;font:inherit;font-size:.85rem">
     </div>
+    <p class="n2" id="ent-expl" style="margin:0 0 12px"></p>
     <div id="lista-entregas"></div>
   </section>
 
@@ -1518,7 +1519,7 @@ function tarjetaVideo(e){
       <div class="cuerpo">
         <h3>${e.nom} <span class="hand">@${e.ig}</span></h3>
         <div class="pills">
-          <span class="pill ok">✓ Aprobada${fecha ? ' el ' + fecha : ''}</span>
+          <span class="pill ok">✓ En IG y aprobada${fecha ? ' el ' + fecha : ''}</span>
           <span class="pill">${(e.views || 0).toLocaleString('es-AR')} views</span>
           ${e.ventas ? `<span class="pill ok">${e.ventas} venta${e.ventas === 1 ? '' : 's'}${e.facturado ? ' · $' + Math.round(e.facturado).toLocaleString('es-AR') : ''}</span>` : ''}
           ${e.url && e.url !== '#' ? `<a class="pill" href="${e.url}" target="_blank" rel="noopener" style="text-decoration:none">Instagram ↗</a>` : ''}
@@ -1535,6 +1536,17 @@ window.masEnt = () => { verEnt += 24; pintarEntregas(); };
 
 function pintarEntregas(){
   document.querySelectorAll('[data-ne]').forEach(x => { x.textContent = ENTREGAS.filter(ENT_FILTROS[x.dataset.ne]).length; });
+  const EXPL = {
+    pendientes: 'Todo lo que espera algo de la marca o de la creadora.',
+    revisar: 'La creadora mandó su video por Drive y nadie lo miró todavía. Abrilo y aprobalo o pedí un cambio.',
+    ajuste: 'Le pediste un cambio y todavía no mandó el video corregido.',
+    publicar: 'Ya aprobaste el video. Falta que ella lo suba a su Instagram y TikTok etiquetando a la marca.',
+    decidir: 'Ya está subido a Instagram, pero falta la etiqueta a la marca o tiene menos de 1.000 views. Mirá y decidí.',
+    verificadas: 'Subido a Instagram, con la marca etiquetada y más de 1.000 views. Se pueden aprobar todas juntas.',
+    aprobadas: 'Collabs terminadas: el video está subido a Instagram y la marca lo aprobó.',
+    rechazadas: 'Videos que la marca rechazó.',
+  };
+  const ex = $('#ent-expl'); if (ex) ex.textContent = EXPL[filtroEnt] || '';
   const oEnt = $('#orden-ent'); if (oEnt) oEnt.hidden = filtroEnt === 'pendientes';
   const bPub = document.querySelector('.fent[data-f="publicar"]'); if (bPub) bPub.classList.toggle('oculto', !CREADORA_PUBLICA());
   const busca = e => !buscaEnt || (e.ig || '').toLowerCase().includes(buscaEnt) || (e.nom || '').toLowerCase().includes(buscaEnt);
@@ -2559,7 +2571,7 @@ function aplicarRol(){
     pintarTodo();
   }
 })();
-const APP_VERSION = '2026-10-30-e';
+const APP_VERSION = '2026-10-30-f';
 </script>
 </body>
 </html>
