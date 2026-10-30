@@ -1799,7 +1799,7 @@ function pintarInspi(){
   const lista = I.videos.filter(v => !inFiltro || v.angulo === inFiltro || !v.angulo);
   $('#in-lista').innerHTML = lista.map((v, i) => `
     <div class="card in-card">
-      <a class="in-vid" href="${escI(v.url)}" target="_blank" rel="noopener">${v.img ? `<img src="${escI(v.img)}" alt="" loading="lazy">` : ''}<span class="play">▶ Ver en TikTok</span></a>
+      <a class="in-vid" href="${escI(v.url)}" target="_blank" rel="noopener">${v.img ? `<img src="${escI(/^https?:/.test(v.img) ? v.img : 'https://cima-creators.github.io/cleargy.ugc/' + v.img)}" alt="" loading="lazy">` : ''}<span class="play">▶ Ver en TikTok</span></a>
       <div class="in-cuerpo">
         <small style="text-transform:uppercase;letter-spacing:.06em;font-weight:700;opacity:.65">${escI(v.marca || '')}${v.producto ? ' · ' + escI(v.producto) : ''}</small>
         <div class="in-cifras">${v.vistas ? `<span>👀 ${escI(v.vistas)} views</span>` : ''}${v.ventas ? `<span>💰 ${escI(v.ventas)} en ventas</span>` : ''}${v.angulo ? `<span>${escI(String(nomKit(v.angulo)).replace(/^.*·\s*/, ''))}</span>` : ''}</div>
@@ -2269,7 +2269,7 @@ function pintarMarca(){
   } catch { if (DEMO){ precargar(); traerBorrador(); } ver(DEMO ? 'v-ficha' : 'v-error'); }
 })();
 
-const APP_VERSION = '2026-10-30-b';
+const APP_VERSION = '2026-10-30-c';
 </script>
 </body>
 </html>
