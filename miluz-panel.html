@@ -899,6 +899,7 @@ async function cargar(){
     videos: f.videos || (f.datos && f.datos.videos) || null, entregas: Array.isArray(f.entregas) ? f.entregas : [],
     tiktokUser: (f.datos && f.datos.tiktok) || null,
     aprobadoVideoEn: f.aprobadoVideoEn || null,
+    publicarRecordatorios: f.publicarRecordatorios || 0, publicarRecordadoEn: f.publicarRecordadoEn || 0, dijoPublicadoEn: f.dijoPublicadoEn || 0,
     tel: f.tel || (f.datos && f.datos.tel) || '',
     cerradaEn: f.estado === 'cumplida' ? (f.cumplidaEn || 0) : f.estado === 'rechazada' ? (f.decididaEn || 0) : 0,
     ventas: f.ventas || 0, facturado: f.facturado || 0, veterana: !!(f.veterana || f.importada),
@@ -1602,6 +1603,17 @@ function pintarEntregas(){
   contar();
 }
 
+/* 30/10: aprobado y sin publicar — cuántos días, recordatorios que salieron y si dijo que ya lo subió */
+function avisoPublicar(e){
+  const dias = e.aprobadoVideoEn ? Math.floor((Date.now() - e.aprobadoVideoEn) / 864e5) : 0;
+  const f = t => new Date(t).toLocaleDateString('es-AR', { day: 'numeric', month: 'numeric' });
+  const rec = e.publicarRecordatorios ? ` Le mandamos ${e.publicarRecordatorios} recordatorio${e.publicarRecordatorios === 1 ? '' : 's'} (el último el ${f(e.publicarRecordadoEn)}).` : ' El sistema le recuerda solo a los 2, 5 y 9 días.';
+  if (e.dijoPublicadoEn) return `<div class="aviso urg"><b>Dice que ya lo subió (${f(e.dijoPublicadoEn)}) pero no cargó los links.</b> Le explicamos cómo cargarlos en su app. Si no lo hace, escribile por WhatsApp.</div>`;
+  if (dias >= 9) return `<div class="aviso urg"><b>Hace ${dias} días que se lo aprobaste y no lo publicó.</b>${rec} Escribile por WhatsApp.</div>`;
+  if (dias >= 2) return `<div class="aviso med"><b>Hace ${dias} días que se lo aprobaste y todavía no lo publicó.</b>${rec}</div>`;
+  return `<div class="aviso med"><b>Ya le avisamos que lo publique.</b> Cuando cargue los links de Instagram y TikTok, pasa a "Subido a IG" para aprobar la collab.${rec}</div>`;
+}
+
 function tarjetaDrive(e){
   const ix = ENTREGAS.indexOf(e);
   const hace = e.entregadoEn ? Math.max(0, Math.round((Date.now() - e.entregadoEn) / 864e5)) : null;
@@ -1623,7 +1635,7 @@ function tarjetaDrive(e){
       <div class="cuerpo">
         <h3>${e.nom} <span class="hand">@${e.ig}</span></h3>
         <div class="pills">
-          <span class="pill ${e.estado === 'cambios' ? 'esp' : (aprobado ? 'ok' : '')}">${e.estado === 'cambios' ? 'Le pedimos un ajuste' : (aprobado ? '✓ Aprobado · esperando que publique' : 'Video entregado')}</span>
+          <span class="pill ${e.estado === 'cambios' ? 'esp' : (aprobado ? (Date.now() - e.aprobadoVideoEn >= 5 * 864e5 ? 'no' : 'ok') : '')}">${e.estado === 'cambios' ? 'Le pedimos un ajuste' : (aprobado ? `✓ Aprobado hace ${Math.floor((Date.now() - e.aprobadoVideoEn) / 864e5)} d · falta que publique` : 'Video entregado')}</span>
           ${hace !== null ? `<span class="pill">${hace === 0 ? 'hoy' : 'hace ' + hace + ' d'}</span>` : ''}
           ${e.codigo ? `<span class="pill">código ${e.codigo}</span>` : ''}
           <span class="pill">${e.nro===1?'primera collab':`collab n° ${e.nro}`}</span>
@@ -1631,7 +1643,7 @@ function tarjetaDrive(e){
         ${e.estado === 'cambios' ? `<div class="aviso med"><b>Le pedimos:</b> ${e.motivo || '—'}</div>`
           : (ella
             ? (aprobado
-              ? `<div class="aviso med"><b>Ya le avisamos que lo publique.</b> Cuando cargue los links de Instagram y TikTok, pasa a "publicadas" para aprobar la collab.</div>`
+              ? avisoPublicar(e)
               : `<div class="aviso med"><b>Qué hacer:</b> ${queMirar} Si está bien, tocá ${'<b>Aprobar video</b>'}: le llega el aviso para publicarlo en su Instagram y su TikTok etiquetando a @${CFG.cuentaIg}.</div>`)
             : `<div class="aviso med"><b>Qué hacer:</b> ${queMirar} Si está bien, subilo desde @${CFG.cuentaIg} como collab (Etiquetar personas → Invitar colaborador → @${e.ig}) y pegá acá el link del reel.</div>`)}
         ${videos}
@@ -2571,7 +2583,7 @@ function aplicarRol(){
     pintarTodo();
   }
 })();
-const APP_VERSION = '2026-10-30-f';
+const APP_VERSION = '2026-10-30-g';
 </script>
 </body>
 </html>
