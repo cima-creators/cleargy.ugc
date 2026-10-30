@@ -621,6 +621,12 @@ dialog.dlg.dlg-cre{max-width:680px}
       <button class="bsec fent" data-f="verificadas" title="Publicadas, con la collab aceptada y más de 1.000 views">✓ Verificadas <span class="n" data-ne="verificadas">0</span></button>
       <button class="bsec fent" data-f="aprobadas" title="Collabs terminadas y aprobadas">✅ Aprobadas <span class="n" data-ne="aprobadas">0</span></button>
       <button class="bsec fent" data-f="rechazadas" title="Videos que se rechazaron">✕ Rechazadas <span class="n" data-ne="rechazadas">0</span></button>
+      <select id="orden-ent" title="Ordenar" style="padding:9px 12px;border:1px solid var(--linea,#ddd);border-radius:999px;font:inherit;font-size:.85rem;background:#fff">
+        <option value="fecha">Más recientes</option>
+        <option value="views">Más views</option>
+        <option value="ventas">Más ventas</option>
+        <option value="facturado">Más facturado</option>
+      </select>
       <input id="buscar-ent" type="search" placeholder="Buscar @usuaria o nombre" style="flex:1 1 180px;min-width:150px;padding:9px 12px;border:1px solid var(--linea,#ddd);border-radius:999px;font:inherit;font-size:.85rem">
     </div>
     <div id="lista-entregas"></div>
@@ -894,6 +900,9 @@ async function cargar(){
     aprobadoVideoEn: f.aprobadoVideoEn || null,
     tel: f.tel || (f.datos && f.datos.tel) || '',
     cerradaEn: f.estado === 'cumplida' ? (f.cumplidaEn || 0) : f.estado === 'rechazada' ? (f.decididaEn || 0) : 0,
+    ventas: f.ventas || 0, facturado: f.facturado || 0, veterana: !!(f.veterana || f.importada),
+    // si el reel principal no está, el de la 2ª entrega o el de Cyber (para la galería de Aprobadas)
+    urlAlt: (((f.entregas || []).concat(f.cyberVideos || []).find(x => x && x.reel && x.reel.url) || {}).reel || {}).url || '',
   }));
 
   CREADORAS = !todas ? [] : todas.fichas.map(f => ({
@@ -1447,7 +1456,11 @@ const ENT_FILTROS = {
   aprobadas:   e => e.estado === 'cumplida',
   rechazadas:  e => e.estado === 'rechazada',
 };
-let filtroEnt = 'pendientes', buscaEnt = '';
+let filtroEnt = 'pendientes', buscaEnt = '', ordenEnt = 'fecha';
+document.addEventListener('change', ev => {
+  if (ev.target.id !== 'orden-ent') return;
+  ordenEnt = ev.target.value; verEnt = 24; pintarEntregas();
+});
 document.addEventListener('click', ev => {
   const b = ev.target.closest('.fent'); if (!b) return;
   filtroEnt = b.dataset.f; verEnt = 24;
@@ -1486,7 +1499,7 @@ function tarjetaCerrada(e){
 
 /* Embed del video: reel de Instagram → TikTok (con id) → archivo de Drive. Si no hay, null. */
 function embedVideo(e){
-  const ig = String(e.url || '').match(/instagram\.com\/(?:[\w.]+\/)?(reel|reels|p|tv)\/([\w-]+)/i);
+  const ig = String((e.url && e.url !== '#' ? e.url : e.urlAlt) || '').match(/instagram\.com\/(?:[\w.]+\/)?(reel|reels|p|tv)\/([\w-]+)/i);
   if (ig) return `https://www.instagram.com/${ig[1] === 'p' ? 'p' : 'reel'}/${ig[2]}/embed/`;
   const tt = String(e.tiktok || '').match(/tiktok\.com\/.*\/video\/(\d+)/i);
   if (tt) return `https://www.tiktok.com/embed/v2/${tt[1]}`;
@@ -1500,12 +1513,13 @@ function tarjetaVideo(e){
   const link = e.url && e.url !== '#' ? e.url : e.drive;
   return `<div class="vid-card">
       ${src ? `<iframe src="${src}" loading="lazy" allowfullscreen scrolling="no" allow="autoplay; encrypted-media; picture-in-picture"></iframe>`
-        : `<a class="sin-vid" href="${link || '#'}" target="_blank" rel="noopener">${link ? '▶ Abrir el video' : 'Sin video cargado'}</a>`}
+        : `<a class="sin-vid" href="${link || '#'}" target="_blank" rel="noopener">${link ? '▶ Abrir el video' : e.veterana ? 'Collab de antes de la app · sin link' : 'Sin video cargado'}</a>`}
       <div class="cuerpo">
         <h3>${e.nom} <span class="hand">@${e.ig}</span></h3>
         <div class="pills">
           <span class="pill ok">✓ Aprobada${fecha ? ' el ' + fecha : ''}</span>
           <span class="pill">${(e.views || 0).toLocaleString('es-AR')} views</span>
+          ${e.ventas ? `<span class="pill ok">${e.ventas} venta${e.ventas === 1 ? '' : 's'}${e.facturado ? ' · $' + Math.round(e.facturado).toLocaleString('es-AR') : ''}</span>` : ''}
           ${e.url && e.url !== '#' ? `<a class="pill" href="${e.url}" target="_blank" rel="noopener" style="text-decoration:none">Instagram ↗</a>` : ''}
           ${e.tiktok ? `<a class="pill" href="${e.tiktok}" target="_blank" rel="noopener" style="text-decoration:none">TikTok ↗</a>` : ''}
           ${e.drive ? `<a class="pill" href="${e.drive}" target="_blank" rel="noopener" style="text-decoration:none">📁 Drive</a>` : ''}
@@ -1520,11 +1534,15 @@ window.masEnt = () => { verEnt += 24; pintarEntregas(); };
 
 function pintarEntregas(){
   document.querySelectorAll('[data-ne]').forEach(x => { x.textContent = ENTREGAS.filter(ENT_FILTROS[x.dataset.ne]).length; });
+  const oEnt = $('#orden-ent'); if (oEnt) oEnt.hidden = filtroEnt === 'pendientes';
   const bPub = document.querySelector('.fent[data-f="publicar"]'); if (bPub) bPub.classList.toggle('oculto', !CREADORA_PUBLICA());
   const busca = e => !buscaEnt || (e.ig || '').toLowerCase().includes(buscaEnt) || (e.nom || '').toLowerCase().includes(buscaEnt);
   if (filtroEnt !== 'pendientes') {
+    const fecha = x => x.cerradaEn || x.entregadoEn || 0;
+    const tieneVideo = x => !!embedVideo(x) || !!(x.url && x.url !== '#');
     const lista = ENTREGAS.filter(ENT_FILTROS[filtroEnt]).filter(busca)
-      .sort((a, b) => (b.cerradaEn || b.entregadoEn || 0) - (a.cerradaEn || a.entregadoEn || 0));
+      .sort((a, b) => (tieneVideo(b) - tieneVideo(a))   // las importadas sin link, al final
+        || (ordenEnt === 'fecha' ? fecha(b) - fecha(a) : ((b[ordenEnt] || 0) - (a[ordenEnt] || 0)) || fecha(b) - fecha(a)));
     $('#lista-entregas').innerHTML = !lista.length
       ? `<div class="vacio"><b class="serif" style="font-size:1.1rem">No hay ninguna${buscaEnt ? ' con esa búsqueda' : ''}</b></div>`
       : filtroEnt === 'aprobadas'
@@ -2540,7 +2558,7 @@ function aplicarRol(){
     pintarTodo();
   }
 })();
-const APP_VERSION = '2026-10-30-c';
+const APP_VERSION = '2026-10-30-d';
 </script>
 </body>
 </html>
