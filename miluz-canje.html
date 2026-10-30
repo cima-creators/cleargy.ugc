@@ -316,7 +316,21 @@ dialog.pop::backdrop{background:rgba(42,35,29,.45)}
 ul.limpia{margin:0;padding-left:1.05rem}
 #cy-cuerpo ul.limpia{list-style:none;padding-left:0}
 .cy-banner{display:flex;align-items:center;gap:10px;width:100%;margin:0 0 14px;padding:13px 15px;border:0;border-radius:16px;background:#111;color:#fff;font:inherit;text-align:left;cursor:pointer}
-.cy-banner b{font-size:.9rem;line-height:1.35}.cy-banner span{margin-left:auto;font-weight:700;white-space:nowrap;font-size:.85rem}
+.cy-banner b{font-size:.9rem;line-height:1.35}
+/* 30/10 · Inspiración: videos virales de otras marcas para replicar */
+.in-banner{background:var(--rosa)}
+.in-filtros{display:flex;gap:6px;flex-wrap:wrap;margin:0 0 14px}
+.in-filtros button{border:1px solid var(--sup2);background:#fff;border-radius:99px;padding:8px 13px;font:inherit;font-size:.82rem;font-weight:600;cursor:pointer;color:inherit}
+.in-filtros button.on{background:var(--rosa);border-color:var(--rosa);color:#fff}
+.in-card{padding:0;overflow:hidden}
+.in-vid{position:relative;display:block;background:#111;aspect-ratio:4/5;width:100%;overflow:hidden;color:#fff;text-decoration:none}
+.in-vid img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}
+.in-vid .play{position:absolute;inset:auto 12px 12px 12px;display:flex;align-items:center;justify-content:center;gap:8px;padding:12px;border-radius:14px;background:rgba(0,0,0,.72);font-weight:700;font-size:.92rem}
+.in-cuerpo{padding:14px 16px 16px}
+.in-cifras{display:flex;gap:6px;flex-wrap:wrap;margin:8px 0 10px}
+.in-cifras span{background:rgba(var(--acento-rgb),.1);color:var(--rosa);border-radius:99px;padding:4px 10px;font-size:.75rem;font-weight:700}
+.in-cuerpo .gancho{font-size:1rem;font-weight:700;margin:0 0 8px}
+.in-cuerpo p{margin:0 0 8px;font-size:.9rem;line-height:1.5}.cy-banner span{margin-left:auto;font-weight:700;white-space:nowrap;font-size:.85rem}
 ul.limpia li{margin-bottom:.5rem;font-size:.88rem;color:var(--tx2)}
 .brief h3{font-size:.96rem;font-weight:700;margin:1.5rem 0 .5rem;color:var(--tx)}
 .brief h3:first-child{margin-top:0}
@@ -572,6 +586,7 @@ details.ej summary{cursor:pointer;font-size:.9rem;color:var(--tx)}
     <p class="lead">Cinco minutos de lectura. Es la diferencia entre un video que funciona y uno que no.</p>
     <div class="demo-kits oculto" id="demo-kits"></div>
     <div class="card brief" id="brief-cuerpo"></div>
+    <button class="cy-banner in-banner oculto" id="in-banner2">💡 <b>Inspiración: videos virales que vendieron millones. Copiá la idea.</b><span>Ver →</span></button>
     <div class="card sutil">
       <label class="check">
         <input type="checkbox" id="chk-brief">
@@ -591,9 +606,20 @@ details.ej summary{cursor:pointer;font-size:.9rem;color:var(--tx)}
     <button class="btn sec" id="cy-volver">Volver</button>
   </section>
 
+  <!-- ══ INSPIRACIÓN (30/10): videos virales de otras marcas que vendieron mucho — sale de CFG.inspiracion ══ -->
+  <section id="v-inspi" class="oculto">
+    <p class="eyebrow">Inspiración</p>
+    <h1 id="in-tit">Videos que vendieron millones</h1>
+    <p class="lead" id="in-intro"></p>
+    <div class="in-filtros" id="in-filtros"></div>
+    <div id="in-lista"></div>
+    <button class="btn sec" id="in-volver">Volver</button>
+  </section>
+
   <!-- ══ 3 · ESTADO ══ -->
   <section id="v-estado" class="oculto">
     <button class="cy-banner oculto" id="cy-banner">⚡ <b id="cy-banner-tx">Cyber Monday</b><span>Ver cómo →</span></button>
+    <button class="cy-banner in-banner oculto" id="in-banner">💡 <b>Inspiración: videos virales que vendieron millones. Copiá la idea.</b><span>Ver →</span></button>
 
     <div class="hero" id="hero">
       <div class="hero-anillo" id="hero-anillo">
@@ -900,7 +926,7 @@ function briefKit(){
   if (!bk) return null;
   return bk[kitActual()] || bk[Object.keys(bk)[0]] || null;
 }
-function pintarBriefing(){ $('#brief-cuerpo').innerHTML = armarBriefing(); pintarChk(); pintarDemoKits(); }
+function pintarBriefing(){ $('#brief-cuerpo').innerHTML = armarBriefing(); pintarChk(); pintarDemoKits(); pintarInspiBanner(); }
 /* Solo en la demo: ver el briefing de cada producto (cada creadora real ve solo el suyo). */
 function pintarDemoKits(){
   const box = $('#demo-kits');
@@ -1251,7 +1277,7 @@ function armarBriefing(){
 let D = null;
 const $ = s => document.querySelector(s);
 const ver = id => {
-  ['v-load','v-error','v-ficha','v-brief','v-estado','v-cyber'].forEach(v =>
+  ['v-load','v-error','v-ficha','v-brief','v-estado','v-cyber','v-inspi'].forEach(v =>
     $('#'+v).classList.toggle('oculto', v !== id));
   window.scrollTo(0,0);
 };
@@ -1754,6 +1780,42 @@ function pintarCyberBanner(){
   b.classList.toggle('oculto', !vivo);
   if (vivo) $('#cy-banner-tx').textContent = `Cyber Monday: ${C.comision ? C.comision.pct + '% de comisión' : 'bonos especiales'}${C.bonoDoble ? ' y bono de $' + Number(C.bonoDoble.monto).toLocaleString('es-AR') : ''}.`;
 }
+/* 30/10 · Inspiración. CFG.inspiracion = { titulo, intro, videos: [{ url, marca, producto, angulo, vistas, ventas, gancho, porque, comoHacerlo }] } */
+let inFiltro = null, inVolverA = 'v-estado';
+function pintarInspiBanner(){
+  const hay = !!(CFG.inspiracion && (CFG.inspiracion.videos || []).length);
+  ['#in-banner', '#in-banner2'].forEach(id => { const b = $(id); if (b) b.classList.toggle('oculto', !hay); });
+}
+function pintarInspi(){
+  const I = CFG.inspiracion || { videos: [] };
+  $('#in-tit').textContent = I.titulo || 'Videos que vendieron millones';
+  $('#in-intro').textContent = I.intro || 'Videos de otras marcas que se hicieron virales y vendieron muchísimo. No los copies igual: tomá la idea, el gancho y el formato, y hacé tu versión con tu producto.';
+  const nomKit = id => ((CFG.opciones || []).find(o => o.id === id) || {}).nom || id;
+  const angs = [...new Set(I.videos.map(v => v.angulo).filter(Boolean))];
+  if (inFiltro === null) inFiltro = (D && D.kit && angs.includes(D.kit)) ? D.kit : '';
+  $('#in-filtros').innerHTML = angs.length > 1 ? [['', 'Todos'], ...angs.map(a => [a, nomKit(a)])]
+    .map(([k, t]) => `<button type="button" data-a="${esc(k)}" class="${inFiltro === k ? 'on' : ''}">${esc(String(t).replace(/^.*·\s*/, ''))}</button>`).join('') : '';
+  const lista = I.videos.filter(v => !inFiltro || v.angulo === inFiltro || !v.angulo);
+  $('#in-lista').innerHTML = lista.map((v, i) => `
+    <div class="card in-card">
+      <a class="in-vid" href="${esc(v.url)}" target="_blank" rel="noopener">${v.img ? `<img src="${esc(v.img)}" alt="" loading="lazy">` : ''}<span class="play">▶ Ver en TikTok</span></a>
+      <div class="in-cuerpo">
+        <small style="text-transform:uppercase;letter-spacing:.06em;font-weight:700;opacity:.65">${esc(v.marca || '')}${v.producto ? ' · ' + esc(v.producto) : ''}</small>
+        <div class="in-cifras">${v.vistas ? `<span>👀 ${esc(v.vistas)} views</span>` : ''}${v.ventas ? `<span>💰 ${esc(v.ventas)} en ventas</span>` : ''}${v.angulo ? `<span>${esc(String(nomKit(v.angulo)).replace(/^.*·\s*/, ''))}</span>` : ''}</div>
+        ${v.gancho ? `<p class="gancho">«${esc(v.gancho)}»</p>` : ''}
+        ${v.porque ? `<p><b>Por qué funcionó:</b> ${esc(v.porque)}</p>` : ''}
+        ${v.comoHacerlo ? `<p><b>Cómo hacer tu versión:</b> ${esc(v.comoHacerlo)}</p>` : ''}
+      </div>
+    </div>`).join('') || '<p class="lead">Todavía no hay videos para este ángulo.</p>';
+}
+document.addEventListener('click', ev => {
+  const f = ev.target.closest('#in-filtros button');
+  if (f) { inFiltro = f.dataset.a; pintarInspi(); return; }
+});
+const abrirInspi = desde => { inVolverA = desde; pintarInspi(); ver('v-inspi'); };
+$('#in-banner').addEventListener('click', () => abrirInspi('v-estado'));
+$('#in-banner2').addEventListener('click', () => abrirInspi('v-brief'));
+$('#in-volver').addEventListener('click', () => { if (inVolverA === 'v-estado' && typeof pintarEstado === 'function') pintarEstado(); ver(inVolverA); });
 $('#cy-volver').addEventListener('click', () => { if (typeof pintarEstado === 'function') pintarEstado(); ver('v-estado'); });
 /* 21/10: la sección especial de Cyber Monday. CFG.cyber = { titulo, fechas, intro, ofertas[], bonos[{t,d,monto}], guiones[{t,seg,filas[{e,dice,pantalla,filma}]}], reglas[] } */
 function pintarCyber(){
@@ -1964,7 +2026,7 @@ function pintarPlata(){
       `<br>Este mes llevás <b>${n} ${n === 1 ? 'venta' : 'ventas'}</b>${actual ? ` (vas al <b>${actual.pct}%</b>)` : ''}` +
       (!n ? `: con la primera arrancás en el <b>${E[0].pct}%</b>.` : sig ? `: te ${sig.desde - n === 1 ? 'falta 1' : 'faltan ' + (sig.desde - n)} para el <b>${sig.pct}%</b>.` : '. Llegaste al máximo 🔥');
   }
-  pintarCyberBanner();
+  pintarCyberBanner(); pintarInspiBanner();
   // sin tienda no hay código ni comisión por ventas: se esconde el bono
   $('#bono-comision-pct').closest('.bono').classList.toggle('oculto', !CFG.cupon && !(B.escala || []).length);   // 27/10: con escala se muestra aunque la tienda no esté conectada
 }
@@ -2206,7 +2268,7 @@ function pintarMarca(){
   } catch { if (DEMO){ precargar(); traerBorrador(); } ver(DEMO ? 'v-ficha' : 'v-error'); }
 })();
 
-const APP_VERSION = '2026-10-27-g';
+const APP_VERSION = '2026-10-30-a';
 </script>
 </body>
 </html>
