@@ -837,6 +837,7 @@ const BRAND_CONFIGS = {
   miluz: {
     goal:300, // objetivo total de la campaña
     name:'MiLuz', collection:'miluz', defaultCampaignStart:'2026-06-10', dailyVideos:2,   // 22/10 (Nacho): 2 por día por creadora; antes caía al default de 5
+    videoGoal:90, salary:550000, minVideos:90,   // 30/10 (Nacho): 90 videos por mes por creadora. Ale Pérez cobra en USD (abajo); el resto $550.000
     rachaMonto:30000, adminPass:'miluz-admin-2025', adminPass2:'miluz-2025', adminPass4:'abril-2026',
     adminPass3:'vane-2026', adminUser3:'V', adminNombre3:'Vane',   // Vane: acceso total, pero SOLO en Mi Luz
     accent:'#111111', accentLight:'#333333', bg:'#f0f0f0', surface2:'#e8e8e8', border:'#d0d0d0',
@@ -855,7 +856,7 @@ const BRAND_CONFIGS = {
       creadora10:{name:'Constanza Staib',avatar:'CS',color:'#1f1f1f',phone:'',inactive:true},
       creadora11:{name:'Abril Schwaner',avatar:'AS',color:'#3d3d3d',phone:''},
       creadora12:{name:'Juliana',avatar:'JU',color:'#2a2a2a',phone:'',inactive:true},
-      creadora13:{name:'Alejandra Pérez',avatar:'AP',color:'#4f4f4f',phone:''},
+      creadora13:{name:'Alejandra Pérez',avatar:'AP',color:'#4f4f4f',phone:'',salary:780000},   // 30/10: USD 500 por los 90, pasados a pesos al blue vendedor ($1.560). Si se mueve el dólar, se actualiza
       creadora15:{name:'Alejandra Claret',avatar:'AC',color:'#737373',phone:''},
       creadora14:{name:'Jimena',avatar:'JI',color:'#606060',phone:''},
     }
@@ -4038,7 +4039,7 @@ loadConfig();
 <!-- Auto-actualización: GitHub Pages cachea el HTML y los celulares lo retienen mucho más.
      Esto compara la versión publicada con la que está corriendo y refresca sola. -->
 <script>
-const APP_VERSION = '2026-10-28-victor';
+const APP_VERSION = '2026-10-30-miluz90';
 (function(){
   var CLAVE='cima_ver_reload';
   function hayAlguienEscribiendo(){
