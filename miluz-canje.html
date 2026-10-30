@@ -2204,7 +2204,10 @@ function barraDemo(){
    ['En lista',()=>irA('briefing_ok')],['Despachado',()=>irA('enviado')],
    ['Te llegó',()=>irA('recibido')],['Entregó',()=>irA('entregado')],['Aprobado',()=>api('aprobar_video',{}).then(r=>{D=r.creadora;pintarEstado();ver('v-estado');})],['Publicado',()=>irA('publicado')],
    ['Cumplida',()=>irA('cumplida')],['Vencida',()=>irA('vencida')]
-  ].forEach(([t,fn]) => {
+  ].concat(CFG.ronda2 ? [['2ª collab',()=>{   // 30/10: el briefing de la segunda collab (testimonio) se ve recién cuando la aprueban
+     D = Object.assign(D || {}, { ronda: 2, estado: 'briefing_ok', ronda2: { estado: 'aprobada' } });
+     $('#brief-cuerpo').innerHTML = armarBriefing(); ver('v-brief'); window.scrollTo(0, 0); }]] : [])
+  .forEach(([t,fn]) => {
     const b = document.createElement('button'); b.textContent = t; b.onclick = fn; nav.appendChild(b);
   });
   document.body.appendChild(nav);
@@ -2269,7 +2272,7 @@ function pintarMarca(){
   } catch { if (DEMO){ precargar(); traerBorrador(); } ver(DEMO ? 'v-ficha' : 'v-error'); }
 })();
 
-const APP_VERSION = '2026-10-30-c';
+const APP_VERSION = '2026-10-30-d';
 </script>
 </body>
 </html>
