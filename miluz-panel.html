@@ -549,7 +549,13 @@ dialog.dlg.dlg-cre{max-width:680px}
     </div>
     <div class="wa-filtros" id="filtro-env">
       <button class="bsec fwa activo" data-f="listo">Para enviar <span class="n" data-n="listo">0</span></button>
-      <button class="bsec fwa" data-f="despachado">Despachados <span class="n" data-n="despachado">0</span></button>
+      <button class="bsec fwa" data-f="despachado" title="Todos los kits que ya salieron">Despachados <span class="n" data-n="despachado">0</span></button>
+      <button class="bsec fwa" data-f="encamino" title="Salió el kit y ella todavía no confirmó que le llegó">🚚 Todavía no les llegó <span class="n" data-n="encamino">0</span></button>
+      <button class="bsec fwa" data-f="demorados" title="Salió hace 7 días o más y todavía no confirmó que le llegó: mirar el seguimiento">⚠ Salió hace 7+ días y no llegó <span class="n" data-n="demorados">0</span></button>
+      <button class="bsec fwa" data-f="recibidos" title="Confirmaron que les llegó el kit">✓ Ya lo recibieron <span class="n" data-n="recibidos">0</span></button>
+      <button class="bsec fwa" data-f="recibidos5" title="Les llegó hace 5 días o más y todavía no mandaron el video">⏳ Recibieron hace 5+ días, sin video <span class="n" data-n="recibidos5">0</span></button>
+      <button class="bsec fwa" data-f="conVideo" title="Ya recibieron y mandaron el video">🎬 Ya mandaron el video <span class="n" data-n="conVideo">0</span></button>
+      <input id="buscar-env" type="search" placeholder="Buscar @usuaria, nombre o localidad" style="flex:1 1 200px;min-width:150px;padding:9px 12px;border:1px solid var(--linea,#ddd);border-radius:999px;font:inherit;font-size:.85rem">
     </div>
     <div id="tabla-envios"></div>
   </section>
@@ -803,6 +809,7 @@ function ENVIOS_desde(env){
       : (f.tonos || (f.datos && f.datos.tonos) || []).map(t => NOMBRE_TONO[t] || t).join(' · '),
     estado: ['ficha_completa','briefing_ok'].includes(f.estado) ? 'listo' : 'despachado',
     recibido: !['ficha_completa','briefing_ok','enviado'].includes(f.estado), recibidoEn: f.recibidoEn || 0,
+    estadoReal: f.estado,
     sinBriefing: f.estado === 'ficha_completa',   // completó la ficha pero no confirmó que leyó el briefing
   }));
 }
@@ -1251,12 +1258,32 @@ function decidir(qué, motivo){
 
 /* ── envíos ── */
 let filtroEnv = 'listo';   // 5/10: separar los que faltan enviar de los ya despachados
+/* 30/10: filtros de Despachados (no les llegó · demorados · recibieron · hace 5+ días sin video · ya mandaron el video) */
+const DIAS_DESDE = t => t ? Math.floor((Date.now() - t) / 864e5) : null;
+const ENV_FILTROS = {
+  listo:      e => e.estado === 'listo',
+  despachado: e => e.estado === 'despachado',
+  encamino:   e => e.estado === 'despachado' && !e.recibido,
+  demorados:  e => e.estado === 'despachado' && !e.recibido && DIAS_DESDE(e.despachadoEn) >= 7,
+  recibidos:  e => e.estado === 'despachado' && e.recibido,
+  recibidos5: e => ['recibido','vencida'].includes(e.estadoReal) && DIAS_DESDE(e.recibidoEn) >= 5,
+  conVideo:   e => ['entregado','cambios','publicado','cumplida'].includes(e.estadoReal),
+};
+let buscaEnv = '';
+document.addEventListener('input', ev => {
+  if (ev.target.id !== 'buscar-env') return;
+  buscaEnv = ev.target.value.trim().toLowerCase().replace(/^@/, '');
+  pintarEnvios();
+});
 function pintarEnvios(){
-  document.querySelectorAll('#filtro-env [data-n]').forEach(el => { const n = ENVIOS.filter(e => e.estado === el.dataset.n); el.textContent = el.dataset.n === 'despachado' ? `${n.length} · ${n.filter(e => e.recibido).length} recibidos` : n.length; });
+  document.querySelectorAll('#filtro-env [data-n]').forEach(el => { el.textContent = ENVIOS.filter(ENV_FILTROS[el.dataset.n]).length; });
   document.querySelectorAll('#filtro-env .fwa').forEach(b => { b.classList.toggle('activo', b.dataset.f === filtroEnv); b.onclick = () => { filtroEnv = b.dataset.f; pintarEnvios(); }; });
   const btnD = $('#btn-desp'); if (btnD && ROL !== 'marca') btnD.hidden = filtroEnv !== 'listo';
-  const vista = ENVIOS.map((e, ix) => ({ e, ix })).filter(x => x.e.estado === filtroEnv)
-    .sort((a, b) => filtroEnv === 'despachado' ? (b.e.despachadoEn || 0) - (a.e.despachadoEn || 0) : 0);
+  const busca = e => !buscaEnv || [e.ig, e.nom, e.loc].some(x => String(x || '').toLowerCase().includes(buscaEnv));
+  const vista = ENVIOS.map((e, ix) => ({ e, ix })).filter(x => ENV_FILTROS[filtroEnv](x.e) && busca(x.e))
+    .sort((a, b) => ['recibidos','recibidos5','conVideo'].includes(filtroEnv) ? (a.e.recibidoEn || 0) - (b.e.recibidoEn || 0)
+      : ['encamino','demorados'].includes(filtroEnv) ? (a.e.despachadoEn || 0) - (b.e.despachadoEn || 0)
+      : filtroEnv === 'despachado' ? (b.e.despachadoEn || 0) - (a.e.despachadoEn || 0) : 0);
   const conOpciones = !!(CFG && (CFG.elegir || CFG.kitPorRespuesta));
   const colOpciones = CFG && CFG.kitPorRespuesta ? 'Kit' : 'Colores';
   $('#tabla-envios').innerHTML = `
@@ -1265,15 +1292,15 @@ function pintarEnvios(){
         <th style="width:34px">${filtroEnv === 'listo' ? '<input type="checkbox" id="sel-todas" title="Seleccionar todas las pendientes">' : ''}</th><th>Creadora</th><th>Dirección</th>
         ${conOpciones ? `<th>${colOpciones}</th>` : ''}<th>Estado</th><th>Aviso</th>
       </tr></thead>
-      <tbody>${!vista.length ? `<tr><td colspan="7" class="n2" style="padding:24px;text-align:center">${filtroEnv === 'listo' ? 'No queda nadie por enviar 🎉' : 'Todavía no se despachó ningún kit.'}</td></tr>` : ''}${vista.map(({e, ix}) => `
+      <tbody>${!vista.length ? `<tr><td colspan="7" class="n2" style="padding:24px;text-align:center">${buscaEnv ? 'Nadie con esa búsqueda.' : filtroEnv === 'listo' ? 'No queda nadie por enviar 🎉' : filtroEnv === 'despachado' ? 'Todavía no se despachó ningún kit.' : 'No hay ninguna en este filtro.'}</td></tr>` : ''}${vista.map(({e, ix}) => `
         <tr>
           <td>${e.estado === 'listo' ? `<input type="checkbox" class="sel" data-i="${ix}">` : ''}</td>
           <td><b>${e.nom}</b><span class="n2">@${e.ig}</span>${e.sinBriefing ? '<span class="pill esp" style="margin-top:3px" title="Completó la ficha pero todavía no confirmó que leyó el briefing. El kit se puede mandar igual: lo lee en su app.">sin confirmar briefing</span>' : ''}${e.email?`<span class="n2">${e.email}</span>`:''}${e.tel?`<span class="n2">${e.tel}</span>`:''}</td>
           <td>${e.dir}<span class="n2">${e.loc} · CP ${e.cp}</span></td>
           ${conOpciones ? `<td>${e.tonos}</td>` : ''}
           <td>${e.estado !== 'despachado' ? '<span class="pill esp">Para enviar</span>'
-            : e.recibido ? `<span class="pill ok">Recibido${e.recibidoEn ? ' · ' + new Date(e.recibidoEn).toLocaleDateString('es-AR', {day:'numeric', month:'short'}) : ''}</span>`
-            : `<span class="pill">En camino${e.despachadoEn ? ' · salió ' + new Date(e.despachadoEn).toLocaleDateString('es-AR', {day:'numeric', month:'short'}) : ''}</span>`}${e.seguimiento && e.seguimiento.codigo ? `<a class="n2 verreel" href="${e.seguimiento.url}" target="_blank" rel="noopener" title="Seguir el envío">${e.seguimiento.correo} · ${e.seguimiento.tipo === 'guia' ? 'guía ' : e.seguimiento.correo === 'Andesmar' ? 'remito ' : ''}${e.seguimiento.codigo} ↗</a>` : ''}</td>
+            : e.recibido ? `<span class="pill ok">Recibido${e.recibidoEn ? ' · ' + new Date(e.recibidoEn).toLocaleDateString('es-AR', {day:'numeric', month:'short'}) + ' (hace ' + DIAS_DESDE(e.recibidoEn) + ' d)' : ''}</span>${ENV_FILTROS.conVideo(e) ? '<span class="pill ok" style="margin-top:3px">🎬 mandó el video</span>' : ''}`
+            : `<span class="pill ${DIAS_DESDE(e.despachadoEn) >= 7 ? 'no' : ''}">En camino${e.despachadoEn ? ' · salió ' + new Date(e.despachadoEn).toLocaleDateString('es-AR', {day:'numeric', month:'short'}) + ' (hace ' + DIAS_DESDE(e.despachadoEn) + ' d)' : ''}</span>`}${e.seguimiento && e.seguimiento.codigo ? `<a class="n2 verreel" href="${e.seguimiento.url}" target="_blank" rel="noopener" title="Seguir el envío">${e.seguimiento.correo} · ${e.seguimiento.tipo === 'guia' ? 'guía ' : e.seguimiento.correo === 'Andesmar' ? 'remito ' : ''}${e.seguimiento.codigo} ↗</a>` : ''}</td>
           <td class="dmacc">${e.estado !== 'despachado' ? '' : (e.avisoDespachoEn
             ? `<span class="pill ok" title="Le llegó el DM 'tu kit salió'">DM ✓</span>`
             : `<span class="pill no" title="No le llegó el DM: hace más de 24 h que no escribe al bot (Instagram lo bloquea)">sin DM</span>${e.tel ? `<a class="mini" target="_blank" href="${waLinkTexto(e.tel, mensajeDespachado(e.nom))}" title="Abre WhatsApp con el aviso armado">WhatsApp</a>` : ''}`)}${['admin','equipo','abril'].includes(ROL) ? `<select class="mini cambio-est" data-i="${ix}" title="Dar de baja o corregir el estado">
@@ -2467,7 +2494,7 @@ function aplicarRol(){
     pintarTodo();
   }
 })();
-const APP_VERSION = '2026-10-30-a';
+const APP_VERSION = '2026-10-30-b';
 </script>
 </body>
 </html>
