@@ -330,7 +330,14 @@ ul.limpia{margin:0;padding-left:1.05rem}
 .in-cifras{display:flex;gap:6px;flex-wrap:wrap;margin:8px 0 10px}
 .in-cifras span{background:rgba(var(--acento-rgb),.1);color:var(--rosa);border-radius:99px;padding:4px 10px;font-size:.75rem;font-weight:700}
 .in-cuerpo .gancho{font-size:1rem;font-weight:700;margin:0 0 8px}
-.in-cuerpo p{margin:0 0 8px;font-size:.9rem;line-height:1.5}.cy-banner span{margin-left:auto;font-weight:700;white-space:nowrap;font-size:.85rem}
+.in-cuerpo p{margin:0 0 8px;font-size:.9rem;line-height:1.5}
+.in-guion{margin:12px 0 0;padding:12px 0 0;border-top:1px solid var(--linea)}
+.in-guion h4{margin:0 0 8px;font-size:.95rem}
+.in-angs{display:flex;gap:6px;flex-wrap:wrap;margin:0 0 10px}
+.in-angs button{border:1px solid var(--sup2);background:#fff;border-radius:99px;padding:7px 12px;font:inherit;font-size:.8rem;font-weight:600;cursor:pointer;color:inherit}
+.in-angs button.on{background:var(--rosa);border-color:var(--rosa);color:#fff}
+.in-guion .ej-filas{display:grid;gap:10px}
+.in-guion .ej-f small{display:block;font-size:.8rem;line-height:1.4;opacity:.8}.cy-banner span{margin-left:auto;font-weight:700;white-space:nowrap;font-size:.85rem}
 ul.limpia li{margin-bottom:.5rem;font-size:.88rem;color:var(--tx2)}
 .brief h3{font-size:.96rem;font-weight:700;margin:1.5rem 0 .5rem;color:var(--tx)}
 .brief h3:first-child{margin-top:0}
@@ -1781,7 +1788,16 @@ function pintarCyberBanner(){
   if (vivo) $('#cy-banner-tx').textContent = `Cyber Monday: ${C.comision ? C.comision.pct + '% de comisión' : 'bonos especiales'}${C.bonoDoble ? ' y bono de $' + Number(C.bonoDoble.monto).toLocaleString('es-AR') : ''}.`;
 }
 /* 30/10 · Inspiración. CFG.inspiracion = { titulo, intro, videos: [{ url, marca, producto, angulo, vistas, ventas, gancho, porque, comoHacerlo }] } */
-let inFiltro = null, inVolverA = 'v-estado';
+let inFiltro = null, inVolverA = 'v-estado', inGuiones = null, inAng = {};
+// 30/10: los guiones de cada video (uno por ángulo) se piden aparte: pesan mucho para venir en la config
+async function cargarInspiGuiones(){
+  if (inGuiones || !((CFG.inspiracion || {}).videos || []).some(v => v.guiones)) return;
+  try {
+    const r = await fetch(API, { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({ accion:'inspiracion', marca: MARCA }) });
+    const j = await r.json();
+    if (j.ok) { inGuiones = j.guiones || {}; pintarInspi(); }
+  } catch (e) { console.warn('inspiracion', e); }
+}
 const escI = t => String(t == null ? '' : t).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 function pintarInspiBanner(){
   const hay = !!(CFG.inspiracion && (CFG.inspiracion.videos || []).length);
@@ -1806,14 +1822,31 @@ function pintarInspi(){
         ${v.gancho ? `<p class="gancho">«${escI(v.gancho)}»</p>` : ''}
         ${v.porque ? `<p><b>Por qué funcionó:</b> ${escI(v.porque)}</p>` : ''}
         ${v.comoHacerlo ? `<p><b>Cómo hacer tu versión:</b> ${escI(v.comoHacerlo)}</p>` : ''}
+        ${guionInspi(v, nomKit)}
       </div>
     </div>`).join('') || '<p class="lead">Todavía no hay videos para este ángulo.</p>';
 }
+function guionInspi(v, nomKit){
+  if (!v.guiones) return '';
+  const gs = inGuiones && inGuiones[v.url];
+  if (!gs) return `<div class="in-guion"><h4>Tu guion, escena por escena</h4><p class="lead">Cargando los guiones…</p></div>`;
+  const pref = [inAng[v.url], D && D.kit, inFiltro, v.angulo].find(a => a && gs.some(g => g.angulo === a));
+  const g = gs.find(x => x.angulo === pref) || gs[0];
+  const nom = a => String(nomKit(a)).replace(/^.*·\s*/, '');
+  return `<div class="in-guion"><h4>Tu guion, escena por escena</h4>
+    <p>Elegí tu ángulo. Grabalo tal cual, con tu tono.</p>
+    <div class="in-angs">${gs.map(x => `<button type="button" data-u="${escI(v.url)}" data-a="${escI(x.angulo)}" class="${x === g ? 'on' : ''}">${escI(nom(x.angulo))}</button>`).join('')}</div>
+    <p class="gancho">«${escI(g.hook)}»</p>
+    <div class="ej-filas">${(g.filas || []).map(f => `<div class="ej-f"><i>${escI(f.seg)} s</i><b>${escI(f.dice)}</b>${f.ve ? `<small>🎬 ${escI(f.ve)}</small>` : ''}${f.pantalla ? `<small>📝 ${escI(f.pantalla)}</small>` : ''}</div>`).join('')}</div>
+  </div>`;
+}
 document.addEventListener('click', ev => {
+  const a = ev.target.closest('.in-angs button');
+  if (a) { inAng[a.dataset.u] = a.dataset.a; const y = window.scrollY; pintarInspi(); window.scrollTo(0, y); return; }
   const f = ev.target.closest('#in-filtros button');
   if (f) { inFiltro = f.dataset.a; pintarInspi(); return; }
 });
-const abrirInspi = desde => { inVolverA = desde; pintarInspi(); ver('v-inspi'); };
+const abrirInspi = desde => { inVolverA = desde; pintarInspi(); ver('v-inspi'); cargarInspiGuiones(); };
 $('#in-banner').addEventListener('click', () => abrirInspi('v-estado'));
 $('#in-banner2').addEventListener('click', () => abrirInspi('v-brief'));
 $('#in-volver').addEventListener('click', () => { if (inVolverA === 'v-estado' && typeof pintarEstado === 'function') pintarEstado(); ver(inVolverA); });
@@ -2272,7 +2305,7 @@ function pintarMarca(){
   } catch { if (DEMO){ precargar(); traerBorrador(); } ver(DEMO ? 'v-ficha' : 'v-error'); }
 })();
 
-const APP_VERSION = '2026-10-30-d';
+const APP_VERSION = '2026-10-30-e';
 </script>
 </body>
 </html>
