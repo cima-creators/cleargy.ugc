@@ -849,7 +849,7 @@ const conCupos = () => !!(CFG && CFG.cupos);
 const SOLAPAS = {
   admin:  ['resumen','admision','envios','entregas','creadoras','pagos','cupos','wa'],
   equipo: ['resumen','admision','envios','entregas','creadoras','pagos','cupos','wa'],
-  marca:  ['admision','envios','entregas','creadoras','cupos'],   // 29/9: ve Envíos; despachar queda para logística
+  marca:  ['admision','envios','entregas','creadoras','pagos','cupos','wa'],   // 29/9: ve Envíos; despachar queda para logística · 3/11: + Pagos y WhatsApp
   envios: ['envios'],
   abril:  ['resumen','admision','envios','entregas','creadoras','cupos','wa'],   // 26/10: como el equipo, sin Pagos
   avisos: ['creadoras','wa'],   // 29/9: solo mandar el link a mano a las aceptadas (Jhose) · 1/10: y atender WhatsApp
@@ -2588,7 +2588,7 @@ function aplicarRol(){
     pintarTodo();
   }
 })();
-const APP_VERSION = '2026-11-03-a';
+const APP_VERSION = '2026-11-03-b';
 </script>
 </body>
 </html>
