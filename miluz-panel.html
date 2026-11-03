@@ -1768,7 +1768,12 @@ const pesos = n => '$' + n.toLocaleString('es-AR');
 
 function pintarResumen(){
   const m = MES, e = ECONOMIA;
-  const cumplimiento = m.recibidos ? Math.round(m.publicadas / m.recibidos * 100) : 0;
+  // 3/11: sobre las que ya recibieron y se les terminó el plazo (o cumplieron). El viejo (publicadas del mes / recibidos
+  // del mes) mezclaba tandas y daba 500%.
+  const cBase = m.cumplioBase != null ? m.cumplioBase : m.recibidos, cOk = m.cumplioBase != null ? m.cumplioOk : m.publicadas;
+  const cumplimiento = cBase ? Math.min(100, Math.round(cOk / cBase * 100)) : 0;
+  const vistas = n => n >= 1e6 ? (n / 1e6).toLocaleString('es-AR', { maximumFractionDigits: 1 }) + ' M'
+    : n >= 1e4 ? Math.round(n / 1e3).toLocaleString('es-AR') + ' mil' : num(Math.round(n));
   const comisiones = Math.round(m.facturado * e.comision / 100);
   const ticket = m.ventas ? Math.round(m.facturado / m.ventas) : 0;
 
@@ -1802,10 +1807,10 @@ function pintarResumen(){
         <i>meta ${num(e.metaMes)} · ${e.metaMes ? Math.round(m.publicadas / e.metaMes * 100) : 0}%</i>
         <span class="mini"><u style="width:${e.metaMes ? Math.min(100, m.publicadas / e.metaMes * 100) : 0}%"></u></span>
       </div>
-      <div class="kpi"><b>${(m.views / 1e6).toFixed(2)}M</b><span>views generadas</span>
-        <i>${m.publicadas ? num(Math.round(m.views / m.publicadas)) : 0} por collab</i></div>
-      <div class="kpi"><b>${cumplimiento}%</b><span>cumplimiento</span>
-        <i>${num(m.publicadas)} de ${num(m.recibidos)} que recibieron</i></div>
+      <div class="kpi"><b>${vistas(m.views)}</b><span>views del mes</span>
+        <i>${m.publicadas ? vistas(m.views / m.publicadas) + ' por collab' : 'sin collabs este mes'}${m.viewsTotal ? ' · ' + vistas(m.viewsTotal) + ' en total' : ''}</i></div>
+      <div class="kpi"><b>${cBase ? cumplimiento + '%' : '—'}</b><span>cumplimiento</span>
+        <i>${cBase ? `${num(cOk)} de ${num(cBase)} con el plazo cumplido` : 'todavía no se venció ningún plazo'}</i></div>
       <div class="kpi"><b>${num(m.ventas)}</b><span>ventas con código</span>
         <i>ticket ${pesos(ticket)}</i></div>
     </div>
@@ -2583,7 +2588,7 @@ function aplicarRol(){
     pintarTodo();
   }
 })();
-const APP_VERSION = '2026-10-30-g';
+const APP_VERSION = '2026-11-03-a';
 </script>
 </body>
 </html>
