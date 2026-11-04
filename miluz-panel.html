@@ -1448,11 +1448,14 @@ $('#btn-desp').onclick = () => {
 /* 30/10: filtros de Entregas (pendientes · para revisar · ajuste · falta publicar · publicadas · aprobadas · rechazadas) */
 const ENT_CERRADA = e => e.estado === 'cumplida' || e.estado === 'rechazada';
 const ENT_VERIF = e => e.estado === 'publicado' && e.collab && e.views >= 1000;
+// 4/11 (Nacho): con dos videos, sigue en "falta revisarlo" hasta que se aprueben los dos (si el 2 ya está cargado)
+const FALTA_APROBAR = e => !e.aprobadoVideoEn ||
+  (e.videos === 'dos' && !!((e.entregas || [])[1] || {}).drive && !e.entregas[1].aprobadoEn);
 const ENT_FILTROS = {
   pendientes:  e => !ENT_CERRADA(e),
-  revisar:     e => e.estado === 'entregado' && !(CREADORA_PUBLICA() && e.aprobadoVideoEn),
+  revisar:     e => e.estado === 'entregado' && !(CREADORA_PUBLICA() && !FALTA_APROBAR(e)),
   ajuste:      e => e.estado === 'cambios',
-  publicar:    e => e.estado === 'entregado' && CREADORA_PUBLICA() && !!e.aprobadoVideoEn,
+  publicar:    e => e.estado === 'entregado' && CREADORA_PUBLICA() && !FALTA_APROBAR(e),
   decidir:     e => e.estado === 'publicado' && !ENT_VERIF(e),
   verificadas: ENT_VERIF,
   // las veteranas (anotadas por el link especial, collab de antes del sistema) sin ningún video no son entregas
@@ -1635,7 +1638,7 @@ function tarjetaDrive(e){
       <div class="cuerpo">
         <h3>${e.nom} <span class="hand">@${e.ig}</span></h3>
         <div class="pills">
-          <span class="pill ${e.estado === 'cambios' ? 'esp' : (aprobado ? (Date.now() - e.aprobadoVideoEn >= 5 * 864e5 ? 'no' : 'ok') : '')}">${e.estado === 'cambios' ? 'Le pedimos un ajuste' : (aprobado ? `✓ Aprobado hace ${Math.floor((Date.now() - e.aprobadoVideoEn) / 864e5)} d · falta que publique` : 'Video entregado')}</span>
+          <span class="pill ${e.estado === 'cambios' ? 'esp' : (aprobado ? (Date.now() - e.aprobadoVideoEn >= 5 * 864e5 ? 'no' : 'ok') : '')}">${e.estado === 'cambios' ? 'Le pedimos un ajuste' : (aprobado && FALTA_APROBAR(e) ? '✓ Video 1 aprobado · falta revisar el 2' : aprobado ? `✓ Aprobado hace ${Math.floor((Date.now() - e.aprobadoVideoEn) / 864e5)} d · falta que publique` : 'Video entregado')}</span>
           ${hace !== null ? `<span class="pill">${hace === 0 ? 'hoy' : 'hace ' + hace + ' d'}</span>` : ''}
           ${e.codigo ? `<span class="pill">código ${e.codigo}</span>` : ''}
           <span class="pill">${e.nro===1?'primera collab':`collab n° ${e.nro}`}</span>
@@ -2603,7 +2606,7 @@ function aplicarRol(){
     pintarTodo();
   }
 })();
-const APP_VERSION = '2026-11-04-a';
+const APP_VERSION = '2026-11-04-b';
 </script>
 </body>
 </html>
