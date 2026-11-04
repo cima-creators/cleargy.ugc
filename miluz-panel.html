@@ -2120,6 +2120,20 @@ document.addEventListener('click', async e => {
     if (!DEMO) { abrirCreadora(b.dataset.id); cargar().then(() => typeof pintarTodo === 'function' && pintarTodo()).catch(() => {}); }
   } catch (err) { alert('No se pudo cambiar: ' + err.message); b.disabled = false; }
 });
+// 4/11 (Nacho): Vane, Luz y la marca le cambian el código a una creadora desde su ficha.
+// Se crea el cupón nuevo en la tienda; el viejo sigue andando y sus ventas se le siguen contando.
+const puedeCambiarCodigo = () => ['admin', 'equipo', 'marca'].includes(ROL) && !DEMO;
+async function cambiarCodigo(id, actual){
+  const nuevo = (prompt(`Código nuevo (solo letras y números). Ahora tiene ${actual}.\nEl ${actual} sigue andando: si ya lo pasó, esas ventas se le cuentan igual.`, '') || '').trim().toUpperCase().replace(/[^A-Z0-9]/g, '');
+  if (!nuevo || nuevo === actual) return;
+  if (nuevo.length < 4) { alert('Tiene que tener al menos 4 letras o números.'); return; }
+  try {
+    const r = await api('cambiar_codigo', { id, codigo: nuevo });
+    if (!r.ok) { alert('No se pudo: ' + (r.error || 'error')); return; }
+    const x = CREADORAS.find(z => z.id === id); if (x) x.codigo = r.codigo;
+    abrirCreadora(id);
+  } catch (e) { alert(e.message === 'clave' ? 'Tu clave no puede cambiar códigos.' : 'No se pudo cambiar el código.'); }
+}
 async function abrirCreadora(id){
   const dlg = $('#dlg-cre'), cu = $('#cre-cuerpo');
   cu.innerHTML = '<div class="wa-vacio">Cargando…</div>'; dlg.showModal();
@@ -2164,7 +2178,8 @@ async function abrirCreadora(id){
         ${fila('Kit', c.kit ? escH(nombresKits(c.kit, c.videos === 'dos' ? c.kit2 : null)) : null)}
         ${fila('Videos', c.videos === 'dos' ? 'Dos' : (c.kit ? 'Uno' : null))}
         ${fila('Colores', c.tonos && c.tonos.length ? escH(c.tonos.map(nombreKit).join(', ')) : null)}
-        ${fila('Código', c.codigo ? escH(c.codigo) : null)}
+        ${fila('Código', c.codigo ? escH(c.codigo) + (puedeCambiarCodigo() ? ` <button class="bsec" style="padding:2px 8px;font-size:12px;margin-left:6px" onclick="cambiarCodigo('${escH(c.id || id)}','${escH(c.codigo)}')">Cambiar</button>` : '') : null)}
+        ${c.codigoAnterior ? fila('Código anterior', escH(c.codigoAnterior) + ' <small style="color:var(--topo)">(sigue andando)</small>') : ''}
         ${c.seguimiento && c.seguimiento.codigo ? fila('Seguimiento', `<a href="${escH(c.seguimiento.url)}" target="_blank" rel="noopener">${escH(c.seguimiento.correo)} · ${escH(c.seguimiento.codigo)} ↗</a>`) : ''}
         ${resp}
       </div>
@@ -2588,7 +2603,7 @@ function aplicarRol(){
     pintarTodo();
   }
 })();
-const APP_VERSION = '2026-11-03-b';
+const APP_VERSION = '2026-11-04-a';
 </script>
 </body>
 </html>
