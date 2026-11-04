@@ -952,8 +952,6 @@ const BRAND_CONFIGS = {
     accent:'#1C6CA6', accentLight:'#4A93C9', bg:'#f4f7fa', surface2:'#e8eef4', border:'#d4dfe8',
     text:'#12212e', muted:'#64788a', shadow:'28,108,166', loginBg:'linear-gradient(135deg,#f4f7fa 0%,#e8eef4 50%,#dae5ee 100%)',
     creators:{
-      creadora1:{name:'Florencia',avatar:'FL',color:'#1C6CA6',phone:''},
-      creadora2:{name:'Victoria',avatar:'VI',color:'#2F84BE',phone:''},
       creadora3:{name:'Mariana',avatar:'MA',color:'#4A93C9',phone:''},
     }
   },
@@ -2529,11 +2527,15 @@ function _slotPorNombre(txt){
   const t=String(txt||"").trim().toLowerCase();
   if(!t) return "";
   if(/^creadora\d+$/.test(t)) return t;
-  const claves=Object.keys(NAMES||{});
-  let hit=claves.find(c=>String(NAMES[c]||"").toLowerCase()===t);
-  if(!hit) hit=claves.find(c=>String(NAMES[c]||"").toLowerCase().split(" ")[0]===t);
-  if(!hit) hit=claves.find(c=>String(NAMES[c]||"").toLowerCase().startsWith(t));
-  return hit||"";
+  // 3/11: primero entre las ACTIVAS. Antes devolvia el primer slot con ese nombre aunque estuviera
+  // de baja: en Nala habia dos Florencia y los 15 guiones nuevos de Abril se fueron a la cuenta vieja,
+  // asi que la creadora entraba a la app y no los veia.
+  const todas=Object.keys(NAMES||{});
+  const activas=todas.filter(c=>!((BRAND.creators||{})[c]||{}).inactive);
+  const buscar=cs=>cs.find(c=>String(NAMES[c]||"").toLowerCase()===t)
+    || cs.find(c=>String(NAMES[c]||"").toLowerCase().split(" ")[0]===t)
+    || cs.find(c=>String(NAMES[c]||"").toLowerCase().startsWith(t));
+  return buscar(activas) || buscar(todas) || "";
 }
 
 function cargarGuiones(){
@@ -4044,7 +4046,7 @@ loadConfig();
 <!-- Auto-actualización: GitHub Pages cachea el HTML y los celulares lo retienen mucho más.
      Esto compara la versión publicada con la que está corriendo y refresca sola. -->
 <script>
-const APP_VERSION = '2026-11-02-pagalamarca';
+const APP_VERSION = '2026-11-03-florencia';
 (function(){
   var CLAVE='cima_ver_reload';
   function hayAlguienEscribiendo(){
