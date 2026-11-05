@@ -2540,19 +2540,25 @@ function pintarPagos(){
 
 // 5/11: el id del pago va en `idem` (en `clave` pisaba la clave del panel y el pago no se guardaba).
 // Solo se marca pagado en pantalla si el servidor lo registró.
-async function registrarPago(c){
+async function registrarPago(c, monto, sinAviso){
   const saldo = c.ganado - c.pagado;
-  if (saldo <= 0) return true;
-  if (DEMO || !c.id) { c.pagado += saldo; return true; }
-  const r = await api('pagar', { id: c.id, monto: saldo, idem: `${c.ig}_${new Date().toISOString().slice(0,10)}_${Math.round(c.pagado)}`, concepto: 'liquidación' });
-  if (r.ok || r.duplicado) { c.pagado += saldo; return true; }
+  if (monto === undefined) monto = saldo;
+  if (saldo <= 0 || monto <= 0) return true;
+  if (DEMO || !c.id) { c.pagado += monto; return true; }
+  const r = await api('pagar', { id: c.id, monto, sinAviso: !!sinAviso, idem: `${c.ig}_${new Date().toISOString().slice(0,10)}_${Math.round(c.pagado)}`, concepto: 'liquidación' });
+  if (r.ok || r.duplicado) { c.pagado += monto; return true; }
   return false;
 }
+// 5/11: se registra lo que de verdad se transfirió (las ventas siguen sumando después de pagar) y se puede cargar un pago viejo sin avisar.
 window.pagarSaldo = async ig => {
   const c = PLATA.find(x => x.ig === ig);
   const saldo = c.ganado - c.pagado;
-  if (!confirm(`¿Registrar el pago de ${pesos(saldo)} a ${c.nom}?\nHacé la transferencia ANTES de confirmar.`)) return;
-  try { if (!(await registrarPago(c))) alert('No se pudo registrar. Reintentá.'); }
+  const txt = prompt(`¿Cuánto le transferiste a ${c.nom}?\nSaldo hoy: ${pesos(saldo)}. Si le pagaste otro monto, cambialo.\nHacé la transferencia ANTES de confirmar.`, Math.round(saldo));
+  if (txt === null) return;
+  const monto = Number(String(txt).replace(/[^\d]/g, ''));
+  if (!monto || monto > Math.ceil(saldo)) { alert(`El monto tiene que ser mayor a 0 y no pasar el saldo (${pesos(saldo)}).`); return; }
+  const avisar = confirm(`¿Le avisamos por WhatsApp que le depositaron ${pesos(monto)}?\nAceptar = le llega el aviso.\nCancelar = se registra sin avisar (si ya le pagaste hace días).`);
+  try { if (!(await registrarPago(c, Math.min(monto, saldo), !avisar))) alert('No se pudo registrar. Reintentá.'); }
   catch (e) { alert('No se pudo registrar. Reintentá.'); }
   pintarPagos();
 };
@@ -2724,7 +2730,7 @@ function aplicarRol(){
     pintarTodo();
   }
 })();
-const APP_VERSION = '2026-11-05-c';
+const APP_VERSION = '2026-11-05-d';
 </script>
 </body>
 </html>
