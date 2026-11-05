@@ -575,6 +575,7 @@ dialog.dlg.dlg-cre{max-width:680px}
     <p class="sub">Los bonos se acreditan solos todos los días a las 9. Acá solo transferís y marcás pagado.</p>
     <div class="barrasup">
       <button class="bsec pri" id="btn-csv-pag">Exportar para transferir</button>
+      <button class="bsec" id="btn-pag-todas" title="Ya les transferiste a todas: deja el saldo de cada una en 0. Las ventas nuevas suman desde acá.">Pagué a todas</button>
       <button class="bsec" id="btn-pedir-alias" hidden title="Les manda un WhatsApp a las que tienen saldo y no cargaron su alias">Pedir alias por WhatsApp</button>
     </div>
     <div id="tabla-pagos"></div>
@@ -2514,18 +2515,38 @@ function pintarPagos(){
   setN('n-pag', deben.length);
 }
 
-window.pagarSaldo = ig => {
+// 5/11: el id del pago va en `idem` (en `clave` pisaba la clave del panel y el pago no se guardaba).
+// Solo se marca pagado en pantalla si el servidor lo registró.
+async function registrarPago(c){
+  const saldo = c.ganado - c.pagado;
+  if (saldo <= 0) return true;
+  if (DEMO || !c.id) { c.pagado += saldo; return true; }
+  const r = await api('pagar', { id: c.id, monto: saldo, idem: `${c.ig}_${new Date().toISOString().slice(0,10)}_${Math.round(c.pagado)}`, concepto: 'liquidación' });
+  if (r.ok || r.duplicado) { c.pagado += saldo; return true; }
+  return false;
+}
+window.pagarSaldo = async ig => {
   const c = PLATA.find(x => x.ig === ig);
   const saldo = c.ganado - c.pagado;
   if (!confirm(`¿Registrar el pago de ${pesos(saldo)} a ${c.nom}?\nHacé la transferencia ANTES de confirmar.`)) return;
-  if (!DEMO && c.id){
-    // clave determinística: si el click se repite, el backend no duplica
-    api('pagar', { id: c.id, monto: saldo, clave: `${c.ig}_${new Date().toISOString().slice(0,10)}`, concepto: 'liquidación' })
-      .then(r => { if (r.duplicado) alert('Ese pago ya estaba registrado.'); })
-      .catch(() => alert('No se pudo registrar. Reintentá.'));
-  }
-  c.pagado += saldo;
+  try { if (!(await registrarPago(c))) alert('No se pudo registrar. Reintentá.'); }
+  catch (e) { alert('No se pudo registrar. Reintentá.'); }
   pintarPagos();
+};
+$('#btn-pag-todas').onclick = async () => {
+  const deben = PLATA.filter(c => c.ganado - c.pagado > 0);
+  if (!deben.length) { alert('No hay saldos pendientes.'); return; }
+  const tot = deben.reduce((a, c) => a + c.ganado - c.pagado, 0);
+  if (!confirm(`¿Registrar como pagadas a las ${deben.length} creadoras con saldo (${pesos(tot)} en total)?\nHacé las transferencias ANTES de confirmar. A cada una le llega el aviso de que le depositaron.`)) return;
+  const b = $('#btn-pag-todas'); b.disabled = true;
+  let mal = 0;
+  for (const [i, c] of deben.entries()) {
+    b.textContent = `Registrando ${i + 1} de ${deben.length}…`;
+    try { if (!(await registrarPago(c))) mal++; } catch (e) { mal++; }
+  }
+  b.disabled = false; b.textContent = 'Pagué a todas';
+  pintarPagos();
+  alert(mal ? `Listo, pero ${mal} no se pudieron registrar. Volvé a tocar el botón.` : `Listo: ${deben.length} pagos registrados.`);
 };
 
 $('#btn-csv-pag').onclick = () => {
@@ -2606,7 +2627,7 @@ function aplicarRol(){
     pintarTodo();
   }
 })();
-const APP_VERSION = '2026-11-04-b';
+const APP_VERSION = '2026-11-05-a';
 </script>
 </body>
 </html>
