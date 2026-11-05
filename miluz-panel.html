@@ -2498,8 +2498,11 @@ $('#btn-pedir-alias') && ($('#btn-pedir-alias').onclick = async () => {
 });
 function pintarPagos(){
   if ($('#btn-pedir-alias')) $('#btn-pedir-alias').hidden = ROL !== 'admin';
+  // 5/11 (Nacho): «alias nuevo» = lo cargó hoy (desde las 0 h de Argentina). Esas van arriba: se les paga ya.
+  const hoy0 = new Date(new Date(Date.now() - 3 * 36e5).toISOString().slice(0, 10) + 'T03:00:00Z').getTime();
+  const aliasHoy = c => !!(c.cobro && c.cobro.alias && c.cobro.en >= hoy0);
   const filas = PLATA.map(c => ({...c, saldo: c.ganado - c.pagado}))
-    .sort((x,y) => y.saldo - x.saldo);
+    .sort((x,y) => ((y.saldo > 0 && aliasHoy(y)) - (x.saldo > 0 && aliasHoy(x))) || y.saldo - x.saldo);
   const deben = filas.filter(c => c.saldo > 0);
   const tot = filas.reduce((t,c) => ({g:t.g+c.ganado, p:t.p+c.pagado, s:t.s+c.saldo}), {g:0,p:0,s:0});
 
@@ -2518,7 +2521,7 @@ function pintarPagos(){
           <td class="num">${c.pagado ? pesos(c.pagado) : '—'}</td>
           <td class="num"><b style="color:${c.saldo > 0 ? 'var(--no)' : 'var(--ok)'}">${pesos(c.saldo)}</b></td>
           <td>${c.cobro && c.cobro.alias
-            ? `<b style="font-family:monospace">${escH(c.cobro.alias)}</b><span class="n2">${escH(c.cobro.titular || '')}</span><button class="mini" onclick="navigator.clipboard.writeText('${escH(c.cobro.alias)}');this.textContent='copiado ✓'">copiar</button>`
+            ? `${aliasHoy(c) ? `<span class="pill ok" style="display:inline-block;margin-bottom:3px">🆕 alias nuevo · hoy ${new Date(c.cobro.en).toLocaleTimeString('es-AR', {hour:'2-digit', minute:'2-digit'})}</span><br>` : (c.cobro.en ? `<span class="n2">ya lo tenía · desde el ${new Date(c.cobro.en).toLocaleDateString('es-AR')}</span>` : '')}<b style="font-family:monospace">${escH(c.cobro.alias)}</b><span class="n2">${escH(c.cobro.titular || '')}</span><button class="mini" onclick="navigator.clipboard.writeText('${escH(c.cobro.alias)}');this.textContent='copiado ✓'">copiar</button>`
             : `<span class="pill no">sin alias</span>${c.aliasPedidoEn ? `<span class="n2">pedido ${new Date(c.aliasPedidoEn).toLocaleDateString('es-AR')}</span>` : ''}`}</td>
           <td>${c.saldo > 0
             ? `<button class="bsec" onclick="pagarSaldo('${c.ig}')">Pagué</button>`
@@ -2721,7 +2724,7 @@ function aplicarRol(){
     pintarTodo();
   }
 })();
-const APP_VERSION = '2026-11-05-b';
+const APP_VERSION = '2026-11-05-c';
 </script>
 </body>
 </html>
