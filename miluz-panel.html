@@ -634,6 +634,7 @@ dialog.dlg.dlg-cre{max-width:680px}
       <button class="bsec fent" data-f="verificadas" title="Publicadas, con la collab aceptada y más de 1.000 views">✓ Subido a IG y chequeado · aprobar <span class="n" data-ne="verificadas">0</span></button>
       <button class="bsec fent" data-f="aprobadas" title="Collabs terminadas y aprobadas">✅ Terminadas · subidas a IG y aprobadas <span class="n" data-ne="aprobadas">0</span></button>
       <button class="bsec fent" data-f="rechazadas" title="Videos que se rechazaron">✕ Video rechazado <span class="n" data-ne="rechazadas">0</span></button>
+      <select id="prod-ent" title="Filtrar por producto" hidden style="padding:9px 12px;border:1px solid var(--linea,#ddd);border-radius:999px;font:inherit;font-size:.85rem;background:#fff"></select>
       <select id="orden-ent" title="Ordenar" style="padding:9px 12px;border:1px solid var(--linea,#ddd);border-radius:999px;font:inherit;font-size:.85rem;background:#fff">
         <option value="fecha">Más recientes</option>
         <option value="views">Más views</option>
@@ -926,6 +927,7 @@ async function cargar(){
     ventas: f.ventas || 0, facturado: f.facturado || 0, veterana: !!(f.veterana || f.importada),
     // si el reel principal no está, el de la 2ª entrega o el de Cyber (para la galería de Aprobadas)
     urlAlt: (((f.entregas || []).concat(f.cyberVideos || []).find(x => x && x.reel && x.reel.url) || {}).reel || {}).url || '',
+    cyberVideos: Array.isArray(f.cyberVideos) ? f.cyberVideos.filter(Boolean) : [],
   }));
 
   CREADORAS = !todas ? [] : todas.fichas.map(f => ({
@@ -1483,8 +1485,9 @@ const ENT_FILTROS = {
   aprobadas:   e => e.estado === 'cumplida' && !(e.veterana && !embedVideo(e) && !(e.url && e.url !== '#') && !e.drive && !e.tiktok),
   rechazadas:  e => e.estado === 'rechazada',
 };
-let filtroEnt = 'pendientes', buscaEnt = '', ordenEnt = 'fecha';
+let filtroEnt = 'pendientes', buscaEnt = '', ordenEnt = 'fecha', prodEnt = '';
 document.addEventListener('change', ev => {
+  if (ev.target.id === 'prod-ent') { prodEnt = ev.target.value; verEnt = 24; pintarEntregas(); return; }
   if (ev.target.id !== 'orden-ent') return;
   ordenEnt = ev.target.value; verEnt = 24; pintarEntregas();
 });
@@ -1534,6 +1537,37 @@ function embedVideo(e){
   if (dr) return `https://drive.google.com/file/d/${dr[1]}/preview`;
   return null;
 }
+/* 5/11: Aprobadas por producto (Valca), para encontrar los videos de un producto al subir una campaña.
+   Las marcas con kits ven una tarjeta por VIDEO: el de dos videos aparece en cada uno de sus productos. */
+const hayProductos = () => ENTREGAS.some(e => e.kit);
+function videosDeAprobada(e){
+  if (!hayProductos()) return [e];
+  const vws = x => ((x.reel && x.reel.views) || 0) + ((x.tiktok && x.tiktok.views) || 0);
+  const ent = (e.entregas || []).filter(Boolean);
+  const extra = (x, n, prodVideo, etiqueta) => ({ ...e, url: (x.reel && x.reel.url) || '#', urlAlt: '', tiktok: (x.tiktok && x.tiktok.url) || '',
+    drive: x.drive || '', views: vws(x), prodVideo, etiqueta, nVideo: n });
+  const lista = ent.length && (ent[0].reel || ent[0].drive)
+    ? ent.filter(x => x.reel || x.drive).map((x, i) => extra(x, i + 1, x.kit || (i ? e.kit2 : e.kit) || '_sin', nombreKit(x.kit || (i ? e.kit2 : e.kit))))
+    : [{ ...e, prodVideo: e.kit || '_sin', etiqueta: e.kit ? nombreKit(e.kit) : '', nVideo: 1 }];
+  (e.cyberVideos || []).filter(x => x.reel || x.drive).forEach((x, i) => lista.push(extra(x, lista.length + 1, '_cyber', `Cyber ${i + 1}`)));
+  // la que solo subió Cyber no tiene video principal: no va una tarjeta vacía
+  const conLink = lista.filter(v => (v.url && v.url !== '#') || v.drive || v.tiktok);
+  const res = conLink.length ? conLink : lista;
+  res.forEach((v, i) => { v.variosVideos = res.length > 1; v.nVideo = i + 1; });
+  return res;
+}
+function pintarFiltroProd(videos){
+  const sel = $('#prod-ent'); if (!sel) return;
+  const n = {}; videos.forEach(v => { n[v.prodVideo] = (n[v.prodVideo] || 0) + 1; });
+  const ops = (CFG.opciones || []).filter(o => n[o.id]).map(o => [o.id, o.nom]);
+  Object.keys(n).filter(k => !k.startsWith('_') && !ops.some(o => o[0] === k)).forEach(k => ops.push([k, nombreKit(k)]));
+  if (n._cyber) ops.push(['_cyber', 'Cyber']);
+  if (n._sin) ops.push(['_sin', 'Sin producto cargado']);
+  if (prodEnt && !n[prodEnt]) prodEnt = '';
+  sel.innerHTML = `<option value="">Todos los productos (${videos.length})</option>` +
+    ops.map(([id, nom]) => `<option value="${id}"${id === prodEnt ? ' selected' : ''}>${nom} (${n[id]})</option>`).join('');
+  sel.hidden = false;
+}
 function tarjetaVideo(e){
   const src = embedVideo(e);
   const fecha = e.cerradaEn ? new Date(e.cerradaEn).toLocaleDateString('es-AR', { day: 'numeric', month: 'numeric' }) : '';
@@ -1546,11 +1580,11 @@ function tarjetaVideo(e){
         <div class="pills">
           <span class="pill ok">✓ En IG y aprobada${fecha ? ' el ' + fecha : ''}</span>
           <span class="pill">${(e.views || 0).toLocaleString('es-AR')} views</span>
-          ${e.ventas ? `<span class="pill ok">${e.ventas} venta${e.ventas === 1 ? '' : 's'}${e.facturado ? ' · $' + Math.round(e.facturado).toLocaleString('es-AR') : ''}</span>` : ''}
+          ${e.ventas ? `<span class="pill ok">${e.ventas} venta${e.ventas === 1 ? '' : 's'}${e.facturado ? ' · $' + Math.round(e.facturado).toLocaleString('es-AR') : ''}${e.variosVideos ? ' entre sus videos' : ''}</span>` : ''}
           ${e.url && e.url !== '#' ? `<a class="pill" href="${e.url}" target="_blank" rel="noopener" style="text-decoration:none">Instagram ↗</a>` : ''}
           ${e.tiktok ? `<a class="pill" href="${e.tiktok}" target="_blank" rel="noopener" style="text-decoration:none">TikTok ↗</a>` : ''}
           ${e.drive ? `<a class="pill" href="${e.drive}" target="_blank" rel="noopener" style="text-decoration:none">📁 Drive</a>` : ''}
-          ${e.kit ? `<span class="pill">kit ${nombresKits(e.kit, e.videos === 'dos' ? e.kit2 : null)}</span>` : ''}
+          ${e.etiqueta ? `<span class="pill"><b>${e.etiqueta}</b>${e.variosVideos ? ` · video ${e.nVideo}` : ''}</span>` : e.kit ? `<span class="pill">kit ${nombresKits(e.kit, e.videos === 'dos' ? e.kit2 : null)}</span>` : ''}
           ${e.codigo ? `<span class="pill">código ${e.codigo}</span>` : ''}
         </div>
       </div>
@@ -1575,10 +1609,17 @@ function pintarEntregas(){
   const oEnt = $('#orden-ent'); if (oEnt) oEnt.hidden = filtroEnt === 'pendientes';
   const bPub = document.querySelector('.fent[data-f="publicar"]'); if (bPub) bPub.classList.toggle('oculto', !CREADORA_PUBLICA());
   const busca = e => !buscaEnt || (e.ig || '').toLowerCase().includes(buscaEnt) || (e.nom || '').toLowerCase().includes(buscaEnt);
+  const sProd = $('#prod-ent'); if (sProd) sProd.hidden = true;
   if (filtroEnt !== 'pendientes') {
     const fecha = x => x.cerradaEn || x.entregadoEn || 0;
     const tieneVideo = x => !!embedVideo(x) || !!(x.url && x.url !== '#');
-    const lista = ENTREGAS.filter(ENT_FILTROS[filtroEnt]).filter(busca)
+    let base = ENTREGAS.filter(ENT_FILTROS[filtroEnt]).filter(busca);
+    if (filtroEnt === 'aprobadas' && hayProductos()) {
+      base = base.flatMap(videosDeAprobada);
+      pintarFiltroProd(base);
+      if (prodEnt) base = base.filter(v => v.prodVideo === prodEnt);
+    }
+    const lista = base
       .sort((a, b) => (tieneVideo(b) - tieneVideo(a))   // las importadas sin link, al final
         || (ordenEnt === 'fecha' ? fecha(b) - fecha(a) : ((b[ordenEnt] || 0) - (a[ordenEnt] || 0)) || fecha(b) - fecha(a)));
     $('#lista-entregas').innerHTML = !lista.length
@@ -2730,7 +2771,7 @@ function aplicarRol(){
     pintarTodo();
   }
 })();
-const APP_VERSION = '2026-11-05-d';
+const APP_VERSION = '2026-11-05-e';
 </script>
 </body>
 </html>
