@@ -235,6 +235,23 @@ dialog.pop::backdrop{background:rgba(42,35,29,.45)}
 .r2-slot img{width:100%;height:100%;object-fit:cover}
 .r2-slot input{display:none}
 .r2-err{color:#b3412f;font-size:.88rem;margin:8px 0 0}
+/* ── lanzamiento (Valca Talones, 5/11) ── */
+.lz-req{border:2px solid #EF4A65;border-radius:14px;padding:12px 14px;margin:12px 0;font-size:.92rem;line-height:1.45}
+.lz-haces{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin:8px 0 12px}
+.lz-haces div{background:var(--sup2);border-radius:10px;padding:9px 10px;font-size:.85rem;line-height:1.35}
+.lz-gana{background:#0B3F46;color:#fff;border-radius:14px;padding:12px 14px;font-size:.92rem;line-height:1.4;margin-bottom:12px}
+.lz-q{margin:14px 0 6px;font-weight:700}
+.lz-ops{display:flex;flex-direction:column;gap:6px}
+.lz-ops label{display:flex;align-items:center;gap:10px;border:1px solid var(--linea);border-radius:12px;padding:10px 12px;font-size:.92rem;cursor:pointer}
+.lz-ops label:has(input:checked){border:2px solid var(--acento)}
+.lz-sec{display:flex;gap:10px;align-items:flex-start;font-size:.85rem;line-height:1.4;margin:14px 0 4px;color:var(--tx2)}
+.lz-secreto{background:#FDE7EB;color:#8E1D31;border-radius:12px;padding:10px 12px;font-size:.85rem;line-height:1.4;margin-top:12px}
+.lz-dia{display:flex;gap:10px;align-items:flex-start;padding:10px 0;border-top:1px solid var(--linea);font-size:.9rem;line-height:1.4}
+.lz-dia input{margin-top:3px;width:20px;height:20px;flex-shrink:0}
+.lz-dia.hecho span{color:var(--tx3)}
+.lz-ent{border-top:1px solid var(--linea);padding:12px 0 4px}
+.lz-ent input[type=url]{width:100%;box-sizing:border-box;padding:10px 12px;border:1px solid var(--linea);border-radius:10px;font:inherit;margin:6px 0}
+.lz-broll ol{margin:8px 0 0;padding-left:20px;font-size:.88rem;line-height:1.5}
 
 /* ── paleta ── */
 .tonos{display:grid;grid-template-columns:repeat(4,1fr);gap:11px;margin-top:6px}
@@ -687,6 +704,9 @@ details.ej summary{cursor:pointer;font-size:.9rem;color:var(--tx)}
       <small style="margin-bottom:14px" id="collab-txt">En Instagram: Notificaciones → «te invitó a colaborar» → Aceptar. Cuando lo hagas, tocá acá y lo verificamos al toque.</small>
       <button class="btn" id="btn-collab">Ya la acepté</button>
     </div>
+
+    <!-- 5/11: lanzamiento (Valca Talones) — postulación con foto, semana de registro y entregas -->
+    <div class="card oculto" id="bloque-lanz"></div>
 
     <!-- 27/10: segunda collab (Mi Luz) — foto de las uñas de hoy + colores; la decide el panel -->
     <div class="card oculto" id="bloque-ronda2"></div>
@@ -1354,6 +1374,98 @@ function pintarRonda2(e){
       if (j.creadora) D = Object.assign(D, j.creadora); else D.ronda2 = { estado: 'pedida', tonos: R2.tonos };
       pintarRonda2(e);
     } catch (x) { ev.target.disabled = false; ev.target.textContent = 'Quiero mi segunda collab'; mal('No se pudo enviar. Probá de nuevo en un ratito.'); }
+  });
+}
+
+/* 5/11: lanzamiento (Valca Talones). Circuito aparte de la collab: postulación con foto + 3 preguntas →
+   el panel elige → semana de registro (un tilde por día) → links de entrega. Se ve cuando la marca lo abre
+   (CFG.lanzamiento.abierta), o con ?ver=<id> para probar, o si ya se postuló. */
+const LZ = { fotos: [], resp: {}, sec: false };
+const ESTADOS_LZ = ['invitada','ficha_completa','briefing_ok','enviado','recibido','cambios','entregado','publicado','cumplida','vencida','sin_respuesta'];
+function pintarLanz(e){
+  const b = $('#bloque-lanz'), L = CFG.lanzamiento, l = D && D.lanz;
+  const ver = !!(L && D && (l || (ESTADOS_LZ.includes(e) && (L.abierta || QS.get('ver') === L.id))));
+  b.classList.toggle('oculto', !ver);
+  if (!ver) return;
+  const secreto = `<div class="lz-secreto">${L.secreto}</div>`;
+  if (l && l.estado === 'postulada'){
+    b.innerHTML = `<h2>${L.titulo} 💛</h2><small>Recibimos tu postulación. Elegimos ${L.cupo} creadoras entre todas y te avisamos por WhatsApp si quedaste.</small>${secreto}`;
+    return;
+  }
+  if (l && l.estado === 'descartada'){
+    b.innerHTML = `<h2>${L.titulo}</h2><small>Esta vez no quedaste para el lanzamiento. Gracias por postularte 💛 Te avisamos en la próxima.</small>`;
+    return;
+  }
+  if (l && l.estado === 'no_apta'){
+    b.innerHTML = `<h2>${L.titulo}</h2><small>${L.noApta}</small>`;
+    return;
+  }
+  if (l && l.estado === 'elegida'){
+    const dias = l.dias || {}, links = l.links || {}, hechos = Object.keys(dias).length;
+    b.innerHTML = `<h2>¡Quedaste en ${L.titulo}! 🎉</h2>
+      <small>Tu semana: tildá cada día cuando lo grabes. ${hechos} de ${L.semana.length} hechos.</small>
+      ${L.semana.map((t, i) => `<label class="lz-dia ${dias[i+1] ? 'hecho' : ''}"><input type="checkbox" data-dia="${i+1}" ${dias[i+1] ? 'checked' : ''}><span><b>Día ${i+1}.</b> ${t}</span></label>`).join('')}
+      <h3 style="margin:18px 0 4px">Lo que entregás</h3>
+      ${L.entregas.map(x => `<div class="lz-ent"><b>${x.t}</b>${links[x.id] ? ' <span style="color:var(--acento)">✓ cargado</span>' : ''}<small style="display:block;margin-top:2px">${x.a}</small>
+        <input type="url" data-ent="${x.id}" placeholder="Pegá el link acá" value="${links[x.id] ? links[x.id].url.replace(/"/g, '&quot;') : ''}">
+        <button class="btn sec" data-guardar="${x.id}" style="width:100%">${links[x.id] ? 'Cambiar el link' : 'Guardar el link'}</button></div>`).join('')}
+      <details class="lz-broll" style="margin-top:14px"><summary><b>Las 20 tomas de b-roll</b></summary><ol>${L.broll.map(t => `<li>${t}</li>`).join('')}</ol></details>
+      ${L.gpt ? `<a class="btn sec" href="${L.gpt}" target="_blank" rel="noopener" style="display:block;text-align:center;text-decoration:none;margin-top:12px">Armá tus guiones con el GPT</a>` : ''}
+      <div class="lz-gana" style="margin-top:14px">${L.ganas}.${D.codigo ? ` Tu código: <b>${D.codigo}</b>.` : ''}${l.aprobadoEn ? '<br><b>✓ Videos aprobados: ya se te acreditó el pago fijo.</b>' : ''}</div>
+      ${secreto}<p class="r2-err oculto" id="lz-err"></p>`;
+    const err = t => { const x = b.querySelector('#lz-err'); x.textContent = t; x.classList.remove('oculto'); };
+    b.querySelectorAll('[data-dia]').forEach(inp => inp.addEventListener('change', async () => {
+      const n = Number(inp.dataset.dia);
+      try {
+        if (DEMO){ if (inp.checked) dias[n] = Date.now(); else delete dias[n]; D.lanz.dias = dias; }
+        else { const j = await api('lanz_dia', { n, no: !inp.checked }); if (!j.ok) throw 0; if (j.creadora) D = Object.assign(D, j.creadora); }
+        pintarLanz(e);
+      } catch { inp.checked = !inp.checked; err('No se pudo guardar. Probá de nuevo.'); }
+    }));
+    b.querySelectorAll('[data-guardar]').forEach(bt => bt.addEventListener('click', async () => {
+      const tipo = bt.dataset.guardar, url = b.querySelector(`[data-ent="${tipo}"]`).value.trim();
+      if (!/^https?:\/\/\S+$/i.test(url)) return err('Pegá un link que empiece con https://');
+      bt.disabled = true; bt.textContent = 'Guardando…';
+      try {
+        if (DEMO){ D.lanz.links = Object.assign(D.lanz.links || {}, { [tipo]: { url, en: Date.now() } }); }
+        else { const j = await api('lanz_link', { tipo, url }); if (!j.ok) throw new Error(j.error || ''); if (j.creadora) D = Object.assign(D, j.creadora); }
+        pintarLanz(e);
+      } catch (x) { bt.disabled = false; bt.textContent = 'Guardar el link'; err(/instagram/.test(x.message) ? 'Ese no es un link de un reel de Instagram.' : 'No se pudo guardar. Probá de nuevo.'); }
+    }));
+    return;
+  }
+  // postulación
+  b.innerHTML = `<h2>${L.titulo} · postulate ✨</h2>
+    <small>${L.intro}</small>
+    <div class="lz-req"><b>Para postularte tenés que…</b><br>${L.requisito}</div>
+    <div class="lz-haces">${(L.haces || []).map(t => `<div>${t}</div>`).join('')}</div>
+    <div class="lz-gana">${L.ganas}</div>
+    <p style="margin:12px 0 0;font-weight:700">${L.fotos.q}</p><small>${L.fotos.a}</small>
+    <div class="r2-fotos">${[0,1].map(n => `<label class="r2-slot" data-n="${n}">${LZ.fotos[n] ? `<img src="${LZ.fotos[n]}" alt="Foto ${n+1}">` : (n === 0 ? '📷 De atrás' : '📷 De cerca')}<input type="file" accept="image/*"></label>`).join('')}</div>
+    ${L.preguntas.map(p => `<p class="lz-q">${p.q}</p><div class="lz-ops">${p.ops.map(([id, t]) => `<label><input type="radio" name="lz-${p.id}" value="${id}" ${LZ.resp[p.id] === id ? 'checked' : ''}> ${t}</label>`).join('')}</div>`).join('')}
+    <label class="lz-sec"><input type="checkbox" id="lz-secreto" ${LZ.sec ? 'checked' : ''}> ${L.secreto}</label>
+    <button class="btn" id="lz-enviar" style="margin-top:14px">Enviar mi postulación</button>
+    <p class="r2-err oculto" id="lz-err"></p>`;
+  b.querySelectorAll('.r2-slot input').forEach(inp => inp.addEventListener('change', async ev => {
+    const fl = ev.target.files && ev.target.files[0]; if (!fl) return;
+    const n = Number(ev.target.closest('.r2-slot').dataset.n);
+    try { LZ.fotos[n] = await achicarR2(fl); } catch { alert('No pudimos leer esa foto. Probá con otra.'); }
+    pintarLanz(e);
+  }));
+  b.querySelectorAll('.lz-ops input').forEach(inp => inp.addEventListener('change', () => { LZ.resp[inp.name.slice(3)] = inp.value; }));
+  b.querySelector('#lz-secreto').addEventListener('change', ev => { LZ.sec = ev.target.checked; });
+  b.querySelector('#lz-enviar').addEventListener('click', async ev => {
+    const err = b.querySelector('#lz-err'), fotos = LZ.fotos.filter(Boolean);
+    const mal = t => { err.textContent = t; err.classList.remove('oculto'); };
+    if (!fotos.length) return mal('Subí al menos una foto de tus talones.');
+    if (L.preguntas.some(p => !LZ.resp[p.id])) return mal('Respondé las preguntas.');
+    if (!LZ.sec) return mal('Tildá que entendés que es secreto hasta la fecha.');
+    ev.target.disabled = true; ev.target.textContent = 'Enviando…';
+    try {
+      if (DEMO){ const no = L.preguntas.some(p => (p.noApta || []).includes(LZ.resp[p.id])); D.lanz = { estado: no ? 'no_apta' : 'postulada', resp: LZ.resp, en: Date.now() }; }
+      else { const j = await api('lanz_postular', { fotos, resp: LZ.resp }); if (!j.ok) throw new Error(j.error || 'error'); if (j.creadora) D = Object.assign(D, j.creadora); }
+      pintarLanz(e);
+    } catch (x) { ev.target.disabled = false; ev.target.textContent = 'Enviar mi postulación'; mal('No se pudo enviar. Probá de nuevo en un ratito.'); }
   });
 }
 
@@ -2152,6 +2264,8 @@ function pintarEstado(){
   }
   pintarCollab(e);
   pintarRonda2(e);
+  pintarLanz(e);
+  if (CFG.lanzamiento && QS.get('ver') === CFG.lanzamiento.id && !window._lzScroll){ window._lzScroll = 1; setTimeout(() => $('#bloque-lanz').scrollIntoView({ behavior: 'smooth', block: 'start' }), 300); }
   $('#bloque-recorrido').classList.toggle('oculto', !!CFG.sinKit);   // CIMA Club: no hay kit que seguir
   // cuando publica la creadora, el bloque sigue abierto en `publicado` (ajustar links, cargar el 2º video)
   // `vencida` sigue pudiendo entregar: el plazo la apura, no la deja afuera
@@ -2306,7 +2420,7 @@ function pintarMarca(){
   } catch { if (DEMO){ precargar(); traerBorrador(); } ver(DEMO ? 'v-ficha' : 'v-error'); }
 })();
 
-const APP_VERSION = '2026-10-30-f';
+const APP_VERSION = '2026-11-05-a';
 </script>
 </body>
 </html>

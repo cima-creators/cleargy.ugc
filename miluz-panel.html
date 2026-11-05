@@ -218,6 +218,17 @@ td .n2{color:var(--topo);font-size:.78rem;display:block;margin-top:2px}
 
 /* ── segunda collab (27/10) ── */
 .r2-caja{background:#fff;border:1px solid var(--linea);border-radius:18px;padding:16px;margin:0 0 22px}
+/* 5/11: lanzamiento (Valca Talones) */
+.lz-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:14px}
+.lz-card{background:#fff;border:1px solid var(--linea);border-radius:16px;overflow:hidden;display:flex;flex-direction:column}
+.lz-fotos{display:grid;grid-template-columns:1fr 1fr;gap:2px;background:#eee;min-height:150px}
+.lz-fotos img{width:100%;height:170px;object-fit:cover;cursor:zoom-in}
+.lz-fotos img.grande{position:fixed;inset:5vh 5vw;width:90vw;height:90vh;object-fit:contain;background:rgba(0,0,0,.85);z-index:50;cursor:zoom-out}
+.lz-fotos .vacia{display:grid;place-items:center;color:var(--topo);font-size:.85rem;grid-column:1/-1}
+.lz-cu{padding:12px;display:flex;flex-direction:column;gap:5px;font-size:.88rem}
+.lz-bt{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:6px}
+.lz-barra{height:8px;border-radius:4px;background:var(--linea);overflow:hidden;width:220px}
+.lz-barra i{display:block;height:100%;background:var(--acento)}
 .r2-caja h2{font-size:1.05rem;margin:0 0 4px}
 .r2-it{display:grid;grid-template-columns:auto 1fr auto;gap:14px;align-items:center;padding:12px 0;border-top:1px solid var(--linea)}
 .r2-it:first-of-type{border-top:0}
@@ -522,6 +533,7 @@ dialog.dlg.dlg-cre{max-width:680px}
   <button data-t="pagos"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><rect x="2.5" y="6" width="19" height="12.5" rx="2.5"/><path d="M2.5 10h19"/><path d="M6 15h4"/></svg><span class="et">Pagos</span><span class="n" id="n-pag">0</span></button>
   <button data-t="wa" hidden><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M20.5 11.6a8.5 8.5 0 0 1-12.6 7.4L3.5 20.5l1.6-4.2A8.5 8.5 0 1 1 20.5 11.6z"/><path d="M9 9.5c.3 1.9 1.8 3.9 4.4 5 .6.2 1.3-.2 1.6-.8l.3-.6-1.7-.9-.7.7c-.9-.4-1.8-1.3-2.2-2.2l.7-.7-.9-1.7-.6.3c-.6.3-1 .9-.9 1.6z"/></svg><span class="et">WhatsApp</span><span class="n" id="n-wa">0</span></button>
   <button data-t="cupos" hidden><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M4 19V9M10 19V5M16 19v-8M22 19H2"/></svg><span class="et">Cupos</span></button>
+  <button data-t="lanz" hidden><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2.8l2.7 5.9 6.4.7-4.8 4.4 1.3 6.4L12 17l-5.6 3.2 1.3-6.4L2.9 9.4l6.4-.7z"/></svg><span class="et" id="lz-et">Lanzamiento</span><span class="n" id="n-lz">0</span></button>
   <button class="plegar" id="plegar">
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M15 18l-6-6 6-6"/></svg>
     <span class="et">Plegar</span>
@@ -650,6 +662,14 @@ dialog.dlg.dlg-cre{max-width:680px}
       <div class="wa-lista" id="wa-lista"></div>
       <div class="wa-hilo" id="wa-hilo"><div class="wa-vacio">Elegí una conversación.</div></div>
     </div>
+  </section>
+
+  <!-- ══ LANZAMIENTO (5/11, Valca Talones) ══ -->
+  <section id="t-lanz" class="oculto">
+    <h1 id="lz-tit">Lanzamiento</h1>
+    <p class="sub" id="lz-sub"></p>
+    <div class="barrasup" id="lz-barra"></div>
+    <div id="lz-cuerpo"></div>
   </section>
 
   <!-- ══ CUPOS (solo marcas con cupos por kit / ángulo) ══ -->
@@ -848,14 +868,14 @@ const conCupos = () => !!(CFG && CFG.cupos);
    plata, pagos ni envíos; logística solo envíos. "cupos" solo existe en
    las marcas con cupos configurados (se quita en aplicarRol si no). */
 const SOLAPAS = {
-  admin:  ['resumen','admision','envios','entregas','creadoras','pagos','cupos','wa'],
-  equipo: ['resumen','admision','envios','entregas','creadoras','pagos','cupos','wa'],
-  marca:  ['admision','envios','entregas','creadoras','pagos','cupos','wa'],   // 29/9: ve Envíos; despachar queda para logística · 3/11: + Pagos y WhatsApp
+  admin:  ['resumen','admision','envios','entregas','creadoras','pagos','cupos','wa','lanz'],
+  equipo: ['resumen','admision','envios','entregas','creadoras','pagos','cupos','wa','lanz'],
+  marca:  ['admision','envios','entregas','creadoras','pagos','cupos','wa','lanz'],   // 29/9: ve Envíos; despachar queda para logística · 3/11: + Pagos y WhatsApp
   envios: ['envios'],
-  abril:  ['resumen','admision','envios','entregas','creadoras','cupos','wa'],   // 26/10: como el equipo, sin Pagos
+  abril:  ['resumen','admision','envios','entregas','creadoras','cupos','wa','lanz'],   // 26/10: como el equipo, sin Pagos
   avisos: ['creadoras','wa'],   // 29/9: solo mandar el link a mano a las aceptadas (Jhose) · 1/10: y atender WhatsApp
 };
-const puede = t => (SOLAPAS[ROL] || SOLAPAS.equipo).includes(t) && (t !== 'cupos' || conCupos());
+const puede = t => (SOLAPAS[ROL] || SOLAPAS.equipo).includes(t) && (t !== 'cupos' || conCupos()) && (t !== 'lanz' || !!(CFG && CFG.lanzamiento));
 
 /* Trae todo del backend y lo vuelca en las mismas estructuras que
    usan las pantallas — así el render no distingue demo de real. */
@@ -1037,7 +1057,7 @@ let i = 0, total = APLICANTES.length;
 const $ = s => document.querySelector(s);
 
 /* ── navegación entre pestañas ── */
-const VISTAS = ['resumen','admision','envios','entregas','creadoras','pagos','cupos','wa'];
+const VISTAS = ['resumen','admision','envios','entregas','creadoras','pagos','cupos','wa','lanz'];
 function irA(t){
   document.querySelectorAll('.lat button[data-t]').forEach(x => x.classList.toggle('on', x.dataset.t === t));
   VISTAS.forEach(v => $('#t-'+v).classList.toggle('oculto', v !== t));
@@ -2582,6 +2602,79 @@ function pintarRonda2(){
   }));
 }
 
+/* 5/11: lanzamiento (Valca Talones) — postuladas con su foto → Elegir / Descartar (tope = cupo) → seguimiento de las elegidas */
+let LZL = [], LZF = 'postulada', LZFOTOS = {};
+async function cargarLanz(){
+  const L = CFG.lanzamiento;
+  $('#lz-et').textContent = L.titulo; $('#lz-tit').textContent = L.titulo;
+  if (DEMO) LZL = LZL.length ? LZL : [{ id: 'd1', ig: 'sofi.ugc', nombre: 'Sofía Demo', provincia: 'Mendoza', estado: 'postulada', resp: { estado: 'grietas', hace: 'anio', semana: 'si' }, en: Date.now(), nFotos: 0, dias: {}, links: {}, views: 12000, cumplidas: 1 }];
+  else { try { LZL = (await api('lanz_cola')).fichas || []; } catch { LZL = []; } }
+  pintarLanz();
+}
+function pintarLanz(){
+  const L = CFG.lanzamiento, el = LZL.filter(f => f.estado === 'elegida'), cuenta = e => LZL.filter(f => f.estado === e).length;
+  const etq = (pid, v) => { const p = L.preguntas.find(x => x.id === pid); const o = p && p.ops.find(x => x[0] === v); return o ? o[1] : v; };
+  setN('n-lz', cuenta('postulada'));
+  $('#lz-sub').innerHTML = `${L.abierta ? '<b style="color:var(--ok)">Postulación abierta</b>' : '<b style="color:var(--no)">Postulación cerrada</b> (las creadoras no la ven todavía)'} · <b>${el.length} de ${L.cupo}</b> elegidas <span class="lz-barra" style="display:inline-block;vertical-align:middle;margin-left:8px"><i style="width:${Math.min(100, el.length / L.cupo * 100)}%"></i></span>`;
+  const fil = [['postulada','Por revisar'],['elegida','Elegidas'],['descartada','Descartadas'],['no_apta','No aptas']];
+  $('#lz-barra').innerHTML = fil.map(([k, t]) => `<button class="bsec ${LZF === k ? 'pri' : ''}" data-lzf="${k}">${t} · ${cuenta(k)}</button>`).join('') +
+    `<button class="bsec" id="lz-csv" ${el.length ? '' : 'disabled'}>Exportar elegidas (envío)</button>`;
+  $('#lz-barra').querySelectorAll('[data-lzf]').forEach(b => b.onclick = () => { LZF = b.dataset.lzf; pintarLanz(); });
+  const csv = $('#lz-csv'); if (csv) csv.onclick = () => bajarCsv(L.id + '-elegidas', [['Nombre','Instagram','Teléfono','Dirección','Despachado','Días','Videos','Tomas','Reel']]
+    .concat(el.map(f => [f.nombre, '@' + f.ig, f.tel, f.direccion, f.despachadoEn ? 'sí' : 'no', Object.keys(f.dias || {}).length + '/' + L.semana.length,
+      (f.links.videos || {}).url || '', (f.links.broll || {}).url || '', (f.links.reel || {}).url || ''])));
+  const lista = LZL.filter(f => f.estado === LZF);
+  if (!lista.length){ $('#lz-cuerpo').innerHTML = `<div class="vacio"><b class="serif" style="font-size:1.1rem">Nada por acá todavía</b></div>`; return; }
+  const lleno = el.length >= L.cupo;
+  $('#lz-cuerpo').innerHTML = `<div class="lz-grid">${lista.map(f => {
+    const dias = Object.keys(f.dias || {}).length, lk = f.links || {};
+    const link = (k, t) => lk[k] ? `<a href="${escH(lk[k].url)}" target="_blank" rel="noopener">${t} ↗</a>` : `<span class="n2">${t}: falta</span>`;
+    return `<div class="lz-card" data-id="${f.id}">
+      <div class="lz-fotos" data-fotos="${f.id}">${LZFOTOS[f.id] ? LZFOTOS[f.id].map(u => `<img src="${u}" alt="Talones de @${escH(f.ig)}" onclick="this.classList.toggle('grande')">`).join('') : `<span class="vacia">${f.nFotos ? 'Cargando fotos…' : 'sin foto'}</span>`}</div>
+      <div class="lz-cu">
+        <div><b>${escH(f.nombre || '—')}</b> · <a href="https://instagram.com/${escH(f.ig)}" target="_blank" rel="noopener">@${escH(f.ig)}</a></div>
+        <div class="n2">${escH(f.provincia || '')}${f.views ? ' · ' + Number(f.views).toLocaleString('es-AR') + ' views' : ''}${f.cumplidas ? ' · ' + f.cumplidas + ' collab' + (f.cumplidas > 1 ? 's' : '') : ''}</div>
+        <div><b>${escH(etq('estado', f.resp.estado))}</b> · ${escH(etq('hace', f.resp.hace))}</div>
+        <div class="n2">7 días: ${escH(etq('semana', f.resp.semana))}</div>
+        ${f.estado === 'elegida' ? `
+          <div>Semana: <b>${dias} de ${L.semana.length}</b> días</div>
+          <div style="display:flex;gap:10px;flex-wrap:wrap">${link('videos','3 videos')} ${link('broll','20 tomas')} ${link('reel','Reel')}</div>
+          <div class="n2">${f.direccion ? escH(f.direccion) : '⚠ sin dirección cargada'}</div>
+          <label style="display:flex;gap:8px;align-items:center"><input type="checkbox" data-lzdesp ${f.despachadoEn ? 'checked' : ''}> Producto despachado</label>
+          <div class="lz-bt">
+            ${f.tel ? `<a class="bsec" style="text-align:center;text-decoration:none" target="_blank" rel="noopener" href="${waLinkTexto(f.tel, `¡Hola ${String(f.nombre || '').split(' ')[0]}! Quedaste en ${L.titulo} 🎉 Antes de abrir el producto grabá tus talones como están hoy: es tu día 1. Tu semana y la lista de tomas están en tu app: ${f.link}`)}">WhatsApp</a>` : '<span></span>'}
+            ${f.aprobadoEn ? '<span class="pill ok" style="text-align:center">✓ Aprobada y paga</span>' : `<button class="bsec pri" data-lzok ${lk.videos ? '' : 'disabled title="Todavía no cargó los videos"'}>Aprobar y pagar $${Number(L.pagoFijo).toLocaleString('es-AR')}</button>`}
+          </div>` : ''}
+        ${f.estado === 'postulada' ? `<div class="lz-bt"><button class="bsec pri" data-lzsi ${lleno ? 'disabled title="Ya están las ' + L.cupo + '"' : ''}>Elegir</button><button class="bsec" data-lzno>Descartar</button></div>` : ''}
+        ${f.estado === 'descartada' ? `<div class="lz-bt"><button class="bsec" data-lzsi ${lleno ? 'disabled' : ''}>Elegir igual</button><span></span></div>` : ''}
+      </div></div>`; }).join('')}</div>`;
+  const card = b => LZL.find(f => f.id === b.closest('.lz-card').dataset.id);
+  $('#lz-cuerpo').querySelectorAll('[data-lzsi],[data-lzno]').forEach(b => b.onclick = async () => {
+    const f = card(b), si = b.hasAttribute('data-lzsi'); b.disabled = true;
+    try { if (!DEMO){ const r = await api('lanz_decidir', { id: f.id, si }); if (!r.ok) throw new Error(r.error || ''); } f.estado = si ? 'elegida' : 'descartada'; pintarLanz(); }
+    catch (e) { alert(e.message || 'No se pudo guardar.'); b.disabled = false; }
+  });
+  $('#lz-cuerpo').querySelectorAll('[data-lzdesp]').forEach(b => b.onchange = async () => {
+    const f = card(b);
+    try { if (!DEMO) await api('lanz_despachado', { id: f.id, si: b.checked }); f.despachadoEn = b.checked ? Date.now() : null; }
+    catch { b.checked = !b.checked; alert('No se pudo guardar.'); }
+  });
+  $('#lz-cuerpo').querySelectorAll('[data-lzok]').forEach(b => b.onclick = async () => {
+    const f = card(b);
+    if (!confirm(`¿Aprobás los 3 videos de @${f.ig}? Se le acreditan $${Number(L.pagoFijo).toLocaleString('es-AR')} en Pagos.`)) return;
+    b.disabled = true;
+    try { if (!DEMO){ const r = await api('lanz_aprobar', { id: f.id }); if (!r.ok) throw 0; } f.aprobadoEn = Date.now(); pintarLanz(); if (puede('pagos')) cargar().then(pintarPagos).catch(() => {}); }
+    catch { alert('No se pudo aprobar.'); b.disabled = false; }
+  });
+  // fotos de a una, solo las de las tarjetas visibles (pesan)
+  (async () => { for (const f of lista) {
+    if (LZFOTOS[f.id] || !f.nFotos || DEMO) continue;
+    try { LZFOTOS[f.id] = (await api('lanz_fotos', { id: f.id })).fotos || []; } catch { LZFOTOS[f.id] = []; }
+    const c = document.querySelector(`[data-fotos="${f.id}"]`);
+    if (c) c.innerHTML = LZFOTOS[f.id].map(u => `<img src="${u}" alt="Talones de @${escH(f.ig)}" onclick="this.classList.toggle('grande')">`).join('') || '<span class="vacia">sin foto</span>';
+  } })();
+}
+
 function pintarTodo(){
   if (puede('admision')) pintarRonda2();
   if (puede('resumen')) pintarResumen();
@@ -2592,6 +2685,7 @@ function pintarTodo(){
   if (puede('pagos')) pintarPagos();
   if (puede('cupos')) pintarCupos();
   if (puede('wa')) cargarWa();
+  if (puede('lanz')) cargarLanz();
 }
 
 /* esconde las solapas que el rol no puede ver y abre la primera permitida */
@@ -2627,7 +2721,7 @@ function aplicarRol(){
     pintarTodo();
   }
 })();
-const APP_VERSION = '2026-11-05-a';
+const APP_VERSION = '2026-11-05-b';
 </script>
 </body>
 </html>
