@@ -644,7 +644,7 @@ details.ej summary{cursor:pointer;font-size:.9rem;color:var(--tx)}
 
   <!-- ══ 3 · ESTADO ══ -->
   <section id="v-estado" class="oculto">
-    <button class="cy-banner oculto" id="cy-banner">⚡ <b id="cy-banner-tx">Cyber Monday</b><span>Ver cómo →</span></button>
+    <button class="cy-banner oculto" id="lz-banner">👣 <b>Valca Talones: buscamos 30 creadoras. $50.000 fijos + 15%.</b><span>Postulate →</span></button>
     <button class="cy-banner in-banner oculto" id="in-banner">💡 <b>Inspiración: videos virales que vendieron millones. Copiá la idea.</b><span>Ver →</span></button>
 
     <div class="hero" id="hero">
@@ -683,8 +683,8 @@ details.ej summary{cursor:pointer;font-size:.9rem;color:var(--tx)}
       <a class="acceso" id="a-grupo" target="_blank" rel="noopener"><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M9 17a8 8 0 1 0-5.3-2L3 21l5.4-1.6A8 8 0 0 0 9 17z"/><circle cx="9" cy="12" r=".9" fill="currentColor" stroke="none"/><circle cx="12.5" cy="12" r=".9" fill="currentColor" stroke="none"/></svg><span>Comunidad</span></a>
       <a class="acceso" id="a-llamada"><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="6.5" width="12.5" height="11" rx="2.5"/><path d="M15.5 11l5-2.6v7.2l-5-2.6z"/></svg><span>Llamada</span></a>
       <a class="acceso" id="a-bonos"><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2.8l2.7 5.9 6.4.7-4.8 4.4 1.3 6.4L12 17l-5.6 3.2 1.3-6.4L2.9 9.4l6.4-.7z"/></svg><span>Bonos</span></a>
-      <a class="acceso" id="a-cyber" style="display:none"><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M13 2.5 4.5 13.5H11l-1 8 8.5-11H12z"/></svg><span>Cyber</span></a>
       <a class="acceso" id="a-codigo"><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M4 10.5h16V19a1.5 1.5 0 0 1-1.5 1.5h-13A1.5 1.5 0 0 1 4 19z"/><rect x="2.8" y="7" width="18.4" height="3.5" rx="1.2"/><path d="M12 7v13.5"/><path d="M12 7c-2 0-3.4-.8-3.4-2.1S9.9 3.2 12 7zM12 7c2 0 3.4-.8 3.4-2.1S14.1 3.2 12 7z"/></svg><span>Código</span></a>
+      <a class="acceso" id="a-talones" style="display:none"><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3l1.9 5.1L19 10l-5.1 1.9L12 17l-1.9-5.1L5 10l5.1-1.9z"/><path d="M19 16v4M17 18h4"/></svg><span>Talones</span></a>
     </div>
 
     <!-- ya me llegó -->
@@ -1388,6 +1388,8 @@ function pintarLanz(e){
   const b = $('#bloque-lanz'), L = CFG.lanzamiento, l = D && D.lanz;
   const ver = !!(L && D && (l || (ESTADOS_LZ.includes(e) && (L.abierta || QS.get('ver') === L.id))));
   b.classList.toggle('oculto', !ver);
+  $('#a-talones').style.display = ver ? '' : 'none'; ajustarAccesos();
+  $('#lz-banner').classList.toggle('oculto', !ver || !!l);
   if (!ver) return;
   const secreto = `<div class="lz-secreto">${L.secreto}</div>`;
   if (l && l.estado === 'postulada'){
@@ -1888,19 +1890,12 @@ function copiarCodigo(){
   navigator.clipboard ? navigator.clipboard.writeText(t).then(fin).catch(fin) : fin();
 }
 $('#codigo').addEventListener('click', copiarCodigo);
-$('#a-cyber').addEventListener('click', () => { pintarCyber(); ver('v-cyber'); });
-$('#cy-banner').addEventListener('click', () => { pintarCyber(); ver('v-cyber'); });
+['#a-talones', '#lz-banner'].forEach(q => $(q).addEventListener('click', () => $('#bloque-lanz').scrollIntoView({ behavior: 'smooth', block: 'start' })));
 /* 21/10: ¿estamos dentro de la fecha? (en Argentina) */
 const hoyAR = () => new Date(Date.now() - 3 * 36e5).toISOString().slice(0, 10);
 const enVentana = v => !!(v && v.desde && v.hasta && hoyAR() >= v.desde && hoyAR() <= v.hasta);
 const subeCyber = C => !!(C && enVentana({ desde: C.subidaDesde || C.desde, hasta: C.hasta }));   // 27/10: la carga de videos de Cyber arranca antes que la comisión
 const pctHoy = () => { const c = CFG.cyber && CFG.cyber.comision; return enVentana(c) ? c.pct : (CFG.plata || {}).comision; };
-function pintarCyberBanner(){
-  const C = CFG.cyber, b = $('#cy-banner'); if (!b) return;
-  const vivo = !!(C && (subeCyber(C) || DEMO));   // en la demo se ve siempre, para mostrarlo
-  b.classList.toggle('oculto', !vivo);
-  if (vivo) $('#cy-banner-tx').textContent = `Cyber Monday: ${C.comision ? C.comision.pct + '% de comisión' : 'bonos especiales'}${C.bonoDoble ? ' y bono de $' + Number(C.bonoDoble.monto).toLocaleString('es-AR') : ''}.`;
-}
 /* 30/10 · Inspiración. CFG.inspiracion = { titulo, intro, videos: [{ url, marca, producto, angulo, vistas, ventas, gancho, porque, comoHacerlo }] } */
 let inFiltro = null, inVolverA = 'v-estado', inGuiones = null, inAng = {};
 // 30/10: los guiones de cada video (uno por ángulo) se piden aparte: pesan mucho para venir en la config
@@ -2175,7 +2170,7 @@ function pintarPlata(){
       `<br>Este mes llevás <b>${n} ${n === 1 ? 'venta' : 'ventas'}</b>${actual ? ` (vas al <b>${actual.pct}%</b>)` : ''}` +
       (!n ? `: con la primera arrancás en el <b>${E[0].pct}%</b>.` : sig ? `: te ${sig.desde - n === 1 ? 'falta 1' : 'faltan ' + (sig.desde - n)} para el <b>${sig.pct}%</b>.` : '. Llegaste al máximo 🔥');
   }
-  pintarCyberBanner(); pintarInspiBanner();
+  pintarInspiBanner();
   // sin tienda no hay código ni comisión por ventas: se esconde el bono
   $('#bono-comision-pct').closest('.bono').classList.toggle('oculto', !CFG.cupon && !(B.escala || []).length);   // 27/10: con escala se muestra aunque la tienda no esté conectada
 }
@@ -2403,7 +2398,6 @@ function pintarMarca(){
     $('#a-llamada').addEventListener('click', () => $('#pop-llamada').showModal());
   } else $('#a-llamada').style.display = 'none';
   if (!CFG.cupon) $('#a-codigo').style.display = 'none';
-  if (CFG.cyber) $('#a-cyber').style.display = '';
   ajustarAccesos();
   $('#ll-cerrar').addEventListener('click', () => $('#pop-llamada').close());
 
@@ -2422,7 +2416,7 @@ function pintarMarca(){
   } catch { if (DEMO){ precargar(); traerBorrador(); } ver(DEMO ? 'v-ficha' : 'v-error'); }
 })();
 
-const APP_VERSION = '2026-11-06-a';
+const APP_VERSION = '2026-11-06-b';
 </script>
 </body>
 </html>
