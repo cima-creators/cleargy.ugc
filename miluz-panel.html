@@ -320,6 +320,9 @@ td .n2{color:var(--topo);font-size:.78rem;display:block;margin-top:2px}
 .eco-datos b{display:block;font-size:1.02rem;font-weight:700;font-variant-numeric:tabular-nums}
 .eco-datos span{display:block;font-size:.76rem;color:var(--topo);margin-top:2px}
 .economia .comparo{margin:14px 0 0}
+.dos-col{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:14px;margin-bottom:14px}
+.dos-col>.bloque{margin:0}
+@media (max-width:860px){.dos-col{grid-template-columns:minmax(0,1fr)}}
 .cupos-scroll{max-height:440px;overflow:auto;overscroll-behavior:contain;border:1px solid var(--linea);border-radius:18px;margin-bottom:14px}
 .cupos-scroll .bloque{border:0;margin:0;border-radius:0}
 
@@ -1939,7 +1942,10 @@ function pintarResumen(){
       </div>
     </div>
 
+    <div class="dos-col">
     <div class="bloque economia">
+      <h2>Economics de la campaña</h2>
+      <p class="n2">Toda la campaña, no solo este mes.</p>
       ${listo ? `
         <div class="eco-datos">
           <div><b>${num(kitsCampana)}</b><span>kits enviados</span></div>
@@ -1970,6 +1976,7 @@ function pintarResumen(){
       ${m.sinRecibir ? `<div class="alerta urg"><b>${m.sinRecibir}</b> despachadas hace más de 10 días y nunca confirmaron que llegó — revisar con el correo</div>` : ''}
       ${m.vencenEn2Dias ? `<div class="alerta med"><b>${m.vencenEn2Dias}</b> vencen en 2 días — el recordatorio ya salió solo</div>` : ''}
       <div class="alerta info"><b>${m.enTransito}</b> kits en camino</div>
+    </div>
     </div>
 
     <div class="bloque">
@@ -2849,7 +2856,7 @@ function aplicarRol(){
     pintarTodo();
   }
 })();
-const APP_VERSION = '2026-11-07-b';
+const APP_VERSION = '2026-11-07-c';
 </script>
 </body>
 </html>
