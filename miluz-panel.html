@@ -311,6 +311,15 @@ td .n2{color:var(--topo);font-size:.78rem;display:block;margin-top:2px}
 .rank .qui .rk-vids{display:flex;flex-wrap:wrap;gap:4px 12px;margin-top:3px;font-size:.78rem}
 .rk-mas{display:block;width:100%;margin-top:10px;border:1px solid var(--linea);background:#fff;border-radius:10px;font:inherit;font-size:.82rem;font-weight:600;color:var(--tinta2);padding:9px;cursor:pointer}
 .kpi.prim{border-color:var(--acento);background:var(--acento-suave)}
+.inf{display:inline-grid;place-items:center;width:15px;height:15px;margin-left:5px;padding:0;vertical-align:1px;border:1px solid currentColor;border-radius:50%;background:none;color:var(--topo);font:700 10px/1 Georgia,serif;font-style:italic;letter-spacing:0;text-transform:none;cursor:help;opacity:.85}
+.estrella .inf{color:#fff}
+#inf-pop{display:none;position:fixed;z-index:9999;max-width:280px;padding:9px 12px;border-radius:10px;background:var(--tinta);color:#fff;font-size:.8rem;line-height:1.45;box-shadow:0 6px 20px rgba(0,0,0,.2);pointer-events:none}
+.estrella.doble{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:14px 28px}
+.estrella .ars2{font-size:.86rem;font-weight:600;color:rgba(255,255,255,.88);margin-top:3px}
+.eco-datos{display:grid;grid-template-columns:repeat(auto-fit,minmax(120px,1fr));gap:12px 16px}
+.eco-datos b{display:block;font-size:1.02rem;font-weight:700;font-variant-numeric:tabular-nums}
+.eco-datos span{display:block;font-size:.76rem;color:var(--topo);margin-top:2px}
+.economia .comparo{margin:14px 0 0}
 .cupos-scroll{max-height:440px;overflow:auto;overscroll-behavior:contain;border:1px solid var(--linea);border-radius:18px;margin-bottom:14px}
 .cupos-scroll .bloque{border:0;margin:0;border-radius:0}
 
@@ -1064,8 +1073,8 @@ const RANKING = [
   {nom:'Delfina Arce',  ig:'delfi.arce', views:8100,  ventas:9,  monto:180000}
 ];
 /* 7/11: ranking de views y ventas del Resumen. Se reemplaza con rs.rankings; lo de acá es para el demo. */
-let RANKS = RANKING.map((r, ix) => ({ id:'demo'+ix, nombre:r.nom, ig:r.ig, enMes:true, viewsMes:r.views, views:r.views + 2000, ventas:r.ventas + 3, ventasMes:r.ventas,
-  facturado:r.monto + 60000, facturadoMes:r.monto, videos:[{ url:'https://www.instagram.com/reel/demo'+ix, views:r.views, tipo:'Reel' }, { url:'https://www.instagram.com/reel/democ'+ix, views:2000, tipo:'Cyber', cyber:true }] }));
+let RANKS = RANKING.map((r, ix) => ({ id:'demo'+ix, nombre:r.nom, ig:r.ig, viewsMes:r.views, views:r.views + 2000, ventas:r.ventas + 3, ventasMes:r.ventas,
+  facturado:r.monto + 60000, facturadoMes:r.monto, videos:[{ url:'https://www.instagram.com/reel/demo'+ix, views:r.views, tipo:'Reel', mes:true }, { url:'https://www.instagram.com/reel/democ'+ix, views:2000, tipo:'Cyber', cyber:true }] }));
 
 let i = 0, total = APLICANTES.length;
 const $ = s => document.querySelector(s);
@@ -1843,6 +1852,24 @@ window.resolverEntrega = (ix, ok) => {
 const num = n => n.toLocaleString('es-AR');
 const pesos = n => '$' + n.toLocaleString('es-AR');
 
+/* 7/11: el "cosito" de info: un solo globo flotante, para que no lo corte el overflow de los bloques. */
+const inf = t => `<button type="button" class="inf" aria-label="${escH(t)}" data-i="${escH(t)}">i</button>`;
+(() => {
+  const pop = document.createElement('div'); pop.id = 'inf-pop'; document.body.appendChild(pop);
+  const abrir = b => {
+    pop.textContent = b.dataset.i; pop.style.display = 'block';
+    const r = b.getBoundingClientRect(), w = pop.offsetWidth, h = pop.offsetHeight;
+    pop.style.left = Math.min(innerWidth - w - 10, Math.max(10, r.left + r.width / 2 - w / 2)) + 'px';
+    pop.style.top = (r.top - h - 8 < 8 ? r.bottom + 8 : r.top - h - 8) + 'px';
+  };
+  const cerrar = () => { pop.style.display = 'none'; };
+  const deInf = e => e.target.closest && e.target.closest('.inf');
+  document.addEventListener('mouseover', e => { const b = deInf(e); if (b) abrir(b); });
+  document.addEventListener('mouseout', e => { if (deInf(e)) cerrar(); });
+  document.addEventListener('click', e => { const b = deInf(e); b ? abrir(b) : cerrar(); });
+  addEventListener('scroll', cerrar, true);
+})();
+
 function pintarResumen(){
   const m = MES, e = ECONOMIA;
   // 3/11: sobre las que ya recibieron y se les terminó el plazo (o cumplieron). El viejo (publicadas del mes / recibidos
@@ -1864,14 +1891,16 @@ function pintarResumen(){
   const bonos = (m.bonosTotal ?? m.bonosPagados ?? 0) * e.bonoViral;
   const costoTotal = listo ? (e.pautaMes * (m.mesesCampana || 1) * e.dolar) + (porKit * kitsCampana) + bonos : 0;
   const cpmBono = e.bonoViral / e.bonoUmbral * 1000 / e.dolar;
+  const videosPosteados = m.videosPosteados ?? m.publicadas;
   const porVideo = listo && videosHechos ? costoTotal / videosHechos : null;
-  const porVideoUsd = porVideo ? porVideo / e.dolar : null;
-  const cpm = listo && viewsCampana ? (costoTotal / (viewsCampana / 1000)) : null;
-  const cpmUsd = cpm ? cpm / e.dolar : null;
+  const porPosteado = listo && videosPosteados ? costoTotal / videosPosteados : null;
+  const cpmUsd = listo && viewsCampana && !e.sinCpm ? costoTotal / e.dolar / (viewsCampana / 1000) : null;
   const viewsEquilibrio = listo && videosHechos && e.cpmMeta
     ? (costoTotal / e.dolar) / e.cpmMeta * 1000 / videosHechos : null;
   const viewsPorVideo = videosHechos ? viewsCampana / videosHechos : 0;
   const gana = cpmUsd !== null && cpmUsd < e.cpmMeta;
+  const usd = ars => ars !== null ? 'USD ' + (ars / e.dolar).toFixed(1) : '—';
+  const queEntra = `kits enviados con su envío${bonos ? ', bonos virales' : ''}${e.pautaMes ? ', pauta' : ''}`;
   const nombreMes = DEMO ? m.nombre : (() => { const d = new Date(); const n = d.toLocaleDateString('es-AR', { month:'long', year:'numeric' }); return n.charAt(0).toUpperCase() + n.slice(1); })();
 
   $('#t-resumen').innerHTML = `
@@ -1879,55 +1908,55 @@ function pintarResumen(){
     <p class="sub">${nombreMes}</p>
 
     <div class="kpis">
-      <div class="kpi prim"><b>${cBase ? cumplimiento + '%' : '—'}</b><span>cumplimiento</span>
+      <div class="kpi prim"><b>${cBase ? cumplimiento + '%' : '—'}</b><span>cumplimiento${inf('De las creadoras que recibieron el kit y ya se les venció el plazo o ya entregaron, cuántas subieron su video a Drive o a redes. No importa si fue collab ni si la marca ya lo aprobó.')}</span>
         <i>${cBase ? `${num(cOk)} de ${num(cBase)} subieron su video` : 'todavía no se venció ningún plazo'}</i>
         <span class="mini"><u style="width:${cBase ? cumplimiento : 0}%"></u></span></div>
-      <div class="kpi"><b>${num(m.videosDriveMes ?? 0)}</b><span>videos subidos a Drive</span>
+      <div class="kpi"><b>${num(m.videosDriveMes ?? 0)}</b><span>videos en Drive${inf('Videos que las creadoras subieron a Drive este mes. Abajo, los de toda la campaña. «Sin aprobar» son los que están esperando la revisión de la marca.')}</span>
         <i>${num(m.videosDrive ?? 0)} en total${m.porAprobar ? ` · ${num(m.porAprobar)} sin aprobar` : ''}</i></div>
-      <div class="kpi"><b>${num(m.videosPosteadosMes ?? 0)}</b><span>videos posteados</span>
-        <i>${num(m.videosPosteados ?? 0)} en total</i></div>
+      <div class="kpi"><b>${num(m.videosPosteadosMes ?? 0)}</b><span>videos en redes${inf('Videos subidos a Instagram o TikTok este mes con el link cargado, sean collab o no. El reel y el TikTok del mismo video cuentan como uno.')}</span>
+        <i>${num(videosPosteados)} en total</i></div>
       <div class="kpi">
-        <b>${num(m.collabsHechasMes ?? m.publicadas)}</b><span>collabs hechas</span>
+        <b>${num(m.collabsHechasMes ?? m.publicadas)}</b><span>collabs hechas${inf('Videos en redes donde Instagram confirmó la collab con la cuenta de la marca.')}</span>
         <i>${num(m.collabsHechas ?? 0)} en total · meta ${num(e.metaMes)}</i>
         <span class="mini"><u style="width:${e.metaMes ? Math.min(100, (m.collabsHechasMes ?? m.publicadas) / e.metaMes * 100) : 0}%"></u></span>
       </div>
-      <div class="kpi"><b>${vistas(m.views)}</b><span>views del mes</span>
+      <div class="kpi"><b>${vistas(m.viewsRedesMes ?? m.views)}</b><span>views del mes${inf('Views en Instagram y TikTok de todos los videos subidos a redes este mes, sean collab o no.')}</span>
         <i>${vistas(viewsCampana)} en total</i></div>
-      <div class="kpi"><b>${num(m.ventasMes ?? m.ventas)}</b><span>ventas con código o link</span>
+      <div class="kpi"><b>${num(m.ventasMes ?? m.ventas)}</b><span>ventas${inf('Pedidos de este mes hechos con el código o el link de una creadora. El ticket es el promedio de toda la campaña.')}</span>
         <i>${num(m.ventas)} en total · ticket ${pesos(ticket)}</i></div>
     </div>
 
-    <div class="estrella">
+    <div class="estrella doble">
       <div>
-        <div class="lb">Costo por video hecho</div>
-        <div class="val">${porVideoUsd !== null ? 'USD ' + porVideoUsd.toFixed(1) : '—'}</div>
+        <div class="lb">Costo por video hecho${inf(`Todo lo invertido en la campaña (${queEntra}) dividido los videos hechos: los subidos a Drive o a redes.`)}</div>
+        <div class="val">${usd(porVideo)}</div>
+        <div class="ars2">${porVideo !== null ? pesos(Math.round(porVideo)) + ' ARS' : ''}</div>
       </div>
-      <div class="ars">${porVideo !== null ? pesos(Math.round(porVideo)) + ' ARS' : ''}</div>
+      <div>
+        <div class="lb">Costo por video publicado${inf(`Todo lo invertido en la campaña (${queEntra}) dividido los videos subidos a redes, sean collab o no.`)}</div>
+        <div class="val">${usd(porPosteado)}</div>
+        <div class="ars2">${porPosteado !== null ? pesos(Math.round(porPosteado)) + ' ARS' : ''}</div>
+      </div>
     </div>
 
     <div class="bloque economia">
-      ${porVideo !== null ? `
-        <p class="linea chica">Toda la campaña: <b>${num(kitsCampana)} kits enviados</b> a ${pesos(porKit)} cada uno, <b>${num(videosHechos)} videos hechos</b> (subidos a Drive o posteados, sean collab o no).</p>
+      ${listo ? `
+        <div class="eco-datos">
+          <div><b>${num(kitsCampana)}</b><span>kits enviados</span></div>
+          <div><b>${pesos(porKit)}</b><span>por kit con envío</span></div>
+          <div><b>${num(videosHechos)}</b><span>videos hechos</span></div>
+          <div><b>${num(videosPosteados)}</b><span>videos en redes</span></div>
+          ${bonos ? `<div><b>${pesos(bonos)}</b><span>bonos virales</span></div>` : ''}
+          <div><b>${pesos(Math.round(costoTotal))}</b><span>inversión total</span></div>
+        </div>
         ${cpmUsd !== null ? `<div class="comparo ${gana ? 'gana' : 'pierde'}">
           <span class="ic">${gana ? '✓' : '!'}</span>
           <div>
-            <b>Mil views con este sistema salen USD ${cpmUsd.toFixed(2)}</b>
-            <span>contra USD ${e.cpmMeta.toFixed(2)} que pagás en pauta.
-            ${gana ? `Es ${Math.round((1 - cpmUsd / e.cpmMeta) * 100)}% más barato.`
-                   : 'Ahora mismo la pauta sale más barata.'}</span>
+            <b>Mil views salen USD ${cpmUsd.toFixed(2)}</b>
+            <span>contra USD ${e.cpmMeta.toFixed(2)} en pauta. ${gana ? `Es ${Math.round((1 - cpmUsd / e.cpmMeta) * 100)}% más barato.` : 'Ahora la pauta sale más barata.'}
+            ${viewsEquilibrio !== null ? `Equilibrio: ${num(Math.round(viewsEquilibrio))} views por video, vas en ${num(Math.round(viewsPorVideo))}.` : ''}</span>${inf('Inversión total dividida las views de todos los videos en redes de la campaña, sean collab o no. El equilibrio es cuántas views por video hacen falta para igualar el costo de la pauta.')}
           </div>
-        </div>` : ''}
-
-        ${e.bonoViral && e.bonoUmbral ? `<p class="linea chica">Los bonos virales suman
-        <b>${pesos(bonos)}</b> (${m.bonosTotal ?? m.bonosPagados ?? 0} reels) y compran views a
-        <b>USD ${cpmBono.toFixed(2)} el millar</b> en el peor caso — el bono solo se
-        paga si el video rindió.</p>` : ''}
-
-        ${viewsEquilibrio !== null ? `<p class="linea chica">El equilibrio está en
-        <b>${num(Math.round(viewsEquilibrio))} views por video</b> —
-        vas en ${num(Math.round(viewsPorVideo))}. Y ojo: el costo se paga por kit
-        <b>enviado</b>, así que si el cumplimiento cae, este número sube sin que gastes un peso más.</p>` : ''}`
-      : listo ? `<p class="linea">Todavía no hay videos hechos: el costo por video aparece con el primero.</p>`
+        </div>` : ''}`
       : `<p class="linea">Falta cargar el costo del kit o el tipo de cambio en
          <b>economia</b> de la marca (MARCAS.${MARCA}.economia en canje.js).</p>`}
     </div>
@@ -1943,6 +1972,11 @@ function pintarResumen(){
       <div class="alerta info"><b>${m.enTransito}</b> kits en camino</div>
     </div>
 
+    <div class="bloque">
+      <h2>Ranking</h2>
+      <div id="rk-box"></div>
+    </div>
+
     ${CFG && CFG.tienda ? `<div class="bloque">
       <h2>Comisiones a pagar</h2>
       <p class="n2">${e.comision}% de lo que vendió cada una con su código. Se liquida a fin de mes.</p>
@@ -1955,11 +1989,6 @@ function pintarResumen(){
       <div class="total"><span>Total del mes</span><b>${pesos(comisiones)}</b></div>
     </div>` : ''}
 
-    <div class="bloque">
-      <h2>Ranking</h2>
-      <div id="rk-box"></div>
-    </div>
-
     ${conCupos() ? `<div class="cupos-scroll">${bloqueCupos()}</div>` : ''}`;
   pintarRanking();
 }
@@ -1970,16 +1999,15 @@ function pintarRanking(){
   const box = $('#rk-box'); if (!box) return;
   const mes = RK.per === 'mes', porViews = RK.tipo === 'views';
   const filas = RANKS.map(r => porViews
-      ? { ...r, val: mes ? (r.enMes ? r.viewsMes : 0) : r.views, plata: 0, vids: (r.videos || []).filter(v => v.views > 0 && (!mes || !v.cyber)) }
+      ? { ...r, val: mes ? r.viewsMes : r.views, plata: 0, vids: (r.videos || []).filter(v => v.views > 0 && (!mes || v.mes)) }
       : { ...r, val: mes ? r.ventasMes : r.ventas, plata: mes ? r.facturadoMes : r.facturado, vids: [] })
     .filter(r => r.val > 0)
     .sort((x, y) => y.val - x.val || y.plata - x.plata);
   const ver = RK.todas ? filas : filas.slice(0, 10);
   const urlOk = u => /^https?:\/\//i.test(u || '') ? escH(u) : '#';
   const seg = (campo, ops) => `<div class="rk-seg">${ops.map(([v, t]) => `<button type="button" data-rk="${campo}" data-v="${v}" class="${RK[campo] === v ? 'on' : ''}">${t}</button>`).join('')}</div>`;
-  const hayPodio = !!(CFG && CFG.plata && CFG.plata.podio && CFG.plata.podio.length);
   const nota = porViews
-    ? (mes ? `De las collabs de este mes.${hayPodio ? ' Las tres primeras cobran premio en plata.' : ''}` : 'De siempre, todos sus videos, incluidos los de Cyber.')
+    ? (mes ? 'Todo lo que subieron a redes este mes, sea collab o no.' : 'Todo lo que subieron a redes, sea collab o no.')
     : (mes ? 'Ventas de este mes con su código o su link.' : 'Ventas de siempre con su código o su link.');
   box.innerHTML = `
     <div class="rk-ctrl">${seg('tipo', [['views', 'Views'], ['ventas', 'Ventas']])}${seg('per', [['mes', 'Este mes'], ['siempre', 'De siempre']])}</div>
@@ -1987,7 +2015,7 @@ function pintarRanking(){
     ${ver.length ? ver.map((r, ix) => `
       <div class="rank ${['oro','plata','bronce'][ix] || ''}">
         <span class="pos">${ix + 1}</span>
-        <span class="qui"><b class="abre-cre" data-id="${escH(r.id)}" style="cursor:pointer">${escH(r.nombre || r.ig)}</b><span>@${escH(r.ig)}</span>
+        <span class="qui"><b class="abre-cre" data-id="${escH(r.id)}" style="cursor:pointer">${escH(r.nombre || r.ig)}</b><span><a class="verreel" href="https://instagram.com/${encodeURIComponent(String(r.ig || '').replace(/^@/, ''))}" target="_blank" rel="noopener">@${escH(r.ig)} ↗</a></span>
           ${r.vids.length ? `<span class="rk-vids">${r.vids.map(v => `<a class="verreel" href="${urlOk(v.url)}" target="_blank" rel="noopener">${escH(v.tipo)} · ${num(v.views)} ↗</a>`).join('')}</span>` : ''}</span>
         <span class="num"><b>${num(r.val)}</b><span>${porViews ? 'views' : (r.val === 1 ? 'venta' : 'ventas')}${r.plata ? ' · ' + pesos(r.plata) : ''}</span></span>
       </div>`).join('') : `<p class="linea">Todavía no hay ${porViews ? 'views' : 'ventas'} ${mes ? 'este mes' : 'cargadas'}.</p>`}
@@ -2821,7 +2849,7 @@ function aplicarRol(){
     pintarTodo();
   }
 })();
-const APP_VERSION = '2026-11-07-a';
+const APP_VERSION = '2026-11-07-b';
 </script>
 </body>
 </html>
