@@ -1040,7 +1040,8 @@ const MES = {
   views:1847000,
   vencenEn2Dias:9, vencidas:11, sinRecibir:4,
   ventas:213, facturado:4260000,  // ARS
-  bonosPagados:98                 // reels que pasaron el umbral
+  bonosPagados:98,                // reels que pasaron el umbral
+  cumplioBase:130, cumplioOk:118, cumplioTodas:168, cumplioTodasOk:118, kitsEnCamino:17, kitsEnPlazo:21, kitsCuentan:130
 };
 
 /* padrón completo — en producción sale de {marca}_canje */
@@ -1879,6 +1880,9 @@ function pintarResumen(){
   // del mes) mezclaba tandas y daba 500%.
   const cBase = m.cumplioBase != null ? m.cumplioBase : m.recibidos, cOk = m.cumplioBase != null ? m.cumplioOk : m.publicadas;
   const cumplimiento = cBase ? Math.min(100, Math.round(cOk / cBase * 100)) : 0;
+  // 7/11 (Nacho): dos cumplimientos. El real deja afuera los kits en camino y a las que no cumplieron 7 días con el kit.
+  const cTodas = m.cumplioTodas ? Math.min(100, Math.round(m.cumplioTodasOk / m.cumplioTodas * 100)) : null;
+  const enEspera = (m.kitsEnCamino || 0) + (m.kitsEnPlazo || 0);
   const vistas = n => n >= 1e6 ? (n / 1e6).toLocaleString('es-AR', { maximumFractionDigits: 1 }) + ' M'
     : n >= 1e4 ? Math.round(n / 1e3).toLocaleString('es-AR') + ' mil' : num(Math.round(n));
   const comisiones = Math.round(m.facturado * e.comision / 100);
@@ -1893,17 +1897,20 @@ function pintarResumen(){
   // rindió, así que compra views. Entra al costo, pero se mide aparte en CPM.
   const bonos = (m.bonosTotal ?? m.bonosPagados ?? 0) * e.bonoViral;
   const costoTotal = listo ? (e.pautaMes * (m.mesesCampana || 1) * e.dolar) + (porKit * kitsCampana) + bonos : 0;
+  // 7/11 (Nacho): los kits en camino o en plazo todavía no tuvieron chance de dar video → no entran al costo por video
+  const kitsCuentan = m.kitsCuentan ?? kitsCampana;
+  const costoReal = listo ? costoTotal - porKit * (kitsCampana - kitsCuentan) : 0;
   const cpmBono = e.bonoViral / e.bonoUmbral * 1000 / e.dolar;
   const videosPosteados = m.videosPosteados ?? m.publicadas;
-  const porVideo = listo && videosHechos ? costoTotal / videosHechos : null;
-  const porPosteado = listo && videosPosteados ? costoTotal / videosPosteados : null;
-  const cpmUsd = listo && viewsCampana && !e.sinCpm ? costoTotal / e.dolar / (viewsCampana / 1000) : null;
+  const porVideo = listo && videosHechos ? costoReal / videosHechos : null;
+  const porPosteado = listo && videosPosteados ? costoReal / videosPosteados : null;
+  const cpmUsd = listo && viewsCampana && !e.sinCpm ? costoReal / e.dolar / (viewsCampana / 1000) : null;
   const viewsEquilibrio = listo && videosHechos && e.cpmMeta
-    ? (costoTotal / e.dolar) / e.cpmMeta * 1000 / videosHechos : null;
+    ? (costoReal / e.dolar) / e.cpmMeta * 1000 / videosHechos : null;
   const viewsPorVideo = videosHechos ? viewsCampana / videosHechos : 0;
   const gana = cpmUsd !== null && cpmUsd < e.cpmMeta;
   const usd = ars => ars !== null ? 'USD ' + (ars / e.dolar).toFixed(1) : '—';
-  const queEntra = `kits enviados con su envío${bonos ? ', bonos virales' : ''}${e.pautaMes ? ', pauta' : ''}`;
+  const queEntra = `kits con su envío (sin los que están en camino o en plazo)${bonos ? ', bonos virales' : ''}${e.pautaMes ? ', pauta' : ''}`;
   const nombreMes = DEMO ? m.nombre : (() => { const d = new Date(); const n = d.toLocaleDateString('es-AR', { month:'long', year:'numeric' }); return n.charAt(0).toUpperCase() + n.slice(1); })();
 
   $('#t-resumen').innerHTML = `
@@ -1911,8 +1918,10 @@ function pintarResumen(){
     <p class="sub">${nombreMes}</p>
 
     <div class="kpis">
-      <div class="kpi prim"><b>${cBase ? cumplimiento + '%' : '—'}</b><span>cumplimiento${inf('De las creadoras que recibieron el kit y ya se les venció el plazo o ya entregaron, cuántas subieron su video a Drive o a redes. No importa si fue collab ni si la marca ya lo aprobó.')}</span>
+      <div class="kpi prim"><b>${cBase ? cumplimiento + '%' : '—'}</b><span>cumplimiento real${inf('De las creadoras que ya tenían que entregar (recibieron el kit hace 7 días o más) o que ya entregaron, cuántas subieron su video a Drive o a redes. No cuentan los kits en camino ni las que todavía están dentro de sus 7 días: esas están ok. Abajo, el cumplimiento sobre todos los kits enviados.')}</span>
         <i>${cBase ? `${num(cOk)} de ${num(cBase)} subieron su video` : 'todavía no se venció ningún plazo'}</i>
+        ${cTodas !== null ? `<i>Sobre todos los kits: ${cTodas}% (${num(m.cumplioTodasOk)} de ${num(m.cumplioTodas)})</i>` : ''}
+        ${enEspera ? `<i>${num(m.kitsEnCamino || 0)} en camino · ${num(m.kitsEnPlazo || 0)} en sus 7 días</i>` : ''}
         <span class="mini"><u style="width:${cBase ? cumplimiento : 0}%"></u></span></div>
       <div class="kpi"><b>${num(m.videosDriveMes ?? 0)}</b><span>videos en Drive${inf('Videos que las creadoras subieron a Drive este mes. Abajo, los de toda la campaña. «Sin aprobar» son los que están esperando la revisión de la marca.')}</span>
         <i>${num(m.videosDrive ?? 0)} en total${m.porAprobar ? ` · ${num(m.porAprobar)} sin aprobar` : ''}</i></div>
@@ -1948,12 +1957,14 @@ function pintarResumen(){
       <p class="n2">Toda la campaña, no solo este mes.</p>
       ${listo ? `
         <div class="eco-datos">
-          <div><b>${num(kitsCampana)}</b><span>kits enviados</span></div>
+          <div><b>${num(kitsCuentan)}</b><span>kits que ya tenían que entregar</span></div>
+          ${enEspera ? `<div><b>${num(kitsCampana - kitsCuentan)}</b><span>en camino o en plazo (no cuentan)</span></div>` : ''}
           <div><b>${pesos(porKit)}</b><span>por kit con envío</span></div>
           <div><b>${num(videosHechos)}</b><span>videos hechos</span></div>
           <div><b>${num(videosPosteados)}</b><span>videos en redes</span></div>
           ${bonos ? `<div><b>${pesos(bonos)}</b><span>bonos virales</span></div>` : ''}
-          <div><b>${pesos(Math.round(costoTotal))}</b><span>inversión total</span></div>
+          <div><b>${pesos(Math.round(costoReal))}</b><span>inversión que cuenta</span></div>
+          ${costoReal !== costoTotal ? `<div><b>${pesos(Math.round(costoTotal))}</b><span>inversión total</span></div>` : ''}
         </div>
         ${cpmUsd !== null ? `<div class="comparo ${gana ? 'gana' : 'pierde'}">
           <span class="ic">${gana ? '✓' : '!'}</span>
@@ -2856,7 +2867,7 @@ function aplicarRol(){
     pintarTodo();
   }
 })();
-const APP_VERSION = '2026-11-07-c';
+const APP_VERSION = '2026-11-07-d';
 </script>
 </body>
 </html>
