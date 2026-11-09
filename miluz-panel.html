@@ -322,8 +322,8 @@ td .n2{color:var(--topo);font-size:.78rem;display:block;margin-top:2px}
 .economia .comparo{margin:14px 0 0}
 /* 9/11 (Nacho): los 3 números importantes de economics, con color */
 .eco-top{display:grid;grid-template-columns:repeat(auto-fit,minmax(130px,1fr));gap:8px;margin-bottom:14px}
-.eco-top>div{border-radius:14px;padding:12px 13px;min-width:0}
-.eco-top b{display:block;font-size:1.3rem;font-weight:800;letter-spacing:-.02em;line-height:1.1;font-variant-numeric:tabular-nums}
+.eco-top>div{border-radius:14px;padding:12px 11px;min-width:0}
+.eco-top b{display:block;font-size:1.1rem;font-weight:800;letter-spacing:-.02em;line-height:1.1;font-variant-numeric:tabular-nums}
 .eco-top span{display:block;font-size:.76rem;font-weight:600;color:var(--tinta);margin-top:6px}
 .eco-top i{display:block;font-style:normal;font-size:.74rem;color:var(--tinta2);margin-top:2px}
 .eco-top .fac{background:var(--ok-suave)} .eco-top .fac b{color:var(--ok)}
@@ -331,7 +331,7 @@ td .n2{color:var(--topo);font-size:.78rem;display:block;margin-top:2px}
 .eco-top .vid{background:var(--acento-suave)} .eco-top .vid b{color:var(--acento)}
 /* 9/11 (Nacho): las 6 tarjetas del Resumen iguales: número, nombre y un solo renglón */
 .kpis.parejos{grid-template-columns:repeat(6,minmax(0,1fr))}
-.kpis.parejos .kpi{padding:14px}
+.kpis.parejos .kpi{padding:14px 12px}
 .kpis.parejos .kpi span{font-size:.78rem;font-weight:600;letter-spacing:0;text-transform:none;color:var(--tinta);margin-top:8px;white-space:nowrap}
 .kpis.parejos .kpi i{font-size:.75rem;color:var(--topo);margin-top:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .kpis.parejos .inf{margin-left:4px}
@@ -1972,7 +1972,7 @@ function pintarResumen(){
           <div class="inv"><b>${pesos(Math.round(costoReal))}</b><span>inversión${inf(`La plata de los kits que ya tuvieron tiempo de dar video${bonos ? ', más los bonos' : ''}${e.pautaMes ? ', más la pauta' : ''}. Con este número se calcula el costo por video.${costoReal !== costoTotal ? ' El de abajo es todo lo gastado, sumando los kits que todavía están en camino o en sus 7 días.' : ''}`)}</span>${costoReal !== costoTotal ? `<i>${pesos(Math.round(costoTotal))} en total</i>` : ''}</div>
           <div class="vid"><b>${num(videosHechos)}</b><span>videos hechos${inf('Videos subidos a Drive o a redes, sean collab o no.')}</span><i>${num(videosPosteados)} en redes</i></div>
         </div>
-        <div class="eco-datos">
+        <div class="eco-datos" style="grid-template-columns:repeat(${enEspera && bonos ? 2 : 3},minmax(0,1fr))">
           <div><b>${num(kitsCuentan)}</b><span>kits que cuentan${inf('Kits que llegaron hace 7 días o más, o que ya tienen su video. Son los únicos que entran en la cuenta del costo.')}</span></div>
           ${enEspera ? `<div><b>${num(kitsCampana - kitsCuentan)}</b><span>todavía no cuentan${inf('Kits que están en camino, o que llegaron hace menos de 7 días. La creadora todavía está a tiempo, así que no entran en la cuenta.')}</span></div>` : ''}
           <div><b>${pesos(porKit)}</b><span>por kit con envío${inf('Lo que sale cada kit: el producto más el envío.')}</span></div>
@@ -2879,7 +2879,7 @@ function aplicarRol(){
     pintarTodo();
   }
 })();
-const APP_VERSION = '2026-11-09-c';
+const APP_VERSION = '2026-11-09-d';
 </script>
 </body>
 </html>
