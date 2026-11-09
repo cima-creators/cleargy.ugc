@@ -1913,11 +1913,14 @@ function pintarResumen(){
   const kitsCampana = m.enviadosTotal ?? m.enviados, videosHechos = m.videosHechos ?? m.publicadas, viewsCampana = m.viewsCampana ?? m.views;
   // El bono es VARIABLE y atado al rendimiento: solo se paga si el reel
   // rindió, así que compra views. Entra al costo, pero se mide aparte en CPM.
-  const bonos = (m.bonosTotal ?? m.bonosPagados ?? 0) * e.bonoViral;
+  // 9/11 (Nacho): entra todo lo acreditado a las creadoras (comisiones, bonos, referidas, podio), no solo el bono viral
+  const bonos = m.plataGanada ?? (m.bonosTotal ?? m.bonosPagados ?? 0) * e.bonoViral;
   const costoTotal = listo ? (e.pautaMes * (m.mesesCampana || 1) * e.dolar) + (porKit * kitsCampana) + bonos : 0;
   // 7/11 (Nacho): los kits en camino o en plazo todavía no tuvieron chance de dar video → no entran al costo por video
   const kitsCuentan = m.kitsCuentan ?? kitsCampana;
   const costoReal = listo ? costoTotal - porKit * (kitsCampana - kitsCuentan) : 0;
+  const sinContar = kitsCampana - kitsCuentan;
+  const laCuenta = `${num(kitsCuentan)} kits × ${pesos(porKit)}${bonos ? ` + ${pesos(Math.round(bonos))} a creadoras` : ''}${e.pautaMes ? ` + ${pesos(Math.round(e.pautaMes * (m.mesesCampana || 1) * e.dolar))} de pauta` : ''}`;
   const cpmBono = e.bonoViral / e.bonoUmbral * 1000 / e.dolar;
   const videosPosteados = m.videosPosteados ?? m.publicadas;
   const porVideo = listo && videosHechos ? costoReal / videosHechos : null;
@@ -1928,35 +1931,34 @@ function pintarResumen(){
   const viewsPorVideo = videosHechos ? viewsCampana / videosHechos : 0;
   const gana = cpmUsd !== null && cpmUsd < e.cpmMeta;
   const usd = ars => ars !== null ? 'USD ' + (ars / e.dolar).toFixed(1) : '—';
-  const queEntra = `kits con su envío (sin los que están en camino o en plazo)${bonos ? ', bonos virales' : ''}${e.pautaMes ? ', pauta' : ''}`;
 
   $('#t-resumen').innerHTML = `
     <h1>Resumen</h1>
     <p class="sub">Toda la campaña</p>
 
     <div class="kpis parejos">
-      <div class="kpi prim"><b>${cBase ? cumplimiento + '%' : '—'}</b><span>Cumplimiento real${inf(`De las que ya tenían que entregar (recibieron el kit hace 7 días o más), cuántas subieron su video a Drive o a redes: ${num(cOk)} de ${num(cBase)}. No cuentan ${num(m.kitsEnCamino || 0)} kits en camino ni ${num(m.kitsEnPlazo || 0)} creadoras dentro de sus 7 días. Abajo, el cumplimiento sobre todos los kits enviados${cTodas !== null ? ` (${num(m.cumplioTodasOk)} de ${num(m.cumplioTodas)})` : ''}.`)}</span>
+      <div class="kpi prim"><b>${cBase ? cumplimiento + '%' : '—'}</b><span>Cumplimiento real${inf(`Subieron ${num(cOk)} de las ${num(cBase)} que ya tenían que entregar. Con todos los kits: ${num(m.cumplioTodasOk || 0)} de ${num(m.cumplioTodas || 0)}.`)}</span>
         <i>${cTodas !== null ? `${cTodas}% con todos los kits` : 'sin plazos vencidos'}</i></div>
-      <div class="kpi"><b>${num(m.videosDrive ?? 0)}</b><span>Videos en Drive${inf('Videos que las creadoras subieron a Drive en toda la campaña. «Sin aprobar» son los que esperan la revisión de la marca.')}</span>
+      <div class="kpi"><b>${num(m.videosDrive ?? 0)}</b><span>Videos en Drive${inf('Subidos a Drive. Sin aprobar: esperan a la marca.')}</span>
         <i>${num(m.porAprobar || 0)} sin aprobar</i></div>
-      <div class="kpi"><b>${num(videosPosteados)}</b><span>Videos en redes${inf('Videos subidos a Instagram o TikTok con el link cargado, sean collab o no. El reel y el TikTok del mismo video cuentan como uno.')}</span>
+      <div class="kpi"><b>${num(videosPosteados)}</b><span>Videos en redes${inf('Con link de Instagram o TikTok, sean collab o no.')}</span>
         <i>de ${num(videosHechos)} hechos</i></div>
-      <div class="kpi"><b>${num(m.collabsHechas ?? 0)}</b><span>Collabs hechas${inf('De los videos en redes, en cuántos Instagram confirmó la collab con la cuenta de la marca. Si todas postean en collab, da igual que videos en redes.')}</span>
+      <div class="kpi"><b>${num(m.collabsHechas ?? 0)}</b><span>Collabs hechas${inf('Videos en redes con la collab confirmada.')}</span>
         <i>de ${num(videosPosteados)} en redes</i></div>
-      <div class="kpi"><b>${vistas(viewsCampana)}</b><span>Views${inf('Views en Instagram y TikTok de todos los videos subidos a redes, sean collab o no. Abajo, el promedio por video hecho.')}</span>
+      <div class="kpi"><b>${vistas(viewsCampana)}</b><span>Views${inf('Todas las views de los videos en redes.')}</span>
         <i>${num(Math.round(viewsPorVideo))} por video</i></div>
-      <div class="kpi"><b>${num(m.ventas)}</b><span>Ventas${inf('Pedidos pagados con el código o el link de una creadora en toda la campaña. El ticket es el promedio.')}</span>
+      <div class="kpi"><b>${num(m.ventas)}</b><span>Ventas${inf('Pedidos pagados con código o link de una creadora.')}</span>
         <i>ticket ${pesos(ticket)}</i></div>
     </div>
 
     <div class="estrella doble">
       <div>
-        <div class="lb">Costo por video hecho${inf(`Todo lo invertido en la campaña (${queEntra}) dividido los videos hechos: los subidos a Drive o a redes.`)}</div>
+        <div class="lb">Costo por video hecho${inf(`${pesos(Math.round(costoReal))} ÷ ${num(videosHechos)} videos hechos.`)}</div>
         <div class="val">${usd(porVideo)}</div>
         <div class="ars2">${porVideo !== null ? pesos(Math.round(porVideo)) + ' ARS' : ''}</div>
       </div>
       <div>
-        <div class="lb">Costo por video publicado${inf(`Todo lo invertido en la campaña (${queEntra}) dividido los videos subidos a redes, sean collab o no.`)}</div>
+        <div class="lb">Costo por video publicado${inf(`${pesos(Math.round(costoReal))} ÷ ${num(videosPosteados)} videos en redes.`)}</div>
         <div class="val">${usd(porPosteado)}</div>
         <div class="ars2">${porPosteado !== null ? pesos(Math.round(porPosteado)) + ' ARS' : ''}</div>
       </div>
@@ -1968,22 +1970,22 @@ function pintarResumen(){
       <p class="n2">Toda la campaña, no solo este mes.</p>
       ${listo ? `
         <div class="eco-top">
-          ${ROL !== 'abril' ? `<div class="fac"><b>${pesos(m.facturado || 0)}</b><span>facturación${inf('Lo vendido con el código o el link de las creadoras desde que arrancó la campaña. Solo pedidos pagados.')}</span><i>${num(m.ventas)} ventas</i></div>` : ''}
-          <div class="inv"><b>${pesos(Math.round(costoReal))}</b><span>inversión${inf(`La plata de los kits que ya tuvieron tiempo de dar video${bonos ? ', más los bonos' : ''}${e.pautaMes ? ', más la pauta' : ''}. Con este número se calcula el costo por video.${costoReal !== costoTotal ? ' El de abajo es todo lo gastado, sumando los kits que todavía están en camino o en sus 7 días.' : ''}`)}</span>${costoReal !== costoTotal ? `<i>${pesos(Math.round(costoTotal))} en total</i>` : ''}</div>
-          <div class="vid"><b>${num(videosHechos)}</b><span>videos hechos${inf('Videos subidos a Drive o a redes, sean collab o no.')}</span><i>${num(videosPosteados)} en redes</i></div>
+          ${ROL !== 'abril' ? `<div class="fac"><b>${pesos(m.facturado || 0)}</b><span>facturación${inf('Lo vendido con código o link. Solo pedidos pagados.')}</span><i>${num(m.ventas)} ventas</i></div>` : ''}
+          <div class="inv"><b>${pesos(Math.round(costoReal))}</b><span>inversión${inf(`${laCuenta}.${sinContar ? ` Abajo, sumando ${num(sinContar)} kits que todavía no cuentan.` : ''}`)}</span>${costoReal !== costoTotal ? `<i>${pesos(Math.round(costoTotal))} en total</i>` : ''}</div>
+          <div class="vid"><b>${num(videosHechos)}</b><span>videos hechos${inf('Subidos a Drive o a redes.')}</span><i>${num(videosPosteados)} en redes</i></div>
         </div>
         <div class="eco-datos" style="grid-template-columns:repeat(${enEspera && bonos ? 2 : 3},minmax(0,1fr))">
-          <div><b>${num(kitsCuentan)}</b><span>kits que cuentan${inf('Kits que llegaron hace 7 días o más, o que ya tienen su video. Son los únicos que entran en la cuenta del costo.')}</span></div>
-          ${enEspera ? `<div><b>${num(kitsCampana - kitsCuentan)}</b><span>todavía no cuentan${inf('Kits que están en camino, o que llegaron hace menos de 7 días. La creadora todavía está a tiempo, así que no entran en la cuenta.')}</span></div>` : ''}
-          <div><b>${pesos(porKit)}</b><span>por kit con envío${inf('Lo que sale cada kit: el producto más el envío.')}</span></div>
-          ${bonos ? `<div><b>${pesos(bonos)}</b><span>bonos virales${inf('Lo que se pagó a las creadoras cuyo video pasó el mínimo de views para cobrar el bono.')}</span></div>` : ''}
+          <div><b>${num(kitsCuentan)}</b><span>kits que cuentan${inf('Llegaron hace 7 días o más, o ya tienen video.')}</span></div>
+          ${enEspera ? `<div><b>${num(kitsCampana - kitsCuentan)}</b><span>todavía no cuentan${inf('En camino, o llegaron hace menos de 7 días.')}</span></div>` : ''}
+          <div><b>${pesos(porKit)}</b><span>por kit con envío${inf(`${pesos(e.producto)} de producto + ${pesos(e.envio)} de envío.`)}</span></div>
+          ${bonos ? `<div><b>${pesos(bonos)}</b><span>a creadoras${inf('Comisiones, bonos y premios acreditados.')}</span></div>` : ''}
         </div>
         ${cpmUsd !== null ? `<div class="comparo ${gana ? 'gana' : 'pierde'}">
           <span class="ic">${gana ? '✓' : '!'}</span>
           <div>
             <b>Mil views salen USD ${cpmUsd.toFixed(2)}</b>
             <span>contra USD ${e.cpmMeta.toFixed(2)} en pauta. ${gana ? `Es ${Math.round((1 - cpmUsd / e.cpmMeta) * 100)}% más barato.` : 'Ahora la pauta sale más barata.'}
-            ${viewsEquilibrio !== null ? `Equilibrio: ${num(Math.round(viewsEquilibrio))} views por video, vas en ${num(Math.round(viewsPorVideo))}.` : ''}</span>${inf('Inversión total dividida las views de todos los videos en redes de la campaña, sean collab o no. El equilibrio es cuántas views por video hacen falta para igualar el costo de la pauta.')}
+            ${viewsEquilibrio !== null ? `Equilibrio: ${num(Math.round(viewsEquilibrio))} views por video, vas en ${num(Math.round(viewsPorVideo))}.` : ''}</span>${inf('Inversión ÷ miles de views. Equilibrio: views por video para igualar la pauta.')}
           </div>
         </div>` : ''}`
       : `<p class="linea">Falta cargar el costo del kit o el tipo de cambio en
@@ -2879,7 +2881,7 @@ function aplicarRol(){
     pintarTodo();
   }
 })();
-const APP_VERSION = '2026-11-09-d';
+const APP_VERSION = '2026-11-09-e';
 </script>
 </body>
 </html>
