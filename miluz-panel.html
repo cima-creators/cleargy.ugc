@@ -329,10 +329,14 @@ td .n2{color:var(--topo);font-size:.78rem;display:block;margin-top:2px}
 .eco-top .fac{background:var(--ok-suave)} .eco-top .fac b{color:var(--ok)}
 .eco-top .inv{background:var(--duda-suave)} .eco-top .inv b{color:var(--duda)}
 .eco-top .vid{background:var(--acento-suave)} .eco-top .vid b{color:var(--acento)}
-/* los dos cumplimientos lado a lado */
-.kpi.prim.dos{grid-column:span 2;display:grid;grid-template-columns:1fr 1fr;gap:16px}
-.kpi.prim.dos .seg{border-left:1px solid rgba(var(--acento-rgb),.25);padding-left:16px}
-.kpi.prim.dos .seg b{font-size:1.3rem;line-height:1.3}
+/* 9/11 (Nacho): las 6 tarjetas del Resumen iguales: número, nombre y un solo renglón */
+.kpis.parejos{grid-template-columns:repeat(6,minmax(0,1fr))}
+.kpis.parejos .kpi{padding:14px}
+.kpis.parejos .kpi span{font-size:.78rem;font-weight:600;letter-spacing:0;text-transform:none;color:var(--tinta);margin-top:8px;white-space:nowrap}
+.kpis.parejos .kpi i{font-size:.75rem;color:var(--topo);margin-top:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.kpis.parejos .inf{margin-left:4px}
+@media (max-width:1180px){.kpis.parejos{grid-template-columns:repeat(3,minmax(0,1fr))}}
+@media (max-width:560px){.kpis.parejos{grid-template-columns:repeat(2,minmax(0,1fr))}}
 .dos-col{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:14px;margin-bottom:14px}
 .dos-col>.bloque{margin:0}
 @media (max-width:860px){.dos-col{grid-template-columns:minmax(0,1fr)}}
@@ -1054,7 +1058,8 @@ const MES = {
   vencenEn2Dias:9, vencidas:11, sinRecibir:4,
   ventas:213, facturado:4260000,  // ARS
   bonosPagados:98,                // reels que pasaron el umbral
-  cumplioBase:130, cumplioOk:118, cumplioTodas:168, cumplioTodasOk:118, kitsEnCamino:17, kitsEnPlazo:21, kitsCuentan:130
+  cumplioBase:130, cumplioOk:118, cumplioTodas:168, cumplioTodasOk:118, kitsEnCamino:17, kitsEnPlazo:21, kitsCuentan:130,
+  videosDrive:142, videosHechos:142, videosPosteados:130, collabsHechas:121, porAprobar:6
 };
 
 /* padrón completo — en producción sale de {marca}_canje */
@@ -1924,33 +1929,24 @@ function pintarResumen(){
   const gana = cpmUsd !== null && cpmUsd < e.cpmMeta;
   const usd = ars => ars !== null ? 'USD ' + (ars / e.dolar).toFixed(1) : '—';
   const queEntra = `kits con su envío (sin los que están en camino o en plazo)${bonos ? ', bonos virales' : ''}${e.pautaMes ? ', pauta' : ''}`;
-  const nombreMes = DEMO ? m.nombre : (() => { const d = new Date(); const n = d.toLocaleDateString('es-AR', { month:'long', year:'numeric' }); return n.charAt(0).toUpperCase() + n.slice(1); })();
 
   $('#t-resumen').innerHTML = `
     <h1>Resumen</h1>
-    <p class="sub">${nombreMes}</p>
+    <p class="sub">Toda la campaña</p>
 
-    <div class="kpis">
-      <div class="kpi prim${cTodas !== null ? ' dos' : ''}">
-        <div><b>${cBase ? cumplimiento + '%' : '—'}</b><span>cumplimiento real${inf('De las creadoras que ya tenían que entregar (recibieron el kit hace 7 días o más) o que ya entregaron, cuántas subieron su video a Drive o a redes. No cuentan los kits en camino ni las que todavía están dentro de sus 7 días: esas están ok.')}</span>
-          <i>${cBase ? `${num(cOk)} de ${num(cBase)} subieron` : 'todavía no se venció ningún plazo'}</i>
-          <span class="mini"><u style="width:${cBase ? cumplimiento : 0}%"></u></span></div>
-        ${cTodas !== null ? `<div class="seg"><b>${cTodas}%</b><span>sobre todos los kits${inf('Las que subieron su video, sobre todos los kits enviados, incluidos los que están en camino y las que todavía están en sus 7 días.')}</span>
-          <i>${num(m.cumplioTodasOk)} de ${num(m.cumplioTodas)}${m.kitsEnCamino ? ` · ${num(m.kitsEnCamino)} en camino` : ''}${m.kitsEnPlazo ? ` · ${num(m.kitsEnPlazo)} en plazo` : ''}</i></div>` : ''}
-      </div>
-      <div class="kpi"><b>${num(m.videosDriveMes ?? 0)}</b><span>videos en Drive${inf('Videos que las creadoras subieron a Drive este mes. Abajo, los de toda la campaña. «Sin aprobar» son los que están esperando la revisión de la marca.')}</span>
-        <i>${num(m.videosDrive ?? 0)} en total${m.porAprobar ? ` · ${num(m.porAprobar)} sin aprobar` : ''}</i></div>
-      <div class="kpi"><b>${num(m.videosPosteadosMes ?? 0)}</b><span>videos en redes${inf('Videos subidos a Instagram o TikTok este mes con el link cargado, sean collab o no. El reel y el TikTok del mismo video cuentan como uno.')}</span>
-        <i>${num(videosPosteados)} en total</i></div>
-      <div class="kpi">
-        <b>${num(m.collabsHechasMes ?? m.publicadas)}</b><span>collabs hechas${inf('Videos en redes donde Instagram confirmó la collab con la cuenta de la marca.')}</span>
-        <i>${num(m.collabsHechas ?? 0)} en total · meta ${num(e.metaMes)}</i>
-        <span class="mini"><u style="width:${e.metaMes ? Math.min(100, (m.collabsHechasMes ?? m.publicadas) / e.metaMes * 100) : 0}%"></u></span>
-      </div>
-      <div class="kpi"><b>${vistas(m.viewsRedesMes ?? m.views)}</b><span>views del mes${inf('Views en Instagram y TikTok de todos los videos subidos a redes este mes, sean collab o no.')}</span>
-        <i>${vistas(viewsCampana)} en total</i></div>
-      <div class="kpi"><b>${num(m.ventasMes ?? m.ventas)}</b><span>ventas${inf('Pedidos de este mes hechos con el código o el link de una creadora. El ticket es el promedio de toda la campaña.')}</span>
-        <i>${num(m.ventas)} en total · ticket ${pesos(ticket)}</i></div>
+    <div class="kpis parejos">
+      <div class="kpi prim"><b>${cBase ? cumplimiento + '%' : '—'}</b><span>Cumplimiento real${inf(`De las que ya tenían que entregar (recibieron el kit hace 7 días o más), cuántas subieron su video a Drive o a redes: ${num(cOk)} de ${num(cBase)}. No cuentan ${num(m.kitsEnCamino || 0)} kits en camino ni ${num(m.kitsEnPlazo || 0)} creadoras dentro de sus 7 días. Abajo, el cumplimiento sobre todos los kits enviados${cTodas !== null ? ` (${num(m.cumplioTodasOk)} de ${num(m.cumplioTodas)})` : ''}.`)}</span>
+        <i>${cTodas !== null ? `${cTodas}% con todos los kits` : 'sin plazos vencidos'}</i></div>
+      <div class="kpi"><b>${num(m.videosDrive ?? 0)}</b><span>Videos en Drive${inf('Videos que las creadoras subieron a Drive en toda la campaña. «Sin aprobar» son los que esperan la revisión de la marca.')}</span>
+        <i>${num(m.porAprobar || 0)} sin aprobar</i></div>
+      <div class="kpi"><b>${num(videosPosteados)}</b><span>Videos en redes${inf('Videos subidos a Instagram o TikTok con el link cargado, sean collab o no. El reel y el TikTok del mismo video cuentan como uno.')}</span>
+        <i>de ${num(videosHechos)} hechos</i></div>
+      <div class="kpi"><b>${num(m.collabsHechas ?? 0)}</b><span>Collabs hechas${inf('De los videos en redes, en cuántos Instagram confirmó la collab con la cuenta de la marca. Si todas postean en collab, da igual que videos en redes.')}</span>
+        <i>de ${num(videosPosteados)} en redes</i></div>
+      <div class="kpi"><b>${vistas(viewsCampana)}</b><span>Views${inf('Views en Instagram y TikTok de todos los videos subidos a redes, sean collab o no. Abajo, el promedio por video hecho.')}</span>
+        <i>${num(Math.round(viewsPorVideo))} por video</i></div>
+      <div class="kpi"><b>${num(m.ventas)}</b><span>Ventas${inf('Pedidos pagados con el código o el link de una creadora en toda la campaña. El ticket es el promedio.')}</span>
+        <i>ticket ${pesos(ticket)}</i></div>
     </div>
 
     <div class="estrella doble">
@@ -2028,23 +2024,23 @@ function pintarResumen(){
 }
 
 /* 7/11 (Nacho): ranking de views (con link directo a cada video) y de ventas, del mes o de siempre. */
-const RK = { tipo: 'views', per: 'mes', todas: false };
+const RK = { tipo: 'views', per: 'siempre', todas: false };
 function pintarRanking(){
   const box = $('#rk-box'); if (!box) return;
-  const mes = RK.per === 'mes', porViews = RK.tipo === 'views';
+  const porViews = RK.tipo === 'views', mes = RK.per === 'mes' && !porViews;   // 9/11 (Nacho): views, solo totales
   const filas = RANKS.map(r => porViews
       ? { ...r, val: mes ? r.viewsMes : r.views, plata: 0, vids: (r.videos || []).filter(v => v.views > 0 && (!mes || v.mes)) }
       : { ...r, val: mes ? r.ventasMes : r.ventas, plata: mes ? r.facturadoMes : r.facturado, vids: [] })
     .filter(r => r.val > 0)
     .sort((x, y) => y.val - x.val || y.plata - x.plata);
-  const ver = RK.todas ? filas : filas.slice(0, 10);
+  const ver = RK.todas ? filas : filas.slice(0, 5);
   const urlOk = u => /^https?:\/\//i.test(u || '') ? escH(u) : '#';
   const seg = (campo, ops) => `<div class="rk-seg">${ops.map(([v, t]) => `<button type="button" data-rk="${campo}" data-v="${v}" class="${RK[campo] === v ? 'on' : ''}">${t}</button>`).join('')}</div>`;
   const nota = porViews
-    ? (mes ? 'Todo lo que subieron a redes este mes, sea collab o no.' : 'Todo lo que subieron a redes, sea collab o no.')
+    ? 'Todo lo que subieron a redes, sea collab o no.'
     : (mes ? 'Ventas de este mes con su código o su link.' : 'Ventas de siempre con su código o su link.');
   box.innerHTML = `
-    <div class="rk-ctrl">${seg('tipo', [['views', 'Views'], ['ventas', 'Ventas']])}${seg('per', [['mes', 'Este mes'], ['siempre', 'De siempre']])}</div>
+    <div class="rk-ctrl">${seg('tipo', [['views', 'Views'], ['ventas', 'Ventas']])}${porViews ? '' : seg('per', [['mes', 'Este mes'], ['siempre', 'De siempre']])}</div>
     <p class="n2">${nota}</p>
     ${ver.length ? ver.map((r, ix) => `
       <div class="rank ${['oro','plata','bronce'][ix] || ''}">
@@ -2053,7 +2049,7 @@ function pintarRanking(){
           ${r.vids.length ? `<span class="rk-vids">${r.vids.map(v => `<a class="verreel" href="${urlOk(v.url)}" target="_blank" rel="noopener">${escH(v.tipo)} · ${num(v.views)} ↗</a>`).join('')}</span>` : ''}</span>
         <span class="num"><b>${num(r.val)}</b><span>${porViews ? 'views' : (r.val === 1 ? 'venta' : 'ventas')}${r.plata ? ' · ' + pesos(r.plata) : ''}</span></span>
       </div>`).join('') : `<p class="linea">Todavía no hay ${porViews ? 'views' : 'ventas'} ${mes ? 'este mes' : 'cargadas'}.</p>`}
-    ${filas.length > 10 ? `<button type="button" class="rk-mas" data-rk="todas">${RK.todas ? 'Ver solo las 10 primeras' : `Ver las ${filas.length}`}</button>` : ''}`;
+    ${filas.length > 5 ? `<button type="button" class="rk-mas" data-rk="todas">${RK.todas ? 'Ver menos' : 'Ver más'}</button>` : ''}`;
   box.onclick = e => {
     const t = e.target.closest('[data-rk]'); if (!t) return;
     if (t.dataset.rk === 'todas') RK.todas = !RK.todas;
@@ -2883,7 +2879,7 @@ function aplicarRol(){
     pintarTodo();
   }
 })();
-const APP_VERSION = '2026-11-09-a';
+const APP_VERSION = '2026-11-09-b';
 </script>
 </body>
 </html>
