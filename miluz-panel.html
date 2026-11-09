@@ -320,6 +320,19 @@ td .n2{color:var(--topo);font-size:.78rem;display:block;margin-top:2px}
 .eco-datos b{display:block;font-size:1.02rem;font-weight:700;font-variant-numeric:tabular-nums}
 .eco-datos span{display:block;font-size:.76rem;color:var(--topo);margin-top:2px}
 .economia .comparo{margin:14px 0 0}
+/* 9/11 (Nacho): los 3 números importantes de economics, con color */
+.eco-top{display:grid;grid-template-columns:repeat(auto-fit,minmax(130px,1fr));gap:8px;margin-bottom:14px}
+.eco-top>div{border-radius:14px;padding:12px 13px;min-width:0}
+.eco-top b{display:block;font-size:1.3rem;font-weight:800;letter-spacing:-.02em;line-height:1.1;font-variant-numeric:tabular-nums}
+.eco-top span{display:block;font-size:.76rem;font-weight:600;color:var(--tinta);margin-top:6px}
+.eco-top i{display:block;font-style:normal;font-size:.74rem;color:var(--tinta2);margin-top:2px}
+.eco-top .fac{background:var(--ok-suave)} .eco-top .fac b{color:var(--ok)}
+.eco-top .inv{background:var(--duda-suave)} .eco-top .inv b{color:var(--duda)}
+.eco-top .vid{background:var(--acento-suave)} .eco-top .vid b{color:var(--acento)}
+/* los dos cumplimientos lado a lado */
+.kpi.prim.dos{grid-column:span 2;display:grid;grid-template-columns:1fr 1fr;gap:16px}
+.kpi.prim.dos .seg{border-left:1px solid rgba(var(--acento-rgb),.25);padding-left:16px}
+.kpi.prim.dos .seg b{font-size:1.3rem;line-height:1.3}
 .dos-col{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:14px;margin-bottom:14px}
 .dos-col>.bloque{margin:0}
 @media (max-width:860px){.dos-col{grid-template-columns:minmax(0,1fr)}}
@@ -1918,11 +1931,13 @@ function pintarResumen(){
     <p class="sub">${nombreMes}</p>
 
     <div class="kpis">
-      <div class="kpi prim"><b>${cBase ? cumplimiento + '%' : '—'}</b><span>cumplimiento real${inf('De las creadoras que ya tenían que entregar (recibieron el kit hace 7 días o más) o que ya entregaron, cuántas subieron su video a Drive o a redes. No cuentan los kits en camino ni las que todavía están dentro de sus 7 días: esas están ok. Abajo, el cumplimiento sobre todos los kits enviados.')}</span>
-        <i>${cBase ? `${num(cOk)} de ${num(cBase)} subieron su video` : 'todavía no se venció ningún plazo'}</i>
-        ${cTodas !== null ? `<i>Sobre todos los kits: ${cTodas}% (${num(m.cumplioTodasOk)} de ${num(m.cumplioTodas)})</i>` : ''}
-        ${enEspera ? `<i>${num(m.kitsEnCamino || 0)} en camino · ${num(m.kitsEnPlazo || 0)} en sus 7 días</i>` : ''}
-        <span class="mini"><u style="width:${cBase ? cumplimiento : 0}%"></u></span></div>
+      <div class="kpi prim${cTodas !== null ? ' dos' : ''}">
+        <div><b>${cBase ? cumplimiento + '%' : '—'}</b><span>cumplimiento real${inf('De las creadoras que ya tenían que entregar (recibieron el kit hace 7 días o más) o que ya entregaron, cuántas subieron su video a Drive o a redes. No cuentan los kits en camino ni las que todavía están dentro de sus 7 días: esas están ok.')}</span>
+          <i>${cBase ? `${num(cOk)} de ${num(cBase)} subieron` : 'todavía no se venció ningún plazo'}</i>
+          <span class="mini"><u style="width:${cBase ? cumplimiento : 0}%"></u></span></div>
+        ${cTodas !== null ? `<div class="seg"><b>${cTodas}%</b><span>sobre todos los kits${inf('Las que subieron su video, sobre todos los kits enviados, incluidos los que están en camino y las que todavía están en sus 7 días.')}</span>
+          <i>${num(m.cumplioTodasOk)} de ${num(m.cumplioTodas)}${m.kitsEnCamino ? ` · ${num(m.kitsEnCamino)} en camino` : ''}${m.kitsEnPlazo ? ` · ${num(m.kitsEnPlazo)} en plazo` : ''}</i></div>` : ''}
+      </div>
       <div class="kpi"><b>${num(m.videosDriveMes ?? 0)}</b><span>videos en Drive${inf('Videos que las creadoras subieron a Drive este mes. Abajo, los de toda la campaña. «Sin aprobar» son los que están esperando la revisión de la marca.')}</span>
         <i>${num(m.videosDrive ?? 0)} en total${m.porAprobar ? ` · ${num(m.porAprobar)} sin aprobar` : ''}</i></div>
       <div class="kpi"><b>${num(m.videosPosteadosMes ?? 0)}</b><span>videos en redes${inf('Videos subidos a Instagram o TikTok este mes con el link cargado, sean collab o no. El reel y el TikTok del mismo video cuentan como uno.')}</span>
@@ -1956,15 +1971,16 @@ function pintarResumen(){
       <h2>Economics de la campaña</h2>
       <p class="n2">Toda la campaña, no solo este mes.</p>
       ${listo ? `
+        <div class="eco-top">
+          ${ROL !== 'abril' ? `<div class="fac"><b>${pesos(m.facturado || 0)}</b><span>facturación${inf('Lo vendido con el código o el link de las creadoras desde que arrancó la campaña. Solo pedidos pagados.')}</span><i>${num(m.ventas)} ventas</i></div>` : ''}
+          <div class="inv"><b>${pesos(Math.round(costoReal))}</b><span>inversión${inf(`Lo que cuenta para el costo por video: ${queEntra}.`)}</span>${costoReal !== costoTotal ? `<i>${pesos(Math.round(costoTotal))} con todos los kits</i>` : ''}</div>
+          <div class="vid"><b>${num(videosHechos)}</b><span>videos hechos${inf('Videos subidos a Drive o a redes, sean collab o no.')}</span><i>${num(videosPosteados)} en redes</i></div>
+        </div>
         <div class="eco-datos">
-          <div><b>${num(kitsCuentan)}</b><span>kits que ya tenían que entregar</span></div>
-          ${enEspera ? `<div><b>${num(kitsCampana - kitsCuentan)}</b><span>en camino o en plazo (no cuentan)</span></div>` : ''}
+          <div><b>${num(kitsCuentan)}</b><span>kits que cuentan</span></div>
+          ${enEspera ? `<div><b>${num(kitsCampana - kitsCuentan)}</b><span>todavía no cuentan</span></div>` : ''}
           <div><b>${pesos(porKit)}</b><span>por kit con envío</span></div>
-          <div><b>${num(videosHechos)}</b><span>videos hechos</span></div>
-          <div><b>${num(videosPosteados)}</b><span>videos en redes</span></div>
           ${bonos ? `<div><b>${pesos(bonos)}</b><span>bonos virales</span></div>` : ''}
-          <div><b>${pesos(Math.round(costoReal))}</b><span>inversión que cuenta</span></div>
-          ${costoReal !== costoTotal ? `<div><b>${pesos(Math.round(costoTotal))}</b><span>inversión total</span></div>` : ''}
         </div>
         ${cpmUsd !== null ? `<div class="comparo ${gana ? 'gana' : 'pierde'}">
           <span class="ic">${gana ? '✓' : '!'}</span>
@@ -2867,7 +2883,7 @@ function aplicarRol(){
     pintarTodo();
   }
 })();
-const APP_VERSION = '2026-11-07-d';
+const APP_VERSION = '2026-11-09-a';
 </script>
 </body>
 </html>
