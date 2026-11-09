@@ -1925,6 +1925,7 @@ function pintarResumen(){
   const videosPosteados = m.videosPosteados ?? m.publicadas;
   const porVideo = listo && videosHechos ? costoReal / videosHechos : null;
   const porPosteado = listo && videosPosteados ? costoReal / videosPosteados : null;
+  const ingresoVideo = listo && videosHechos ? (m.facturado || 0) / videosHechos : null;
   const cpmUsd = listo && viewsCampana && !e.sinCpm ? costoReal / e.dolar / (viewsCampana / 1000) : null;
   const viewsEquilibrio = listo && videosHechos && e.cpmMeta
     ? (costoReal / e.dolar) / e.cpmMeta * 1000 / videosHechos : null;
@@ -1962,6 +1963,11 @@ function pintarResumen(){
         <div class="val">${usd(porPosteado)}</div>
         <div class="ars2">${porPosteado !== null ? pesos(Math.round(porPosteado)) + ' ARS' : ''}</div>
       </div>
+      ${ROL !== 'abril' ? `<div>
+        <div class="lb">Ingreso por video hecho${inf(`${pesos(m.facturado || 0)} facturados ÷ ${num(videosHechos)} videos hechos.`)}</div>
+        <div class="val">${usd(ingresoVideo)}</div>
+        <div class="ars2">${ingresoVideo !== null ? pesos(Math.round(ingresoVideo)) + ' ARS' : ''}</div>
+      </div>` : ''}
     </div>
 
     <div class="dos-col">
@@ -2881,7 +2887,7 @@ function aplicarRol(){
     pintarTodo();
   }
 })();
-const APP_VERSION = '2026-11-09-f';
+const APP_VERSION = '2026-11-09-g';
 </script>
 </body>
 </html>
