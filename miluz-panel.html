@@ -1978,7 +1978,7 @@ function pintarResumen(){
           <div><b>${num(kitsCuentan)}</b><span>kits que cuentan${inf('Llegaron hace 7 días o más, o ya tienen video.')}</span></div>
           ${enEspera ? `<div><b>${num(kitsCampana - kitsCuentan)}</b><span>todavía no cuentan${inf('En camino, o llegaron hace menos de 7 días.')}</span></div>` : ''}
           <div><b>${pesos(porKit)}</b><span>por kit con envío${inf(`${pesos(e.producto)} de producto + ${pesos(e.envio)} de envío.`)}</span></div>
-          ${bonos ? `<div><b>${pesos(bonos)}</b><span>a creadoras${inf('Comisiones, bonos y premios acreditados.')}</span></div>` : ''}
+          ${bonos ? `<div><b>${pesos(bonos)}</b><span>a creadoras${inf('Lo pagado + lo que se debe: comisiones, bonos y premios.')}</span></div>` : ''}
         </div>
         ${cpmUsd !== null ? `<div class="comparo ${gana ? 'gana' : 'pierde'}">
           <span class="ic">${gana ? '✓' : '!'}</span>
@@ -2881,7 +2881,7 @@ function aplicarRol(){
     pintarTodo();
   }
 })();
-const APP_VERSION = '2026-11-09-e';
+const APP_VERSION = '2026-11-09-f';
 </script>
 </body>
 </html>
