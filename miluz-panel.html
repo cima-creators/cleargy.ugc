@@ -2047,16 +2047,17 @@ function pintarRanking(){
     .filter(r => r.val > 0)
     .sort((x, y) => y.val - x.val || y.plata - x.plata);
   const ver = RK.todas ? filas : filas.slice(0, 5);
+  const minPodio = porViews ? 10000 : 10;   // 9/11 (Nacho): sin 10.000 views o 10 ventas no hay podio
   const urlOk = u => /^https?:\/\//i.test(u || '') ? escH(u) : '#';
   const seg = (campo, ops) => `<div class="rk-seg">${ops.map(([v, t]) => `<button type="button" data-rk="${campo}" data-v="${v}" class="${RK[campo] === v ? 'on' : ''}">${t}</button>`).join('')}</div>`;
   const nota = porViews
-    ? 'Todo lo que subieron a redes, sea collab o no.'
-    : (mes ? 'Ventas de este mes con su código o su link.' : 'Ventas de siempre con su código o su link.');
+    ? 'Todo lo que subieron a redes, sea collab o no. Podio desde 10.000 views.'
+    : (mes ? 'Ventas de este mes con su código o su link.' : 'Ventas de siempre con su código o su link.') + ' Podio desde 10 ventas.';
   box.innerHTML = `
     <div class="rk-ctrl">${seg('tipo', [['views', 'Views'], ['ventas', 'Ventas']])}${porViews ? '' : seg('per', [['mes', 'Este mes'], ['siempre', 'De siempre']])}</div>
     <p class="n2">${nota}</p>
     ${ver.length ? ver.map((r, ix) => `
-      <div class="rank ${['oro','plata','bronce'][ix] || ''}">
+      <div class="rank ${r.val >= minPodio ? ['oro','plata','bronce'][ix] || '' : ''}">
         <span class="pos">${ix + 1}</span>
         <span class="qui"><b class="abre-cre" data-id="${escH(r.id)}" style="cursor:pointer">${escH(r.nombre || r.ig)}</b><span><a class="verreel" href="https://instagram.com/${encodeURIComponent(String(r.ig || '').replace(/^@/, ''))}" target="_blank" rel="noopener">@${escH(r.ig)} ↗</a></span>
           ${r.vids.length ? `<span class="rk-vids">${r.vids.map(v => `<a class="verreel" href="${urlOk(v.url)}" target="_blank" rel="noopener">${escH(v.tipo)} · ${num(v.views)} ↗</a>`).join('')}</span>` : ''}</span>
@@ -2892,7 +2893,7 @@ function aplicarRol(){
     pintarTodo();
   }
 })();
-const APP_VERSION = '2026-11-09-i';
+const APP_VERSION = '2026-11-09-j';
 </script>
 </body>
 </html>

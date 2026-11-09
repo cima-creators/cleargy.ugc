@@ -791,7 +791,7 @@ details.ej summary{cursor:pointer;font-size:.9rem;color:var(--tx)}
           <b>Podio del mes</b>
           <span id="bono-podio-monto">$150.000</span>
         </div>
-        <small id="bono-podio-txt">Las tres collabs con más views del mes cobran premio.</small>
+        <small id="bono-podio-txt">Las tres collabs con más views del mes cobran premio, desde 10.000 views.</small>
       </div>
 
       <div class="bono">
@@ -2148,7 +2148,7 @@ function pintarPlata(){
   $('#bono-podio-monto').textContent = pesos(B.podio[0]);
   $('#bono-podio-txt').textContent = D.posicionMes
     ? `Vas ${D.posicionMes}° este mes.` + (D.posicionMes <= 3 ? ` Estás cobrando ${pesos(B.podio[D.posicionMes-1])}.` : '')
-    : 'Las tres collabs con más views del mes cobran premio.';
+    : 'Las tres collabs con más views del mes cobran premio, desde 10.000 views.';
 
   // 18/10: tu plata (lo acreditado de verdad, no una estimación) + alias para cobrar
   const ganado = D.ganado || 0, pagado = D.pagado || 0;
@@ -2416,7 +2416,7 @@ function pintarMarca(){
   } catch { if (DEMO){ precargar(); traerBorrador(); } ver(DEMO ? 'v-ficha' : 'v-error'); }
 })();
 
-const APP_VERSION = '2026-11-06-b';
+const APP_VERSION = '2026-11-09-a';
 </script>
 </body>
 </html>
