@@ -1969,14 +1969,14 @@ function pintarResumen(){
       ${listo ? `
         <div class="eco-top">
           ${ROL !== 'abril' ? `<div class="fac"><b>${pesos(m.facturado || 0)}</b><span>facturación${inf('Lo vendido con el código o el link de las creadoras desde que arrancó la campaña. Solo pedidos pagados.')}</span><i>${num(m.ventas)} ventas</i></div>` : ''}
-          <div class="inv"><b>${pesos(Math.round(costoReal))}</b><span>inversión${inf(`Lo que cuenta para el costo por video: ${queEntra}.`)}</span>${costoReal !== costoTotal ? `<i>${pesos(Math.round(costoTotal))} con todos los kits</i>` : ''}</div>
+          <div class="inv"><b>${pesos(Math.round(costoReal))}</b><span>inversión${inf(`La plata de los kits que ya tuvieron tiempo de dar video${bonos ? ', más los bonos' : ''}${e.pautaMes ? ', más la pauta' : ''}. Con este número se calcula el costo por video.${costoReal !== costoTotal ? ' El de abajo es todo lo gastado, sumando los kits que todavía están en camino o en sus 7 días.' : ''}`)}</span>${costoReal !== costoTotal ? `<i>${pesos(Math.round(costoTotal))} en total</i>` : ''}</div>
           <div class="vid"><b>${num(videosHechos)}</b><span>videos hechos${inf('Videos subidos a Drive o a redes, sean collab o no.')}</span><i>${num(videosPosteados)} en redes</i></div>
         </div>
         <div class="eco-datos">
-          <div><b>${num(kitsCuentan)}</b><span>kits que cuentan</span></div>
-          ${enEspera ? `<div><b>${num(kitsCampana - kitsCuentan)}</b><span>todavía no cuentan</span></div>` : ''}
-          <div><b>${pesos(porKit)}</b><span>por kit con envío</span></div>
-          ${bonos ? `<div><b>${pesos(bonos)}</b><span>bonos virales</span></div>` : ''}
+          <div><b>${num(kitsCuentan)}</b><span>kits que cuentan${inf('Kits que llegaron hace 7 días o más, o que ya tienen su video. Son los únicos que entran en la cuenta del costo.')}</span></div>
+          ${enEspera ? `<div><b>${num(kitsCampana - kitsCuentan)}</b><span>todavía no cuentan${inf('Kits que están en camino, o que llegaron hace menos de 7 días. La creadora todavía está a tiempo, así que no entran en la cuenta.')}</span></div>` : ''}
+          <div><b>${pesos(porKit)}</b><span>por kit con envío${inf('Lo que sale cada kit: el producto más el envío.')}</span></div>
+          ${bonos ? `<div><b>${pesos(bonos)}</b><span>bonos virales${inf('Lo que se pagó a las creadoras cuyo video pasó el mínimo de views para cobrar el bono.')}</span></div>` : ''}
         </div>
         ${cpmUsd !== null ? `<div class="comparo ${gana ? 'gana' : 'pierde'}">
           <span class="ic">${gana ? '✓' : '!'}</span>
@@ -2879,7 +2879,7 @@ function aplicarRol(){
     pintarTodo();
   }
 })();
-const APP_VERSION = '2026-11-09-b';
+const APP_VERSION = '2026-11-09-c';
 </script>
 </body>
 </html>
