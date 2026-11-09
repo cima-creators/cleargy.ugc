@@ -314,7 +314,7 @@ td .n2{color:var(--topo);font-size:.78rem;display:block;margin-top:2px}
 .inf{display:inline-grid;place-items:center;width:15px;height:15px;margin-left:5px;padding:0;vertical-align:1px;border:1px solid currentColor;border-radius:50%;background:none;color:var(--topo);font:700 10px/1 Georgia,serif;font-style:italic;letter-spacing:0;text-transform:none;cursor:help;opacity:.85}
 .estrella .inf{color:#fff}
 #inf-pop{display:none;position:fixed;z-index:9999;max-width:280px;padding:9px 12px;border-radius:10px;background:var(--tinta);color:#fff;font-size:.8rem;line-height:1.45;box-shadow:0 6px 20px rgba(0,0,0,.2);pointer-events:none}
-.estrella.doble{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:14px 28px}
+.estrella.doble{display:grid;grid-template-columns:repeat(auto-fit,minmax(170px,1fr));gap:14px 20px}
 .estrella .ars2{font-size:.86rem;font-weight:600;color:rgba(255,255,255,.88);margin-top:3px}
 .eco-datos{display:grid;grid-template-columns:repeat(auto-fit,minmax(120px,1fr));gap:12px 16px}
 .eco-datos b{display:block;font-size:1.02rem;font-weight:700;font-variant-numeric:tabular-nums}
@@ -1968,6 +1968,11 @@ function pintarResumen(){
         <div class="val">${usd(ingresoVideo)}</div>
         <div class="ars2">${ingresoVideo !== null ? pesos(Math.round(ingresoVideo)) + ' ARS' : ''}</div>
       </div>` : ''}
+      ${cpmUsd !== null ? `<div>
+        <div class="lb">Costo por mil views${inf(`${pesos(Math.round(costoReal))} ÷ ${vistas(viewsCampana)} views.`)}</div>
+        <div class="val">USD ${cpmUsd.toFixed(2)}</div>
+        <div class="ars2">Pauta: USD ${e.cpmMeta.toFixed(2)}</div>
+      </div>` : ''}
     </div>
 
     <div class="dos-col">
@@ -2887,7 +2892,7 @@ function aplicarRol(){
     pintarTodo();
   }
 })();
-const APP_VERSION = '2026-11-09-g';
+const APP_VERSION = '2026-11-09-h';
 </script>
 </body>
 </html>
