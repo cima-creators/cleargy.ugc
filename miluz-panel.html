@@ -914,7 +914,8 @@ const SOLAPAS = {
   abril:  ['resumen','admision','envios','entregas','creadoras','cupos','wa','lanz'],   // 26/10: como el equipo, sin Pagos
   avisos: ['creadoras','wa'],   // 29/9: solo mandar el link a mano a las aceptadas (Jhose) · 1/10: y atender WhatsApp
 };
-const puede = t => (SOLAPAS[ROL] || SOLAPAS.equipo).includes(t) && (t !== 'cupos' || conCupos()) && (t !== 'lanz' || !!(CFG && CFG.lanzamiento));
+const solapasDe = () => { const s = SOLAPAS[ROL] || SOLAPAS.equipo; return ROL === 'marca' && CFG && CFG.resumenMarca ? ['resumen', ...s] : s; };   // 9/11: Resumen para la marca, solo si su config lo prende
+const puede = t => solapasDe().includes(t) && (t !== 'cupos' || conCupos()) && (t !== 'lanz' || !!(CFG && CFG.lanzamiento));
 
 /* Trae todo del backend y lo vuelca en las mismas estructuras que
    usan las pantallas — así el render no distingue demo de real. */
@@ -2863,7 +2864,7 @@ function pintarTodo(){
 
 /* esconde las solapas que el rol no puede ver y abre la primera permitida */
 function aplicarRol(){
-  const solapas = (SOLAPAS[ROL] || SOLAPAS.equipo).filter(puede);
+  const solapas = solapasDe().filter(puede);
   document.querySelectorAll('.lat button[data-t]').forEach(b => { if (!solapas.includes(b.dataset.t)) b.remove(); else b.hidden = false; });
   $('#btn-importar').hidden = ROL !== 'admin';
   if (ROL === 'marca') $('#btn-desp').hidden = true;   // ve la lista y la exporta; marca despachadas logística
@@ -2894,7 +2895,7 @@ function aplicarRol(){
     pintarTodo();
   }
 })();
-const APP_VERSION = '2026-11-09-k';
+const APP_VERSION = '2026-11-09-l';
 </script>
 </body>
 </html>
