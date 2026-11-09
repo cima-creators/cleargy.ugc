@@ -1926,9 +1926,10 @@ function pintarResumen(){
   const porVideo = listo && videosHechos ? costoReal / videosHechos : null;
   const porPosteado = listo && videosPosteados ? costoReal / videosPosteados : null;
   const ingresoVideo = listo && videosHechos ? (m.facturado || 0) / videosHechos : null;
-  const cpmUsd = listo && viewsCampana && !e.sinCpm ? costoReal / e.dolar / (viewsCampana / 1000) : null;
+  const costoCpm = listo ? costoReal - (m.comisiones || 0) : 0;   // 9/11 (Nacho): sin comisiones, solo se pagan si hay venta
+  const cpmUsd = listo && viewsCampana && !e.sinCpm ? costoCpm / e.dolar / (viewsCampana / 1000) : null;
   const viewsEquilibrio = listo && videosHechos && e.cpmMeta
-    ? (costoReal / e.dolar) / e.cpmMeta * 1000 / videosHechos : null;
+    ? (costoCpm / e.dolar) / e.cpmMeta * 1000 / videosHechos : null;
   const viewsPorVideo = videosHechos ? viewsCampana / videosHechos : 0;
   const gana = cpmUsd !== null && cpmUsd < e.cpmMeta;
   const usd = ars => ars !== null ? 'USD ' + (ars / e.dolar).toFixed(1) : '—';
@@ -1969,7 +1970,7 @@ function pintarResumen(){
         <div class="ars2">${ingresoVideo !== null ? pesos(Math.round(ingresoVideo)) + ' ARS' : ''}</div>
       </div>` : ''}
       ${cpmUsd !== null ? `<div>
-        <div class="lb">Costo por mil views${inf(`${pesos(Math.round(costoReal))} ÷ ${vistas(viewsCampana)} views.`)}</div>
+        <div class="lb">Costo por mil views${inf(`${pesos(Math.round(costoCpm))} (inversión sin comisiones) ÷ ${vistas(viewsCampana)} views.`)}</div>
         <div class="val">USD ${cpmUsd.toFixed(2)}</div>
         <div class="ars2">Pauta: USD ${e.cpmMeta.toFixed(2)}</div>
       </div>` : ''}
@@ -1996,7 +1997,7 @@ function pintarResumen(){
           <div>
             <b>Mil views salen USD ${cpmUsd.toFixed(2)}</b>
             <span>contra USD ${e.cpmMeta.toFixed(2)} en pauta. ${gana ? `Es ${Math.round((1 - cpmUsd / e.cpmMeta) * 100)}% más barato.` : 'Ahora la pauta sale más barata.'}
-            ${viewsEquilibrio !== null ? `Equilibrio: ${num(Math.round(viewsEquilibrio))} views por video, vas en ${num(Math.round(viewsPorVideo))}.` : ''}</span>${inf('Inversión ÷ miles de views. Equilibrio: views por video para igualar la pauta.')}
+            ${viewsEquilibrio !== null ? `Equilibrio: ${num(Math.round(viewsEquilibrio))} views por video, vas en ${num(Math.round(viewsPorVideo))}.` : ''}</span>${inf('Inversión sin comisiones ÷ miles de views. Equilibrio: views por video para igualar la pauta.')}
           </div>
         </div>` : ''}`
       : `<p class="linea">Falta cargar el costo del kit o el tipo de cambio en
@@ -2893,7 +2894,7 @@ function aplicarRol(){
     pintarTodo();
   }
 })();
-const APP_VERSION = '2026-11-09-j';
+const APP_VERSION = '2026-11-09-k';
 </script>
 </body>
 </html>
