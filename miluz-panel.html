@@ -1984,7 +1984,7 @@ function pintarResumen(){
       ${listo ? `
         <div class="eco-top">
           ${ROL !== 'abril' ? `<div class="fac"><b>${pesos(m.facturado || 0)}</b><span>facturación${inf('Lo vendido con código o link. Solo pedidos pagados.')}</span><i>${num(m.ventas)} ventas</i></div>` : ''}
-          <div class="inv"><b>${pesos(Math.round(costoReal))}</b><span>inversión${inf(`${laCuenta}.${sinContar ? ` Abajo, sumando ${num(sinContar)} kits que todavía no cuentan.` : ''}`)}</span>${costoReal !== costoTotal ? `<i>${pesos(Math.round(costoTotal))} en total</i>` : ''}</div>
+          <div class="inv"><b>${pesos(Math.round(costoReal))}</b><span>inversión${inf(`Solo kits que ya cuentan: ${laCuenta}.${sinContar ? ` No suma los ${num(sinContar)} kits en camino o en plazo.` : ''}`)}</span>${costoReal !== costoTotal ? `<i>${pesos(Math.round(costoTotal))} en total${inf(`Todos los kits: ${num(kitsCampana)} × ${pesos(porKit)}${bonos ? ` + ${pesos(Math.round(bonos))} a creadoras` : ''}. Suma ${num(m.kitsEnCamino ?? 0)} en camino y ${num(m.kitsEnPlazo ?? 0)} en plazo.`)}</i>` : ''}</div>
           <div class="vid"><b>${num(videosHechos)}</b><span>videos hechos${inf('Subidos a Drive o a redes.')}</span><i>${num(videosPosteados)} en redes</i></div>
         </div>
         <div class="eco-datos" style="grid-template-columns:repeat(${enEspera && bonos ? 2 : 3},minmax(0,1fr))">
@@ -2895,7 +2895,7 @@ function aplicarRol(){
     pintarTodo();
   }
 })();
-const APP_VERSION = '2026-11-09-l';
+const APP_VERSION = '2026-11-10-a';
 </script>
 </body>
 </html>
