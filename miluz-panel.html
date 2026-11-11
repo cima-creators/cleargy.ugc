@@ -2390,7 +2390,21 @@ async function abrirCreadora(id){
       <a class="bsec" href="${c.link}" target="_blank" rel="noopener">Ver su app</a>
       <a class="bsec" href="https://instagram.com/${encodeURIComponent(c.ig)}" target="_blank" rel="noopener">Instagram</a>
       ${waL ? `<a class="bsec" href="${waL}" target="_blank" rel="noopener">Abrir en mi WhatsApp</a>` : ''}
+      ${tieneVideos(c) && ['admin','equipo','avisos','abril'].includes(ROL) ? `<button class="bsec" id="remedir" onclick="remedir('${escH(c.id || id)}', this)" title="Vuelve a medir las views de todos sus videos. Tarda hasta un minuto.">Actualizar views</button>` : ''}
     </div>`;
+}
+const tieneVideos = c => !!(c.reel || c.tiktokVideo || (c.entregas || []).some(e => e.reel || e.tiktok) || (c.cyberVideos || []).length);
+/* 11/11 (Nacho): cuando una creadora pide que se le actualicen las views, el equipo las vuelve a medir desde la ficha */
+async function remedir(id, btn){
+  btn.disabled = true; btn.textContent = 'Midiendo…';
+  try {
+    const r = await api('remedir', { id });
+    if (!r.ok) throw new Error(r.error || 'error');
+    const x = CREADORAS.find(z => z.id === id); if (x && r.views != null) x.views = r.views;
+    if (r.reciente) alert(`Ya se midió hace menos de 10 minutos. Tiene ${Number(r.views || 0).toLocaleString('es-AR')} views.`);
+    else alert(`Listo: ${r.medidos} video(s) medidos, ${Number(r.views || 0).toLocaleString('es-AR')} views en total.${r.fallas ? ` ${r.fallas} no se pudieron leer (link borrado o privado).` : ''} En su app ya se ve.`);
+    abrirCreadora(id);
+  } catch (e) { alert('No se pudo medir. Probá de nuevo en un rato.'); btn.disabled = false; btn.textContent = 'Actualizar views'; }
 }
 $('#dlg-cre') && $('#dlg-cre').addEventListener('click', e => { if (e.target.id === 'dlg-cre') e.target.close(); });
 document.addEventListener('click', e => { const t = e.target.closest && e.target.closest('.abre-cre'); if (t && t.dataset.id && !DEMO) abrirCreadora(t.dataset.id); });
@@ -2895,7 +2909,7 @@ function aplicarRol(){
     pintarTodo();
   }
 })();
-const APP_VERSION = '2026-11-10-a';
+const APP_VERSION = '2026-11-11-a';
 </script>
 </body>
 </html>
