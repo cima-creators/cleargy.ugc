@@ -2896,7 +2896,7 @@ function aplicarRol(){
   pintarMarca();
   if (DEMO){ ROL = 'equipo'; aplicarRol(); pintarTodo(); return; }
   if (!CLAVE){
-    CLAVE = (prompt('Clave del panel:') || '').trim();
+    CLAVE = (prompt('Clave del panel:') || '').trim().toLowerCase();   // 11/11: el iPhone pone mayúscula
     _ss.set(K_CLAVE, CLAVE);
   }
   try { ROL = (await api('rol')).rol; }
@@ -2909,7 +2909,7 @@ function aplicarRol(){
     pintarTodo();
   }
 })();
-const APP_VERSION = '2026-11-11-b';
+const APP_VERSION = '2026-11-11-c';
 </script>
 </body>
 </html>
