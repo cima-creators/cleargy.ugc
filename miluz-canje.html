@@ -1407,6 +1407,13 @@ function pintarLanz(e){
   if (l && l.estado === 'elegida'){
     const dias = l.dias || {}, links = l.links || {}, hechos = Object.keys(dias).length;
     b.innerHTML = `<h2>¡Quedaste en ${L.titulo}! 🎉</h2>
+      ${l.despachadoEn ? `<div class="lz-req" style="margin-top:10px">📦 <b>Tu producto ya salió.</b>${l.seguimiento ? ` <a href="${l.seguimiento.url}" target="_blank" rel="noopener">Seguilo en ${l.seguimiento.correo} ↗</a>${l.seguimiento.tipo === 'remito' ? `<br><small>En la página elegí «Remito» y poné <b>${l.seguimiento.codigo}</b>.</small>` : ''}` : ''}</div>` : ''}
+      ${L.producto ? `<details class="lz-broll" style="margin-top:12px" open><summary><b>Qué es y qué contar</b></summary>
+        <p style="margin:8px 0">${L.producto.que}</p>
+        <p style="margin:10px 0 4px"><b>Lo que tiene que quedar claro</b></p><ul>${L.producto.decir.map(t => `<li>${t}</li>`).join('')}</ul>
+        <p style="margin:10px 0 4px"><b>Cómo se usa</b> (mostralo así)</p><ol>${L.producto.modo.map(t => `<li>${t}</li>`).join('')}</ol>
+        <p style="margin:10px 0 4px"><b>Qué tiene</b></p><ul>${L.producto.activos.map(([n, t]) => `<li><b>${n}</b>: ${t}</li>`).join('')}</ul>
+        <p style="margin:10px 0 0"><small>${L.producto.nota}</small></p></details>` : ''}
       <small>Tu semana: tildá cada día cuando lo grabes. ${hechos} de ${L.semana.length} hechos.</small>
       ${L.semana.map((t, i) => `<label class="lz-dia ${dias[i+1] ? 'hecho' : ''}"><input type="checkbox" data-dia="${i+1}" ${dias[i+1] ? 'checked' : ''}><span><b>Día ${i+1}.</b> ${t}</span></label>`).join('')}
       <h3 style="margin:18px 0 4px">Lo que entregás</h3>
@@ -2416,7 +2423,7 @@ function pintarMarca(){
   } catch { if (DEMO){ precargar(); traerBorrador(); } ver(DEMO ? 'v-ficha' : 'v-error'); }
 })();
 
-const APP_VERSION = '2026-11-09-a';
+const APP_VERSION = '2026-11-11-a';
 </script>
 </body>
 </html>

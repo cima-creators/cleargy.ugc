@@ -2808,8 +2808,8 @@ function pintarLanz(){
   $('#lz-barra').innerHTML = fil.map(([k, t]) => `<button class="bsec ${LZF === k ? 'pri' : ''}" data-lzf="${k}">${t} · ${cuenta(k)}</button>`).join('') +
     `<button class="bsec" id="lz-csv" ${el.length ? '' : 'disabled'}>Exportar elegidas (envío)</button>`;
   $('#lz-barra').querySelectorAll('[data-lzf]').forEach(b => b.onclick = () => { LZF = b.dataset.lzf; pintarLanz(); });
-  const csv = $('#lz-csv'); if (csv) csv.onclick = () => bajarCsv(L.id + '-elegidas', [['Nombre','Instagram','Teléfono','Dirección','Despachado','Días','Videos','Tomas','Reel']]
-    .concat(el.map(f => [f.nombre, '@' + f.ig, f.tel, f.direccion, f.despachadoEn ? 'sí' : 'no', Object.keys(f.dias || {}).length + '/' + L.semana.length,
+  const csv = $('#lz-csv'); if (csv) csv.onclick = () => bajarCsv(L.id + '-elegidas', [['Nombre','Instagram','Teléfono','Dirección','Despachado','Seguimiento','Días','Videos','Tomas','Reel']]
+    .concat(el.map(f => [f.nombre, '@' + f.ig, f.tel, f.direccion, f.despachadoEn ? 'sí' : 'no', f.seguimiento ? f.seguimiento.correo + ' ' + f.seguimiento.codigo : '', Object.keys(f.dias || {}).length + '/' + L.semana.length,
       (f.links.videos || {}).url || '', (f.links.broll || {}).url || '', (f.links.reel || {}).url || ''])));
   const lista = LZL.filter(f => f.estado === LZF);
   if (!lista.length){ $('#lz-cuerpo').innerHTML = `<div class="vacio"><b class="serif" style="font-size:1.1rem">Nada por acá todavía</b></div>`; return; }
@@ -2828,7 +2828,7 @@ function pintarLanz(){
           <div>Semana: <b>${dias} de ${L.semana.length}</b> días</div>
           <div style="display:flex;gap:10px;flex-wrap:wrap">${link('videos','3 videos')} ${link('broll','20 tomas')} ${link('reel','Reel')}</div>
           <div class="n2">${f.direccion ? escH(f.direccion) : '⚠ sin dirección cargada'}</div>
-          <label style="display:flex;gap:8px;align-items:center"><input type="checkbox" data-lzdesp ${f.despachadoEn ? 'checked' : ''}> Producto despachado</label>
+          <label style="display:flex;gap:8px;align-items:center"><input type="checkbox" data-lzdesp ${f.despachadoEn ? 'checked' : ''}> Producto despachado${f.seguimiento ? ` · <a href="${escH(f.seguimiento.url)}" target="_blank" rel="noopener">${escH(f.seguimiento.correo)} ${escH(f.seguimiento.codigo)} ↗</a>` : ''}</label>
           <div class="lz-bt">
             ${f.tel ? `<a class="bsec" style="text-align:center;text-decoration:none" target="_blank" rel="noopener" href="${waLinkTexto(f.tel, `¡Hola ${String(f.nombre || '').split(' ')[0]}! Quedaste en ${L.titulo} 🎉 Antes de abrir el producto grabá tus talones como están hoy: es tu día 1. Tu semana y la lista de tomas están en tu app: ${f.link}`)}">WhatsApp</a>` : '<span></span>'}
             ${f.aprobadoEn ? '<span class="pill ok" style="text-align:center">✓ Aprobada y paga</span>' : `<button class="bsec pri" data-lzok ${lk.videos ? '' : 'disabled title="Todavía no cargó los videos"'}>Aprobar y pagar $${Number(L.pagoFijo).toLocaleString('es-AR')}</button>`}
@@ -2909,7 +2909,7 @@ function aplicarRol(){
     pintarTodo();
   }
 })();
-const APP_VERSION = '2026-11-11-a';
+const APP_VERSION = '2026-11-11-b';
 </script>
 </body>
 </html>
