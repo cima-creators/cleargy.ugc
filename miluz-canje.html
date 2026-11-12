@@ -748,6 +748,9 @@ details.ej summary{cursor:pointer;font-size:.9rem;color:var(--tx)}
       <button class="btn" id="btn-drive">Entregar</button>
     </div>
 
+    <!-- 12/11: videos extra, aparte de la collab (Valca) — siempre abierto -->
+    <div class="card oculto" id="bloque-extras"></div>
+
     <!-- cómo le está yendo -->
     <div class="card" id="bloque-rendimiento">
       <h2>Tu collab</h2>
@@ -1530,6 +1533,7 @@ function demo(accion, datos){
   if (accion === 'briefing'){ g.estado = 'briefing_ok'; }
   if (accion === 'cobro'){ g.cobro = { alias: datos.alias, titular: datos.titular }; }
   if (accion === 'entregar_cyber'){ g.cyberVideos = (g.cyberVideos || []).concat([{ n: (g.cyberVideos || []).length + 1, drive: datos.drive, reel: datos.ig ? { url: datos.ig, views: 0 } : null, tiktok: datos.tiktok ? { url: datos.tiktok, views: 0 } : null }]); }
+  if (accion === 'entregar_extra'){ g.extras = g.extras || []; const n = datos.n || g.extras.length + 1; g.extras[n-1] = { n, drive: datos.drive, reel: datos.ig ? { url: datos.ig, views: 0 } : null, tiktok: datos.tiktok ? { url: datos.tiktok, views: 0 } : null }; }
   if (accion === 'llego'){ g.estado = 'recibido'; g.deadline = Date.now()+CFG.diasParaPublicar*864e5; }
   if (accion === 'reel'){ g.estado = 'publicado'; g.reel = datos.url; }
   if (accion === 'entregar'){
@@ -2007,6 +2011,45 @@ document.addEventListener('click', async e => {
   try { D = (await api('entregar_cyber', { drive, ig, tiktok })).creadora; pintarCyber(); if (typeof pintarEstado === 'function') pintarEstado(); ver('v-cyber'); alert('¡Listo! Recibimos tu video de Cyber.'); }
   catch (er) { alert('No se pudo subir. Revisá los tres links: Drive, el reel de Instagram y el video de TikTok.'); b.disabled = false; b.textContent = 'Subir mi video de Cyber'; }
 });
+/* 12/11 (Nacho: «dejales siempre para que suban»): videos extra, aparte de los de la collab. Drive obligatorio;
+   los links de Instagram y TikTok se pueden sumar después tocando «Sumar links» en ese video. */
+let EXTRA_N = 0;   // 0 = video nuevo; n = editando ese
+function pintarExtras(e){
+  const caja = $('#bloque-extras');
+  const ok = CFG.videosExtra && ['entregado','cambios','publicado','cumplida'].includes(e);
+  caja.classList.toggle('oculto', !ok);
+  if (!ok) return;
+  const esc = t => String(t ?? '').replace(/[&<>"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+  const mios = (D && D.extras) || [];
+  const ed = EXTRA_N ? mios.find(v => v.n === EXTRA_N) : null;
+  caja.innerHTML = `<h2>Más videos</h2>
+    <small style="margin-bottom:12px">¿Hiciste otro video? Subilo cuando quieras, todos los que tengas: no hay límite. Pegá el Drive y, si ya lo publicaste etiquetando a @${esc(CFG.cuentaIg)}, los links.</small>` +
+    mios.map(v => `<div class="bono"><div class="bono-cab"><b>Video extra ${v.n}</b><span>${((v.reel ? v.reel.views : 0) + (v.tiktok ? v.tiktok.views : 0)).toLocaleString('es-AR')} vistas</span></div>
+      <small>${v.drive ? `<a href="${esc(v.drive)}" target="_blank" rel="noopener">Drive</a>` : ''}${v.reel ? ` · <a href="${esc(v.reel.url)}" target="_blank" rel="noopener">Reel</a>` : ''}${v.tiktok ? ` · <a href="${esc(v.tiktok.url)}" target="_blank" rel="noopener">TikTok</a>` : ''}
+      · <a href="#" class="ex-editar" data-n="${v.n}">${v.reel && v.tiktok ? 'Cambiar links' : 'Sumar links'}</a></small></div>`).join('') +
+    `<div style="margin-top:12px"><p style="margin:0 0 8px"><b>${ed ? 'Video extra ' + ed.n : 'Subir un video ' + (mios.length ? 'más' : 'extra')}</b></p>
+      <input id="ex-drive" inputmode="url" placeholder="Link de Drive con el video" value="${ed ? esc(ed.drive) : ''}" style="width:100%;box-sizing:border-box;margin:0 0 8px">
+      <input id="ex-ig" inputmode="url" placeholder="Link del reel en Instagram (si ya lo publicaste)" value="${ed && ed.reel ? esc(ed.reel.url) : ''}" style="width:100%;box-sizing:border-box;margin:0 0 8px">
+      <input id="ex-tt" inputmode="url" placeholder="Link del video en TikTok (si ya lo publicaste)" value="${ed && ed.tiktok ? esc(ed.tiktok.url) : ''}" style="width:100%;box-sizing:border-box;margin:0 0 10px">
+      <button class="btn" id="ex-enviar">${ed ? 'Guardar' : 'Subir video'}</button>
+      ${ed ? '<a href="#" id="ex-nuevo" style="display:block;text-align:center;margin-top:8px">Mejor subir uno nuevo</a>' : ''}</div>`;
+}
+document.addEventListener('click', async ev => {
+  const t = ev.target; if (!t) return;
+  if (t.classList && t.classList.contains('ex-editar')) { ev.preventDefault(); EXTRA_N = +t.dataset.n; pintarExtras(D.estado); $('#ex-drive').scrollIntoView({ behavior: 'smooth', block: 'center' }); return; }
+  if (t.id === 'ex-nuevo') { ev.preventDefault(); EXTRA_N = 0; pintarExtras(D.estado); return; }
+  if (t.id !== 'ex-enviar') return;
+  const drive = $('#ex-drive').value.trim(), ig = $('#ex-ig').value.trim(), tiktok = $('#ex-tt').value.trim();
+  if (!/^https?:\/\/\S+\.\S+/i.test(drive) || /instagram\.com|tiktok\.com/i.test(drive)) { alert('Pegá el link de Drive (o iCloud, WeTransfer) con tu video.'); return; }
+  if (ig && !/instagram\.com\/(reel|p)\//i.test(ig)) { alert('El link de Instagram tiene que ser el del reel (instagram.com/reel/...).'); return; }
+  if (tiktok && !/tiktok\.com\//i.test(tiktok)) { alert('El link de TikTok tiene que ser tiktok.com/...'); return; }
+  t.disabled = true; t.textContent = 'Subiendo…';
+  try {
+    const r = await api('entregar_extra', { drive, ig, tiktok, ...(EXTRA_N ? { n: EXTRA_N } : {}) });
+    if (!r.ok) throw new Error(r.error || 'error');
+    D = r.creadora; EXTRA_N = 0; pintarExtras(D.estado); alert('¡Listo! Recibimos tu video.');
+  } catch (er) { alert('No se pudo subir. Revisá los links y probá de nuevo.'); t.disabled = false; t.textContent = EXTRA_N ? 'Guardar' : 'Subir video'; }
+});
 $('#a-codigo').addEventListener('click', () => $('#bloque-codigo').scrollIntoView({behavior:'smooth',block:'center'}));
 $('#a-brief').addEventListener('click', () => { modoBriefing(); ver('v-brief'); });
 $('#a-chk').addEventListener('click', () => { modoBriefing(); ver('v-brief'); setTimeout(() => { const c = $('#checklist'); if (c) c.scrollIntoView({ behavior: 'smooth', block: 'start' }); }, 80); });
@@ -2267,6 +2310,7 @@ function pintarEstado(){
     $('#seg-link').href = sg.url;
   }
   pintarCollab(e);
+  pintarExtras(e);
   pintarRonda2(e);
   pintarLanz(e);
   if (CFG.lanzamiento && QS.get('ver') === CFG.lanzamiento.id && !window._lzScroll){ window._lzScroll = 1; setTimeout(() => $('#bloque-lanz').scrollIntoView({ behavior: 'smooth', block: 'start' }), 300); }
@@ -2423,7 +2467,7 @@ function pintarMarca(){
   } catch { if (DEMO){ precargar(); traerBorrador(); } ver(DEMO ? 'v-ficha' : 'v-error'); }
 })();
 
-const APP_VERSION = '2026-11-11-a';
+const APP_VERSION = '2026-11-12-a';
 </script>
 </body>
 </html>

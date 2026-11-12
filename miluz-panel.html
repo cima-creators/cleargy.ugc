@@ -2346,6 +2346,10 @@ async function abrirCreadora(id){
   const ent = (c.entregas || []).map(e => `${e.drive ? fila(`Drive ${e.n}`, `<a href="${escH(e.drive)}" target="_blank" rel="noopener">abrir</a>${e.aprobadoEn ? ' · aprobado' : ''}`) : ''}
     ${e.reel ? fila(`Reel ${e.n}`, `<a href="${escH(e.reel.url)}" target="_blank" rel="noopener">ver</a> · ${num(e.reel.views)} views${e.reel.collab ? ' ✓' : ''}`) : ''}
     ${e.tiktok ? fila(`TikTok ${e.n}`, `<a href="${escH(e.tiktok.url)}" target="_blank" rel="noopener">ver</a> · ${num(e.tiktok.views)} views`) : ''}`).join('');
+  // 12/11: videos extra (aparte de la collab)
+  const extras = (c.extras || []).map(e => fila(`Extra ${e.n}`, [e.drive ? `<a href="${escH(e.drive)}" target="_blank" rel="noopener">Drive</a>` : '',
+    e.reel ? `<a href="${escH(e.reel.url)}" target="_blank" rel="noopener">reel</a> ${num(e.reel.views)}${e.reel.collab ? ' ✓' : ''}` : '',
+    e.tiktok ? `<a href="${escH(e.tiktok.url)}" target="_blank" rel="noopener">TikTok</a> ${num(e.tiktok.views)}` : ''].filter(Boolean).join(' · '))).join('');
   const reelPrincipal = !(c.entregas || []).some(e => e.reel) && c.reel ? fila('Reel', `<a href="${escH(c.reel.url)}" target="_blank" rel="noopener">ver</a> · ${num(c.reel.views)} views · ${c.reel.collab ? 'collab ✓' : 'collab sin aceptar'}`) : '';
   const nombresEv = { estado: null, cupon: 'Cupón creado', video_aprobado: 'Video aprobado', dijo_acepto: 'Dijo que aceptó la collab', entrar: 'Entró a la app', bono_referida: 'Bono por referida' };
   const hist = (c.eventos || []).filter(e => e.tipo === 'estado' || nombresEv[e.tipo]).map(e => `<div class="h"><time>${fechaLarga(e.en)}</time><span>${e.tipo === 'estado' ? `${escH((ETIQUETA[e.a] || [e.a])[0])}${e.actor ? ` <small style="color:var(--topo)">· ${escH(e.actor)}</small>` : ''}${e.motivo ? ` — «${escH(e.motivo)}»` : ''}` : escH(nombresEv[e.tipo])}</span></div>`).join('');
@@ -2381,7 +2385,7 @@ async function abrirCreadora(id){
         ${c.referidaPor ? fila('Referida por', '@' + escH(c.referidaPor)) : ''}
         ${c.referidasCumplidas ? fila('Referidas que cumplieron', c.referidasCumplidas) : ''}
       </div>
-      ${ent || reelPrincipal || c.tiktokVideo ? `<div class="cre-box"><h4>Entregas</h4>${ent}${reelPrincipal}${c.tiktokVideo && !(c.entregas || []).some(e => e.tiktok) ? fila('TikTok', `<a href="${escH(c.tiktokVideo.url)}" target="_blank" rel="noopener">ver</a> · ${num(c.tiktokVideo.views)} views`) : ''}</div>` : ''}
+      ${ent || reelPrincipal || c.tiktokVideo || extras ? `<div class="cre-box"><h4>Entregas</h4>${ent}${reelPrincipal}${c.tiktokVideo && !(c.entregas || []).some(e => e.tiktok) ? fila('TikTok', `<a href="${escH(c.tiktokVideo.url)}" target="_blank" rel="noopener">ver</a> · ${num(c.tiktokVideo.views)} views`) : ''}${extras}</div>` : ''}
       ${env ? `<div class="cre-box"><h4>Envío</h4><div style="line-height:1.5">${env}</div>${c.email ? `<div style="margin-top:6px;color:var(--tinta2)">${escH(c.email)}</div>` : ''}</div>` : ''}
     </div>
     ${hist ? `<div class="cre-box cre-hist" style="margin-top:10px"><h4>Historial</h4>${hist}</div>` : ''}
@@ -2909,7 +2913,7 @@ function aplicarRol(){
     pintarTodo();
   }
 })();
-const APP_VERSION = '2026-11-11-c';
+const APP_VERSION = '2026-11-12-a';
 </script>
 </body>
 </html>
