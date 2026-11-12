@@ -666,6 +666,7 @@ dialog.dlg.dlg-cre{max-width:680px}
     <div class="barrasup" id="filtro-ent" style="gap:6px;flex-wrap:wrap">
       <button class="bsec fent activo" data-f="pendientes" title="Todo lo que espera algo: revisar, ajustes y publicadas por decidir">Todo lo pendiente <span class="n" data-ne="pendientes">0</span></button>
       <button class="bsec fent" data-f="revisar" title="Mandaron el video y nadie lo miró todavía">📥 Mandó el video · falta revisarlo <span class="n" data-ne="revisar">0</span></button>
+      <button class="bsec fent oculto" data-f="extras" title="Videos extra (aparte de la collab) que mandaron por Drive y falta aprobar">🎞️ Video extra · falta revisarlo <span class="n" data-ne="extras">0</span></button>
       <button class="bsec fent" data-f="ajuste" title="Le pediste un cambio y todavía no mandó el video corregido">✏️ Le pedimos un cambio <span class="n" data-ne="ajuste">0</span></button>
       <button class="bsec fent" data-f="publicar" title="Aprobaste el video y falta que lo publique en su Instagram y su TikTok">⏳ Video aprobado · falta que lo suba a IG <span class="n" data-ne="publicar">0</span></button>
       <button class="bsec fent" data-f="decidir" title="Ya está publicado pero falta la etiqueta/collab o tiene menos de 1.000 views">🔎 Subido a IG · falta aprobar <span class="n" data-ne="decidir">0</span></button>
@@ -967,6 +968,7 @@ async function cargar(){
     // si el reel principal no está, el de la 2ª entrega o el de Cyber (para la galería de Aprobadas)
     urlAlt: (((f.entregas || []).concat(f.cyberVideos || []).find(x => x && x.reel && x.reel.url) || {}).reel || {}).url || '',
     cyberVideos: Array.isArray(f.cyberVideos) ? f.cyberVideos.filter(Boolean) : [],
+    extras: Array.isArray(f.extras) ? f.extras.filter(Boolean) : [],
   }));
 
   CREADORAS = !todas ? [] : todas.fichas.map(f => ({
@@ -1528,7 +1530,36 @@ const ENT_FILTROS = {
   // las veteranas (anotadas por el link especial, collab de antes del sistema) sin ningún video no son entregas
   aprobadas:   e => e.estado === 'cumplida' && !(e.veterana && !embedVideo(e) && !(e.url && e.url !== '#') && !e.drive && !e.tiktok),
   rechazadas:  e => e.estado === 'rechazada',
+  extras:      e => EXTRAS_REV(e).length > 0,
 };
+/* 12/11: videos extra por revisar (Drive mandado, sin aprobar ni cambio pedido) */
+const EXTRAS_REV = e => (e.extras || []).filter(x => x.drive && !x.aprobadoEn && !x.cambiosMotivo);
+function tarjetasExtra(e){
+  return EXTRAS_REV(e).map(x => {
+    const dr = String(x.drive).match(/drive\.google\.com\/file\/d\/([\w-]+)/i);
+    return `<div class="entrega">
+      <div class="prev">${dr ? `<iframe src="https://drive.google.com/file/d/${dr[1]}/preview" allow="autoplay" loading="lazy" style="width:100%;height:100%;border:0"></iframe>`
+        : `<a href="${escH(x.drive)}" target="_blank" rel="noopener">📁<span>Abrir Drive</span></a>`}</div>
+      <div class="cuerpo">
+        <h3>${escH(e.nom)} <span class="hand">@${escH(e.ig)}</span></h3>
+        <div class="pills"><span class="pill">Video extra ${x.n}</span>
+          ${x.en ? `<span class="pill">mandado el ${new Date(x.driveEn || x.en).toLocaleDateString('es-AR', { day: 'numeric', month: 'numeric' })}</span>` : ''}
+          <a class="pill" href="${escH(x.drive)}" target="_blank" rel="noopener" style="text-decoration:none">📁 Drive</a></div>
+        <p class="n2" style="margin:8px 0">Aparte de su collab. Si lo aprobás, le avisamos que lo publique etiquetando a la marca; sus vistas suman para sus bonos.</p>
+        <div class="acc"><button class="bsec pri" onclick="resolverExtra('${e.id}', ${x.n}, true)">Aprobar</button>
+          <button class="bsec" onclick="resolverExtra('${e.id}', ${x.n}, false)">Pedir un cambio</button></div>
+      </div></div>`;
+  }).join('');
+}
+async function resolverExtra(id, n, aprobar){
+  let motivo = '';
+  if (!aprobar) { motivo = (prompt('¿Qué tiene que cambiar? Se lo mandamos por WhatsApp.') || '').trim(); if (!motivo) return; }
+  const e = ENTREGAS.find(x => x.id === id), x = e && (e.extras || []).find(v => v.n === n);
+  if (x) { if (aprobar) x.aprobadoEn = Date.now(); else x.cambiosMotivo = motivo; }
+  pintarEntregas();
+  if (!DEMO) api('resolver', { id, decision: aprobar ? 'aprobar_extra' : 'cambios_extra', n, motivo })
+    .then(r => { if (!r || !r.ok) throw 0; }).catch(() => alert('No se pudo guardar. Recargá y reintentá.'));
+}
 let filtroEnt = 'pendientes', buscaEnt = '', ordenEnt = 'fecha', prodEnt = '';
 document.addEventListener('change', ev => {
   if (ev.target.id === 'prod-ent') { prodEnt = ev.target.value; verEnt = 24; pintarEntregas(); return; }
@@ -1648,16 +1679,22 @@ function pintarEntregas(){
     verificadas: 'Subido a Instagram, con la marca etiquetada y más de 1.000 views. Se pueden aprobar todas juntas.',
     aprobadas: 'Collabs terminadas: el video está subido a Instagram y la marca lo aprobó.',
     rechazadas: 'Videos que la marca rechazó.',
+    extras: 'Videos de más que mandaron aparte de su collab. Revisalos: si los aprobás, los publican y sus vistas suman para sus bonos.',
   };
   const ex = $('#ent-expl'); if (ex) ex.textContent = EXPL[filtroEnt] || '';
   const oEnt = $('#orden-ent'); if (oEnt) oEnt.hidden = filtroEnt === 'pendientes';
   const bPub = document.querySelector('.fent[data-f="publicar"]'); if (bPub) bPub.classList.toggle('oculto', !CREADORA_PUBLICA());
+  const bEx = document.querySelector('.fent[data-f="extras"]'); if (bEx) bEx.classList.toggle('oculto', !(CFG && CFG.videosExtra));
   const busca = e => !buscaEnt || (e.ig || '').toLowerCase().includes(buscaEnt) || (e.nom || '').toLowerCase().includes(buscaEnt);
   const sProd = $('#prod-ent'); if (sProd) sProd.hidden = true;
   if (filtroEnt !== 'pendientes') {
     const fecha = x => x.cerradaEn || x.entregadoEn || 0;
     const tieneVideo = x => !!embedVideo(x) || !!(x.url && x.url !== '#');
     let base = ENTREGAS.filter(ENT_FILTROS[filtroEnt]).filter(busca);
+    if (filtroEnt === 'extras') {
+      $('#lista-entregas').innerHTML = base.map(tarjetasExtra).join('') || `<div class="vacio"><b class="serif" style="font-size:1.1rem">No hay videos extra por revisar</b></div>`;
+      contar(); return;
+    }
     if (filtroEnt === 'aprobadas' && hayProductos()) {
       base = base.flatMap(videosDeAprobada);
       pintarFiltroProd(base);
@@ -1677,15 +1714,18 @@ function pintarEntregas(){
     return;
   }
   const abiertas = ENTREGAS.filter(e => !ENT_CERRADA(e)).filter(busca);
+  const conExtras = ENTREGAS.filter(ENT_FILTROS.extras).filter(busca);
+  const nExtras = conExtras.reduce((a, e) => a + EXTRAS_REV(e).length, 0);
   const porRevisar = abiertas.filter(e => e.estado === 'entregado');
   const enAjuste   = abiertas.filter(e => e.estado === 'cambios');
   const publicadas = abiertas.filter(e => e.estado === 'publicado');
   const ok  = publicadas.filter(e => e.collab && e.views >= 1000);
   const rev = publicadas.filter(e => !(e.collab && e.views >= 1000));
 
-  $('#lista-entregas').innerHTML = !abiertas.length
-    ? `<div class="vacio"><div class="big">✓</div>
-       <b class="serif" style="font-size:1.2rem">Nada pendiente</b></div>`
+  $('#lista-entregas').innerHTML = (nExtras ? `<p class="n2" style="margin:6px 0 10px;font-weight:600;color:var(--tinta2)">
+       ${nExtras} video${nExtras === 1 ? '' : 's'} extra para revisar</p>` + conExtras.map(tarjetasExtra).join('') : '') + (!abiertas.length
+    ? (nExtras ? '' : `<div class="vacio"><div class="big">✓</div>
+       <b class="serif" style="font-size:1.2rem">Nada pendiente</b></div>`)
     : `
     ${porRevisar.length ? `<p class="n2" style="margin:6px 0 10px;font-weight:600;color:var(--tinta2)">
        ${porRevisar.length} ${CREADORA_PUBLICA() ? 'para revisar' : 'para revisar y subir'}</p>` + porRevisar.map(e => tarjetaDrive(e)).join('') : ''}
@@ -1708,7 +1748,7 @@ function pintarEntregas(){
 
     ${ok.length ? `<p class="n2" style="margin:22px 0 10px;font-weight:600;color:var(--tinta2)">
        Las verificadas, por si querés mirarlas</p>` +
-       ok.map(e => tarjetaEntrega(e, false)).join('') : ''}`;
+       ok.map(e => tarjetaEntrega(e, false)).join('') : ''}`);
   contar();
 }
 
@@ -2913,7 +2953,7 @@ function aplicarRol(){
     pintarTodo();
   }
 })();
-const APP_VERSION = '2026-11-12-a';
+const APP_VERSION = '2026-11-12-b';
 </script>
 </body>
 </html>
