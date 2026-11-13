@@ -865,7 +865,7 @@ const BRAND_CONFIGS = {
     goal:500, // objetivo total de la campaña
     name:'Skinfinity', logoText:'SKINFINITY', collection:'skinfinity', defaultCampaignStart:'2026-07-02', dailyVideos:3, videoGoal:100, noRacha:true, salary:450000, minVideos:100,
     logoImg:'data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="260" height="80"><rect width="260" height="80" rx="10" fill="%23133327"/><text x="130" y="51" font-family="Georgia,serif" font-size="29" font-weight="bold" fill="white" text-anchor="middle" letter-spacing="1.5">SKINFINITY</text></svg>',
-    no100k:true, adminPass:'skinfinity-admin-2025', adminPass2:'skinfinity-2025', adminPass4:'abril-2026',
+    no100k:true, noViral:true, adminPass:'skinfinity-admin-2025', adminPass2:'skinfinity-2025', adminPass4:'abril-2026',
     accent:'#133327', accentLight:'#2a5a45', bg:'#eef5f1', surface2:'#e2ede7', border:'#c5dbd0',
     text:'#0d2b1f', muted:'#5a7a6b', shadow:'19,51,39', loginBg:'linear-gradient(135deg,#eef5f1 0%,#dcebe2 50%,#c9e0d3 100%)',
     creators:{
@@ -2904,7 +2904,8 @@ function autoAssignBonos(){
       if(top.length && top[0][1]>=5 && (top.length<2||top[0][1]>top[1][1])) _otorgarSemanal(top[0][0],"ventas",wkey,"ventas");
     }
     // Video más viral de la semana (entre los subidos esa semana) — mínimo 10.000 views para calificar
-    if(!data.bonoGranted.weekly[wkey+"_viral"]){
+    // 12/11: marcas sin bono viral (Skinfinity: Nacho no lo paga)
+    if(!BRAND.noViral && !data.bonoGranted.weekly[wkey+"_viral"]){
       const delaSemana=(data.videos||[]).filter(v=>{ if(!v.date||!v.creator) return false; const d=new Date(v.date); return d>=ini&&d<fin; });
       const top=[...delaSemana].sort((a,b)=>viewsAcum(b)-viewsAcum(a))[0];
       if(top && viewsAcum(top)>=10000) _otorgarSemanal(top.creator,"viral",wkey,"video más viral");
@@ -4050,7 +4051,7 @@ loadConfig();
 <!-- Auto-actualización: GitHub Pages cachea el HTML y los celulares lo retienen mucho más.
      Esto compara la versión publicada con la que está corriendo y refresca sola. -->
 <script>
-const APP_VERSION = '2026-11-11-soledad';
+const APP_VERSION = '2026-11-12-z';
 (function(){
   var CLAVE='cima_ver_reload';
   function hayAlguienEscribiendo(){
