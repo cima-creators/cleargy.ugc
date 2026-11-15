@@ -2032,6 +2032,11 @@ function videoRow(v, compact=false){
   // El chip de CRUDO es el único acceso al video cuando no hay IG ni TikTok: va linkeado al Drive
   const _crudoUrl = v.driveLink || v.link || "";
   const _crudoCss = "padding:2px 8px;border-radius:20px;font-size:9px;font-family:'Poppins';font-weight:700;border:1px solid rgba(176,123,46,.35);color:#b45309;background:rgba(176,123,46,.1);";
+  // 15/11: la creadora puede entregar el video YA EDITADO (opción «Editado» de su app). No es crudo
+  // y no lo tiene que editar nadie: se marca distinto para no confundirlo con los que faltan editar.
+  const ediPropio = (v.entrega === 'editado')
+    ? `<a href="${escUrl(_crudoUrl||'#')}" target="_blank" rel="noopener" title="Lo entregó ya editado, listo para subir" style="padding:2px 8px;border-radius:20px;font-size:9px;font-family:'Poppins';font-weight:700;border:1px solid rgba(63,143,107,.4);color:#2F7355;background:rgba(63,143,107,.1);text-decoration:none;">✂ EDITADO POR ELLA</a>`
+    : "";
   const crudoTag = v.crudo
     ? (_crudoUrl
       ? `<a href="${escUrl(_crudoUrl)}" target="_blank" rel="noopener" title="Ver el crudo" style="${_crudoCss}cursor:pointer;text-decoration:none;">🎬 CRUDO</a>`
@@ -2053,6 +2058,7 @@ function videoRow(v, compact=false){
   // "sin editar" — así se lee para abajo de un vistazo en vez de buscar el chip entre los otros.
   const ediCell = (()=>{
     const e = v && v.editado;
+    if((!e || !e.link) && v && v.entrega === 'editado') return `<span style="font-family:'Poppins';font-size:10px;color:#2F7355;font-weight:700;white-space:nowrap;" title="Lo entregó ya editado">✂ lo editó ella</span>`;
     if(!e || !e.link) return `<span style="font-family:'Poppins';font-size:10px;color:var(--muted);opacity:.75;white-space:nowrap;">sin editar</span>`;
     const f = e.fecha ? new Date(e.fecha).toLocaleDateString("es-AR",{day:"2-digit",month:"2-digit"}) : "";
     const t = "Abrir el editado" + (f?" · "+f:"") + (e.archivo?" · "+e.archivo:"");
@@ -2063,7 +2069,7 @@ function videoRow(v, compact=false){
   const cmpChip = _refDe(v)
     ? `<button onclick="abrirComparar('${v.id}')" title="Verlo al lado del anuncio original que calca su guion" style="padding:2px 8px;border-radius:20px;font-size:9px;font-family:'Poppins';font-weight:700;cursor:pointer;border:1px solid rgba(124,58,237,.45);color:#7c3aed;background:rgba(124,58,237,.1);">⚖ ORIGINAL</button>`
     : "";
-  const _chips = [sinDrive,crudoTag,igBtn,ttBtn,fbBtn].filter(Boolean);
+  const _chips = [sinDrive,ediPropio,crudoTag,igBtn,ttBtn,fbBtn].filter(Boolean);
   if(!_chips.length) _chips.push(`<button onclick="copyLink('${v.id}',event)" style="padding:2px 8px;border-radius:20px;font-size:9px;font-family:'Poppins';cursor:pointer;border:1px solid var(--border2);color:var(--muted);background:none;">📋 Copiar</button>`);
   if(cmpChip) _chips.push(cmpChip);
   const copyBtn = _chips.join(" ");
@@ -4165,7 +4171,7 @@ loadConfig();
 <!-- Auto-actualización: GitHub Pages cachea el HTML y los celulares lo retienen mucho más.
      Esto compara la versión publicada con la que está corriendo y refresca sola. -->
 <script>
-const APP_VERSION = '2026-11-15-links';
+const APP_VERSION = '2026-11-15-editado';
 (function(){
   var CLAVE='cima_ver_reload';
   function hayAlguienEscribiendo(){

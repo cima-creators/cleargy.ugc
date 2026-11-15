@@ -580,16 +580,21 @@ html.sin-redes .solo-redes{display:none !important;}
       <div class="upload-title">Nuevo video</div>
       <div id="up-tipo-card" style="display:none;margin-bottom:14px;">
         <div class="flabel" style="margin-bottom:8px;">¿Qué tipo de video es?</div>
-        <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;">
+        <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:6px;">
           <button type="button" id="up-tipo-pub" onclick="setTipoEntrega('publicado')" style="border:2px solid var(--accent);background:rgba(var(--acc-rgb),.08);border-radius:var(--radius-sm);padding:12px 8px;cursor:pointer;font-family:inherit;text-align:center;">
             <div style="font-size:20px;line-height:1;margin-bottom:5px;">📱</div>
             <div style="font-size:12px;font-weight:800;color:var(--text);">Publicado</div>
-            <div style="font-size:9.5px;color:var(--muted);margin-top:2px;">en Instagram / TikTok</div>
+            <div style="font-size:9.5px;color:var(--muted);margin-top:2px;">ya está en mi IG/TikTok</div>
+          </button>
+          <button type="button" id="up-tipo-edi" onclick="setTipoEntrega('editado')" style="border:2px solid var(--border);background:transparent;border-radius:var(--radius-sm);padding:12px 6px;cursor:pointer;font-family:inherit;text-align:center;">
+            <div style="font-size:20px;line-height:1;margin-bottom:5px;">✂️</div>
+            <div style="font-size:12px;font-weight:800;color:var(--text);">Editado</div>
+            <div style="font-size:9.5px;color:var(--muted);margin-top:2px;">lo edité yo, listo</div>
           </button>
           <button type="button" id="up-tipo-cru" onclick="setTipoEntrega('crudo')" style="border:2px solid var(--border);background:transparent;border-radius:var(--radius-sm);padding:12px 8px;cursor:pointer;font-family:inherit;text-align:center;">
             <div style="font-size:20px;line-height:1;margin-bottom:5px;">🎬</div>
             <div style="font-size:12px;font-weight:800;color:var(--text);">Crudo</div>
-            <div style="font-size:9.5px;color:var(--muted);margin-top:2px;">solo para la marca</div>
+            <div style="font-size:9.5px;color:var(--muted);margin-top:2px;"><b>sin editar</b>, lo edita la marca</div>
           </button>
         </div>
         <div id="up-tipo-msg" style="display:none;background:rgba(176,123,46,.09);border:1px solid rgba(176,123,46,.25);border-radius:var(--radius-xs);padding:9px 11px;margin-top:10px;font-size:11px;color:var(--muted);font-weight:600;">
@@ -2155,24 +2160,33 @@ function selectPlat(p, el){
   el.classList.add("active");
 }
 
-// Tipo de entrega (marcas mixtas): 'publicado' pide links de redes, 'crudo' solo el Drive
+// Tipo de entrega: 'publicado' pide links de redes · 'editado' y 'crudo' van solo por Drive.
+// 15/11 (Nacho, Lagos campaña 3): faltaba «Editado». La que edita su video y no lo publica marcaba
+// «Crudo» porque era la única opción que le quedaba, y el video salía como si estuviera sin editar.
 let tipoEntrega = 'publicado';
+const _sinRedes = () => tipoEntrega==='crudo' || tipoEntrega==='editado';
 function setTipoEntrega(t){
   tipoEntrega = t;
-  const pub=document.getElementById('up-tipo-pub'), cru=document.getElementById('up-tipo-cru');
+  const pub=document.getElementById('up-tipo-pub'), cru=document.getElementById('up-tipo-cru'), edi=document.getElementById('up-tipo-edi');
   const on='2px solid var(--accent)', off='2px solid var(--border)';
   if(pub){ pub.style.border = t==='publicado'?on:off; pub.style.background = t==='publicado'?'rgba(var(--acc-rgb),.08)':'transparent'; }
+  if(edi){ edi.style.border = t==='editado'?on:off; edi.style.background = t==='editado'?'rgba(var(--acc-rgb),.08)':'transparent'; }
   if(cru){ cru.style.border = t==='crudo'?on:off; cru.style.background = t==='crudo'?'rgba(var(--acc-rgb),.08)':'transparent'; }
-  const lc=document.getElementById('up-links-card'); if(lc) lc.style.display = t==='crudo'?'none':'block';
-  const si=document.getElementById('up-sync-info'); if(si) si.style.display = t==='crudo'?'none':'block';
-  const msg=document.getElementById('up-tipo-msg'); if(msg) msg.style.display = t==='crudo'?'block':'none';
+  const _sr = t==='crudo' || t==='editado';
+  const lc=document.getElementById('up-links-card'); if(lc) lc.style.display = _sr?'none':'block';
+  const si=document.getElementById('up-sync-info'); if(si) si.style.display = _sr?'none':'block';
+  const msg=document.getElementById('up-tipo-msg'); if(msg) msg.style.display = _sr?'block':'none';
+  if(t==='editado'){
+    const m2=document.getElementById('up-tipo-msg-txt');
+    if(m2) m2.innerHTML = '<b>Video ya editado</b>, listo para publicar. Pegá el link de Drive: no hace falta Instagram ni TikTok. Cuenta igual para tu meta y tu pago. <b>Si todavía no lo editaste, elegí «Crudo».</b>';
+  }
   // Marca que edita puertas adentro: el crudo es lo normal, no la excepción
   const mtx=document.getElementById('up-tipo-msg-txt');
-  if(mtx && BRAND.crudoDefault) mtx.innerHTML = 'Pegá el link de Drive del crudo, <b>sin editar</b>. Puede ser un archivo o una carpeta con varias tomas. La marca lo edita y lo publica — no hace falta Instagram ni TikTok.';
+  if(mtx && BRAND.crudoDefault && t==='crudo') mtx.innerHTML = 'Pegá el link de Drive del crudo, <b>sin editar</b>. Puede ser un archivo o una carpeta con varias tomas. La marca lo edita y lo publica — no hace falta Instagram ni TikTok.';
   const dIn=document.getElementById('up-drive');
   const dg=dIn&&dIn.closest?dIn.closest('.fgroup'):null;
   if(dg){ const fl=dg.querySelector('.flabel');
-    if(fl) fl.innerHTML = t==='crudo'
+    if(fl) fl.innerHTML = _sr
       ? '🎬 Link del video (Drive) <span style="color:var(--accent2)">*</span>'
       : '🎬 Link del video original (Drive)'; }
   const nIn=document.getElementById('up-notes');
@@ -2186,7 +2200,8 @@ function setTipoEntrega(t){
     : 'algo que quieras aclarar...';
   const err=document.getElementById('up-err'); if(err) err.style.display='none';
 }
-// Un video es "crudo" si la marca no tiene redes, o si la creadora eligió ese modo
+// Un video es "crudo" (sin editar) si la marca no tiene redes, o si la creadora eligió ese modo.
+// «Editado» NO es crudo: ya viene listo, no lo tiene que editar nadie.
 function esCrudo(){ return BRAND.driveOnly || tipoEntrega==='crudo'; }
 
 function submitVideo(){
@@ -2204,7 +2219,8 @@ function submitVideo(){
   if(linkFb && !linkFb.startsWith('http')) linkFb = 'https://' + linkFb;
   const _crudo = esCrudo();
   // driveObligatorio: la marca necesita el archivo original, no alcanza con el link de redes
-  if((_crudo || BRAND.driveObligatorio) && !driveVal){document.getElementById("up-err").style.display="block";document.getElementById("up-err").textContent="Falta el link de Drive. La marca necesita el archivo original del video.";return;}
+  const _sr = _crudo || tipoEntrega==='editado';   // sin redes: va solo por Drive
+  if((_sr || BRAND.driveObligatorio) && !driveVal){document.getElementById("up-err").style.display="block";document.getElementById("up-err").textContent="Falta el link de Drive. La marca necesita el archivo original del video.";return;}
   if(driveVal && !/drive\.google\.com/i.test(driveVal)){document.getElementById("up-err").style.display="block";document.getElementById("up-err").textContent="El link de Drive no parece válido — tiene que contener drive.google.com.";return;}
   // Subir sin links de redes exige justificar por qué
   const _notaVal = document.getElementById("up-notes").value.trim();
@@ -2213,7 +2229,7 @@ function submitVideo(){
     document.getElementById("up-err").textContent="Contá en el motivo por qué este video no va publicado en redes.";
     return;
   }
-  if((!linkIg&&!_crudo)||(!cat&&!BRAND.products)){document.getElementById("up-err").style.display="block";document.getElementById("up-err").textContent=_crudo?"Seleccioná la categoría.":(BRAND.products?"Completá el link de Instagram.":"Completá el link de Instagram y la categoría.");return;}
+  if((!linkIg&&!_sr)||(!cat&&!BRAND.products)){document.getElementById("up-err").style.display="block";document.getElementById("up-err").textContent=_sr?"Seleccioná la categoría.":(BRAND.products?"Completá el link de Instagram.":"Completá el link de Instagram y la categoría.");return;}
   if(BRAND.products && !producto){document.getElementById("up-err").style.display="block";document.getElementById("up-err").textContent="Seleccioná de qué producto es el video.";return;}
   // Guion: obligatorio cuando la marca le cargó guiones. "Otro" se permite, pero hay que explicarlo
   const _gGrp = document.getElementById("up-guion-group");
@@ -2238,16 +2254,27 @@ function submitVideo(){
   }
 
   // Validar que cada link sea de su plataforma (evita pegar el de IG en el campo de TikTok)
-  if(!_crudo && !/instagram\.com\//i.test(linkIg)){document.getElementById("up-err").style.display="block";document.getElementById("up-err").textContent="El link de Instagram no parece válido — copialo desde la app de Instagram (debe contener instagram.com).";return;}
+  if(!_sr && !/instagram\.com\//i.test(linkIg)){document.getElementById("up-err").style.display="block";document.getElementById("up-err").textContent="El link de Instagram no parece válido — copialo desde la app de Instagram (debe contener instagram.com).";return;}
   if(linkTt && !/tiktok\.com\//i.test(linkTt)){document.getElementById("up-err").style.display="block";document.getElementById("up-err").textContent="El link de TikTok no parece válido — copialo desde la app de TikTok (debe contener tiktok.com).";return;}
   // Dedup: verificar que no existe ya el mismo link (ignorando ?utm=, barras finales y mayúsculas)
   const _normLink = l => (l||'').trim().toLowerCase().split('?')[0].replace(/\/+$/,'').replace(/^https?:\/\/(www\.)?/,'');
-  const alreadyExists = (sharedData.videos||[]).some(v =>
+  // 15/11: el link de Drive se comparaba SOLO cuando el video era crudo. Dani (Uniderma) subió dos veces
+  // el mismo archivo con dos guiones distintos y nadie lo frenó. Ahora se compara siempre y se dice cuál era.
+  const _idDrive = l => { const m=String(l||'').match(/\/file\/d\/([A-Za-z0-9_-]{10,})|[?&]id=([A-Za-z0-9_-]{10,})/); return m?(m[1]||m[2]):''; };
+  const _mismoDrive = (a,b) => { const x=_idDrive(a), y=_idDrive(b); return x&&y ? x===y : (!!a && _normLink(a)===_normLink(b)); };
+  const _dup = (sharedData.videos||[]).find(v =>
     (linkIg && _normLink(v.linkIg) === _normLink(linkIg)) ||
     (linkTt && _normLink(v.linkTt) === _normLink(linkTt)) ||
-    (_crudo && driveVal && v.driveLink && _normLink(v.driveLink) === _normLink(driveVal))
+    (driveVal && v.driveLink && _mismoDrive(v.driveLink, driveVal))
   );
-  if(alreadyExists){document.getElementById("up-err").style.display="block";document.getElementById("up-err").textContent="Este video ya fue cargado.";return;}
+  if(_dup){
+    const _f = _dup.date ? new Date(_dup.date).toLocaleDateString('es-AR',{day:'2-digit',month:'2-digit'}) : '';
+    document.getElementById("up-err").style.display="block";
+    document.getElementById("up-err").textContent = "Este video ya lo subiste" + (_f?" el "+_f:"")
+      + (_dup.guion && _dup.guion!=="OTRO" ? " con el guion "+_dup.guion : "")
+      + ". Si grabaste otro, subilo con su propio link de Drive.";
+    return;
+  }
   document.getElementById("up-err").style.display="none";
   const day = getCampaignDay() || 1;
   const platform = _crudo ? "drive" : (linkIg && linkTt ? "both" : linkIg ? "ig" : "tt");
@@ -2267,6 +2294,7 @@ function submitVideo(){
     cat,
     producto,
     crudo: _crudo && !BRAND.driveOnly,
+    entrega: tipoEntrega,   // publicado | editado | crudo — «editado» ya viene listo: no lo toca la edición
     guion: _guionVal,
     guionOriginal: _guionCrudo && _guionCrudo.toUpperCase()!==_guionVal ? _guionCrudo : "",
     notes: _notaVal,
@@ -3063,7 +3091,7 @@ loadData();
 <!-- Auto-actualización: GitHub Pages cachea el HTML y los celulares lo retienen mucho más.
      Esto compara la versión publicada con la que está corriendo y refresca sola. -->
 <script>
-const APP_VERSION = '2026-11-15-links';
+const APP_VERSION = '2026-11-15-editado';
 (function(){
   var CLAVE='cima_ver_reload';
   function hayAlguienEscribiendo(){
