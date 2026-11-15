@@ -2880,8 +2880,17 @@ function submitEditVideo(){
   if(!v.featured) delete v.featuredAt;
   const _evp2=document.getElementById("edit-product");
   if(_evp2 && BRAND.products){ v.producto = _evp2.value || ""; }
-  // Merge: escribe SOLO las métricas editadas, nunca pisa la nota
-  if(window._fbPatchVideo) window._fbPatchVideo(v.id, {views:v.views, likes:v.likes, shares:v.shares, saves:v.saves, featured:v.featured, featuredAt:v.featuredAt||null, ...(BRAND.products?{producto:v.producto||""}:{})});
+  // Merge: escribe SOLO lo editado, nunca pisa la nota.
+  // 🛑 15/11 (Nacho: «actualicé los links de Drive de Coni y no se actualiza»): el patch mandaba SOLO las
+  // métricas, así que los links se cambiaban en pantalla, salía el "✓ Video actualizado" y al recargar volvía
+  // el viejo — nunca llegaban a Firestore. Si los editó el equipo, van en el patch.
+  const _patch = {views:v.views, likes:v.likes, shares:v.shares, saves:v.saves, featured:v.featured, featuredAt:v.featuredAt||null, ...(BRAND.products?{producto:v.producto||""}:{})};
+  if(window.adminRole==='superadmin') Object.assign(_patch, {
+    linkIg:v.linkIg||"", linkTt:v.linkTt||"", driveLink:v.driveLink||"", link:v.link||"", platform:v.platform||"",
+    ...(BRAND.facebook?{linkFb:v.linkFb||""}:{}),
+    ...(v._scrapes===0?{_scrapes:0,_lastScrapeAt:0}:{})
+  });
+  if(window._fbPatchVideo) window._fbPatchVideo(v.id, _patch);
   else if(window._fbUpdateVideo) window._fbUpdateVideo(v);
   saveData(); renderAll(); renderVideos();
   document.getElementById("edit-overlay").classList.remove("open");
@@ -4171,7 +4180,7 @@ loadConfig();
 <!-- Auto-actualización: GitHub Pages cachea el HTML y los celulares lo retienen mucho más.
      Esto compara la versión publicada con la que está corriendo y refresca sola. -->
 <script>
-const APP_VERSION = '2026-11-15-editado';
+const APP_VERSION = '2026-11-15-links-guardan';
 (function(){
   var CLAVE='cima_ver_reload';
   function hayAlguienEscribiendo(){
