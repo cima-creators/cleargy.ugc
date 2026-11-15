@@ -354,6 +354,7 @@ body.archivo .abtn,body.archivo .action-row button,body.archivo #apify-sync-btn,
           <button id="apify-full-btn" class="hbtn" onclick="syncApify(true)" title="Todos los videos" style="background:#555;color:white;border:none;padding:10px 14px;border-radius:12px;font-family:'Poppins';font-weight:700;font-size:12px;cursor:pointer;opacity:.8;">📸 todo</button>
           <button id="tt-full-btn" class="hbtn" onclick="syncTikTok(true)" title="Todos los videos" style="background:#555;color:white;border:none;padding:10px 14px;border-radius:12px;font-family:'Poppins';font-weight:700;font-size:12px;cursor:pointer;opacity:.8;">🎵 todo</button>
           <button id="wp-notify-btn" onclick="notifyNoVideos()" style="background:linear-gradient(135deg,#25d366,#128c7e);color:white;border:none;padding:10px 18px;border-radius:12px;font-family:'Poppins';font-weight:800;font-size:13px;cursor:pointer;box-shadow:0 4px 14px rgba(37,211,102,.3);">📲 Avisar sin videos</button>
+          <button id="cmp-btn" onclick="abrirComparar()" title="Mirar lo que subieron al lado del anuncio original que calca cada guion" style="display:none;background:linear-gradient(135deg,#6d28d9,#a855f7);color:white;border:none;padding:10px 18px;border-radius:12px;font-family:'Poppins';font-weight:800;font-size:13px;cursor:pointer;box-shadow:0 4px 14px rgba(124,58,237,.3);">⚖ Comparar con el original</button>
           <span id="sync-status" style="font-size:11px;color:#aaa;font-family:'Poppins';"></span>
         </div>
         <div class="filters">
@@ -625,6 +626,23 @@ body.archivo .abtn,body.archivo .action-row button,body.archivo #apify-sync-btn,
       <label style="font-size:13px;font-weight:700;">⭐ Destacar este video</label>
     </div>
     <button class="hbtn primary" style="width:100%;padding:13px;" onclick="submitEditVideo()">Guardar cambios</button>
+  </div>
+</div>
+
+<!-- COMPARAR CON EL ORIGINAL (13/11/2026) -->
+<div class="overlay" id="cmp-overlay" onclick="if(event.target===this)cmpCerrar()">
+  <div class="modal" style="max-width:1000px;padding:18px 20px 22px;">
+    <div class="mhead" style="margin-bottom:8px;gap:10px;">
+      <div class="mtitle" id="cmp-title" style="font-size:15px;line-height:1.35;">Comparar</div>
+      <div style="display:flex;gap:4px;align-items:center;flex-shrink:0;">
+        <button class="xbtn" onclick="cmpPasar(-1)" title="Anterior">‹</button>
+        <span id="cmp-pos" style="font-size:11px;font-family:'Poppins';color:var(--muted);min-width:34px;text-align:center;"></span>
+        <button class="xbtn" onclick="cmpPasar(1)" title="Siguiente">›</button>
+        <button class="xbtn" onclick="cmpCerrar()">✕</button>
+      </div>
+    </div>
+    <div id="cmp-meta" style="font-size:11.5px;color:var(--muted);font-family:'Poppins';line-height:1.55;margin-bottom:12px;"></div>
+    <div id="cmp-cols" style="display:flex;gap:14px;flex-wrap:wrap;"></div>
   </div>
 </div>
 
@@ -1491,6 +1509,23 @@ window._avisarSinConexion = function(){
     '<button onclick="location.reload()" style="margin-left:8px;padding:4px 12px;border:0;border-radius:8px;background:#fff;color:#B0512F;font-family:Poppins;font-size:11.5px;font-weight:800;cursor:pointer;">Recargar</button>';
   document.body.appendChild(d);
 };
+// 15/11 (Nacho: «se rompió Nala, veo 0 en todo»): hasta que llegan los datos el panel dibuja
+// ceros y parecen reales. Mientras tanto, un cartel avisa; se va solo apenas entran.
+window._avisarCargando = function(on){
+  let d = document.getElementById('cargando-datos');
+  if(!on){ if(d) d.remove(); return; }
+  if(d) return;
+  d = document.createElement('div'); d.id = 'cargando-datos';
+  d.style.cssText = 'position:fixed;left:0;right:0;top:0;z-index:99998;background:#B07B2E;color:#fff;'+
+    "padding:9px 16px;font-family:'Poppins',sans-serif;font-size:12.5px;font-weight:700;text-align:center;";
+  d.textContent = '\u23f3 Cargando los datos de la marca\u2026 los n\u00fameros de abajo todav\u00eda no son reales';
+  document.body.appendChild(d);
+};
+setTimeout(function(){
+  if(_fbDataLoaded) return;
+  window._avisarCargando(true);
+  const _t = setInterval(function(){ if(_fbDataLoaded){ window._avisarCargando(false); clearInterval(_t); } }, 400);
+}, 2500);
 function saveData(){
   if(!_fbDataLoaded){ if(window._avisarSinConexion) window._avisarSinConexion(); return; }
   const _b=document.getElementById('sin-conexion'); if(_b) _b.remove();
@@ -2023,11 +2058,21 @@ function videoRow(v, compact=false){
     const t = "Abrir el editado" + (f?" · "+f:"") + (e.archivo?" · "+e.archivo:"");
     return `<a href="${escUrl(e.link)}" target="_blank" rel="noopener" title="${esc(t)}" style="padding:3px 10px;border-radius:20px;font-size:10px;font-family:'Poppins';font-weight:800;letter-spacing:.3px;border:1px solid #6d28d9;color:#fff;background:#7c3aed;box-shadow:0 1px 5px rgba(124,58,237,.45);text-decoration:none;white-space:nowrap;">✂ EDITADO</a>`;
   })();
-  const copyBtn = (sinDrive||crudoTag||igBtn||ttBtn||fbBtn) ? [sinDrive,crudoTag,igBtn,ttBtn,fbBtn].filter(Boolean).join(" ") : `<button onclick="copyLink('${v.id}',event)" style="padding:2px 8px;border-radius:20px;font-size:9px;font-family:'Poppins';cursor:pointer;border:1px solid var(--border2);color:var(--muted);background:none;">📋 Copiar</button>`;
+  // ⚖ ORIGINAL: al lado de los chips de plataforma, abre el video de la creadora junto al anuncio que calca
+  // su guion (Nacho, 13/11: "ponémelo al lado de cada video, al lado del Instagram o TikTok").
+  const cmpChip = _refDe(v)
+    ? `<button onclick="abrirComparar('${v.id}')" title="Verlo al lado del anuncio original que calca su guion" style="padding:2px 8px;border-radius:20px;font-size:9px;font-family:'Poppins';font-weight:700;cursor:pointer;border:1px solid rgba(124,58,237,.45);color:#7c3aed;background:rgba(124,58,237,.1);">⚖ ORIGINAL</button>`
+    : "";
+  const _chips = [sinDrive,crudoTag,igBtn,ttBtn,fbBtn].filter(Boolean);
+  if(!_chips.length) _chips.push(`<button onclick="copyLink('${v.id}',event)" style="padding:2px 8px;border-radius:20px;font-size:9px;font-family:'Poppins';cursor:pointer;border:1px solid var(--border2);color:var(--muted);background:none;">📋 Copiar</button>`);
+  if(cmpChip) _chips.push(cmpChip);
+  const copyBtn = _chips.join(" ");
   const guionTag = v.guion
     ? (v.guion==="OTRO"
       ? `<span style="font-family:'Poppins';font-size:9px;font-weight:700;padding:1px 7px;border-radius:20px;background:rgba(176,123,46,.1);border:1px solid rgba(176,123,46,.3);color:#b45309;" title="La creadora dijo que no es ninguno de sus guiones">sin guion</span>`
-      : `<span style="font-family:'Poppins';font-size:9px;font-weight:700;padding:1px 7px;border-radius:20px;background:rgba(124,58,237,.08);border:1px solid rgba(124,58,237,.22);color:#7c3aed;" title="Guion grabado">${esc(v.guion)}</span>`)
+      : (_refDe(v)
+        ? `<span onclick="abrirComparar('${v.id}')" style="font-family:'Poppins';font-size:9px;font-weight:700;padding:1px 7px;border-radius:20px;background:rgba(124,58,237,.12);border:1px solid rgba(124,58,237,.4);color:#7c3aed;cursor:pointer;" title="Comparar con el anuncio original que calca este guion">⚖ ${esc(v.guion)}</span>`
+        : `<span style="font-family:'Poppins';font-size:9px;font-weight:700;padding:1px 7px;border-radius:20px;background:rgba(124,58,237,.08);border:1px solid rgba(124,58,237,.22);color:#7c3aed;" title="Guion grabado">${esc(v.guion)}</span>`))
     : "";
   const startStr = campaignStartFor(v.creator);
   const calcDay = v.date ? Math.max(1,Math.floor((new Date(v.date)-new Date(startStr))/(86400000))+1) : (v.day||1);
@@ -2172,6 +2217,15 @@ function renderVideos(){
   document.getElementById("videos-tbody").innerHTML=vids.length?vids.map(v=>videoRow(v)).join(""):`<tr><td colspan="12" style="text-align:center;color:var(--muted);padding:32px;">Sin videos</td></tr>`;
   actualizarSeleccion();
   renderStatusPanel();
+  cmpBoton();
+}
+
+/* El botón ⚖ solo aparece si hay videos subidos de guiones que calcan un ganador, y dice cuántos. */
+function cmpBoton(){
+  const b=document.getElementById("cmp-btn"); if(!b) return;
+  const n=cmpConRef().length;
+  b.style.display=n?"inline-block":"none";
+  b.textContent="\u2696 Comparar con el original ("+n+")";
 }
 
 // Quién es cada inicial: N Nacho · A Abril · M la marca · la tercera la pone cada marca (Mi Luz: Vane)
@@ -2709,6 +2763,66 @@ function renderGuionesAdmin(){
 // EDIT VIDEO
 // ═══════════════════════════════════
 let editVideoId = null;
+/* ===== ⚖ COMPARAR CON EL ORIGINAL (Nacho, 13/11/2026: "quiero poder ver la comparativa del video
+   original del cual están haciendo la idea") ===========================================================
+   La referencia viaja en el guion de data.guiones, puesta por tablero/refs-guiones.py:
+     ref  = mp4 del ganador que el guion calca, ya publicado en el panel de guiones de la marca
+     refT = de quién es y cuánto dura ("Wild Dose · 1.652 ads · 201 días · 39 s")   ang = ángulo
+   El crudo de la creadora se embebe desde su link de Drive (/preview). Las flechas pasan por todos los
+   videos subidos que tengan referencia, del más nuevo al más viejo: así se miran de corrido. */
+function _guionDe(v){
+  const c=_gCode(v&&v.guion); if(!c||c==="OTRO") return null;
+  return ((data&&data.guiones)||[]).find(g=>_gCode(g.code)===c)||null;
+}
+function _refDe(v){ const g=_guionDe(v); return (g&&g.ref)?g:null; }
+function _drivePrev(u){
+  const m=String(u||"").match(/\/file\/d\/([A-Za-z0-9_-]{10,})/);
+  return m?("https://drive.google.com/file/d/"+m[1]+"/preview"):"";
+}
+let cmpLista=[], cmpIdx=0;
+function cmpConRef(){
+  return ((data&&data.videos)||[]).filter(v=>v && v.status!=="rejected" && _refDe(v))
+    .sort((a,b)=>String(b.date||"").localeCompare(String(a.date||"")));
+}
+function abrirComparar(id){
+  cmpLista=cmpConRef();
+  if(!cmpLista.length) return;
+  const i=cmpLista.findIndex(v=>String(v.id)===String(id));
+  cmpIdx = i<0?0:i;
+  cmpPintar();
+  document.getElementById("cmp-overlay").classList.add("open");
+}
+function cmpPasar(d){ if(cmpLista.length<2) return; cmpIdx=(cmpIdx+d+cmpLista.length)%cmpLista.length; cmpPintar(); }
+function cmpCerrar(){
+  document.getElementById("cmp-overlay").classList.remove("open");
+  document.getElementById("cmp-cols").innerHTML="";   // corta los dos reproductores
+}
+function cmpPintar(){
+  const v=cmpLista[cmpIdx]; if(!v) return;
+  const g=_guionDe(v)||{};
+  const quien=String(NAMES[v.creator]||v.creator||"").split(" ")[0];
+  const f=v.date?new Date(v.date).toLocaleDateString("es-AR",{day:"2-digit",month:"2-digit",hour:"2-digit",minute:"2-digit"}):"";
+  document.getElementById("cmp-title").innerHTML="⚖ "+esc(g.titulo||v.guion||"")
+    +'<span style="font-weight:600;color:var(--muted);font-size:11px;font-family:\'Poppins\';"> · '+esc(v.guion||"")+"</span>";
+  document.getElementById("cmp-pos").textContent=(cmpIdx+1)+"/"+cmpLista.length;
+  document.getElementById("cmp-meta").innerHTML=(g.ang?"<b>"+esc(g.ang)+"</b> · ":"")
+    +(g.refT?"calca "+esc(g.refT)+" · ":"")+"lo subió "+esc(quien)+(f?" el "+f:"")
+    +(v.status==="pending"?' · <b style="color:#b45309;">sin aprobar</b>':"")
+    +(g.link?' · <a href="'+escUrl(g.link)+'" target="_blank" rel="noopener" style="color:var(--accent);text-decoration:none;font-weight:700;">ver el guion ↗</a>':"");
+  const marco="width:100%;aspect-ratio:9/16;max-height:60vh;border:1px solid var(--border);border-radius:12px;background:#000;";
+  const col=(t,sub,cuerpo)=>'<div style="flex:1 1 300px;min-width:270px;">'
+    +'<div style="font-family:\'Poppins\';font-size:10px;font-weight:800;letter-spacing:.4px;text-transform:uppercase;color:var(--muted);margin-bottom:6px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">'
+    +t+(sub?'<span style="font-weight:600;text-transform:none;letter-spacing:0;opacity:.85;"> · '+sub+"</span>":"")+"</div>"+cuerpo+"</div>";
+  const prev=_drivePrev(v.driveLink||v.link), abrir=v.driveLink||v.link||"";
+  document.getElementById("cmp-cols").innerHTML=
+    col("🎬 El de "+esc(quien), "", prev
+      ? '<iframe src="'+escUrl(prev)+'" allow="autoplay" allowfullscreen style="'+marco+'"></iframe>'
+      : '<div style="'+marco+'display:flex;align-items:center;justify-content:center;text-align:center;font-family:\'Poppins\';font-size:11px;color:#bbb;padding:16px;">El link no es de un archivo de Drive'
+        +(abrir?'<br><br><a href="'+escUrl(abrir)+'" target="_blank" rel="noopener" style="color:#7dd3fc;">abrirlo igual ↗</a>':"")+"</div>")
+    +col("🏆 El original", esc(g.refT||""),
+      '<video src="'+escUrl(g.ref)+'" controls playsinline preload="metadata" style="'+marco+'object-fit:contain;"></video>');
+}
+
 function openEditVideo(id){
   editVideoId = id;
   const v = data.videos.find(x=>x.id==id);
@@ -4051,7 +4165,7 @@ loadConfig();
 <!-- Auto-actualización: GitHub Pages cachea el HTML y los celulares lo retienen mucho más.
      Esto compara la versión publicada con la que está corriendo y refresca sola. -->
 <script>
-const APP_VERSION = '2026-11-12-z';
+const APP_VERSION = '2026-11-15-links';
 (function(){
   var CLAVE='cima_ver_reload';
   function hayAlguienEscribiendo(){
@@ -4072,12 +4186,21 @@ const APP_VERSION = '2026-11-12-z';
   }
   function chequear(){
     if(!navigator.onLine) return;
-    fetch(location.pathname+'?cb='+Date.now(), {cache:'no-store'})
+    // 13/11: el fetch iba a location.pathname, pero la barra se reescribe al link corto (/<marca>/admin/) y ESE
+    // archivo es el redirect de tres líneas: no tiene APP_VERSION, así que la actualización no disparaba nunca
+    // desde el 13/10 y los celulares se quedaban con la copia vieja. Ahora pide el HTML de verdad.
+    var _url = (function(){
+      try{ var n=performance.getEntriesByType('navigation')[0]; if(n && n.name) return n.name.split('#')[0].split('?')[0]; }catch(e){}
+      return location.pathname;
+    })();
+    if(!/\.html$/.test(_url)) _url = '/cleargy.dashboard/cima-admin.html';
+    fetch(_url+'?cb='+Date.now(), {cache:'no-store'})
       .then(function(r){ return r.ok?r.text():null; })
       .then(function(t){
         if(!t) return;
         var m=t.match(/APP_VERSION\s*=\s*'([^']+)'/);
-        if(!m || m[1]===APP_VERSION) return;
+        if(!m) return;   // no es el HTML de la app (un redirect): nada que comparar
+        if(m[1]===APP_VERSION) return;
         if(hayAlguienEscribiendo()){ banner(); return; }
         if(sessionStorage.getItem(CLAVE)===m[1]){ banner(); return; }  // ya recargamos por esta versión: no loopear
         sessionStorage.setItem(CLAVE, m[1]);
