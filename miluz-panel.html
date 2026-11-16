@@ -1962,7 +1962,7 @@ function pintarResumen(){
   const costoReal = listo ? costoTotal - porKit * (kitsCampana - kitsCuentan) : 0;
   const sinContar = kitsCampana - kitsCuentan;
   const laCuenta = `${num(kitsCuentan)} kits × ${pesos(porKit)}${bonos ? ` + ${pesos(Math.round(bonos))} a creadoras` : ''}${e.pautaMes ? ` + ${pesos(Math.round(e.pautaMes * (m.mesesCampana || 1) * e.dolar))} de pauta` : ''}`;
-  const cpmBono = e.bonoViral / e.bonoUmbral * 1000 / e.dolar;
+  const cpmBono = e.bonoUmbral ? e.bonoViral / e.bonoUmbral * 1000 / e.dolar : 0;   // 16/11: Mi Luz sin bono viral
   const videosPosteados = m.videosPosteados ?? m.publicadas;
   const porVideo = listo && videosHechos ? costoReal / videosHechos : null;
   const porPosteado = listo && videosPosteados ? costoReal / videosPosteados : null;
@@ -2953,7 +2953,7 @@ function aplicarRol(){
     pintarTodo();
   }
 })();
-const APP_VERSION = '2026-11-12-b';
+const APP_VERSION = '2026-11-16-a';
 </script>
 </body>
 </html>

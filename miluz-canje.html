@@ -765,7 +765,7 @@ details.ej summary{cursor:pointer;font-size:.9rem;color:var(--tx)}
 
     <div class="card" id="bloque-tiktok">
       <h2>Subilo también a TikTok</h2>
-      <small style="margin-bottom:14px">El mismo video, en tu cuenta de TikTok. <b style="color:var(--tx)">Esas views se suman a las del reel</b> para el bono viral y el podio. Pegá el link cuando lo subas.</small>
+      <small style="margin-bottom:14px" id="tt-intro">El mismo video, en tu cuenta de TikTok. <b style="color:var(--tx)">Esas views se suman a las del reel</b> para el bono viral y el podio. Pegá el link cuando lo subas.</small>
       <div id="tt-hecho" class="oculto" style="margin-bottom:10px"><small>Tu TikTok: <a id="tt-link" target="_blank" rel="noopener" style="color:var(--tx)">ver</a> · <b id="tt-views">—</b> views</small></div>
       <label>
         <span class="lb">Link de tu TikTok</span>
@@ -778,7 +778,7 @@ details.ej summary{cursor:pointer;font-size:.9rem;color:var(--tx)}
     <!-- bonos -->
     <div class="card" id="bloque-bonos">
       <h2>Tus bonos</h2>
-      <small style="margin-bottom:14px">Además del kit, hay plata en juego todos los meses. Y no es una sola: cuando terminás una collab podés pedir otro kit y hacer <b style="color:var(--tx)">+1</b>. Las views y los bonos se van sumando.</small>
+      <small style="margin-bottom:14px" id="bonos-intro">Además del kit, hay plata en juego todos los meses. Y no es una sola: cuando terminás una collab podés pedir otro kit y hacer <b style="color:var(--tx)">+1</b>. Las views y los bonos se van sumando.</small>
 
       <div class="bono" id="bono-viral">
         <div class="bono-cab">
@@ -790,7 +790,7 @@ details.ej summary{cursor:pointer;font-size:.9rem;color:var(--tx)}
         <small id="bono-viral-txt" style="margin-top:6px"></small>
       </div>
 
-      <div class="bono">
+      <div class="bono" id="bono-podio">
         <div class="bono-cab">
           <b>Podio del mes</b>
           <span id="bono-podio-monto">$150.000</span>
@@ -1284,10 +1284,10 @@ function armarBriefing(){
      </ul>`;
   const cuandoSuba = CREADORA_PUBLICA()
     ? `<h3>Cuando lo publiques</h3>
-     <p>${B('Resubilo a tus historias')} ese mismo día. Las views de Instagram y de TikTok ${B('se suman')} para el bono viral y el podio del mes: por eso van los dos links.${br.hashtag ? ` Usá ${B(br.hashtag)}.` : ''}</p>`
+     <p>${B('Resubilo a tus historias')} ese mismo día. ${BONO_VIEWS() ? `Las views de Instagram y de TikTok ${B('se suman')} para el bono viral y el podio del mes: por eso van los dos links.` : ''}${br.hashtag ? ` Usá ${B(br.hashtag)}.` : ''}</p>`
     : `<h3>Cuando lo subamos</h3>
      <p>Te va a llegar una ${B('invitación de colaboración')} en Instagram (Notificaciones → "te invitó a colaborar"). <span class="si">Aceptala</span>: así el reel aparece también en tu perfil y cuenta como tu collab. Y ${B('resubilo a tus historias')} ese mismo día.</p>
-     <p>${B('Subilo también a tu TikTok.')} El mismo video, en tu cuenta. Después pegá el link en tu app: las views de TikTok ${B('se suman a las del reel')} para el bono viral y el podio del mes.${br.hashtag ? ` En TikTok arrobá a @${CFG.cuentaIg} y usá ${B(br.hashtag)}.` : ''}</p>`;
+     <p>${B('Subilo también a tu TikTok.')} El mismo video, en tu cuenta. Después pegá el link en tu app${BONO_VIEWS() ? `: las views de TikTok ${B('se suman a las del reel')} para el bono viral y el podio del mes` : ''}.${br.hashtag ? ` En TikTok arrobá a @${CFG.cuentaIg} y usá ${B(br.hashtag)}.` : ''}</p>`;
   secciones.push(comoEntregar + fotosBloque +
     fotosEjemplo(bk) + (bk2 && bk2.fotos ? fotosEjemplo(bk2) : '') +
     (nCrudos ? `<h3>Los ${nCrudos} videos crudos</h3>
@@ -1322,6 +1322,8 @@ const soporteLink = (motivo) => 'https://wa.me/' + SOPORTE_WA + '?text=' + encod
 /* 2/10: ella avisa que aceptó la collab y lo re-verificamos en el momento */
 /* 27/10: segunda collab — las que ya cumplieron mandan sus uñas de hoy y eligen colores; CIMA decide */
 const R2 = { fotos: [], tonos: [] };
+/* 16/11: ¿la marca paga bonos por views (viral o podio)? Mi Luz no. */
+const BONO_VIEWS = () => !!(CFG && CFG.plata && (CFG.plata.viralMonto > 0 || (CFG.plata.podio || []).length));
 /* 13/11: más tolerante (una creadora de Mi Luz no podía subir la foto de la 2ª collab desde el iPhone): primero
    createImageBitmap (usa menos memoria con fotos de 48 MP), después <img> con un objectURL, y si ninguno puede leerla
    (HEIC en algunos navegadores internos) pero es JPG/PNG liviano, se manda tal cual. */
@@ -2200,8 +2202,12 @@ function pintarPlata(){
     if (tt){ $('#tt-link').href = D.tiktok.url; $('#tt-views').textContent = viewsTt ? numero(viewsTt) : (D.tiktok.medidoEn ? '0' : 'midiendo…'); $('#btn-tiktok').textContent = 'Cambiar link'; }
   }
 
+  // 16/11 (Nacho): Mi Luz no paga bonos por views → sin bono viral ni podio, se esconden (B.viralMonto 0 / podio vacío)
+  $('#bono-viral').classList.toggle('oculto', !(B.viralMonto > 0));
+  $('#bono-podio').classList.toggle('oculto', !((B.podio || []).length));
+  if (!BONO_VIEWS()) { $('#bonos-intro').textContent = 'Además del kit, ganás plata con lo que se venda con tu código. Y cuando terminás una collab podés pedir otro kit y hacer +1.'; $('#tt-intro').textContent = 'El mismo video, en tu cuenta de TikTok. Pegá el link cuando lo subas.'; }
   // bono viral: barra de progreso hacia el umbral
-  const ganoViral = views >= B.viralViews;
+  const ganoViral = B.viralViews > 0 && views >= B.viralViews;
   $('#bono-viral').classList.toggle('ganado', ganoViral);
   $('#bono-viral-monto').textContent = pesos(B.viralMonto);
   $('#bono-viral-cond').textContent = `Si tu reel + tu TikTok pasan las ${numero(B.viralViews)} views.`;
@@ -2212,7 +2218,7 @@ function pintarPlata(){
       ? `¡Lo ganaste! ${numero(views)} views.`
       : `${numero(views)} de ${numero(B.viralViews)} views.`;
 
-  $('#bono-podio-monto').textContent = pesos(B.podio[0]);
+  $('#bono-podio-monto').textContent = pesos((B.podio || [])[0] || 0);
   $('#bono-podio-txt').textContent = D.posicionMes
     ? `Vas ${D.posicionMes}° este mes.` + (D.posicionMes <= 3 ? ` Estás cobrando ${pesos(B.podio[D.posicionMes-1])}.` : '')
     : 'Las tres collabs con más views del mes cobran premio, desde 10.000 views.';
@@ -2390,7 +2396,7 @@ function pintarReferidas(){
 }
 $('#btn-ref').addEventListener('click', async () => {
   const link = linkReferida();
-  const texto = `Sumate al equipo de creadoras de ${CFG.nombre} ✨ Te regalan el kit y ganás bonos por views y ventas. Aplicá con mi link: ${link}`;
+  const texto = `Sumate al equipo de creadoras de ${CFG.nombre} ✨ Te regalan el kit y ${BONO_VIEWS() ? "ganás bonos por views y ventas" : "ganás comisión por tus ventas"}. Aplicá con mi link: ${link}`;
   if (navigator.share) { try { await navigator.share({ text: texto }); return; } catch {} }
   try { await navigator.clipboard.writeText(texto); $('#rf-ok').style.display = 'block'; setTimeout(() => $('#rf-ok').style.display = 'none', 2500); }
   catch { window.open('https://wa.me/?text=' + encodeURIComponent(texto), '_blank'); }
@@ -2484,7 +2490,7 @@ function pintarMarca(){
   } catch { if (DEMO){ precargar(); traerBorrador(); } ver(DEMO ? 'v-ficha' : 'v-error'); }
 })();
 
-const APP_VERSION = '2026-11-13-a';
+const APP_VERSION = '2026-11-16-a';
 </script>
 </body>
 </html>
