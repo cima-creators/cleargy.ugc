@@ -2069,7 +2069,12 @@ function videoRow(v, compact=false){
   const cmpChip = _refDe(v)
     ? `<button onclick="abrirComparar('${v.id}')" title="Verlo al lado del anuncio original que calca su guion" style="padding:2px 8px;border-radius:20px;font-size:9px;font-family:'Poppins';font-weight:700;cursor:pointer;border:1px solid rgba(124,58,237,.45);color:#7c3aed;background:rgba(124,58,237,.1);">⚖ ORIGINAL</button>`
     : "";
-  const _chips = [sinDrive,ediPropio,crudoTag,igBtn,ttBtn,fbBtn].filter(Boolean);
+  // el nombre con el que la marca sube el anuncio a Meta (si el guion lo trae)
+  const _anun = _anuncioDe(v);
+  const anunChip = _anun
+    ? `<button onclick="copiarNombreAnuncio('${esc(_anun).replace(/'/g,"\\'")}',event)" title="Copiar el nombre del anuncio: ${esc(_anun)}" style="padding:2px 8px;border-radius:20px;font-size:9px;font-family:'Poppins';font-weight:700;cursor:pointer;border:1px solid rgba(74,143,255,.35);color:var(--accent3);background:rgba(74,143,255,.07);">📋 NOMBRE</button>`
+    : "";
+  const _chips = [sinDrive,ediPropio,crudoTag,igBtn,ttBtn,fbBtn,anunChip].filter(Boolean);
   if(!_chips.length) _chips.push(`<button onclick="copyLink('${v.id}',event)" style="padding:2px 8px;border-radius:20px;font-size:9px;font-family:'Poppins';cursor:pointer;border:1px solid var(--border2);color:var(--muted);background:none;">📋 Copiar</button>`);
   if(cmpChip) _chips.push(cmpChip);
   const copyBtn = _chips.join(" ");
@@ -2708,6 +2713,17 @@ function bannerGuiones(){
     📄 <b style="color:${col[2]};">Guiones por agotarse</b> — ${txt}. Cargá más en Guiones →</div>`;
 }
 
+/* Nombre del anuncio (SOP sop/sop-naming.md): viene en el guion como `anuncio`. Con ese nombre la
+   marca sube el anuncio a Meta, así el reporte dice después qué persona, ángulo, formato y creadora
+   ganan. El guion que no lo traiga no muestra nada. Pedido de Nacho, 18/11/2026. */
+function copiarNombreAnuncio(txt, e){
+  if(e){ e.stopPropagation(); e.preventDefault(); }
+  const t = String(txt||"");
+  const ok = () => showToast("✓ Nombre del anuncio copiado");
+  if(navigator.clipboard && navigator.clipboard.writeText) navigator.clipboard.writeText(t).then(ok).catch(()=>prompt("Copiá el nombre:", t));
+  else prompt("Copiá el nombre:", t);
+}
+function _anuncioDe(v){ const g=_guionDe(v); return (g&&g.anuncio)||""; }
 function renderGuionesAdmin(){
   const cont=document.getElementById("guiones-admin-list");
   if(!cont) return;
@@ -2754,7 +2770,7 @@ function renderGuionesAdmin(){
         ? `<span class="badge badge-approved">✓ grabado</span> <span style="font-size:10px;font-family:'Poppins';color:var(--muted);">${NAMES[v.creator]?String(NAMES[v.creator]).split(" ")[0]:v.creator}${v.date?" · "+new Date(v.date).toLocaleDateString("es-AR",{day:"2-digit",month:"2-digit"}):""}</span>${v.driveLink||v.link?` <a href="${escUrl(v.driveLink||v.link)}" target="_blank" style="font-size:10px;font-family:'Poppins';color:var(--accent);text-decoration:none;">ver ↗</a>`:""}`
         : `<span class="badge badge-pending">⏳ sin grabar</span>`;
       return `<tr>
-        <td><span style="font-family:'Poppins';font-size:10px;font-weight:700;color:#7c3aed;background:rgba(124,58,237,.08);border:1px solid rgba(124,58,237,.22);border-radius:8px;padding:1px 7px;">${esc(g.code)}</span>${g.titulo?`<div style="font-size:12px;margin-top:4px;">${esc(g.titulo)}</div>`:""}${g.link?`<a href="${escUrl(g.link)}" target="_blank" style="font-size:10px;font-family:'Poppins';color:var(--accent);text-decoration:none;">abrir el guion ↗</a>`:""}</td>
+        <td><span style="font-family:'Poppins';font-size:10px;font-weight:700;color:#7c3aed;background:rgba(124,58,237,.08);border:1px solid rgba(124,58,237,.22);border-radius:8px;padding:1px 7px;">${esc(g.code)}</span>${g.titulo?`<div style="font-size:12px;margin-top:4px;">${esc(g.titulo)}</div>`:""}${g.link?`<a href="${escUrl(g.link)}" target="_blank" style="font-size:10px;font-family:'Poppins';color:var(--accent);text-decoration:none;">abrir el guion ↗</a>`:""}${g.anuncio?`<div style="margin-top:5px;display:flex;align-items:center;gap:6px;max-width:430px;"><code style="font-size:9.5px;line-height:1.3;color:var(--muted);word-break:break-all;" title="Nombre del anuncio (así se sube a Meta)">${esc(g.anuncio)}</code><button onclick="copiarNombreAnuncio('${esc(g.anuncio).replace(/'/g,"\\'")}',event)" title="Copiar el nombre del anuncio" style="flex-shrink:0;border:1px solid var(--border2);background:none;border-radius:7px;padding:2px 6px;font-size:11px;cursor:pointer;color:var(--muted);">📋</button></div>`:""}</td>
         <td style="font-size:12px;">${quien}</td>
         <td style="white-space:nowrap;">${estado}</td>
         <td><button onclick="borrarGuion('${esc(g.code).replace(/'/g,"\\'")}')" style="background:none;border:none;color:var(--muted);cursor:pointer;font-size:15px;padding:4px;">✕</button></td>
@@ -4193,7 +4209,7 @@ loadConfig();
 <!-- Auto-actualización: GitHub Pages cachea el HTML y los celulares lo retienen mucho más.
      Esto compara la versión publicada con la que está corriendo y refresca sola. -->
 <script>
-const APP_VERSION = '2026-11-17-cupones';
+const APP_VERSION = '2026-11-18-anuncio';
 (function(){
   var CLAVE='cima_ver_reload';
   function hayAlguienEscribiendo(){

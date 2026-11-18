@@ -635,6 +635,7 @@ html.sin-redes .solo-redes{display:none !important;}
           <option value="">Seleccioná...</option>
         </select>
         <div style="font-size:10px;font-family:'Poppins';color:var(--muted);margin-top:4px;">Así la marca sabe cuáles ya están grabados y cuáles faltan.</div>
+        <div id="up-anuncio"></div>
         <div id="up-guion-manual" style="display:none;margin-top:9px;">
           <input class="finput" type="text" id="up-guion-cod" placeholder="Número del guion (ej: 69)" autocomplete="off">
           <div style="font-size:10px;font-family:'Poppins';color:var(--muted);margin-top:4px;">Poné el número tal cual figura en el doc.</div>
@@ -1715,6 +1716,27 @@ function renderHomeGuiones(){
   card.style.borderColor = pend.length ? "" : "rgba(193,97,60,.45)";
 }
 
+/* Nombre del anuncio (SOP de naming, sop/sop-naming.md): viene en el guion como `anuncio`.
+   Con ese nombre la creadora guarda el archivo del video y la marca sube el anuncio a Meta, así
+   el reporte después dice qué persona, ángulo, formato y creadora ganan. Si el guion no lo trae
+   (formatos viejos, guiones de fuera de la Sala) no se muestra nada. Pedido de Nacho, 18/11/2026. */
+function copiarAnuncio(txt, e){
+  if(e) e.stopPropagation();
+  const ok = () => showToast("✓ Nombre copiado — guardá el video con ese nombre");
+  try{ navigator.clipboard.writeText(txt).then(ok).catch(()=>prompt("Copiá el nombre:", txt)); }
+  catch(x){ prompt("Copiá el nombre:", txt); }
+}
+function cajaAnuncio(a){
+  if(!a) return "";
+  return '<div style="margin-top:8px;background:rgba(var(--acc-rgb),.06);border:1px solid rgba(var(--acc-rgb),.22);border-radius:10px;padding:8px 10px;">'
+    + '<div style="font-family:\'Poppins\';font-size:9px;font-weight:800;letter-spacing:.4px;text-transform:uppercase;color:var(--muted);margin-bottom:3px;">Nombre del anuncio</div>'
+    + '<div style="display:flex;align-items:center;gap:8px;">'
+    + '<code style="flex:1;font-size:10.5px;line-height:1.35;word-break:break-all;color:var(--text);">' + esc(a) + '</code>'
+    + '<button onclick="copiarAnuncio(\'' + esc(a).replace(/'/g,"\\'") + '\', event)" style="flex-shrink:0;border:1px solid var(--border);background:var(--surface);border-radius:8px;padding:5px 9px;font-size:12px;cursor:pointer;">📋</button>'
+    + '</div>'
+    + '<div style="font-family:\'Poppins\';font-size:9.5px;color:var(--muted);margin-top:4px;">Guardá el archivo del video con este nombre.</div>'
+    + '</div>';
+}
 function renderGuiones(){
   const cont = document.getElementById("guiones-list");
   if(!cont) return;
@@ -1738,6 +1760,7 @@ function renderGuiones(){
             ${g.titulo?`<div class="gui-tit">${esc(g.titulo)}</div>`:""}
             ${g.texto?`<div class="gui-hk">${esc(g.texto)}</div>`:""}
             ${g.link?`<a class="gui-link" href="${escUrl(g.link)}" target="_blank" rel="noopener" onclick="event.stopPropagation()">Abrir el guion ↗</a>`:""}
+            ${cajaAnuncio(g.anuncio)}
           </div>
         </div>
       </div>`;
@@ -1766,6 +1789,12 @@ function llenarGuionesUpload(){
   sel.onchange = () => {
     const m = document.getElementById("up-guion-manual");
     if(m) m.style.display = sel.value === "__manual__" ? "block" : "none";
+    // el nombre con el que tiene que guardar el archivo, del guion que eligió
+    const caja = document.getElementById("up-anuncio");
+    if(caja){
+      const g = (sharedData.guiones||[]).find(x=>_gCode(x.code)===sel.value);
+      caja.innerHTML = (g && g.anuncio) ? cajaAnuncio(g.anuncio) : "";
+    }
   };
   sel.onchange();
   // Solo queda trabada si no hay NINGUNO libre en toda la marca
@@ -3093,7 +3122,7 @@ loadData();
 <!-- Auto-actualización: GitHub Pages cachea el HTML y los celulares lo retienen mucho más.
      Esto compara la versión publicada con la que está corriendo y refresca sola. -->
 <script>
-const APP_VERSION = '2026-11-17-cupones';
+const APP_VERSION = '2026-11-18-anuncio';
 (function(){
   var CLAVE='cima_ver_reload';
   function hayAlguienEscribiendo(){
