@@ -2786,15 +2786,27 @@ function _drivePrev(u){
   return m?("https://drive.google.com/file/d/"+m[1]+"/preview"):"";
 }
 let cmpLista=[], cmpIdx=0;
+// 🛑 17/11 (Nacho: «abrí uno de Marlene y me tira ese otro»): el chip ⚖ se pintaba en TODOS los videos
+// con guion calcado, pero esta lista sacaba los RECHAZADOS. Al tocar el chip de uno rechazado el índice
+// daba -1, caía en 0 y abría el primero de la lista — otro video. Ahora la lista es la misma que el chip
+// (los rechazados son justo los que conviene mirar contra el original) y, si igual no estuviera, se abre
+// el que se pidió y nunca otro.
 function cmpConRef(){
-  return ((data&&data.videos)||[]).filter(v=>v && v.status!=="rejected" && _refDe(v))
+  return ((data&&data.videos)||[]).filter(v=>v && _refDe(v))
     .sort((a,b)=>String(b.date||"").localeCompare(String(a.date||"")));
 }
 function abrirComparar(id){
   cmpLista=cmpConRef();
+  if(id){
+    const i=cmpLista.findIndex(v=>String(v.id)===String(id));
+    if(i>=0) cmpIdx=i;
+    else {
+      const v=((data&&data.videos)||[]).find(x=>String(x.id)===String(id));
+      if(!v) return;                  // sin el video pedido no se abre nada
+      cmpLista=[v].concat(cmpLista); cmpIdx=0;
+    }
+  } else cmpIdx=0;
   if(!cmpLista.length) return;
-  const i=cmpLista.findIndex(v=>String(v.id)===String(id));
-  cmpIdx = i<0?0:i;
   cmpPintar();
   document.getElementById("cmp-overlay").classList.add("open");
 }
@@ -2814,6 +2826,7 @@ function cmpPintar(){
   document.getElementById("cmp-meta").innerHTML=(g.ang?"<b>"+esc(g.ang)+"</b> · ":"")
     +(g.refT?"calca "+esc(g.refT)+" · ":"")+"lo subió "+esc(quien)+(f?" el "+f:"")
     +(v.status==="pending"?' · <b style="color:#b45309;">sin aprobar</b>':"")
+    +(v.status==="rejected"?' · <b style="color:#B0512F;">rechazado</b>':"")
     +(g.link?' · <a href="'+escUrl(g.link)+'" target="_blank" rel="noopener" style="color:var(--accent);text-decoration:none;font-weight:700;">ver el guion ↗</a>':"");
   const marco="width:100%;aspect-ratio:9/16;max-height:60vh;border:1px solid var(--border);border-radius:12px;background:#000;";
   const col=(t,sub,cuerpo)=>'<div style="flex:1 1 300px;min-width:270px;">'
@@ -4180,7 +4193,7 @@ loadConfig();
 <!-- Auto-actualización: GitHub Pages cachea el HTML y los celulares lo retienen mucho más.
      Esto compara la versión publicada con la que está corriendo y refresca sola. -->
 <script>
-const APP_VERSION = '2026-11-16-saldada';
+const APP_VERSION = '2026-11-17-comparar-ok';
 (function(){
   var CLAVE='cima_ver_reload';
   function hayAlguienEscribiendo(){
