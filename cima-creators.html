@@ -1052,12 +1052,12 @@ const BRAND_CONFIGS = {
     text:'#161616', muted:'#6b6b6b', shadow:'22,22,22',
     goal: 300, dailyVideos:2, videoGoal:60, salary:375000, minVideos:60,
     creators:{
-      creadora1:{name:'Flor',pass:'uniflor',avatar:'FL',color:'#161616',salary:450000},
+      creadora1:{name:'Flor',pass:'uniflor',cupon:'FLOR10',avatar:'FL',color:'#161616',salary:450000},
       creadora2:{name:'Cate',pass:'unicate',avatar:'CA',color:'#454545'},
       creadora3:{name:'Rocío',pass:'baja-unirocio',avatar:'RO',color:'#2e2e2e'},   // 6/10: se va (dejó 4 videos, 2 aprobados)
       creadora4:{name:'Mora',pass:'unimora',avatar:'MO',color:'#6b6b6b'},
-      creadora5:{name:'Coni',pass:'uniconi',avatar:'CO',color:'#8c8c8c'},
-      creadora6:{name:'Nani',pass:'uninani',avatar:'NA',color:'#3f3f3f'},   // 6/10: entra por Rocío, slot nuevo para no mezclar videos
+      creadora5:{name:'Coni',pass:'uniconi',cupon:'CONI10',avatar:'CO',color:'#8c8c8c'},
+      creadora6:{name:'Nani',pass:'uninani',cupon:'NANI10',avatar:'NA',color:'#3f3f3f'},   // 6/10: entra por Rocío, slot nuevo para no mezclar videos
     }
   },
   menlab: {
@@ -1388,7 +1388,7 @@ function _aplicarCreadorasCfg(cfg){
   cfg = cfg || {};
   (cfg.altas||[]).forEach(a=>{
     if(!a || !a.key) return;
-    BRAND.creators[a.key] = Object.assign(BRAND.creators[a.key]||{}, {name:a.name, pass:a.pass, avatar:a.avatar, color:a.color}, a.salary?{salary:a.salary}:{});   // 18/10: sueldo propio de una alta del panel
+    BRAND.creators[a.key] = Object.assign(BRAND.creators[a.key]||{}, {name:a.name, pass:a.pass, avatar:a.avatar, color:a.color}, a.salary?{salary:a.salary}:{}, a.cupon?{cupon:a.cupon}:{});   // 18/10: sueldo propio de una alta del panel · 17/11: y su código de descuento
     PASSWORDS[a.key]=a.pass; DISPLAY_NAMES[a.key]=a.name; AVATARS[a.key]=a.avatar; COLORS[a.key]=a.color;
     if(!CREATOR_KEYS.includes(a.key)) CREATOR_KEYS.push(a.key);
   });
@@ -3093,7 +3093,7 @@ loadData();
 <!-- Auto-actualización: GitHub Pages cachea el HTML y los celulares lo retienen mucho más.
      Esto compara la versión publicada con la que está corriendo y refresca sola. -->
 <script>
-const APP_VERSION = '2026-11-17-sinavisos';
+const APP_VERSION = '2026-11-17-cupones';
 (function(){
   var CLAVE='cima_ver_reload';
   function hayAlguienEscribiendo(){
