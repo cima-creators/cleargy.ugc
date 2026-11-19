@@ -1394,7 +1394,9 @@ function _aplicarCreadorasCfg(cfg){
     if(!CREATOR_KEYS.includes(a.key)) CREATOR_KEYS.push(a.key);
   });
   _CREADORAS_BAJA = {};
-  Object.entries(cfg.estado||{}).forEach(([k,e])=>{ if(e && e.activa===false) _CREADORAS_BAJA[k]=true; });
+  // `eventual` (Nacho, 19/11 por Fabi en Lagos): no cuenta para las metas ni para los videos del día,
+  // pero su cuenta sigue andando — sube cuando graba algo. La baja de verdad es la que no tiene esta marca.
+  Object.entries(cfg.estado||{}).forEach(([k,e])=>{ if(e && e.activa===false && !e.eventual) _CREADORAS_BAJA[k]=true; });
 }
 try{ _aplicarCreadorasCfg(JSON.parse(localStorage.getItem(BRAND_ID+'_creadoras')||'null')); }catch(e){}
 window._onCreadorasCfg = function(cfg){
@@ -3122,7 +3124,7 @@ loadData();
 <!-- Auto-actualización: GitHub Pages cachea el HTML y los celulares lo retienen mucho más.
      Esto compara la versión publicada con la que está corriendo y refresca sola. -->
 <script>
-const APP_VERSION = '2026-11-19-chips2col-b';
+const APP_VERSION = '2026-11-19-eventual';
 (function(){
   var CLAVE='cima_ver_reload';
   function hayAlguienEscribiendo(){

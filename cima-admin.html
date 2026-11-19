@@ -1896,10 +1896,12 @@ function renderOverview(){
     const {vids, ventas, views}=_statsDe(c);
     const pct=Math.min(100,Math.round(vids.length/VIDEO_GOAL*100));
     const _baja=(BRAND.creators[c]||{}).inactive;
+    // eventual: no cuenta para las metas ni para el objetivo del día, pero sigue entrando a su app
+    const _even=!!(((CREADORAS_CFG||{}).estado||{})[c]||{}).eventual;
     return`<div class="creator-card" style="${_baja?'opacity:.6;':''}" onclick="document.getElementById('vf-creator').value='${c}';nav(document.querySelector('[data-view=videos]'))">
       <div class="cc-avatar" style="background:${_baja?'#dc262612':COLORS[c]+'18'};border:2px solid ${_baja?'#dc2626':COLORS[c]};color:${_baja?'#dc2626':COLORS[c]};">${!_baja&&_rank<3?['🥇','🥈','🥉'][_rank]+' ':''}${AVATARS[c]}</div>
       <div class="cc-info">
-        <div class="cc-name" style="${_baja?'color:#dc2626;':''}">${NAMES[c].split(' ')[0]}${_baja?` <span style="font-size:8px;font-family:'Poppins';letter-spacing:1px;background:#dc262615;color:#dc2626;border:1px solid #dc262640;border-radius:8px;padding:1px 6px;vertical-align:1px;">BAJA</span>`:''}</div>
+        <div class="cc-name" style="${_baja?'color:#dc2626;':''}">${NAMES[c].split(' ')[0]}${_baja?` <span style="font-size:8px;font-family:'Poppins';letter-spacing:1px;background:${_even?'#b45a0915':'#dc262615'};color:${_even?'#b45309':'#dc2626'};border:1px solid ${_even?'#b4530940':'#dc262640'};border-radius:8px;padding:1px 6px;vertical-align:1px;" title="${_even?'No cuenta para las metas ni para los videos del día, pero su cuenta anda: sube cuando graba':'Dada de baja'}">${_even?'EVENTUAL':'BAJA'}</span>`:''}</div>
         <div class="cc-meta">${ventas} ventas · ${fmtV(views)} views · ${vids.length} videos</div>
         <div style="height:3px;background:var(--surface2);border-radius:3px;margin-top:6px;overflow:hidden;">
           <div style="height:100%;width:${pct}%;background:${COLORS[c]};border-radius:3px;transition:width .4s;"></div>
@@ -4209,7 +4211,7 @@ loadConfig();
 <!-- Auto-actualización: GitHub Pages cachea el HTML y los celulares lo retienen mucho más.
      Esto compara la versión publicada con la que está corriendo y refresca sola. -->
 <script>
-const APP_VERSION = '2026-11-19-chips2col-b';
+const APP_VERSION = '2026-11-19-eventual';
 (function(){
   var CLAVE='cima_ver_reload';
   function hayAlguienEscribiendo(){
