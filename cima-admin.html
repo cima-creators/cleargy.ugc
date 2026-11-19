@@ -2077,7 +2077,7 @@ function videoRow(v, compact=false){
   const _chips = [sinDrive,ediPropio,crudoTag,igBtn,ttBtn,fbBtn,anunChip].filter(Boolean);
   if(!_chips.length) _chips.push(`<button onclick="copyLink('${v.id}',event)" style="padding:2px 8px;border-radius:20px;font-size:9px;font-family:'Poppins';cursor:pointer;border:1px solid var(--border2);color:var(--muted);background:none;">📋 Copiar</button>`);
   if(cmpChip) _chips.push(cmpChip);
-  const copyBtn = _chips.join(" ");
+  const copyBtn = _chips.join("");
   const guionTag = v.guion
     ? (v.guion==="OTRO"
       ? `<span style="font-family:'Poppins';font-size:9px;font-weight:700;padding:1px 7px;border-radius:20px;background:rgba(176,123,46,.1);border:1px solid rgba(176,123,46,.3);color:#b45309;" title="La creadora dijo que no es ninguno de sus guiones">sin guion</span>`
@@ -2093,7 +2093,7 @@ function videoRow(v, compact=false){
     <td style="font-family:'Poppins';font-size:11px;white-space:nowrap;">${v.date?new Date(v.date).toLocaleDateString("es-AR",{day:"2-digit",month:"2-digit"}):"—"} · D${calcDay}</td>
     ${cols.plat?`<td style="font-size:11px;white-space:nowrap;">${v.linkIg&&v.linkTt?'📸🎵':v.linkIg?'📸':'🎵'}</td>`:""}
     ${cols.cat?`<td style="font-size:11px;color:var(--muted);max-width:120px;">${v.producto?`<div style="font-size:9.5px;font-weight:800;color:#7c3aed;background:rgba(124,58,237,.08);border:1px solid rgba(124,58,237,.25);border-radius:8px;padding:1px 7px;margin-bottom:2px;display:inline-block;white-space:nowrap;">📦 ${esc(v.producto)}</div><br>`:""}<span style="overflow:hidden;text-overflow:ellipsis;white-space:nowrap;display:inline-block;max-width:115px;">${esc(v.cat)}</span></td>`:""}
-    <td style="white-space:nowrap;">${guionTag?guionTag+" ":""}${copyBtn}</td>
+    <td><div style="display:grid;grid-template-columns:repeat(2,max-content);gap:4px 6px;align-items:center;">${guionTag}${copyBtn}</div></td>
     ${cols.metrics?`<td style="font-family:'Poppins';font-size:10px;color:var(--muted);white-space:nowrap;">${metricsStr}</td>`:""}
     ${cols.edi?`<td style="white-space:nowrap;">${ediCell}</td>`:""}
     <td><span class="badge badge-${v.status}">${v.status==="approved"?"✓ Ok":v.status==="rejected"?"✗":"⏳"}</span>
@@ -4209,7 +4209,7 @@ loadConfig();
 <!-- Auto-actualización: GitHub Pages cachea el HTML y los celulares lo retienen mucho más.
      Esto compara la versión publicada con la que está corriendo y refresca sola. -->
 <script>
-const APP_VERSION = '2026-11-18-anuncio';
+const APP_VERSION = '2026-11-19-chips2col';
 (function(){
   var CLAVE='cima_ver_reload';
   function hayAlguienEscribiendo(){
