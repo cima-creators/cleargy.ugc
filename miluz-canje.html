@@ -1826,6 +1826,14 @@ document.querySelectorAll('#segm-videos button').forEach(b => b.addEventListener
   document.querySelectorAll('#segm-videos button').forEach(x => x.classList.toggle('on', x === b));
   precargarEntrega();
 }));
+/* 19/11: en `cumplida`, qué video le falta: el 2 (sin Drive o sin links) o el 1 aprobado sin links. 0 = nada. */
+function PEND_CUMPLIDA(){
+  if (!D || !CREADORA_PUBLICA()) return 0;
+  const ents = Array.isArray(D.entregas) ? D.entregas : [], tiene = x => !!(x && x.reel && x.reel.url && x.reel.url !== '#');
+  if (D.videos === 'dos' && (ents[0] || D.entrega) && !tiene(ents[1])) return 2;
+  if (ents[0] && ents[0].drive && ents[0].aprobadoEn && !tiene(ents[0]) && !tiene(D.reel)) return 1;
+  return 0;
+}
 /* La entrega que está cargando (Video 1 / Video 2) y si ya está aprobada para publicar. */
 function entregaActual(){
   return (D && Array.isArray(D.entregas) && D.entregas[ENTREGA_N - 1]) ||
@@ -2281,7 +2289,7 @@ function pintarEstado(){
       : (D.reel && D.reel.collab
         ? ['Tu collab','¡Collab<br>aceptada!','Ya aparece en tu perfil. Resubilo a tus historias: esas views suman para tus bonos.','Publicado']
         : ['Tu collab','¡Ya está<br>publicado!','Aceptá la invitación de colaboración en Instagram y resubilo a tus historias.','Publicado']),
-    cumplida:   ['Tu collab','¡Listo!', (D && D.veterana && !(D.reel && D.reel.url)) ? 'Ya estás en la app. Compartí tu código y tu link: cobrás comisión por cada venta. Te avisamos por WhatsApp cuando arranque la próxima campaña.' : 'Ya podés pedir tu próximo kit.','Completada'],
+    cumplida:   PEND_CUMPLIDA() ? ['Tu collab', PEND_CUMPLIDA() === 2 ? 'Te falta<br>el video 2' : 'Te faltan<br>tus links', PEND_CUMPLIDA() === 2 ? 'Tu primer video ya está aprobado. Cargá el segundo acá abajo: primero el Drive y, cuando lo aprobemos, los links.' : 'Tu video está aprobado: cargá los links de Instagram y TikTok acá abajo.', 'Falta un paso'] : ['Tu collab','¡Listo!', (D && D.veterana && !(D.reel && D.reel.url)) ? 'Ya estás en la app. Compartí tu código y tu link: cobrás comisión por cada venta. Te avisamos por WhatsApp cuando arranque la próxima campaña.' : 'Ya podés pedir tu próximo kit.','Completada'],
     sin_respuesta:['Tu collab','Cerramos<br>tu collab', `Como no supimos nada de vos, tu cuenta quedó bloqueada en las campañas de CIMA y te pedimos el kit de vuelta${CFG.devolucion ? ' (mandalo a ' + CFG.devolucion + ' con tu nombre adentro)' : ''}. Si igual subís tu video acá abajo, la cerramos como cumplida.`,'Cerrada'],
     devolucion: ['Tu collab','Devolvés<br>el kit', `Nos avisaste que no vas a hacer el video. ${CFG.devolucion ? 'Mandá el kit a ' + CFG.devolucion + ' con tu nombre adentro (el envío va por tu cuenta).' : 'Te pasamos por WhatsApp la dirección para devolver el kit.'} Si cambiaste de idea, todavía podés subir tu video acá abajo.`,'Devolución'],
     vencida:    ['Tu plazo','Se te pasó<br>el plazo', CREADORA_PUBLICA() ? 'El kit ya lo tenés: mandanos tu video hoy acá abajo. Sin video no podemos mandarte más kits.' : 'El kit ya lo tenés: entregá tu video hoy acá abajo. Sin video no podemos mandarte más kits.','Atrasada']
@@ -2341,6 +2349,9 @@ function pintarEstado(){
   // cuando publica la creadora, el bloque sigue abierto en `publicado` (ajustar links, cargar el 2º video)
   // `vencida` sigue pudiendo entregar: el plazo la apura, no la deja afuera
   const conSubir = CREADORA_PUBLICA() ? ['enviado','recibido','cambios','entregado','publicado','vencida','sin_respuesta','devolucion'] : ['enviado','recibido','cambios','entregado','vencida','sin_respuesta','devolucion'];
+  // 19/11: collab cerrada (cumplida) con algo pendiente — el video 2 o los links de un video aprobado — sigue abierta para eso
+  const pendC = e === 'cumplida' ? PEND_CUMPLIDA() : 0;
+  if (pendC){ conSubir.push('cumplida'); ENTREGA_N = pendC; }
   $('#bloque-subir').classList.toggle('oculto', !conSubir.includes(e));
   if (conSubir.includes(e)){
     if (CREADORA_PUBLICA()){
@@ -2349,7 +2360,7 @@ function pintarEstado(){
       $('#segm-videos').classList.toggle('oculto', !dos);
       if (dos){
         $('#segm-k1').textContent = nombreKit(D.kit); $('#segm-k2').textContent = nombreKit(D.kit2);
-        ENTREGA_N = (e === 'publicado' && falta2) ? 2 : ENTREGA_N;
+        ENTREGA_N = (e === 'publicado' && falta2) ? 2 : (pendC || ENTREGA_N);
         document.querySelectorAll('#segm-videos button').forEach(x => x.classList.toggle('on', +x.dataset.n === ENTREGA_N));
       } else ENTREGA_N = 1;
       precargarEntrega();
@@ -2490,7 +2501,7 @@ function pintarMarca(){
   } catch { if (DEMO){ precargar(); traerBorrador(); } ver(DEMO ? 'v-ficha' : 'v-error'); }
 })();
 
-const APP_VERSION = '2026-11-16-a';
+const APP_VERSION = '2026-11-19-a';
 </script>
 </body>
 </html>

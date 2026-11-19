@@ -1515,14 +1515,16 @@ $('#btn-desp').onclick = () => {
 
 /* ── entregas ── */
 /* 30/10: filtros de Entregas (pendientes · para revisar · ajuste · falta publicar · publicadas · aprobadas · rechazadas) */
-const ENT_CERRADA = e => e.estado === 'cumplida' || e.estado === 'rechazada';
+// 19/11: collab cerrada con el video 2 mandado y sin aprobar — vuelve a «Revisar» para que la marca lo apruebe
+const V2_PEND = e => CREADORA_PUBLICA() && e.estado === 'cumplida' && e.videos === 'dos' && !!((e.entregas || [])[1] || {}).drive && !e.entregas[1].aprobadoEn && !(e.entregas[1].reel && e.entregas[1].reel.url);
+const ENT_CERRADA = e => (e.estado === 'cumplida' && !V2_PEND(e)) || e.estado === 'rechazada';
 const ENT_VERIF = e => e.estado === 'publicado' && e.collab && e.views >= 1000;
 // 4/11 (Nacho): con dos videos, sigue en "falta revisarlo" hasta que se aprueben los dos (si el 2 ya está cargado)
 const FALTA_APROBAR = e => !e.aprobadoVideoEn ||
   (e.videos === 'dos' && !!((e.entregas || [])[1] || {}).drive && !e.entregas[1].aprobadoEn);
 const ENT_FILTROS = {
   pendientes:  e => !ENT_CERRADA(e),
-  revisar:     e => e.estado === 'entregado' && !(CREADORA_PUBLICA() && !FALTA_APROBAR(e)),
+  revisar:     e => (e.estado === 'entregado' && !(CREADORA_PUBLICA() && !FALTA_APROBAR(e))) || V2_PEND(e),
   ajuste:      e => e.estado === 'cambios',
   publicar:    e => e.estado === 'entregado' && CREADORA_PUBLICA() && !FALTA_APROBAR(e),
   decidir:     e => e.estado === 'publicado' && !ENT_VERIF(e),
@@ -1716,7 +1718,7 @@ function pintarEntregas(){
   const abiertas = ENTREGAS.filter(e => !ENT_CERRADA(e)).filter(busca);
   const conExtras = ENTREGAS.filter(ENT_FILTROS.extras).filter(busca);
   const nExtras = conExtras.reduce((a, e) => a + EXTRAS_REV(e).length, 0);
-  const porRevisar = abiertas.filter(e => e.estado === 'entregado');
+  const porRevisar = abiertas.filter(e => e.estado === 'entregado' || V2_PEND(e));
   const enAjuste   = abiertas.filter(e => e.estado === 'cambios');
   const publicadas = abiertas.filter(e => e.estado === 'publicado');
   const ok  = publicadas.filter(e => e.collab && e.views >= 1000);
@@ -1789,7 +1791,8 @@ function tarjetaDrive(e){
           ${e.codigo ? `<span class="pill">código ${e.codigo}</span>` : ''}
           <span class="pill">${e.nro===1?'primera collab':`collab n° ${e.nro}`}</span>
         </div>
-        ${e.estado === 'cambios' ? `<div class="aviso med"><b>Le pedimos:</b> ${e.motivo || '—'}</div>`
+        ${V2_PEND(e) ? `<div class="aviso med"><b>La collab ya está aprobada y mandó el video 2.</b> Abrí el Drive y tocá <b>Aprobar video 2</b>: le llega el aviso para publicarlo y cargar los links.</div>`
+          : e.estado === 'cambios' ? `<div class="aviso med"><b>Le pedimos:</b> ${e.motivo || '—'}</div>`
           : (ella
             ? (aprobado
               ? avisoPublicar(e)
@@ -1798,8 +1801,8 @@ function tarjetaDrive(e){
         ${videos}
         <div class="acc">
           ${waEntrega(e)}
-          <button class="b duda" onclick="pedirCambios(${ix})">Pedir cambios</button>
-          <button class="b no" onclick="resolverEntrega(${ix},0)">Rechazar</button>
+          ${V2_PEND(e) ? '' : `<button class="b duda" onclick="pedirCambios(${ix})">Pedir cambios</button>
+          <button class="b no" onclick="resolverEntrega(${ix},0)">Rechazar</button>`}
           ${ella
             ? (aprobado || dos ? '' : `<button class="b ok" onclick="aprobarVideo(${ix},1)">Aprobar video → que lo publique</button>`)
             : `<button class="b ok" onclick="marcarPublicado(${ix})">Ya lo publiqué → pegar link</button>`}
@@ -2953,7 +2956,7 @@ function aplicarRol(){
     pintarTodo();
   }
 })();
-const APP_VERSION = '2026-11-16-a';
+const APP_VERSION = '2026-11-19-a';
 </script>
 </body>
 </html>
