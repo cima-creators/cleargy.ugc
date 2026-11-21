@@ -1396,29 +1396,47 @@ function pintarRonda2(e){
    (CFG.lanzamiento.abierta), o con ?ver=<id> para probar, o si ya se postuló. */
 const LZ = { fotos: [], resp: {}, sec: false };
 const ESTADOS_LZ = ['invitada','ficha_completa','briefing_ok','enviado','recibido','cambios','entregado','publicado','cumplida','vencida','sin_respuesta'];
+/* 21/11: varias campañas a la vez (Talones + «Este verano es tuyo»). Se ve la del link (?ver=), si no la que está haciendo
+   (elegida sin aprobar), si no la abierta más nueva a la que no se postuló. Con más de una, arriba hay un selector. */
+let LZ_ID = null;
+const LANZS = () => (CFG.lanzamientos && CFG.lanzamientos.length ? CFG.lanzamientos : (CFG.lanzamiento ? [CFG.lanzamiento] : []));
+const lzDe = id => (D && D.lanzs && D.lanzs[id]) || (D && CFG.lanzamiento && id === CFG.lanzamiento.id ? D.lanz : null) || null;
+const lzAbierta = L => !!(L && L.abierta && (!L.hasta || hoyAR() <= L.hasta));
+const lzVisibles = e => D ? LANZS().filter(L => lzDe(L.id) || (ESTADOS_LZ.includes(e) && (lzAbierta(L) || QS.get('ver') === L.id))) : [];
 function pintarLanz(e){
-  const b = $('#bloque-lanz'), L = CFG.lanzamiento, l = D && D.lanz;
-  const ver = !!(L && D && (l || (ESTADOS_LZ.includes(e) && (L.abierta || QS.get('ver') === L.id))));
+  const b = $('#bloque-lanz'), vis = lzVisibles(e);
+  if (!LZ_ID || !vis.some(x => x.id === LZ_ID)){
+    const q = QS.get('ver'), est = x => (lzDe(x.id) || {});
+    LZ_ID = (vis.find(x => x.id === q) || vis.find(x => est(x).estado === 'elegida' && !est(x).aprobadoEn)
+      || vis.slice().reverse().find(x => lzAbierta(x) && !lzDe(x.id)) || vis[0] || {}).id || null;
+  }
+  const L = vis.find(x => x.id === LZ_ID) || null, l = L ? lzDe(L.id) : null;
+  const ver = !!L;
   b.classList.toggle('oculto', !ver);
   $('#a-talones').style.display = ver ? '' : 'none'; ajustarAccesos();
-  $('#lz-banner').classList.toggle('oculto', !ver || !!l);
+  const lzA = $('#a-talones span'); if (lzA && L) lzA.textContent = vis.length > 1 ? 'Campañas' : (L.corto || L.titulo);
+  const paraBanner = vis.slice().reverse().find(x => lzAbierta(x) && !lzDe(x.id));
+  $('#lz-banner').classList.toggle('oculto', !paraBanner);
+  if (paraBanner){ $('#lz-banner').innerHTML = `${paraBanner.banner || `✨ <b>${paraBanner.titulo}</b>`}<span>Postulate →</span>`; $('#lz-banner').dataset.lz = paraBanner.id; }
   if (!ver) return;
-  const secreto = `<div class="lz-secreto">${L.secreto}</div>`;
+  const SW = vis.length > 1 ? `<div class="lz-sw" style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:10px">${vis.map(x => `<button class="btn sec" data-lzsw="${x.id}" style="width:auto;padding:6px 12px;font-size:.85rem;${x.id === L.id ? 'opacity:1;font-weight:700' : 'opacity:.6'}">${x.corto || x.titulo}</button>`).join('')}</div>` : '';
+  b.onclick = ev => { const sw = ev.target.closest('[data-lzsw]'); if (!sw || sw.dataset.lzsw === LZ_ID) return; LZ_ID = sw.dataset.lzsw; LZ.fotos = []; LZ.resp = {}; LZ.sec = false; pintarLanz(e); };
+  const secreto = L.mostrarSecreto === false ? '' : `<div class="lz-secreto">${L.secreto}</div>`;
   if (l && l.estado === 'postulada'){
-    b.innerHTML = `<h2>${L.titulo} 💛</h2><small>Recibimos tu postulación. Elegimos ${L.cupo} creadoras entre todas y te avisamos por WhatsApp si quedaste.</small>${secreto}`;
+    b.innerHTML = SW + `<h2>${L.titulo} 💛</h2><small>Recibimos tu postulación. Elegimos ${L.cupo} creadoras entre todas y te avisamos por WhatsApp si quedaste.</small>${secreto}`;
     return;
   }
   if (l && l.estado === 'descartada'){
-    b.innerHTML = `<h2>${L.titulo}</h2><small>Esta vez no quedaste para el lanzamiento. Gracias por postularte 💛 Te avisamos en la próxima.</small>`;
+    b.innerHTML = SW + `<h2>${L.titulo}</h2><small>Esta vez no quedaste para el lanzamiento. Gracias por postularte 💛 Te avisamos en la próxima.</small>`;
     return;
   }
   if (l && l.estado === 'no_apta'){
-    b.innerHTML = `<h2>${L.titulo}</h2><small>${L.noApta}</small>`;
+    b.innerHTML = SW + `<h2>${L.titulo}</h2><small>${L.noApta}</small>`;
     return;
   }
   if (l && l.estado === 'elegida'){
     const dias = l.dias || {}, links = l.links || {}, hechos = Object.keys(dias).length;
-    b.innerHTML = `<h2>¡Quedaste en ${L.titulo}! 🎉</h2>
+    b.innerHTML = SW + `<h2>¡Quedaste en ${L.titulo}! 🎉</h2>
       ${l.despachadoEn ? `<div class="lz-req" style="margin-top:10px">📦 <b>Tu producto ya salió.</b>${l.seguimiento ? ` <a href="${l.seguimiento.url}" target="_blank" rel="noopener">Seguilo en ${l.seguimiento.correo} ↗</a>${l.seguimiento.tipo === 'remito' ? `<br><small>En la página elegí «Remito» y poné <b>${l.seguimiento.codigo}</b>.</small>` : ''}` : ''}</div>` : ''}
       ${L.producto ? `<details class="lz-broll" style="margin-top:12px" open><summary><b>Qué es y qué contar</b></summary>
         <p style="margin:8px 0">${L.producto.que}</p>
@@ -1426,13 +1444,15 @@ function pintarLanz(e){
         <p style="margin:10px 0 4px"><b>Cómo se usa</b> (mostralo así)</p><ol>${L.producto.modo.map(t => `<li>${t}</li>`).join('')}</ol>
         <p style="margin:10px 0 4px"><b>Qué tiene</b></p><ul>${L.producto.activos.map(([n, t]) => `<li><b>${n}</b>: ${t}</li>`).join('')}</ul>
         <p style="margin:10px 0 0"><small>${L.producto.nota}</small></p></details>` : ''}
-      <small>Tu semana: tildá cada día cuando lo grabes. ${hechos} de ${L.semana.length} hechos.</small>
+      ${L.elegida ? `<small>${L.elegida}</small>` : ''}
+      ${(L.noDecir || []).length ? `<details class="lz-broll" style="margin-top:12px"><summary><b>Lo que no se dice ni se hace</b></summary><ul>${L.noDecir.map(t => `<li>${t}</li>`).join('')}</ul></details>` : ''}
+      ${L.semana.length ? `<small>Tu semana: tildá cada día cuando lo grabes. ${hechos} de ${L.semana.length} hechos.</small>` : ''}
       ${L.semana.map((t, i) => `<label class="lz-dia ${dias[i+1] ? 'hecho' : ''}"><input type="checkbox" data-dia="${i+1}" ${dias[i+1] ? 'checked' : ''}><span><b>Día ${i+1}.</b> ${t}</span></label>`).join('')}
-      <h3 style="margin:18px 0 4px">Lo que entregás</h3>
+      ${L.entregas.length ? '<h3 style="margin:18px 0 4px">Lo que entregás</h3>' : ''}
       ${L.entregas.map(x => `<div class="lz-ent"><b>${x.t}</b>${links[x.id] ? ' <span style="color:var(--acento)">✓ cargado</span>' : ''}<small style="display:block;margin-top:2px">${x.a}</small>
         <input type="url" data-ent="${x.id}" placeholder="Pegá el link acá" value="${links[x.id] ? links[x.id].url.replace(/"/g, '&quot;') : ''}">
         <button class="btn sec" data-guardar="${x.id}" style="width:100%">${links[x.id] ? 'Cambiar el link' : 'Guardar el link'}</button></div>`).join('')}
-      <details class="lz-broll" style="margin-top:14px"><summary><b>Las 20 tomas de b-roll</b></summary><ol>${L.broll.map(t => `<li>${t}</li>`).join('')}</ol></details>
+      ${(L.broll || []).length ? `<details class="lz-broll" style="margin-top:14px"><summary><b>Las ${L.broll.length} tomas de b-roll</b></summary><ol>${L.broll.map(t => `<li>${t}</li>`).join('')}</ol></details>` : ''}
       ${L.gpt ? `<a class="btn sec" href="${L.gpt}" target="_blank" rel="noopener" style="display:block;text-align:center;text-decoration:none;margin-top:12px">Armá tus guiones con el GPT</a>` : ''}
       <div class="lz-gana" style="margin-top:14px">${L.ganas}.${D.codigo ? ` Tu código: <b>${D.codigo}</b>.` : ''}${l.aprobadoEn ? '<br><b>✓ Videos aprobados: ya se te acreditó el pago fijo.</b>' : ''}</div>
       ${secreto}<p class="r2-err oculto" id="lz-err"></p>`;
@@ -1440,8 +1460,8 @@ function pintarLanz(e){
     b.querySelectorAll('[data-dia]').forEach(inp => inp.addEventListener('change', async () => {
       const n = Number(inp.dataset.dia);
       try {
-        if (DEMO){ if (inp.checked) dias[n] = Date.now(); else delete dias[n]; D.lanz.dias = dias; }
-        else { const j = await api('lanz_dia', { n, no: !inp.checked }); if (!j.ok) throw 0; if (j.creadora) D = Object.assign(D, j.creadora); }
+        if (DEMO){ if (inp.checked) dias[n] = Date.now(); else delete dias[n]; l.dias = dias; }
+        else { const j = await api('lanz_dia', { n, no: !inp.checked, lanz: L.id }); if (!j.ok) throw 0; if (j.creadora) D = Object.assign(D, j.creadora); }
         pintarLanz(e);
       } catch { inp.checked = !inp.checked; err('No se pudo guardar. Probá de nuevo.'); }
     }));
@@ -1450,21 +1470,21 @@ function pintarLanz(e){
       if (!/^https?:\/\/\S+$/i.test(url)) return err('Pegá un link que empiece con https://');
       bt.disabled = true; bt.textContent = 'Guardando…';
       try {
-        if (DEMO){ D.lanz.links = Object.assign(D.lanz.links || {}, { [tipo]: { url, en: Date.now() } }); }
-        else { const j = await api('lanz_link', { tipo, url }); if (!j.ok) throw new Error(j.error || ''); if (j.creadora) D = Object.assign(D, j.creadora); }
+        if (DEMO){ l.links = Object.assign(l.links || {}, { [tipo]: { url, en: Date.now() } }); }
+        else { const j = await api('lanz_link', { tipo, url, lanz: L.id }); if (!j.ok) throw new Error(j.error || ''); if (j.creadora) D = Object.assign(D, j.creadora); }
         pintarLanz(e);
       } catch (x) { bt.disabled = false; bt.textContent = 'Guardar el link'; err(/instagram/.test(x.message) ? 'Ese no es un link de un reel de Instagram.' : 'No se pudo guardar. Probá de nuevo.'); }
     }));
     return;
   }
   // postulación
-  b.innerHTML = `<h2>${L.titulo} · postulate ✨</h2>
+  b.innerHTML = SW + `<h2>${L.titulo} · postulate ✨</h2>
     <small>${L.intro}</small>
     <div class="lz-req"><b>Para postularte tenés que…</b><br>${L.requisito}</div>
     <div class="lz-haces">${(L.haces || []).map(t => `<div>${t}</div>`).join('')}</div>
     <div class="lz-gana">${L.ganas}</div>
     <p style="margin:12px 0 0;font-weight:700">${L.fotos.q}</p><small>${L.fotos.a}</small>
-    <div class="r2-fotos">${[0,1].map(n => `<label class="r2-slot" data-n="${n}">${LZ.fotos[n] ? `<img src="${LZ.fotos[n]}" alt="Foto ${n+1}">` : (n === 0 ? '📷 De atrás' : '📷 De cerca')}<input type="file" accept="image/*"></label>`).join('')}</div>
+    <div class="r2-fotos">${[0,1].map(n => `<label class="r2-slot" data-n="${n}">${LZ.fotos[n] ? `<img src="${LZ.fotos[n]}" alt="Foto ${n+1}">` : ((L.fotos.slots || ['📷 De atrás', '📷 De cerca'])[n])}<input type="file" accept="image/*"></label>`).join('')}</div>
     ${L.preguntas.map(p => `<p class="lz-q">${p.q}</p><div class="lz-ops">${p.ops.map(([id, t]) => `<label><input type="radio" name="lz-${p.id}" value="${id}" ${LZ.resp[p.id] === id ? 'checked' : ''}> ${t}</label>`).join('')}</div>`).join('')}
     <label class="lz-sec"><input type="checkbox" id="lz-secreto" ${LZ.sec ? 'checked' : ''}> ${L.secreto}</label>
     <button class="btn" id="lz-enviar" style="margin-top:14px">Enviar mi postulación</button>
@@ -1480,13 +1500,13 @@ function pintarLanz(e){
   b.querySelector('#lz-enviar').addEventListener('click', async ev => {
     const err = b.querySelector('#lz-err'), fotos = LZ.fotos.filter(Boolean);
     const mal = t => { err.textContent = t; err.classList.remove('oculto'); };
-    if (!fotos.length) return mal('Subí al menos una foto de tus talones.');
+    if (!fotos.length) return mal('Subí al menos una foto.');
     if (L.preguntas.some(p => !LZ.resp[p.id])) return mal('Respondé las preguntas.');
-    if (!LZ.sec) return mal('Tildá que entendés que es secreto hasta la fecha.');
+    if (!LZ.sec) return mal('Tildá la casilla de abajo.');
     ev.target.disabled = true; ev.target.textContent = 'Enviando…';
     try {
-      if (DEMO){ const no = L.preguntas.some(p => (p.noApta || []).includes(LZ.resp[p.id])); D.lanz = { estado: no ? 'no_apta' : 'postulada', resp: LZ.resp, en: Date.now() }; }
-      else { const j = await api('lanz_postular', { fotos, resp: LZ.resp }); if (!j.ok) throw new Error(j.error || 'error'); if (j.creadora) D = Object.assign(D, j.creadora); }
+      if (DEMO){ const no = L.preguntas.some(p => (p.noApta || []).includes(LZ.resp[p.id])); (D.lanzs = D.lanzs || {})[L.id] = { estado: no ? 'no_apta' : 'postulada', resp: LZ.resp, en: Date.now() }; if (CFG.lanzamiento && L.id === CFG.lanzamiento.id) D.lanz = D.lanzs[L.id]; }
+      else { const j = await api('lanz_postular', { fotos, resp: LZ.resp, lanz: L.id }); if (!j.ok) throw new Error(j.error || 'error'); if (j.creadora) D = Object.assign(D, j.creadora); }
       pintarLanz(e);
     } catch (x) { ev.target.disabled = false; ev.target.textContent = 'Enviar mi postulación'; mal('No se pudo enviar. Probá de nuevo en un ratito.'); }
   });
@@ -1920,7 +1940,7 @@ function copiarCodigo(){
   navigator.clipboard ? navigator.clipboard.writeText(t).then(fin).catch(fin) : fin();
 }
 $('#codigo').addEventListener('click', copiarCodigo);
-['#a-talones', '#lz-banner'].forEach(q => $(q).addEventListener('click', () => $('#bloque-lanz').scrollIntoView({ behavior: 'smooth', block: 'start' })));
+['#a-talones', '#lz-banner'].forEach(q => $(q).addEventListener('click', ev => { const id = ev.currentTarget.dataset.lz; if (id && id !== LZ_ID){ LZ_ID = id; LZ.fotos = []; LZ.resp = {}; LZ.sec = false; pintarLanz(D.estado); } $('#bloque-lanz').scrollIntoView({ behavior: 'smooth', block: 'start' }); }));
 /* 21/10: ¿estamos dentro de la fecha? (en Argentina) */
 const hoyAR = () => new Date(Date.now() - 3 * 36e5).toISOString().slice(0, 10);
 const enVentana = v => !!(v && v.desde && v.hasta && hoyAR() >= v.desde && hoyAR() <= v.hasta);
@@ -2344,7 +2364,7 @@ function pintarEstado(){
   pintarExtras(e);
   pintarRonda2(e);
   pintarLanz(e);
-  if (CFG.lanzamiento && QS.get('ver') === CFG.lanzamiento.id && !window._lzScroll){ window._lzScroll = 1; setTimeout(() => $('#bloque-lanz').scrollIntoView({ behavior: 'smooth', block: 'start' }), 300); }
+  if (QS.get('ver') && LANZS().some(x => x.id === QS.get('ver')) && !window._lzScroll){ window._lzScroll = 1; setTimeout(() => $('#bloque-lanz').scrollIntoView({ behavior: 'smooth', block: 'start' }), 300); }
   $('#bloque-recorrido').classList.toggle('oculto', !!CFG.sinKit);   // CIMA Club: no hay kit que seguir
   // cuando publica la creadora, el bloque sigue abierto en `publicado` (ajustar links, cargar el 2º video)
   // `vencida` sigue pudiendo entregar: el plazo la apura, no la deja afuera
@@ -2501,7 +2521,7 @@ function pintarMarca(){
   } catch { if (DEMO){ precargar(); traerBorrador(); } ver(DEMO ? 'v-ficha' : 'v-error'); }
 })();
 
-const APP_VERSION = '2026-11-19-a';
+const APP_VERSION = '2026-11-21-b';
 </script>
 </body>
 </html>
