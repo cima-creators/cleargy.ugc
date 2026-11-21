@@ -667,6 +667,7 @@ dialog.dlg.dlg-cre{max-width:680px}
       <button class="bsec fent activo" data-f="pendientes" title="Todo lo que espera algo: revisar, ajustes y publicadas por decidir">Todo lo pendiente <span class="n" data-ne="pendientes">0</span></button>
       <button class="bsec fent" data-f="revisar" title="Mandaron el video y nadie lo miró todavía">📥 Mandó el video · falta revisarlo <span class="n" data-ne="revisar">0</span></button>
       <button class="bsec fent oculto" data-f="extras" title="Videos extra (aparte de la collab) que mandaron por Drive y falta aprobar">🎞️ Video extra · falta revisarlo <span class="n" data-ne="extras">0</span></button>
+      <button class="bsec fent oculto" data-f="talones" title="Lo que entregaron las elegidas del lanzamiento: 3 videos, tomas y reel">👣 <span id="ent-lz-tit">Lanzamiento</span> · entregas <span class="n" id="ne-talones">0</span></button>
       <button class="bsec fent" data-f="ajuste" title="Le pediste un cambio y todavía no mandó el video corregido">✏️ Le pedimos un cambio <span class="n" data-ne="ajuste">0</span></button>
       <button class="bsec fent" data-f="publicar" title="Aprobaste el video y falta que lo publique en su Instagram y su TikTok">⏳ Video aprobado · falta que lo suba a IG <span class="n" data-ne="publicar">0</span></button>
       <button class="bsec fent" data-f="decidir" title="Ya está publicado pero falta la etiqueta/collab o tiene menos de 1.000 views">🔎 Subido a IG · falta aprobar <span class="n" data-ne="decidir">0</span></button>
@@ -1534,6 +1535,29 @@ const ENT_FILTROS = {
   rechazadas:  e => e.estado === 'rechazada',
   extras:      e => EXTRAS_REV(e).length > 0,
 };
+/* 21/11 (Valca): lo que entregan las elegidas del lanzamiento (Talones) también se ve en Entregas, no solo en su pestaña */
+const LZ_ULT = f => Math.max(0, ...Object.values(f.links || {}).map(x => (x && x.en) || 0));
+const LZ_ENT = () => (CFG && CFG.lanzamiento ? LZL : []).filter(f => f.estado === 'elegida' && Object.keys(f.links || {}).length)
+  .sort((a, b) => (!!a.aprobadoEn - !!b.aprobadoEn) || (LZ_ULT(b) - LZ_ULT(a)));
+const LZ_PEND = () => LZ_ENT().filter(f => !f.aprobadoEn && (f.links || {}).videos);
+function tarjetaLzEnt(f){
+  const L = CFG.lanzamiento, lk = f.links || {}, dias = Object.keys(f.dias || {}).length, cuando = LZ_ULT(f);
+  const link = (k, t) => lk[k] ? `<a class="verreel" href="${escH(lk[k].url)}" target="_blank" rel="noopener">📁 ${t}</a>` : `<span class="n2">${t}: falta</span>`;
+  return `<div class="entrega"><div class="prev">${lk.videos ? `<a href="${escH(lk.videos.url)}" target="_blank" rel="noopener">📁<span>3 videos</span></a>` : '<span style="opacity:.6">📁<span>Sin videos</span></span>'}</div>
+    <div class="cuerpo">
+      <h3>${escH(f.nombre || f.ig)} <span class="hand">@${escH(f.ig)}</span></h3>
+      <div class="pills"><span class="pill">${escH(L.titulo)}</span>${f.aprobadoEn ? '<span class="pill ok">✓ Aprobada y paga</span>' : '<span class="pill esp">Falta revisar</span>'}
+        ${cuando ? `<span class="pill">cargó ${new Date(cuando).toLocaleDateString('es-AR', { day: 'numeric', month: 'numeric' })}</span>` : ''}<span class="pill">semana: ${dias} de ${L.semana.length} días</span></div>
+      <div class="aviso med" style="background:var(--arena);color:var(--tinta2);display:flex;gap:12px;flex-wrap:wrap">${link('videos', '3 videos')} ${link('broll', '20 tomas')} ${link('reel', 'Reel')}</div>
+      <div class="acc">${f.aprobadoEn ? '' : `<button class="b ok" ${lk.videos ? '' : 'disabled'} onclick="aprobarLzEnt('${f.id}')">Aprobar y pagar $${Number(L.pagoFijo || 0).toLocaleString('es-AR')}</button>`}</div>
+    </div></div>`;
+}
+window.aprobarLzEnt = async id => {
+  const f = LZL.find(x => x.id === id), L = CFG.lanzamiento; if (!f) return;
+  if (!confirm(`¿Aprobás los 3 videos de @${f.ig}? Se le acreditan $${Number(L.pagoFijo || 0).toLocaleString('es-AR')} en Pagos.`)) return;
+  try { if (!DEMO){ const r = await api('lanz_aprobar', { id }); if (!r.ok) throw 0; } f.aprobadoEn = Date.now(); pintarEntregas(); if (puede('lanz')) pintarLanz(); if (puede('pagos')) cargar().then(pintarPagos).catch(() => {}); }
+  catch { alert('No se pudo aprobar.'); }
+};
 /* 12/11: videos extra por revisar (Drive mandado, sin aprobar ni cambio pedido) */
 const EXTRAS_REV = e => (e.extras || []).filter(x => x.drive && !x.aprobadoEn && !x.cambiosMotivo);
 function tarjetasExtra(e){
@@ -1687,6 +1711,13 @@ function pintarEntregas(){
   const oEnt = $('#orden-ent'); if (oEnt) oEnt.hidden = filtroEnt === 'pendientes';
   const bPub = document.querySelector('.fent[data-f="publicar"]'); if (bPub) bPub.classList.toggle('oculto', !CREADORA_PUBLICA());
   const bEx = document.querySelector('.fent[data-f="extras"]'); if (bEx) bEx.classList.toggle('oculto', !(CFG && CFG.videosExtra));
+  const bLz = document.querySelector('.fent[data-f="talones"]'); if (bLz) bLz.classList.toggle('oculto', !(CFG && CFG.lanzamiento && LZ_ENT().length));
+  if (CFG && CFG.lanzamiento){ const t = $('#ent-lz-tit'); if (t) t.textContent = CFG.lanzamiento.titulo; const n = $('#ne-talones'); if (n) n.textContent = LZ_PEND().length || LZ_ENT().length; }
+  if (filtroEnt === 'talones'){
+    if (ex) ex.textContent = 'Lo que cargaron las elegidas del lanzamiento: la carpeta con los 3 videos, las tomas y el reel. Revisalos y aprobá: se les acredita el pago fijo.';
+    $('#lista-entregas').innerHTML = LZ_ENT().filter(f => !buscaEnt || (f.ig || '').toLowerCase().includes(buscaEnt) || (f.nombre || '').toLowerCase().includes(buscaEnt)).map(tarjetaLzEnt).join('') || `<div class="vacio"><b class="serif" style="font-size:1.1rem">Todavía no entregó ninguna</b></div>`;
+    contar(); return;
+  }
   const busca = e => !buscaEnt || (e.ig || '').toLowerCase().includes(buscaEnt) || (e.nom || '').toLowerCase().includes(buscaEnt);
   const sProd = $('#prod-ent'); if (sProd) sProd.hidden = true;
   if (filtroEnt !== 'pendientes') {
@@ -1724,9 +1755,11 @@ function pintarEntregas(){
   const ok  = publicadas.filter(e => e.collab && e.views >= 1000);
   const rev = publicadas.filter(e => !(e.collab && e.views >= 1000));
 
-  $('#lista-entregas').innerHTML = (nExtras ? `<p class="n2" style="margin:6px 0 10px;font-weight:600;color:var(--tinta2)">
+  const lzPend = LZ_PEND();
+  const bloqueLz = lzPend.length ? `<p class="n2" style="margin:6px 0 10px;font-weight:600;color:var(--tinta2)">${lzPend.length} entrega${lzPend.length === 1 ? '' : 's'} de ${escH(CFG.lanzamiento.titulo)} para revisar</p>` + lzPend.map(tarjetaLzEnt).join('') : '';
+  $('#lista-entregas').innerHTML = bloqueLz + (nExtras ? `<p class="n2" style="margin:6px 0 10px;font-weight:600;color:var(--tinta2)">
        ${nExtras} video${nExtras === 1 ? '' : 's'} extra para revisar</p>` + conExtras.map(tarjetasExtra).join('') : '') + (!abiertas.length
-    ? (nExtras ? '' : `<div class="vacio"><div class="big">✓</div>
+    ? (nExtras || lzPend.length ? '' : `<div class="vacio"><div class="big">✓</div>
        <b class="serif" style="font-size:1.2rem">Nada pendiente</b></div>`)
     : `
     ${porRevisar.length ? `<p class="n2" style="margin:6px 0 10px;font-weight:600;color:var(--tinta2)">
@@ -2845,6 +2878,7 @@ async function cargarLanz(){
   if (DEMO) LZL = LZL.length ? LZL : [{ id: 'd1', ig: 'sofi.ugc', nombre: 'Sofía Demo', provincia: 'Mendoza', estado: 'postulada', resp: { estado: 'grietas', hace: 'anio', semana: 'si' }, en: Date.now(), nFotos: 0, dias: {}, links: {}, views: 12000, cumplidas: 1 }];
   else { try { LZL = (await api('lanz_cola')).fichas || []; } catch { LZL = []; } }
   pintarLanz();
+  if (puede('entregas')) pintarEntregas();   // 21/11: las entregas del lanzamiento también van en Entregas
 }
 function pintarLanz(){
   const L = CFG.lanzamiento, el = LZL.filter(f => f.estado === 'elegida'), cuenta = e => LZL.filter(f => f.estado === e).length;
@@ -2956,7 +2990,7 @@ function aplicarRol(){
     pintarTodo();
   }
 })();
-const APP_VERSION = '2026-11-19-a';
+const APP_VERSION = '2026-11-21-a';
 </script>
 </body>
 </html>
