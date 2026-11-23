@@ -529,6 +529,13 @@ dialog.dlg .fila{display:flex;gap:8px;justify-content:flex-end;flex-wrap:wrap}
 .fwa.activo{background:var(--tinta);color:#fff;border-color:var(--tinta)}
 .wa-conv.nolei b{font-weight:800}.wa-conv.nolei b::before{content:'';display:inline-block;width:8px;height:8px;border-radius:50%;background:#25D366;margin-right:6px;flex:0 0 auto;align-self:center}
 dialog.dlg.dlg-cre{max-width:680px}
+.at-toca{cursor:pointer;position:relative}
+.at-toca:hover{filter:brightness(.97)}
+.at-ver{float:right;font-weight:700;opacity:.7;font-size:.85em}
+.at-lista{display:flex;flex-direction:column;gap:8px;margin-top:12px;max-height:65vh;overflow:auto}
+.at-fila{display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap;padding:10px 12px;border:1px solid var(--linea,#e6e0d6);border-radius:12px}
+.at-q small{display:block;color:var(--topo,#8a8070);margin-top:2px}
+.at-acc{display:flex;gap:6px;flex-wrap:wrap}
 .cre-cab{display:flex;justify-content:space-between;gap:12px;align-items:flex-start;flex-wrap:wrap}
 .cre-cab h2 small{display:block;font-size:.8rem;font-weight:500;color:var(--topo);margin-top:2px}
 .cre-etapa{margin:14px 0;padding:14px 16px;border-radius:14px;background:var(--acento-suave)}
@@ -723,6 +730,7 @@ dialog.dlg.dlg-cre{max-width:680px}
 </main>
 
 <dialog class="dlg dlg-cre" id="dlg-cre"><div class="cuerpo" id="cre-cuerpo"></div></dialog>
+<dialog class="dlg dlg-cre" id="dlg-aten"><div class="cuerpo" id="aten-cuerpo"></div></dialog>
 
 <dialog class="dlg" id="dlg-importar">
   <div class="cuerpo">
@@ -2084,12 +2092,7 @@ function pintarResumen(){
     <div class="bloque">
       <h2>Qué necesita atención</h2>
       <p class="n2">Ordenado por urgencia.</p>
-      ${(() => { const n = (CREADORAS||[]).filter(c => c.estado === 'invitada' && !c.avisadaEn).length; return n ? `<div class="alerta urg"><b>${n}</b> aceptadas sin DM automático — mandarles el link a mano (Creadoras → “Mandar link a mano”)</div>` : ''; })()}
-      ${(() => { const n = (CREADORAS||[]).filter(c => c.pideHumana).length; return n ? `<div class="alerta urg"><b>${n}</b> pidieron hablar con alguien desde el bot — escribirles hoy por Instagram (están marcadas en Creadoras)</div>` : ''; })()}
-      ${m.vencidas ? `<div class="alerta urg"><b>${m.vencidas}</b> atrasadas: se les pasó el plazo y todavía no entregaron (pueden entregar igual) — apurarlas</div>` : ''}
-      ${m.sinRecibir ? `<div class="alerta urg"><b>${m.sinRecibir}</b> despachadas hace más de 10 días y nunca confirmaron que llegó — revisar con el correo</div>` : ''}
-      ${m.vencenEn2Dias ? `<div class="alerta med"><b>${m.vencenEn2Dias}</b> vencen en 2 días — el recordatorio ya salió solo</div>` : ''}
-      <div class="alerta info"><b>${m.enTransito}</b> kits en camino</div>
+      ${ATENCION.map(a => { const n = a.lista().length; return n || a.siempre ? `<div class="alerta ${a.tono} at-toca" onclick="verAtencion('${a.id}')" title="Tocá para ver quiénes son"><b>${n}</b> ${a.texto} <span class="at-ver">Ver ›</span></div>` : ''; }).join('')}
     </div>
     </div>
 
@@ -2399,6 +2402,46 @@ async function cambiarCodigo(id, actual){
     abrirCreadora(id);
   } catch (e) { alert(e.message === 'clave' ? 'Tu clave no puede cambiar códigos.' : 'No se pudo cambiar el código.'); }
 }
+/* 23/11 (Nacho): «Qué necesita atención» → tocás un renglón y se abre la lista de esas creadoras, con su ficha y su chat */
+const AT_DIA = 864e5, atHace = t => t ? Math.max(0, Math.floor((Date.now() - t) / AT_DIA)) : null;
+const atEnvio = id => (ENVIOS || []).find(e => e.id === id) || {};
+const ATENCION = [
+  { id: 'sindm', tono: 'urg', texto: 'aceptadas sin DM automático — mandarles el link a mano',
+    lista: () => (CREADORAS || []).filter(c => c.estado === 'invitada' && !c.avisadaEn), info: c => c.decididaEn ? `aceptada hace ${atHace(c.decididaEn)} d` : '' },
+  { id: 'humana', tono: 'urg', texto: 'pidieron hablar con alguien desde el bot — escribirles hoy',
+    lista: () => (CREADORAS || []).filter(c => c.pideHumana).sort((a, b) => (b.pideHumana || 0) - (a.pideHumana || 0)), info: c => `pidió hace ${atHace(c.pideHumana)} d · ${(ETIQUETA[c.estado] || [c.estado])[0]}` },
+  { id: 'vencidas', tono: 'urg', texto: 'atrasadas: se les pasó el plazo y todavía no entregaron (pueden entregar igual) — apurarlas',
+    lista: () => (CREADORAS || []).filter(c => c.estado === 'vencida').sort((a, b) => (a.vencidaEn || 0) - (b.vencidaEn || 0)), info: c => c.vencidaEn ? `venció hace ${atHace(c.vencidaEn)} d` : '' },
+  { id: 'sinrecibir', tono: 'urg', texto: 'despachadas hace más de 10 días y nunca confirmaron que llegó — revisar con el correo',
+    lista: () => (CREADORAS || []).filter(c => c.estado === 'enviado' && atEnvio(c.id).despachadoEn && Date.now() - atEnvio(c.id).despachadoEn > 10 * AT_DIA).sort((a, b) => atEnvio(a.id).despachadoEn - atEnvio(b.id).despachadoEn),
+    info: c => { const e = atEnvio(c.id); return `salió hace ${atHace(e.despachadoEn)} d` + (e.seguimiento && e.seguimiento.url ? ` · <a href="${escH(e.seguimiento.url)}" target="_blank" rel="noopener">seguimiento ↗</a>` : ' · sin nº de seguimiento'); } },
+  { id: 'vencen', tono: 'med', texto: 'vencen en 2 días — el recordatorio ya salió solo',
+    lista: () => (CREADORAS || []).filter(c => c.estado === 'recibido' && c.deadline && c.deadline > Date.now() && c.deadline - Date.now() < 2 * AT_DIA), info: c => `vence ${new Date(c.deadline).toLocaleDateString('es-AR', { day: 'numeric', month: 'numeric' })}` },
+  { id: 'camino', tono: 'info', siempre: true, texto: 'kits en camino',
+    lista: () => (CREADORAS || []).filter(c => c.estado === 'enviado').sort((a, b) => (atEnvio(b.id).despachadoEn || 0) - (atEnvio(a.id).despachadoEn || 0)),
+    info: c => { const e = atEnvio(c.id); return (e.despachadoEn ? `salió hace ${atHace(e.despachadoEn)} d` : '') + (e.seguimiento && e.seguimiento.url ? ` · <a href="${escH(e.seguimiento.url)}" target="_blank" rel="noopener">seguimiento ↗</a>` : ''); } },
+];
+window.verAtencion = id => {
+  const a = ATENCION.find(x => x.id === id); if (!a) return;
+  const L = a.lista(), dlg = $('#dlg-aten');
+  $('#aten-cuerpo').innerHTML = `<div class="cre-cab"><h2>${L.length} ${escH(a.texto.split(' — ')[0])}<small>${escH(a.texto.split(' — ')[1] || '')}</small></h2>
+      <button class="bsec" onclick="document.getElementById('dlg-aten').close()">Cerrar</button></div>
+    <div class="at-lista">${L.map(c => `<div class="at-fila">
+        <div class="at-q"><b>${escH(c.nom || c.ig)}</b> <a href="https://instagram.com/${escH(c.ig)}" target="_blank" rel="noopener">@${escH(c.ig)}</a>
+          <small>${a.info(c) || ''}${c.tel ? ' · ' + escH(c.tel) : ''}</small></div>
+        <div class="at-acc"><button class="bsec" onclick="abrirCreadora('${c.id}')">Ficha</button>
+          ${c.tel && puede('wa') ? `<button class="bsec" onclick="verChat('${escH(c.tel)}')">Chat</button>` : ''}
+          ${c.tel ? `<a class="bsec" style="text-decoration:none" href="${waLinkTexto(c.tel, '')}" target="_blank" rel="noopener">WhatsApp ↗</a>` : ''}</div>
+      </div>`).join('') || '<div class="wa-vacio">Nadie por acá.</div>'}</div>`;
+  dlg.showModal();
+};
+/* abre la conversación de esa creadora en la bandeja de WhatsApp del panel */
+window.verChat = tel => {
+  document.querySelectorAll('dialog[open]').forEach(d => d.close());
+  const b = document.querySelector('nav [data-t="wa"], [data-t="wa"]'); if (b) b.click();
+  const t = telWa(tel);
+  setTimeout(() => { if ((WA.mensajes || []).some(m => m.tel === t)) abrirWa(t); else { const h = $('#wa-hilo'); if (h) h.innerHTML = '<div class="wa-vacio">Todavía no hay mensajes con este número en la bandeja.</div>'; } }, 400);
+};
 async function abrirCreadora(id){
   const dlg = $('#dlg-cre'), cu = $('#cre-cuerpo');
   cu.innerHTML = '<div class="wa-vacio">Cargando…</div>'; dlg.showModal();
@@ -2487,6 +2530,7 @@ async function remedir(id, btn){
   } catch (e) { alert('No se pudo medir. Probá de nuevo en un rato.'); btn.disabled = false; btn.textContent = 'Actualizar views'; }
 }
 $('#dlg-cre') && $('#dlg-cre').addEventListener('click', e => { if (e.target.id === 'dlg-cre') e.target.close(); });
+$('#dlg-aten') && $('#dlg-aten').addEventListener('click', e => { if (e.target.id === 'dlg-aten') e.target.close(); });
 document.addEventListener('click', e => { const t = e.target.closest && e.target.closest('.abre-cre'); if (t && t.dataset.id && !DEMO) abrirCreadora(t.dataset.id); });
 
 /* ── creadoras ── */
@@ -2998,7 +3042,7 @@ function aplicarRol(){
     pintarTodo();
   }
 })();
-const APP_VERSION = '2026-11-21-b';
+const APP_VERSION = '2026-11-23-a';
 </script>
 </body>
 </html>
