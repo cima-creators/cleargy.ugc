@@ -2915,7 +2915,7 @@ function pintarRonda2(){
 }
 
 /* 5/11: lanzamiento (Valca Talones) — postuladas con su foto → Elegir / Descartar (tope = cupo) → seguimiento de las elegidas */
-let LZL = [], LZF = 'postulada', LZFOTOS = {}, LZP = [], LZ_SEL = null;
+let LZL = [], LZF = 'postulada', LZFOTOS = {} /* 25/11: clave campaña:creadora (antes solo creadora → en verano se veían las fotos de Talones) */, LZP = [], LZ_SEL = null;
 /* 21/11: varias campañas (Talones + «Este verano es tuyo»): selector arriba de la pestaña; LZP = la principal, para Entregas */
 const LANZS_P = () => (CFG.lanzamientos && CFG.lanzamientos.length ? CFG.lanzamientos : [CFG.lanzamiento]);
 const lzAbiertaP = L => !!(L && L.abierta && (!L.hasta || new Date(Date.now() - 3 * 36e5).toISOString().slice(0, 10) <= L.hasta));
@@ -2951,7 +2951,7 @@ function pintarLanz(){
     const dias = Object.keys(f.dias || {}).length, lk = f.links || {};
     const link = (k, t) => lk[k] ? `<a href="${escH(lk[k].url)}" target="_blank" rel="noopener">${t} ↗</a>` : `<span class="n2">${t}: falta</span>`;
     return `<div class="lz-card" data-id="${f.id}">
-      <div class="lz-fotos" data-fotos="${f.id}">${LZFOTOS[f.id] ? LZFOTOS[f.id].map(u => `<img src="${u}" alt="Fotos de @${escH(f.ig)}" onclick="this.classList.toggle('grande')">`).join('') : `<span class="vacia">${f.nFotos ? 'Cargando fotos…' : 'sin foto'}</span>`}</div>
+      <div class="lz-fotos" data-fotos="${f.id}">${LZFOTOS[L.id + ':' + f.id] ? LZFOTOS[L.id + ':' + f.id].map(u => `<img src="${u}" alt="Fotos de @${escH(f.ig)}" onclick="this.classList.toggle('grande')">`).join('') : `<span class="vacia">${f.nFotos ? 'Cargando fotos…' : 'sin foto'}</span>`}</div>
       <div class="lz-cu">
         <div><b>${escH(f.nombre || '—')}</b> · <a href="https://instagram.com/${escH(f.ig)}" target="_blank" rel="noopener">@${escH(f.ig)}</a></div>
         <div class="n2">${escH(f.provincia || '')}${f.views ? ' · ' + Number(f.views).toLocaleString('es-AR') + ' views' : ''}${f.cumplidas ? ' · ' + f.cumplidas + ' collab' + (f.cumplidas > 1 ? 's' : '') : ''}</div>
@@ -2989,10 +2989,10 @@ function pintarLanz(){
   });
   // fotos de a una, solo las de las tarjetas visibles (pesan)
   (async () => { for (const f of lista) {
-    if (LZFOTOS[f.id] || !f.nFotos || DEMO) continue;
-    try { LZFOTOS[f.id] = (await api('lanz_fotos', { id: f.id, lanz: L.id })).fotos || []; } catch { LZFOTOS[f.id] = []; }
+    if (LZFOTOS[L.id + ':' + f.id] || !f.nFotos || DEMO) continue;
+    try { LZFOTOS[L.id + ':' + f.id] = (await api('lanz_fotos', { id: f.id, lanz: L.id })).fotos || []; } catch { LZFOTOS[L.id + ':' + f.id] = []; }
     const c = document.querySelector(`[data-fotos="${f.id}"]`);
-    if (c) c.innerHTML = LZFOTOS[f.id].map(u => `<img src="${u}" alt="Fotos de @${escH(f.ig)}" onclick="this.classList.toggle('grande')">`).join('') || '<span class="vacia">sin foto</span>';
+    if (c) c.innerHTML = LZFOTOS[L.id + ':' + f.id].map(u => `<img src="${u}" alt="Fotos de @${escH(f.ig)}" onclick="this.classList.toggle('grande')">`).join('') || '<span class="vacia">sin foto</span>';
   } })();
 }
 
@@ -3042,7 +3042,7 @@ function aplicarRol(){
     pintarTodo();
   }
 })();
-const APP_VERSION = '2026-11-23-a';
+const APP_VERSION = '2026-11-25-a';
 </script>
 </body>
 </html>
