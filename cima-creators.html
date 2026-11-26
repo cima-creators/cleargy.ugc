@@ -1079,18 +1079,18 @@ const BRAND_CONFIGS = {
   },
   menlab: {
     border:'#d6d6d6', muted2:'#b5b5b5',
-    name:'MenLab', logoText:'MENLAB', defaultCampaignStart:'2026-09-08', sub:'Creators Hub',
+    name:'MenLab', logoText:'MENLAB', defaultCampaignStart:'2026-11-26', sub:'Creators Hub',   // 26/11: arranca la campaña 2 (solo Seba, 30 videos)
     logoImg:'data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="320" height="104"><rect width="320" height="104" rx="12" fill="%23000000"/><text x="160" y="70" font-family="Arial Black,Arial,sans-serif" font-size="46" font-weight="900" font-style="italic" fill="%23FFFFFF" text-anchor="middle" letter-spacing="-1">MenLab</text></svg>',
     collection:'menlab', driveOnly:true, no100k:true, noRacha:true, bgDark:'#d9d9d9',   // 4/10: suben solo el crudo a Drive, los edita el editor
     cats:['Review / testimonio','Rutina / uso','Antes y después','Beneficios','Trend / challenge','Otro'],
     accent:'#111111', accentLight:'#3a3a3a', bg:'#f4f4f4', surface2:'#e9e9e9', surface3:'#dedede',
     text:'#111111', muted:'#6b6b6b', shadow:'17,17,17',
-    goal: 200, dailyVideos:2, videoGoal:50, salary:370000, minVideos:50,
+    goal: 30, dailyVideos:2, videoGoal:30, salary:370000, minVideos:50,   // 26/11: campaña 2 = 30 videos, solo Seba (su meta y su sueldo van en su bloque)
     storeUrl:'',
     creators:{
       creadora1:{name:'Fernando',pass:'menfer',avatar:'FE',color:'#111111',salary:450000},
       creadora2:{name:'Fabi',pass:'menfabi',avatar:'FA',color:'#3a3a3a',salary:525000},   // 1/10: entra Fabi, se va Matías (no había subido ningún video)
-      creadora3:{name:'Sebastián',pass:'mensebas',avatar:'SE',color:'#5c5c5c',salary:450000},
+      creadora3:{name:'Sebastián',pass:'mensebas',avatar:'SE',color:'#5c5c5c',salary:300000,minVideos:30},   // 26/11: MenLab vuelve solo con él — 30 videos por $300.000 (10.000 c/u). Antes: 450.000 por 50
       creadora4:{name:'Víctor',pass:'menvictor',avatar:'VI',color:'#7e7e7e',salary:600000,minVideos:40},   // 28/10: Víctor pasa a 600.000 por 40 videos
     }
   },
@@ -3140,7 +3140,7 @@ loadData();
 <!-- Auto-actualización: GitHub Pages cachea el HTML y los celulares lo retienen mucho más.
      Esto compara la versión publicada con la que está corriendo y refresca sola. -->
 <script>
-const APP_VERSION = '2026-11-25-altier';
+const APP_VERSION = '2026-11-26-menlab-seba';
 (function(){
   var CLAVE='cima_ver_reload';
   function hayAlguienEscribiendo(){

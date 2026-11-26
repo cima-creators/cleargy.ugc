@@ -1043,7 +1043,10 @@ const BRAND_CONFIGS = {
   },
   menlab: {
     goal:200, // objetivo del mes que paga la marca (Nacho, 3/10)
-    name:'MenLab', logoText:'MENLAB', collection:'menlab', driveOnly:true, defaultCampaignStart:'2026-09-08', dailyVideos:2, videoGoal:50, no100k:true, noRacha:true, salary:370000, minVideos:50,
+    // 26/11: campaña 2, solo con Seba — 30 videos. El sueldo y la meta de la marca quedan en los de la campaña 1
+    // (370.000/50) porque son los de los tres que ya cobraron y están archivados; lo de Seba va en su propio bloque.
+    goal:30,
+    name:'MenLab', logoText:'MENLAB', collection:'menlab', driveOnly:true, defaultCampaignStart:'2026-11-26', dailyVideos:2, videoGoal:30, no100k:true, noRacha:true, salary:370000, minVideos:50,
     logoImg:'data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="320" height="104"><rect width="320" height="104" rx="12" fill="%23000000"/><text x="160" y="70" font-family="Arial Black,Arial,sans-serif" font-size="46" font-weight="900" font-style="italic" fill="%23FFFFFF" text-anchor="middle" letter-spacing="-1">MenLab</text></svg>',
     adminPass:'menlab-admin-2026', adminPass2:'menlab-2026', adminPass4:'abril-2026', adminPassEdit:'menlab-editor-2026',
     accent:'#111111', accentLight:'#3a3a3a', bg:'#f4f4f4', surface2:'#e9e9e9', border:'#d6d6d6',
@@ -1051,7 +1054,7 @@ const BRAND_CONFIGS = {
     creators:{
       creadora1:{name:'Fernando',avatar:'FE',color:'#111111',phone:'',salary:450000},
       creadora2:{name:'Fabi',avatar:'FA',color:'#3a3a3a',phone:'',salary:525000},   // 12/10: +75.000 por los b-roll, repartido por video
-      creadora3:{name:'Sebastián',avatar:'SE',color:'#5c5c5c',phone:'',salary:450000},
+      creadora3:{name:'Sebastián',avatar:'SE',color:'#5c5c5c',phone:'',salary:300000,minVideos:30},   // 26/11: MenLab vuelve solo con él — 30 videos por $300.000 (10.000 c/u). Antes: 450.000 por 50
       creadora4:{name:'Víctor',avatar:'VI',color:'#7e7e7e',phone:'',salary:600000,minVideos:40},   // 28/10: Víctor pasa a 600.000 por 40 videos
     }
   },
@@ -4226,7 +4229,7 @@ loadConfig();
 <!-- Auto-actualización: GitHub Pages cachea el HTML y los celulares lo retienen mucho más.
      Esto compara la versión publicada con la que está corriendo y refresca sola. -->
 <script>
-const APP_VERSION = '2026-11-25-altier';
+const APP_VERSION = '2026-11-26-menlab-seba';
 (function(){
   var CLAVE='cima_ver_reload';
   function hayAlguienEscribiendo(){
