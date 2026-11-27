@@ -1437,7 +1437,7 @@ function pintarLanz(e){
   if (l && l.estado === 'elegida'){
     const dias = l.dias || {}, links = l.links || {}, hechos = Object.keys(dias).length;
     b.innerHTML = SW + `<h2>¡Quedaste en ${L.titulo}! 🎉</h2>
-      ${l.despachadoEn ? `<div class="lz-req" style="margin-top:10px">📦 <b>Tu producto ya salió.</b>${l.seguimiento ? ` <a href="${l.seguimiento.url}" target="_blank" rel="noopener">Seguilo en ${l.seguimiento.correo} ↗</a>${l.seguimiento.tipo === 'remito' ? `<br><small>En la página elegí «Remito» y poné <b>${l.seguimiento.codigo}</b>.</small>` : ''}` : ''}</div>` : ''}
+      ${l.despachadoEn ? `<div class="lz-req" style="margin-top:10px">📦 <b>Tu producto ya salió.</b>${CFG.diasEnvio ? ` Llega en ${CFG.diasEnvio} días.` : ''}${l.seguimiento ? ` <a href="${l.seguimiento.url}" target="_blank" rel="noopener">Seguilo en ${l.seguimiento.correo} ↗</a>${l.seguimiento.tipo === 'remito' ? `<br><small>En la página elegí «Remito» y poné <b>${l.seguimiento.codigo}</b>.</small>` : ''}` : ''}</div>` : ''}
       ${L.producto ? `<details class="lz-broll" style="margin-top:12px" open><summary><b>Qué es y qué contar</b></summary>
         <p style="margin:8px 0">${L.producto.que}</p>
         <p style="margin:10px 0 4px"><b>Lo que tiene que quedar claro</b></p><ul>${L.producto.decir.map(t => `<li>${t}</li>`).join('')}</ul>
@@ -2172,7 +2172,7 @@ const SVG_VIDEO = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" st
 const FLUJO = () => [
   ['aprobada',  SVG_OK,'Te aceptamos',        'Tus datos ya están cargados.'],
   ['briefing_ok', '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 7h16M4 12h10M4 17h7"/></svg>','En la lista de envío','Estamos preparando tu kit.'],
-  ['enviado',   '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 7.5l9-4 9 4-9 4z"/><path d="M3 7.5v9l9 4 9-4v-9"/><path d="M12 11.5v9"/></svg>','Kit despachado',      'Va en camino a tu casa.'],
+  ['enviado',   '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 7.5l9-4 9 4-9 4z"/><path d="M3 7.5v9l9 4 9-4v-9"/><path d="M12 11.5v9"/></svg>','Kit despachado',      (CFG.diasEnvio ? `Va en camino: llega en ${CFG.diasEnvio} días.` : 'Va en camino a tu casa.')],
   ['recibido',  '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3.5 11L12 4l8.5 7"/><path d="M5.5 9.7V19a1 1 0 0 0 1 1h11a1 1 0 0 0 1-1V9.7"/></svg>','Te llegó',            `Arrancaron tus ${CFG.diasParaPublicar} días.`],
   CREADORA_PUBLICA()
     ? ['entregado', SVG_VIDEO,'Mandaste tu video', (D && D.aprobadoVideoEn) ? '¡Aprobado! Ya podés publicarlo.' : 'Lo revisamos. Todavía no lo publiques.']
@@ -2521,7 +2521,7 @@ function pintarMarca(){
   } catch { if (DEMO){ precargar(); traerBorrador(); } ver(DEMO ? 'v-ficha' : 'v-error'); }
 })();
 
-const APP_VERSION = '2026-11-21-b';
+const APP_VERSION = '2026-11-27-a';
 </script>
 </body>
 </html>
