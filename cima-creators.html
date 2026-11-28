@@ -1676,6 +1676,27 @@ function _normGuion(c){
   return m ? m[1].replace(/\s+/g,"") : s;
 }
 
+// El NÚMERO del guion dentro de su código (NAL-P-F07E-N3-111-VICTORIA → "111"; un número suelto se devuelve igual).
+function _numGuion(c){
+  const p = String(c==null?"":c).toUpperCase().split("-").filter(x=>/^\d{1,4}$/.test(x));
+  return p.length ? String(+p[p.length-1]) : "";
+}
+// 28/11 (Nacho: «los de Kari se ven diferente en la app, no puedo compararlos con el original»): cuando elige
+// «No está en la lista» la app le pide EL NÚMERO del guion, y ese número se guardaba suelto («111»). Todo el resto
+// del sistema cruza por CÓDIGO (⚖ comparar con el original, el nombre del anuncio, «ya lo grabaste», el reporte por
+// guion), así que el video quedaba huérfano. Acá se traduce a su código antes de guardarlo; lo que escribió queda
+// en guionOriginal. Si el número es de varios guiones no se adivina: se guarda tal cual, como antes.
+function _resolverGuion(txt){
+  const t = _gCode(txt).replace(/^#/,"");
+  const todos = (sharedData.guiones||[]);
+  if(!t || !todos.length) return "";
+  const ex = todos.find(g => _gCode(g.code) === t); if(ex) return _gCode(ex.code);
+  const num = _numGuion(t); if(!num) return "";
+  let cand = todos.filter(g => _numGuion(g.code) === num);
+  if(cand.length > 1){ const mios = cand.filter(g => g.creadora === currentUser); if(mios.length) cand = mios; }
+  return cand.length === 1 ? _gCode(cand[0].code) : "";
+}
+
 // Los míos: los que me asignaron + los que quedaron libres para cualquiera
 // Nacho (14/10/2026): cada creadora ve SOLO sus guiones (los asignados a ella). Los que
 // quedaron sin dueña ya no se le mezclan a todas: se eligen en el selector al subir, nada más.
@@ -1684,7 +1705,11 @@ function misGuiones(){
 }
 function guionesGrabados(){
   const s = new Set();
-  (sharedData.videos||[]).forEach(v => { if(v.guion) s.add(_gCode(v.guion)); });
+  (sharedData.videos||[]).forEach(v => {
+    if(!v.guion) return;
+    s.add(_gCode(v.guion));
+    const r = _resolverGuion(v.guion); if(r) s.add(r);   // lo escribió a mano: igual cuenta como grabado
+  });
   return s;
 }
 function misGuionesPendientes(){
@@ -2287,7 +2312,7 @@ function submitVideo(){
   let _guionCrudo = "";   // lo que escribió tal cual, cuando no eligió de la lista
   if(_guionVal === "__manual__"){
     _guionCrudo = (document.getElementById("up-guion-cod").value||"").trim();
-    _guionVal = _normGuion(_guionCrudo);
+    _guionVal = _resolverGuion(_guionCrudo) || _normGuion(_guionCrudo);
     if(!_guionVal){
       document.getElementById("up-err").style.display="block";
       document.getElementById("up-err").textContent="Escribí el número del guion que grabaste.";
@@ -3140,7 +3165,7 @@ loadData();
 <!-- Auto-actualización: GitHub Pages cachea el HTML y los celulares lo retienen mucho más.
      Esto compara la versión publicada con la que está corriendo y refresca sola. -->
 <script>
-const APP_VERSION = '2026-11-26-menlab-c2';
+const APP_VERSION = '2026-11-28-guion-numero';
 (function(){
   var CLAVE='cima_ver_reload';
   function hayAlguienEscribiendo(){
