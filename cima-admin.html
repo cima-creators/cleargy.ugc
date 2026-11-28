@@ -2606,6 +2606,14 @@ function deleteIdea(id){
 // Catálogo de lo que cada creadora tiene para grabar. Un guion está grabado cuando
 // existe un video con ese código: el video es la prueba, no hay un check aparte.
 function _gCode(c){ return String(c==null?"":c).trim().toUpperCase(); }
+// El NÚMERO del guion dentro de su código (NAL-P-F07E-N3-111-VICTORIA → "111"; un número suelto se devuelve igual).
+// 28/11 (Nacho: «los de Kari se ven diferente en la app, no puedo compararlos con el original»): cuando la creadora
+// elige «no está en la lista», la app le pide EL NÚMERO — y ese número quedaba guardado suelto, sin matchear ningún
+// código: sin ⚖ comparar, sin nombre del anuncio y el guion seguía figurando pendiente. Acá se resuelve por número.
+function _numGuion(c){
+  const p=String(c==null?"":c).toUpperCase().split("-").filter(x=>/^\d{1,4}$/.test(x));
+  return p.length?String(+p[p.length-1]):"";
+}
 function toggleGuionForm(){
   const f=document.getElementById("guion-form");
   f.style.display = f.style.display==="none" ? "block" : "none";
@@ -2692,7 +2700,12 @@ function vaciarGuiones(){
 // Qué código grabó cada video (para cruzar con el catálogo)
 function _videosPorGuion(){
   const m={};
-  ((data&&data.videos)||[]).forEach(v=>{ if(v.guion) (m[_gCode(v.guion)]=m[_gCode(v.guion)]||[]).push(v); });
+  ((data&&data.videos)||[]).forEach(v=>{
+    if(!v.guion) return;
+    (m[_gCode(v.guion)]=m[_gCode(v.guion)]||[]).push(v);
+    const g=_guionDe(v);   // escrito a mano: también cuenta para el código real, así no queda «pendiente»
+    if(g&&_gCode(g.code)!==_gCode(v.guion)) (m[_gCode(g.code)]=m[_gCode(g.code)]||[]).push(v);
+  });
   return m;
 }
 
@@ -2814,7 +2827,12 @@ let editVideoId = null;
    videos subidos que tengan referencia, del más nuevo al más viejo: así se miran de corrido. */
 function _guionDe(v){
   const c=_gCode(v&&v.guion); if(!c||c==="OTRO") return null;
-  return ((data&&data.guiones)||[]).find(g=>_gCode(g.code)===c)||null;
+  const GU=((data&&data.guiones)||[]);
+  const ex=GU.find(g=>_gCode(g.code)===c); if(ex) return ex;
+  const num=_numGuion(c); if(!num) return null;   // lo escribió a mano: lo resolvemos por número
+  let cand=GU.filter(g=>_numGuion(g.code)===num);
+  if(cand.length>1&&v&&v.creator){ const suyos=cand.filter(g=>g.creadora===v.creator); if(suyos.length) cand=suyos; }
+  return cand.length===1?cand[0]:null;   // si el número es de varios guiones, no adivinamos
 }
 function _refDe(v){ const g=_guionDe(v); return (g&&g.ref)?g:null; }
 function _drivePrev(u){
@@ -4229,7 +4247,7 @@ loadConfig();
 <!-- Auto-actualización: GitHub Pages cachea el HTML y los celulares lo retienen mucho más.
      Esto compara la versión publicada con la que está corriendo y refresca sola. -->
 <script>
-const APP_VERSION = '2026-11-26-menlab-c2';
+const APP_VERSION = '2026-11-28-guion-numero';
 (function(){
   var CLAVE='cima_ver_reload';
   function hayAlguienEscribiendo(){
